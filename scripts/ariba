@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+
+import argparse
+import sys
+
+
+tasks = {
+    'run': 'Run the ARIBA local assembly pipeline',
+    'flag': 'Translate the meaning of a flag output by the pipeline',
+    'version': 'Print version and exit',
+}
+
+
+ordered_tasks = [
+    'run',
+    'flag',
+    'version',
+]
+
+
+def print_usage_and_exit():
+    print('Usage: ariba <command> [options]', file=sys.stderr)
+    print('\nTo get minimal usage for a command use:\nariba command', file=sys.stderr)
+    print('\nTo get full help for a command use one of:\nariba command -h\nariba command --help\n', file=sys.stderr)
+    print('\nAvailable commands:\n', file=sys.stderr)
+    max_task_length = max([len(x) for x in list(tasks.keys())]) + 1
+    for task in ordered_tasks:
+        print('{{0: <{}}}'.format(max_task_length).format(task), tasks[task], sep=' ', file=sys.stderr)
+    sys.exit(1)
+
+if len(sys.argv) == 1 or sys.argv[1] in ['-h', '-help', '--help']:
+    print_usage_and_exit()
+
+task = sys.argv.pop(1)
+
+if task not in tasks:
+    print('Task "' + task + '" not recognised. Cannot continue.\n', file=sys.stderr)
+    print_usage_and_exit()
+
+exec('import ariba.tasks.' + task)
+exec('ariba.tasks.' + task + '.run()')
