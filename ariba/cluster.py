@@ -117,6 +117,7 @@ class Cluster:
         self.final_assembly_bam = os.path.join(self.root_dir, 'assembly.reads_mapped.bam')
         self.final_assembly_vcf = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.vcf')
         self.final_assembly = {}
+        self.variants = {}
 
 
     def _get_gene(self):
@@ -672,6 +673,14 @@ class Cluster:
             self._assemble_with_velvet()
         elif self.assembler == 'spades':
             self._assemble_with_spades()
+
+        # velvet can finish successfully, but make an empty contigs file
+        if self.assembled_ok:
+            number_of_contigs = pyfastaq.tasks.count_sequences(self.assembly_contigs)
+            if number_of_contigs == 0:
+                self.assembled_ok = False
+                self.status_flag.add('assembly_fail')
+
         if self.assembled_ok:
             # finish the assembly
             self._scaffold_with_sspace()
@@ -699,4 +708,5 @@ class Cluster:
             self._update_flag_from_nucmer_file()
             self._make_assembly_vcf()
             self._get_vcf_variant_counts()
-            self._make_report_lines()
+
+        self._make_report_lines()
