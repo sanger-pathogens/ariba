@@ -6,6 +6,7 @@ from setuptools import setup, find_packages
 
 
 required_progs = [
+    'bcftools',
     'GapFiller.pl',
     'SSPACE_Basic_v2.0.pl',
     'samtools',
