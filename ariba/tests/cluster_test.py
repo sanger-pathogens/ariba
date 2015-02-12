@@ -217,7 +217,7 @@ class TestCluster(unittest.TestCase):
         shutil.copy(assembly_fa, c.final_assembly_fa)
         c._load_final_contigs()
         c._parse_assembly_bam()
-        for e in ['scaff', 'soft_clipped.gz', 'soft_clipped.gz.tbi', 'unmapped_mates.gz', 'unmapped_mates.gz.tbi']:
+        for e in ['scaff', 'soft_clipped', 'unmapped_mates']:
             self.assertTrue(os.path.exists(c.final_assembly_bam + '.' + e))
         clean_cluster_dir(cluster_dir)
 
@@ -510,7 +510,7 @@ class TestCluster(unittest.TestCase):
         c.final_assembly_vcf = os.path.join(data_dir, 'cluster_test_get_vcf_variant_counts.vcf')
         c._get_vcf_variant_counts()
         expected = {'scaff1': 1}
-        self.assertEqual(expected, c.vcf_variant_counts) 
+        self.assertEqual(expected, c.vcf_variant_counts)
         clean_cluster_dir(cluster_dir)
 
 

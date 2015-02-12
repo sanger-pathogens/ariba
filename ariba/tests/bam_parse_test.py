@@ -36,7 +36,7 @@ class TestBamParse(unittest.TestCase):
                 with self.assertRaises(bam_parse.Error):
                     bp._sam_to_soft_clipped(sam)
             else:
-                self.assertEqual(expected[i], bp._sam_to_soft_clipped(sam)) 
+                self.assertEqual(expected[i], bp._sam_to_soft_clipped(sam))
 
             i += 1
 
@@ -46,7 +46,7 @@ class TestBamParse(unittest.TestCase):
         ref_fasta = os.path.join(data_dir, 'bam_parse_test_update_soft_clipped_from_sam.ref.fa')
         bam = os.path.join(data_dir, 'bam_parse_test_update_soft_clipped_from_sam.bam')
         pyfastaq.tasks.file_to_dict(ref_fasta, ref_seqs)
-        bp = bam_parse.Parser(bam, ref_seqs) 
+        bp = bam_parse.Parser(bam, ref_seqs)
         expected = [
             {},
             {'ref1': {61: [1, 0]}},
@@ -56,7 +56,7 @@ class TestBamParse(unittest.TestCase):
         sam_reader = pysam.Samfile(bam, "rb")
         for sam in sam_reader.fetch(until_eof=True):
             bp._update_soft_clipped_from_sam(sam)
-            self.assertEqual(expected[i], bp.soft_clipped) 
+            self.assertEqual(expected[i], bp.soft_clipped)
             i += 1
 
 
@@ -66,7 +66,7 @@ class TestBamParse(unittest.TestCase):
         ref_fasta = os.path.join(data_dir, 'bam_parse_test_update_unmapped_mates_from_sam.ref.fa')
         bam = os.path.join(data_dir, 'bam_parse_test_update_unmapped_mates_from_sam.bam')
         pyfastaq.tasks.file_to_dict(ref_fasta, ref_seqs)
-        bp = bam_parse.Parser(bam, ref_seqs) 
+        bp = bam_parse.Parser(bam, ref_seqs)
         expected = [
             {},
             {'ref': {240: 1}},
@@ -76,12 +76,12 @@ class TestBamParse(unittest.TestCase):
             {'ref': {240: 1, 360: 1}},
             {'ref': {240: 1, 360: 1}},
             {'ref': {240: 1, 360: 1}},
-        ] 
+        ]
         i = 0
         sam_reader = pysam.Samfile(bam, "rb")
         for sam in sam_reader.fetch(until_eof=True):
             bp._update_unmapped_mates_from_sam(sam)
-            self.assertEqual(expected[i], bp.unmapped_mates) 
+            self.assertEqual(expected[i], bp.unmapped_mates)
             i += 1
 
 
@@ -89,7 +89,7 @@ class TestBamParse(unittest.TestCase):
         '''test parse'''
         ref_seqs = {}
         ref_fasta = os.path.join(data_dir, 'bam_parse_test_parse.ref.fa')
-        bam = os.path.join(data_dir, 'bam_parse_test_parse.bam') 
+        bam = os.path.join(data_dir, 'bam_parse_test_parse.bam')
         pyfastaq.tasks.file_to_dict(ref_fasta, ref_seqs)
         bp = bam_parse.Parser(bam, ref_seqs)
         bp.parse()
@@ -105,26 +105,6 @@ class TestBamParse(unittest.TestCase):
         self.assertEqual(bp.scaff_graph.links[expected_link_keys[0]][0], l)
 
 
-    def test_zip_and_tabix(self):
-        '''test _zip_and_tabix'''
-        tmp_file = 'tmp.test_zip_and_tabix'
-        lines = ['name1\t1\t42', 'name1\t2\t43', 'name2\t5\t42']
-        with open(tmp_file, 'w') as f:
-            for line in lines:
-                print(line, file=f)
-
-        bam = os.path.join(data_dir, 'dummy.bam')
-        bp = bam_parse.Parser(bam, {'x':pyfastaq.sequences.Fasta('x', 'ACGT')})
-        bp._zip_and_tabix(tmp_file)
-        self.assertFalse(os.path.exists(tmp_file))
-        self.assertTrue(os.path.exists(tmp_file + '.gz'))
-        self.assertTrue(os.path.exists(tmp_file + '.gz.tbi'))
-        got_lines = file_to_lines(tmp_file + '.gz')
-        self.assertEqual(lines, got_lines)
-        os.unlink(tmp_file + '.gz')
-        os.unlink(tmp_file + '.gz.tbi')
-
-
     def test_write_soft_clipped_to_file(self):
         '''test _write_soft_clipped_to_file'''
         tmp_file = 'tmp.soft_clipped'
@@ -137,10 +117,9 @@ class TestBamParse(unittest.TestCase):
             'ref1\t43\t142\t242',
             'ref1\t44\t44\t45'
         ]
-        got_lines = file_to_lines(tmp_file + '.gz')
+        got_lines = file_to_lines(tmp_file)
         self.assertEqual(got_lines, expected_lines)
-        os.unlink(tmp_file + '.gz')
-        os.unlink(tmp_file + '.gz.tbi')
+        os.unlink(tmp_file)
 
 
     def test_write_unmapped_mates_to_file(self):
@@ -151,7 +130,6 @@ class TestBamParse(unittest.TestCase):
         bp.unmapped_mates = {'ref': {41: 1, 42: 43}}
         bp._write_unmapped_mates_to_file(tmp_file)
         expected_lines = ['ref\t42\t1', 'ref\t43\t43']
-        got_lines = file_to_lines(tmp_file + '.gz')
+        got_lines = file_to_lines(tmp_file)
         self.assertEqual(got_lines, expected_lines)
-        os.unlink(tmp_file + '.gz')
-        os.unlink(tmp_file + '.gz.tbi')
+        os.unlink(tmp_file)

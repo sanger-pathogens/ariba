@@ -58,18 +58,12 @@ class Parser:
             self.unmapped_mates[ref_name][pos] = self.unmapped_mates[ref_name].get(pos, 0) + 1
 
 
-    def _zip_and_tabix(self, filename):
-        pyfastaq.utils.syscall('bgzip ' + filename)
-        pyfastaq.utils.syscall('tabix -s 1 -b 2 -e 2 ' + filename + '.gz')
-
-
     def _write_soft_clipped_to_file(self, filename):
         f = pyfastaq.utils.open_file_write(filename)
         for seq in sorted(self.soft_clipped):
             for position in sorted(self.soft_clipped[seq]):
                 print(seq, position + 1, self.soft_clipped[seq][position][0], self.soft_clipped[seq][position][1], sep='\t', file=f)
         pyfastaq.utils.close(f)
-        self._zip_and_tabix(filename)
 
 
     def _write_unmapped_mates_to_file(self, filename):
@@ -78,7 +72,6 @@ class Parser:
             for position in sorted(self.unmapped_mates[seq]):
                 print(seq, position + 1, self.unmapped_mates[seq][position], sep='\t', file=f)
         pyfastaq.utils.close(f)
-        self._zip_and_tabix(filename)
 
 
     def parse(self):

@@ -6,8 +6,6 @@ from setuptools import setup, find_packages
 
 
 required_progs = [
-    'bgzip',
-    'tabix',
     'GapFiller.pl',
     'SSPACE_Basic_v2.0.pl',
     'samtools',
