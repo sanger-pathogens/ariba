@@ -46,7 +46,13 @@ setup(
     url='https://github.com/sanger-pathogens/ariba',
     scripts=glob.glob('scripts/*'),
     test_suite='nose.collector',
-    install_requires=['nose >= 1.3','pyfastaq >= 3.0.1','pysam >= 0.8.1', 'pymummer>=0.0.2'],
+    install_requires=[
+        'nose >= 1.3',
+        'openpyxl',
+        'pyfastaq >= 3.0.1',
+        'pysam >= 0.8.1',
+        'pymummer>=0.0.2'
+    ],
     license='GPLv3',
     classifiers=[
         'Development Status :: 4 - Beta',

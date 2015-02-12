@@ -632,7 +632,7 @@ class Cluster:
         self.report_lines = []
 
         if len(self.variants) == 0:
-            self.report_lines.append('\t'.join([self.gene.id, str(self.status_flag), str(len(self.gene))] + ['.'] * 11))
+            self.report_lines.append([self.gene.id, self.status_flag.to_number(), len(self.gene)] + ['.'] * 11)
 
         for contig in self.variants:
             for variants in self.variants[contig]:
@@ -640,9 +640,9 @@ class Cluster:
                 if t is not None:
                     effect, new_bases = t
                     for v in variants:
-                        self.report_lines.append('\t'.join([str(x) for x in [
+                        self.report_lines.append([
                             self.gene.id,
-                            self.status_flag,
+                            self.status_flag.to_number(),
                             len(self.gene),
                             pymummer.variant.var_types[v.var_type],
                             effect,
@@ -655,7 +655,7 @@ class Cluster:
                             v.qry_start + 1,
                             v.qry_end + 1,
                             v.qry_base,
-                        ]]))
+                        ])
 
 
     def run(self):

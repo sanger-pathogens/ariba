@@ -524,6 +524,21 @@ class TestCluster(unittest.TestCase):
         c.variants = {'contig': [[v1]]}
         c.status_flag.set_flag(42)
         c._make_report_lines()
-        expected = ['gene\t42\t39\tSNP\tSYN\t.\t6\t6\tC\tcontig\t39\t6\t6\tT']
+        expected = [[
+            'gene',
+            42,
+            39,
+            'SNP',
+            'SYN',
+            '.',
+            6,
+            6,
+            'C',
+            'contig',
+            39,
+            6,
+            6,
+            'T',
+        ]]
         self.assertEqual(expected, c.report_lines)
         clean_cluster_dir(cluster_dir)

@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+import openpyxl
 import pysam
 import pyfastaq
 from ariba import cluster, common, mapping, histogram
@@ -47,7 +48,8 @@ class Clusters:
 
         self.bam_prefix = os.path.join(self.outdir, 'map_all_reads')
         self.bam = self.bam_prefix + '.bam'
-        self.report_file = os.path.join(self.outdir, 'report.tsv')
+        self.report_file_tsv = os.path.join(self.outdir, 'report.tsv')
+        self.report_file_xls = os.path.join(self.outdir, 'report.xls')
         self.threads = threads
         self.verbose = verbose
 
@@ -253,9 +255,8 @@ class Clusters:
             self.clusters[gene].run()
 
 
-    def _write_report(self):
-        f = pyfastaq.utils.open_file_write(self.report_file)
-        print(
+    def _write_reports(self):
+        columns = [
             '#gene',
             'flag',
             'gene_len',
@@ -270,12 +271,25 @@ class Clusters:
             'scaff_start',
             'scaff_end',
             'scaff_nt',
-            sep='\t', file=f
-        )
+        ]
+
+        f = pyfastaq.utils.open_file_write(self.report_file_tsv)
+        print('\t'.join(columns), file=f)
+
+        columns[0] = 'gene'
+        workbook = openpyxl.Workbook()
+        worksheet = workbook.worksheets[0] 
+        worksheet.title = 'ARIBA_report'
+        worksheet.append(columns)
+
         for gene in sorted(self.clusters):
             for line in self.clusters[gene].report_lines:
-                print(line, file=f)
+                print('\t'.join([str(x) for x in line]), file=f)
+                worksheet.append(line)
         pyfastaq.utils.close(f)
+        workbook.save(self.report_file_xls)
+
+
 
 
     def run(self):
@@ -283,4 +297,4 @@ class Clusters:
         self._bam_to_clusters_reads()
         self._set_insert_size_data()
         self._init_and_run_clusters()
-        self._write_report()
+        self._write_reports()

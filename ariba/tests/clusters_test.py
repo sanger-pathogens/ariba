@@ -126,17 +126,18 @@ class TestClusters(unittest.TestCase):
         os.unlink(tmp_file)
 
 
-    def test_write_report(self):
+    def test_write_reports(self):
         class FakeCluster:
             def __init__(self, lines):
                 self.report_lines = lines
 
         self.clusters.clusters = {
-            'gene1': FakeCluster(['gene1 line1']),
-            'gene2': FakeCluster(['gene2 line2'])
+            'gene1': FakeCluster([['gene1 line1']]),
+            'gene2': FakeCluster([['gene2 line2']])
         }
 
-        self.clusters._write_report()
+        self.clusters._write_reports()
         expected = os.path.join(data_dir, 'clusters_test_write_report.tsv')
-        self.assertTrue(filecmp.cmp(expected, self.clusters.report_file, shallow=False))
+        self.assertTrue(filecmp.cmp(expected, self.clusters.report_file_tsv, shallow=False))
+        self.assertTrue(os.path.exists(self.clusters.report_file_xls))
 
