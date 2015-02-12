@@ -1,0 +1,8 @@
+ref.fa qry.fa
+NUCMER
+
+[P1]	[SUB]	[SUB]	[P2]	[BUFF]	[DIST]	[LEN R]	[LEN Q]	[FRM]	[TAGS]
+42	A	G	42	42	42	500	500	1	1	gene	contig1
+42	A	G	42	42	42	500	500	1	1	gene	contig2
+40	T	C	40	42	42	500	500	1	1	gene	contig1
+2	C	G	2	42	42	500	500	1	1	gene	contig1
