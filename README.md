@@ -12,6 +12,7 @@ Dependencies:
   * [SSPACE-basic scaffolder] [sspace]
   * [GapFiller] [gapfiller]
   * [SMALT] [smalt]
+  * [Velvet] [velvet]
 
 Install with pip:
 
@@ -51,3 +52,4 @@ To run the pipeline to identify the genes present in a pair of FASTQ files:
   [sspace]: http://www.baseclear.com/genomics/bioinformatics/basetools/SSPACE
   [gapfiller]: http://www.baseclear.com/genomics/bioinformatics/basetools/gapfiller
   [samtools]: http://www.htslib.org/
+  [velvet]: http://www.ebi.ac.uk/~zerbino/velvet/
