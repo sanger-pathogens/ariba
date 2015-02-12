@@ -8,6 +8,7 @@ __all__ = [
     'link',
     'mapping',
     'scaffold_graph',
+    'tasks',
 ]
 
 from ariba import *
