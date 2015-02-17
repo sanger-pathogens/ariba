@@ -20,7 +20,6 @@ class Cluster:
       nucmer_min_id=90,
       nucmer_min_len=50,
       nucmer_breaklen=50,
-      spades='spades.py',
       spades_only_assembler=False,
       sspace_k=20,
       reads_insert=500,
@@ -36,6 +35,7 @@ class Cluster:
       bcftools_exe='bcftools',
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
+      spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
     ):
@@ -71,8 +71,8 @@ class Cluster:
         self._set_assembly_kmer(assembly_kmer)
         self.assembler = assembler
         assert self.assembler in ['velvet', 'spades']
-        self.spades = spades
         self.spades_only_assembler = spades_only_assembler
+        self.spades_exe = spades_exe
 
         self.bcftools_exe = bcftools_exe
 
@@ -185,7 +185,7 @@ class Cluster:
 
     def _assemble_with_spades(self, unittest=False):
         cmd = ' '.join([
-            self.spades,
+            self.spades_exe,
             '-1', self.reads1,
             '-2', self.reads2,
             '-o', self.assembler_dir,

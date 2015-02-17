@@ -33,6 +33,7 @@ class Clusters:
       bcftools_exe='bcftools',
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
+      spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
     ):
@@ -83,6 +84,7 @@ class Clusters:
         self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
 
         self.samtools_exe = samtools_exe
+        self.spades_exe = spades_exe
 
         self.sspace_exe = shutil.which(sspace_exe)
         if self.sspace_exe is None:
@@ -248,6 +250,7 @@ class Clusters:
                 bcftools_exe=self.bcftools_exe,
                 gapfiller_exe=self.gapfiller_exe,
                 samtools_exe=self.samtools_exe,
+                spades_exe=self.spades_exe,
                 sspace_exe=self.sspace_exe,
                 velvet_exe=self.velvet,
             )
