@@ -19,7 +19,7 @@ ordered_tasks = [
 
 
 def print_usage_and_exit():
-    print('Usage: ariba <command> [options]', file=sys.stderr)
+    print('Usage: ariba <command> [options] <required arguments>', file=sys.stderr)
     print('\nTo get minimal usage for a command use:\nariba command', file=sys.stderr)
     print('\nTo get full help for a command use one of:\nariba command -h\nariba command --help\n', file=sys.stderr)
     print('\nAvailable commands:\n', file=sys.stderr)
