@@ -71,14 +71,14 @@ class TestCluster(unittest.TestCase):
         clean_cluster_dir(cluster_dir)
 
 
-    def test_assemble_with_velvet(self):
-        '''test _assemble_with_velvet'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_assemble_with_velvet')
-        clean_cluster_dir(cluster_dir, exclude=set(['gene.reads_mapped.unsorted.bam']))
-        c = cluster.Cluster(cluster_dir)
-        c._assemble_with_velvet()
-        self.assertEqual(c.status_flag.to_number(), 0)
-        clean_cluster_dir(cluster_dir, exclude=set(['gene.reads_mapped.unsorted.bam']))
+    #def test_assemble_with_velvet(self):
+    #    '''test _assemble_with_velvet'''
+    #    cluster_dir = os.path.join(data_dir, 'cluster_test_assemble_with_velvet')
+    #    clean_cluster_dir(cluster_dir, exclude=set(['gene.reads_mapped.unsorted.bam']))
+    #    c = cluster.Cluster(cluster_dir)
+    #    c._assemble_with_velvet()
+    #    self.assertEqual(c.status_flag.to_number(), 0)
+    #    clean_cluster_dir(cluster_dir, exclude=set(['gene.reads_mapped.unsorted.bam']))
 
 
     def test_assemble_with_spades(self):

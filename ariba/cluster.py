@@ -20,8 +20,6 @@ class Cluster:
       nucmer_min_id=90,
       nucmer_min_len=50,
       nucmer_breaklen=50,
-      spades='spades.py',
-      spades_only_assembler=False,
       sspace_k=20,
       reads_insert=500,
       sspace_sd=0.4,
@@ -36,8 +34,10 @@ class Cluster:
       bcftools_exe='bcftools',
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
+      spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
+      spades_other=None,
     ):
 
         self.root_dir = os.path.abspath(root_dir)
@@ -71,8 +71,8 @@ class Cluster:
         self._set_assembly_kmer(assembly_kmer)
         self.assembler = assembler
         assert self.assembler in ['velvet', 'spades']
-        self.spades = spades
-        self.spades_only_assembler = spades_only_assembler
+        self.spades_exe = spades_exe
+        self.spades_other = spades_other
 
         self.bcftools_exe = bcftools_exe
 
@@ -140,6 +140,17 @@ class Cluster:
 
 
     def _assemble_with_velvet(self):
+        # map reads to reference gene to make BAM input to velvet columbus
+        mapping.run_smalt(
+            self.reads1,
+            self.reads2,
+            self.gene_fa,
+            self.gene_bam[:-4],
+            threads=self.threads,
+            sort=True,
+            verbose=self.verbose,
+        )
+
         cmd = ' '.join([
             self.velveth,
             self.assembler_dir,
@@ -185,15 +196,16 @@ class Cluster:
 
     def _assemble_with_spades(self, unittest=False):
         cmd = ' '.join([
-            self.spades,
+            self.spades_exe,
             '-1', self.reads1,
             '-2', self.reads2,
             '-o', self.assembler_dir,
             '-k', str(self.assembly_kmer),
             '--threads', str(self.threads),
+            '--trusted-contigs', self.gene_fa,
         ])
-        if self.spades_only_assembler:
-            cmd += ' --only-assembler'
+        if self.spades_other is not None:
+            cmd += ' ' + self.spades_other
 
         cwd = os.getcwd()
         os.chdir(self.assembly_dir)
@@ -659,16 +671,6 @@ class Cluster:
 
 
     def run(self):
-        # map reads to reference gene
-        mapping.run_smalt(
-            self.reads1,
-            self.reads2,
-            self.gene_fa,
-            self.gene_bam[:-4],
-            threads=self.threads,
-            sort=True,
-        )
-
         if self.assembler == 'velvet':
             self._assemble_with_velvet()
         elif self.assembler == 'spades':
@@ -696,6 +698,7 @@ class Cluster:
                 self.final_assembly_bam[:-4],
                 threads=self.threads,
                 sort=True,
+                verbose=self.verbose,
             )
             self._parse_assembly_bam()
 

@@ -27,11 +27,6 @@ if not found_all_progs:
     sys.exit(1)
 
 
-if not(  (shutil.which('velveth') and shutil.which('velvetg')) or shutil.which('spades.py')  ):
-    print('Must have velvet (velveth and velvetg) or spades.py installed. Cannot continue', file=sys.stderr)
-    sys.exit(1)
-
-
 print('... all dependencies found')
 
 

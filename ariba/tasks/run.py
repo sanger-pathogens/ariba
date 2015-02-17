@@ -22,26 +22,31 @@ def run():
     nucmer_group.add_argument('--nucmer_min_len', type=int, help='Minimum alignment length (delta-filter -i) [%(default)s]', default=50, metavar='INT')
     nucmer_group.add_argument('--nucmer_breaklen', type=int, help='Value to use for -breaklen when running nucmer [%(default)s]', default=50, metavar='INT')
 
-    executables_group = parser.add_argument_group('executables locations')
-    executables_group.add_argument('--bcftools', help='Path to bcftools executable [%(default)s]', default='bcftools', metavar='PATH')
-    executables_group.add_argument('--gapfiller', help='Path to GapFiller.pl [%(default)s]', default='GapFiller.pl', metavar='PATH')
-    executables_group.add_argument('--samtools', help='Path to samtools executable [%(default)s]', default='samtools', metavar='PATH')
-    executables_group.add_argument('--sspace', help='Path to SSPACE_Basic_v2.0.pl [%(default)s]', default='SSPACE_Basic_v2.0.pl', metavar='PATH')
-    executables_group.add_argument('--velvet', help='Path to prefix of velvet{g,h} [%(default)s]', default='velvet', metavar='PATH')
+    assembly_group = parser.add_argument_group('Assembly options')
+    allowed_assemblers = ['velvet', 'spades']
+    assembly_group.add_argument('--assembler', help='Assembler to use. Available options: ' + ','.join(allowed_assemblers) + ' [%(default)s]', choices=allowed_assemblers, default='spades', metavar='Assembler')
+    assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs. This is also the value used for sspace -k when scaffolding [%(default)s]', default=10, metavar='INT')
+    assembly_group.add_argument('--assembler_k', help='kmer size to use with assembler. Default is 2/3 of the read length', metavar='INT')
+    assembly_group.add_argument('--spades_other', help='Put options string to be used with spades in quotes. This will NOT be sanity checked. Do not use -k or -t: for these options you should use the ariba run options --assembler_k and --threads')
 
     other_group = parser.add_argument_group('Other options')
     other_group.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1 (default) or 4', choices=[1,4], default=1, metavar='INT')
-    other_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs. This is also the value used for sspace -k when scaffolding [%(default)s]', default=10, metavar='INT')
-    allowed_assemblers = ['velvet', 'spades']
-    other_group.add_argument('--assembler', help='Assembler to use. Although SPAdes can be used, it is experimental and velvet is currently recommended. Available options: ' + ','.join(allowed_assemblers) + ' [%(default)s]', choices=allowed_assemblers, default='velvet', metavar='Assembler')
-    other_group.add_argument('--assembler_k', help='kmer size to use with assembler. Default is 2/3 of the read length', metavar='INT')
-    other_group.add_argument('--spades_only_assembler', action='store_true', help='Use --only-assembler when running SPAdes')
     other_group.add_argument('--threads', type=int, help='Number of threads for smalt and spades [%(default)s]', default=1, metavar='INT')
     other_group.add_argument('--assembled_threshold', type=float, help='If proportion of gene assembled (regardless of into how many contigs) is at least this value then the flag gene_assembled is set [%(default)s]', default=0.95, metavar='FLOAT (between 0 and 1)')
     other_group.add_argument('--unique_threshold', type=float, help='If proportion of bases in gene assembled more than once is <= this value, then the flag unique_contig is set [%(default)s]', default=0.03, metavar='FLOAT (between 0 and 1)')
     other_group.add_argument('--verbose', action='store_true', help='Be verbose')
-    options = parser.parse_args()
 
+    executables_group = parser.add_argument_group('executables locations')
+    executables_group.add_argument('--bcftools', help='Path to bcftools executable [%(default)s]', default='bcftools', metavar='PATH')
+    executables_group.add_argument('--gapfiller', help='Path to GapFiller executable [%(default)s]', default='GapFiller.pl', metavar='PATH')
+    executables_group.add_argument('--samtools', help='Path to samtools executable [%(default)s]', default='samtools', metavar='PATH')
+    executables_group.add_argument('--smalt', help='Path to SMALT executable [%(default)s]', default='smalt', metavar='PATH')
+    executables_group.add_argument('--spades', help='Path to SPAdes executable [%(default)s]', default='spades.py', metavar='PATH')
+    executables_group.add_argument('--sspace', help='Path to SSPACE executable [%(default)s]', default='SSPACE_Basic_v2.0.pl', metavar='PATH')
+    executables_group.add_argument('--velvet', help='Path to prefix of velvet{g,h} [%(default)s]', default='velvet', metavar='PATH')
+
+    options = parser.parse_args()
+    ariba.external_progs.check_versions(options, verbose=options.verbose)
     pyfastaq.sequences.codon2aa = pyfastaq.genetic_codes.codes[options.genetic_code]
 
     c = ariba.clusters.Clusters(
@@ -60,12 +65,13 @@ def run():
           nucmer_min_id=options.nucmer_min_id,
           nucmer_min_len=options.nucmer_min_len,
           nucmer_breaklen=options.nucmer_breaklen,
-          spades_only_assembler=options.spades_only_assembler,
+          spades_other=options.spades_other,
           assembled_threshold=options.assembled_threshold,
           unique_threshold=options.unique_threshold,
           bcftools_exe=options.bcftools,
           gapfiller_exe=options.gapfiller,
           samtools_exe=options.samtools,
+          spades_exe=options.spades,
           sspace_exe=options.sspace,
           velvet_exe=options.velvet,
         )

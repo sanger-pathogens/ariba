@@ -3,6 +3,7 @@ __all__ = [
     'cluster',
     'clusters',
     'common',
+    'external_progs',
     'flag',
     'histogram',
     'link',

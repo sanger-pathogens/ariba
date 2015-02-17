@@ -22,7 +22,7 @@ class Clusters:
       smalt_k=13,
       smalt_s=2,
       smalt_min_id=0.9,
-      spades_only_assembler=False,
+      spades_other=None,
       max_insert=1000,
       min_scaff_depth=10,
       nucmer_min_id=90,
@@ -33,6 +33,7 @@ class Clusters:
       bcftools_exe='bcftools',
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
+      spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
     ):
@@ -44,7 +45,7 @@ class Clusters:
         self.assembler = assembler
         assert self.assembler in ['velvet', 'spades']
         self.assembly_kmer = assembly_kmer
-        self.spades_only_assembler = spades_only_assembler
+        self.spades_other = spades_other
 
         self.bam_prefix = os.path.join(self.outdir, 'map_all_reads')
         self.bam = self.bam_prefix + '.bam'
@@ -83,6 +84,7 @@ class Clusters:
         self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
 
         self.samtools_exe = samtools_exe
+        self.spades_exe = spades_exe
 
         self.sspace_exe = shutil.which(sspace_exe)
         if self.sspace_exe is None:
@@ -106,7 +108,8 @@ class Clusters:
             index_k=self.smalt_k,
             index_s=self.smalt_s,
             threads=self.threads,
-            minid=self.smalt_min_id
+            minid=self.smalt_min_id,
+            verbose=self.verbose,
         )
 
 
@@ -201,9 +204,11 @@ class Clusters:
         (x, self.insert_size, pc95, self.insert_sspace_sd) = self.insert_hist.stats()
         self.insert_proper_pair_max = 1.1 * pc95
         if self.verbose:
+            print('\nInsert size information from reads mapped to reference genes:')
             print('Insert size:', self.insert_size, sep='\t')
             print('Insert sspace sd:', self.insert_sspace_sd, sep='\t')
             print('Max insert:', self.insert_proper_pair_max, sep='\t')
+            print()
 
 
     def _write_gene_fa(self, gene_name, outfile):
@@ -223,9 +228,12 @@ class Clusters:
         if len(self.cluster_to_dir) == 0:
             raise Error('Did not get any reads mapped to genes. Cannot continue')
 
+        counter = 0
+
         for gene in sorted(self.cluster_to_dir):
+            counter += 1
             if self.verbose:
-                print('Running', gene)
+                print('\nAssembling cluster', counter, 'of', str(len(self.cluster_to_dir)) + ':', gene)
             new_dir = self.cluster_to_dir[gene]
             self._write_gene_fa(gene, os.path.join(new_dir, 'gene.fa'))
             self.clusters[gene] = cluster.Cluster(
@@ -237,7 +245,6 @@ class Clusters:
                 nucmer_min_id=self.nucmer_min_id,
                 nucmer_min_len=self.nucmer_min_len,
                 nucmer_breaklen=self.nucmer_breaklen,
-                spades_only_assembler=self.spades_only_assembler,
                 sspace_k=self.min_scaff_depth,
                 reads_insert=self.insert_size,
                 sspace_sd=self.insert_sspace_sd,
@@ -248,8 +255,10 @@ class Clusters:
                 bcftools_exe=self.bcftools_exe,
                 gapfiller_exe=self.gapfiller_exe,
                 samtools_exe=self.samtools_exe,
+                spades_exe=self.spades_exe,
                 sspace_exe=self.sspace_exe,
                 velvet_exe=self.velvet,
+                spades_other=self.spades_other
             )
 
             self.clusters[gene].run()
@@ -293,8 +302,20 @@ class Clusters:
 
 
     def run(self):
+        if self.verbose:
+            print('{:_^79}'.format(' Mapping reads to reference genes '))
         self._map_reads()
+        if self.verbose:
+            print('Finished mapping\n')
+            print('{:_^79}'.format(' Generating clusters '))
         self._bam_to_clusters_reads()
         self._set_insert_size_data()
+        if self.verbose:
+            print('{:_^79}'.format(' Assembling each cluster '))
         self._init_and_run_clusters()
+        if self.verbose:
+            print('Finished assembling clusters\n')
+            print('{:_^79}'.format(' Writing report files '))
         self._write_reports()
+        if self.verbose:
+            print('Finished writing report files. All done!')
