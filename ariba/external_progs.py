@@ -20,7 +20,9 @@ prog_to_version_cmd = {
     'spades': ('spades.py', re.compile('^SPAdes genome assembler v.([0-9\.]+)')),
     'samtools': ('samtools', re.compile('^Version: ([0-9\.]+)')),
     'sspace': (None, re.compile('^Usage: .*pl \[SSPACE_(.*)\]')),
-    'gapfiller': (None, re.compile('^Usage: .*pl \[GapFiller_(.*)\]'))
+    'gapfiller': (None, re.compile('^Usage: .*pl \[GapFiller_(.*)\]')),
+    'velvetg': ('velvetg', re.compile('Version ([0-9\.]+)')),
+    'velveth': ('velveth', re.compile('Version ([0-9\.]+)')),
 }
 
 
@@ -56,18 +58,27 @@ def check_versions(opts, verbose=False):
         ('bcftools', opts.bcftools),
         ('nucmer', None),
         ('smalt', opts.smalt),
-        ('spades', opts.spades),
         ('samtools', opts.samtools),
         ('sspace', opts.sspace),
         ('gapfiller', opts.gapfiller),
     ]
-     
+    
+    if opts.assembler == 'spades':
+        l.append(('spades', opts.spades))
+    elif opts.assembler == 'velvet':
+        l.append(('velvetg', opts.velvet + 'g'))
+        l.append(('velveth', opts.velvet + 'h'))
+    else:
+        raise Error('Assembler ' + opts.assembler + ' not recognised. Cannot continue')
+
     min_versions = {
         'bcftools': '1.2',
         'samtools': '1.2',
         'nucmer': '3.1',
         'spades': '3.5.0',
         'smalt': '0.7.6',
+        'velvetg': '1.2.07',
+        'velveth': '1.2.07',
     }
 
     errors = []
