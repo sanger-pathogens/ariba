@@ -108,6 +108,7 @@ class Clusters:
             index_k=self.smalt_k,
             index_s=self.smalt_s,
             threads=self.threads,
+            samtools=self.samtools_exe,
             minid=self.smalt_min_id,
             verbose=self.verbose,
         )
@@ -213,10 +214,10 @@ class Clusters:
 
     def _write_gene_fa(self, gene_name, outfile):
         if not os.path.exists(self.db_fasta + '.fai'):
-            common.syscall('samtools faidx ' + self.db_fasta, verbose=self.verbose)
+            common.syscall(self.samtools_exe + ' faidx ' + self.db_fasta, verbose=self.verbose)
 
         common.syscall(' '.join([
-            'samtools faidx',
+            self.samtools_exe + ' faidx',
             self.db_fasta,
             gene_name,
             '>', outfile

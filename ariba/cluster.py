@@ -148,6 +148,7 @@ class Cluster:
             self.gene_bam[:-4],
             threads=self.threads,
             sort=True,
+            samtools=self.samtools_exe,
             verbose=self.verbose,
         )
 
@@ -698,6 +699,7 @@ class Cluster:
                 self.final_assembly_bam[:-4],
                 threads=self.threads,
                 sort=True,
+                samtools=self.samtools_exe,
                 verbose=self.verbose,
             )
             self._parse_assembly_bam()
