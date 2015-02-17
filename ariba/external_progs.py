@@ -76,7 +76,7 @@ def check_versions(opts, verbose=False):
         'samtools': '1.2',
         'nucmer': '3.1',
         'spades': '3.5.0',
-        'smalt': '0.7.6',
+        'smalt': '0.7.4',
         'velvetg': '1.2.07',
         'velveth': '1.2.07',
     }
