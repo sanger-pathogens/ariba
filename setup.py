@@ -11,7 +11,6 @@ required_progs = [
     'SSPACE_Basic_v2.0.pl',
     'samtools',
     'smalt',
-    'spades.py',
 ]
 
 print('Checking that dependencies are found in path...')
