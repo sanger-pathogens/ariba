@@ -11,7 +11,7 @@ Dependencies:
   * [samtools and bcftools] [samtools]  version >= 1.2
   * [SSPACE-basic scaffolder] [sspace]
   * [GapFiller] [gapfiller]
-  * [MUMmer] [mummer] vesrion >= 3.23
+  * [MUMmer] [mummer] version >= 3.23
   * [SMALT] [smalt] version >= 0.7.4
   * Either [SPAdes] [spades] version >= 3.5.0 or [Velvet] [velvet] version >= 1.2.07
     (SPAdes is recommended)
