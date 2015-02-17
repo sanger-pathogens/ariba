@@ -108,7 +108,8 @@ class Clusters:
             index_k=self.smalt_k,
             index_s=self.smalt_s,
             threads=self.threads,
-            minid=self.smalt_min_id
+            minid=self.smalt_min_id,
+            verbose=self.verbose,
         )
 
 
@@ -203,9 +204,11 @@ class Clusters:
         (x, self.insert_size, pc95, self.insert_sspace_sd) = self.insert_hist.stats()
         self.insert_proper_pair_max = 1.1 * pc95
         if self.verbose:
+            print('\nInsert size information from reads mapped to reference genes:')
             print('Insert size:', self.insert_size, sep='\t')
             print('Insert sspace sd:', self.insert_sspace_sd, sep='\t')
             print('Max insert:', self.insert_proper_pair_max, sep='\t')
+            print()
 
 
     def _write_gene_fa(self, gene_name, outfile):
@@ -225,9 +228,12 @@ class Clusters:
         if len(self.cluster_to_dir) == 0:
             raise Error('Did not get any reads mapped to genes. Cannot continue')
 
+        counter = 0
+
         for gene in sorted(self.cluster_to_dir):
+            counter += 1
             if self.verbose:
-                print('Running', gene)
+                print('\nAssembling cluster', counter, 'of', str(len(self.cluster_to_dir)) + ':', gene)
             new_dir = self.cluster_to_dir[gene]
             self._write_gene_fa(gene, os.path.join(new_dir, 'gene.fa'))
             self.clusters[gene] = cluster.Cluster(
@@ -296,8 +302,20 @@ class Clusters:
 
 
     def run(self):
+        if self.verbose:
+            print('{:_^79}'.format(' Mapping reads to reference genes '))
         self._map_reads()
+        if self.verbose:
+            print('Finished mapping\n')
+            print('{:_^79}'.format(' Generating clusters '))
         self._bam_to_clusters_reads()
         self._set_insert_size_data()
+        if self.verbose:
+            print('{:_^79}'.format(' Assembling each cluster '))
         self._init_and_run_clusters()
+        if self.verbose:
+            print('Finished assembling clusters\n')
+            print('{:_^79}'.format(' Writing report files '))
         self._write_reports()
+        if self.verbose:
+            print('Finished writing report files. All done!')

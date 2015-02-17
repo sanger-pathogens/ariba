@@ -49,7 +49,7 @@ def get_version(prog, path=None):
 
 def check_versions(opts, verbose=False):
     if verbose:
-        print('\nChecking depencies and their versions ...\n')
+        print('{:_^79}'.format(' Checking dependencies and their versions '))
         print('tool', 'path', 'version', sep='\t')
 
     l = [
@@ -85,3 +85,5 @@ def check_versions(opts, verbose=False):
             print(e, file=sys.stderr)
         raise Error('Cannot continue. Some dependencies need updating')
 
+    if verbose:
+        print('\n... dependencies look OK.\n')

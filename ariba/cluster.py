@@ -140,6 +140,17 @@ class Cluster:
 
 
     def _assemble_with_velvet(self):
+        # map reads to reference gene to make BAM input to velvet columbus
+        mapping.run_smalt(
+            self.reads1,
+            self.reads2,
+            self.gene_fa,
+            self.gene_bam[:-4],
+            threads=self.threads,
+            sort=True,
+            verbose=self.verbose,
+        )
+
         cmd = ' '.join([
             self.velveth,
             self.assembler_dir,
@@ -191,6 +202,7 @@ class Cluster:
             '-o', self.assembler_dir,
             '-k', str(self.assembly_kmer),
             '--threads', str(self.threads),
+            '--trusted-contigs', self.gene_fa,
         ])
         if self.spades_other is not None:
             cmd += ' ' + self.spades_other
@@ -659,16 +671,6 @@ class Cluster:
 
 
     def run(self):
-        # map reads to reference gene
-        mapping.run_smalt(
-            self.reads1,
-            self.reads2,
-            self.gene_fa,
-            self.gene_bam[:-4],
-            threads=self.threads,
-            sort=True,
-        )
-
         if self.assembler == 'velvet':
             self._assemble_with_velvet()
         elif self.assembler == 'spades':
@@ -696,6 +698,7 @@ class Cluster:
                 self.final_assembly_bam[:-4],
                 threads=self.threads,
                 sort=True,
+                verbose=self.verbose,
             )
             self._parse_assembly_bam()
 
