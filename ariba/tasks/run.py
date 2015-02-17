@@ -23,11 +23,11 @@ def run():
     nucmer_group.add_argument('--nucmer_breaklen', type=int, help='Value to use for -breaklen when running nucmer [%(default)s]', default=50, metavar='INT')
 
     assembly_group = parser.add_argument_group('Assembly options')
-    assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs. This is also the value used for sspace -k when scaffolding [%(default)s]', default=10, metavar='INT')
     allowed_assemblers = ['velvet', 'spades']
     assembly_group.add_argument('--assembler', help='Assembler to use. Available options: ' + ','.join(allowed_assemblers) + ' [%(default)s]', choices=allowed_assemblers, default='spades', metavar='Assembler')
+    assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs. This is also the value used for sspace -k when scaffolding [%(default)s]', default=10, metavar='INT')
     assembly_group.add_argument('--assembler_k', help='kmer size to use with assembler. Default is 2/3 of the read length', metavar='INT')
-    assembly_group.add_argument('--spades_only_assembler', action='store_true', help='Use --only-assembler when running SPAdes')
+    assembly_group.add_argument('--spades_other', help='Put options string to be used with spades in quotes. This will NOT be sanity checked. Do not use -k or -t: for these options you should use the ariba run options --assembler_k and --threads')
 
     other_group = parser.add_argument_group('Other options')
     other_group.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1 (default) or 4', choices=[1,4], default=1, metavar='INT')
@@ -65,7 +65,7 @@ def run():
           nucmer_min_id=options.nucmer_min_id,
           nucmer_min_len=options.nucmer_min_len,
           nucmer_breaklen=options.nucmer_breaklen,
-          spades_only_assembler=options.spades_only_assembler,
+          spades_other=options.spades_other,
           assembled_threshold=options.assembled_threshold,
           unique_threshold=options.unique_threshold,
           bcftools_exe=options.bcftools,

@@ -22,7 +22,7 @@ class Clusters:
       smalt_k=13,
       smalt_s=2,
       smalt_min_id=0.9,
-      spades_only_assembler=False,
+      spades_other=None,
       max_insert=1000,
       min_scaff_depth=10,
       nucmer_min_id=90,
@@ -45,7 +45,7 @@ class Clusters:
         self.assembler = assembler
         assert self.assembler in ['velvet', 'spades']
         self.assembly_kmer = assembly_kmer
-        self.spades_only_assembler = spades_only_assembler
+        self.spades_other = spades_other
 
         self.bam_prefix = os.path.join(self.outdir, 'map_all_reads')
         self.bam = self.bam_prefix + '.bam'
@@ -239,7 +239,6 @@ class Clusters:
                 nucmer_min_id=self.nucmer_min_id,
                 nucmer_min_len=self.nucmer_min_len,
                 nucmer_breaklen=self.nucmer_breaklen,
-                spades_only_assembler=self.spades_only_assembler,
                 sspace_k=self.min_scaff_depth,
                 reads_insert=self.insert_size,
                 sspace_sd=self.insert_sspace_sd,
@@ -253,6 +252,7 @@ class Clusters:
                 spades_exe=self.spades_exe,
                 sspace_exe=self.sspace_exe,
                 velvet_exe=self.velvet,
+                spades_other=self.spades_other
             )
 
             self.clusters[gene].run()

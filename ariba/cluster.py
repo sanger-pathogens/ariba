@@ -20,7 +20,6 @@ class Cluster:
       nucmer_min_id=90,
       nucmer_min_len=50,
       nucmer_breaklen=50,
-      spades_only_assembler=False,
       sspace_k=20,
       reads_insert=500,
       sspace_sd=0.4,
@@ -38,6 +37,7 @@ class Cluster:
       spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
+      spades_other=None,
     ):
 
         self.root_dir = os.path.abspath(root_dir)
@@ -71,8 +71,8 @@ class Cluster:
         self._set_assembly_kmer(assembly_kmer)
         self.assembler = assembler
         assert self.assembler in ['velvet', 'spades']
-        self.spades_only_assembler = spades_only_assembler
         self.spades_exe = spades_exe
+        self.spades_other = spades_other
 
         self.bcftools_exe = bcftools_exe
 
@@ -192,8 +192,8 @@ class Cluster:
             '-k', str(self.assembly_kmer),
             '--threads', str(self.threads),
         ])
-        if self.spades_only_assembler:
-            cmd += ' --only-assembler'
+        if self.spades_other is not None:
+            cmd += ' ' + self.spades_other
 
         cwd = os.getcwd()
         os.chdir(self.assembly_dir)
