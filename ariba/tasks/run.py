@@ -71,6 +71,7 @@ def run():
           bcftools_exe=options.bcftools,
           gapfiller_exe=options.gapfiller,
           samtools_exe=options.samtools,
+          smalt_exe=options.smalt,
           spades_exe=options.spades,
           sspace_exe=options.sspace,
           velvet_exe=options.velvet,

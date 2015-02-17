@@ -33,6 +33,7 @@ class Clusters:
       bcftools_exe='bcftools',
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
+      smalt_exe='smalt',
       spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
@@ -58,6 +59,7 @@ class Clusters:
         self.smalt_s = smalt_s
         self.smalt_min_id = smalt_min_id
         self.max_insert = max_insert
+        self.smalt_exe = smalt_exe
 
         self.insert_hist_bin = 10
         self.insert_hist = histogram.Histogram(self.insert_hist_bin)
@@ -109,6 +111,7 @@ class Clusters:
             index_s=self.smalt_s,
             threads=self.threads,
             samtools=self.samtools_exe,
+            smalt=self.smalt_exe,
             minid=self.smalt_min_id,
             verbose=self.verbose,
         )

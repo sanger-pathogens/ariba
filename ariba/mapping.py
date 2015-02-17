@@ -17,6 +17,7 @@ def run_smalt(
       sort=False,
       extra_smalt_map_ops='-x',
       samtools='samtools',
+      smalt='smalt',
       verbose=False
     ):
     if extra_smalt_map_ops is None:
@@ -24,14 +25,14 @@ def run_smalt(
     map_index = out_prefix + '.map_index'
     clean_files = [map_index + '.' + x for x in ['smi', 'sma']]
     index_cmd = ' '.join([
-        'smalt index',
+        smalt, 'index',
         '-k', str(index_k),
         '-s', str(index_s),
         map_index,
         ref_fa
     ])
 
-    map_cmd = 'smalt map ' + extra_smalt_map_ops + ' '
+    map_cmd = smalt + ' map ' + extra_smalt_map_ops + ' '
 
     # depending on OS, -n can break smalt, so only use -n if it's > 1.
     if threads > 1:
