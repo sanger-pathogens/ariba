@@ -11,6 +11,7 @@ required_progs = [
     'SSPACE_Basic_v2.0.pl',
     'samtools',
     'smalt',
+    'spades.py',
 ]
 
 print('Checking that dependencies are found in path...')
@@ -24,11 +25,6 @@ for program in required_progs:
     print(found, program, sep='\t')
 if not found_all_progs:
     print('Cannot install because some required programs not found.', file=sys.stderr)
-    sys.exit(1)
-
-
-if not(  (shutil.which('velveth') and shutil.which('velvetg')) or shutil.which('spades.py')  ):
-    print('Must have velvet (velveth and velvetg) or spades.py installed. Cannot continue', file=sys.stderr)
     sys.exit(1)
 
 
