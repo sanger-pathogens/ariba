@@ -90,8 +90,9 @@ class Cluster:
             raise Error('Error! ' + sspace_exe + ' not found in path')
         self.sspace_exe = os.path.realpath(self.sspace_exe) # otherwise sspace dies loading packages
 
-        self.velveth = velvet_exe + 'h'
-        self.velvetg = velvet_exe + 'g'
+        if self.assembler == 'velvet':
+            self.velveth = velvet_exe + 'h'
+            self.velvetg = velvet_exe + 'g'
 
         self.sspace_k = sspace_k
         self.reads_insert = reads_insert
