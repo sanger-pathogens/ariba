@@ -54,7 +54,7 @@ def run():
           options.reads_1,
           options.reads_2,
           options.outdir,
-          assembly_kmer=None,
+          assembly_kmer=options.assembler_k,
           assembler=options.assembler,
           threads=options.threads,
           verbose=options.verbose,
