@@ -49,6 +49,8 @@ def run():
     executables_group.add_argument('--velveth', help=argparse.SUPPRESS)
 
     options = parser.parse_args()
+    if options.assembler == 'velvet':
+        options.velvet = 'velvet'
     ariba.external_progs.check_versions(options, verbose=options.verbose)
     pyfastaq.sequences.codon2aa = pyfastaq.genetic_codes.codes[options.genetic_code]
 
