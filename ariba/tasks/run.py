@@ -37,16 +37,20 @@ def run():
     other_group.add_argument('--verbose', action='store_true', help='Be verbose')
 
     executables_group = parser.add_argument_group('executables locations')
-    executables_group.add_argument('--bcftools', help='Path to bcftools executable [%(default)s]', default='bcftools', metavar='PATH')
-    executables_group.add_argument('--gapfiller', help='Path to GapFiller executable [%(default)s]', default='GapFiller.pl', metavar='PATH')
-    executables_group.add_argument('--samtools', help='Path to samtools executable [%(default)s]', default='samtools', metavar='PATH')
-    executables_group.add_argument('--smalt', help='Path to SMALT executable [%(default)s]', default='smalt', metavar='PATH')
-    executables_group.add_argument('--spades', help='Path to SPAdes executable [%(default)s]', default='spades.py', metavar='PATH')
-    executables_group.add_argument('--sspace', help='Path to SSPACE executable [%(default)s]', default='SSPACE_Basic_v2.0.pl', metavar='PATH')
-    executables_group.add_argument('--velvet', help='Path to prefix of velvet{g,h} [%(default)s]', default='velvet', metavar='PATH')
+    executables_group.add_argument('--bcftools', help='bcftools executable [bcftools]', metavar='PATH')
+    executables_group.add_argument('--gapfiller', help='GapFiller executable [GapFiller.pl]', metavar='PATH')
+    executables_group.add_argument('--nucmer', help=argparse.SUPPRESS, default='nucmer')
+    executables_group.add_argument('--samtools', help='samtools executable [samtools]', metavar='PATH')
+    executables_group.add_argument('--smalt', help='SMALT executable [smalt]', metavar='PATH')
+    executables_group.add_argument('--spades', help='SPAdes executable [spades.py]',  metavar='PATH')
+    executables_group.add_argument('--sspace', help='SSPACE executable [SSPACE_Basic_v2.0.pl]', metavar='PATH')
+    executables_group.add_argument('--velvet', help='prefix of velvet{g,h} executables [velvet]', metavar='PATH')
+    executables_group.add_argument('--velvetg', help=argparse.SUPPRESS)
+    executables_group.add_argument('--velveth', help=argparse.SUPPRESS)
 
     options = parser.parse_args()
     ariba.external_progs.check_versions(options, verbose=options.verbose)
+    sys.exit()
     pyfastaq.sequences.codon2aa = pyfastaq.genetic_codes.codes[options.genetic_code]
 
     c = ariba.clusters.Clusters(
