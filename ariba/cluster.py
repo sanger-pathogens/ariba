@@ -13,7 +13,7 @@ class Error (Exception): pass
 class Cluster:
     def __init__(self,
       root_dir,
-      assembly_kmer=None,
+      assembly_kmer=0,
       assembler='velvet',
       max_insert=1000,
       min_scaff_depth=10,
@@ -34,6 +34,7 @@ class Cluster:
       bcftools_exe='bcftools',
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
+      smalt_exe='smalt',
       spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
@@ -82,6 +83,7 @@ class Cluster:
         self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
 
         self.samtools_exe = samtools_exe
+        self.smalt_exe = smalt_exe
 
         self.sspace_exe = shutil.which(sspace_exe)
         if self.sspace_exe is None:
@@ -129,14 +131,14 @@ class Cluster:
 
     def _set_assembly_kmer(self, k):
         '''If the kmer not given, uses 2/3 of the mean read length (using first 1000 forward and first 1000 reverse reads)'''
-        if k is not None:
-            self.assembly_kmer = k
-        else:
+        if k == 0:
             read_length1 = pyfastaq.tasks.mean_length(self.reads1, limit=1000)
             read_length2 = pyfastaq.tasks.mean_length(self.reads2, limit=1000)
             self.assembly_kmer = round( (read_length1 + read_length2) / 3)
             if self.assembly_kmer % 2 == 0:
                 self.assembly_kmer += 1
+        else:
+            self.assembly_kmer = k
 
 
     def _assemble_with_velvet(self):
@@ -148,6 +150,8 @@ class Cluster:
             self.gene_bam[:-4],
             threads=self.threads,
             sort=True,
+            samtools=self.samtools_exe,
+            smalt=self.smalt_exe,
             verbose=self.verbose,
         )
 
@@ -698,6 +702,8 @@ class Cluster:
                 self.final_assembly_bam[:-4],
                 threads=self.threads,
                 sort=True,
+                samtools=self.samtools_exe,
+                smalt=self.smalt_exe,
                 verbose=self.verbose,
             )
             self._parse_assembly_bam()

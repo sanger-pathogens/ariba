@@ -16,6 +16,8 @@ def run_smalt(
       minid=0.9,
       sort=False,
       extra_smalt_map_ops='-x',
+      samtools='samtools',
+      smalt='smalt',
       verbose=False
     ):
     if extra_smalt_map_ops is None:
@@ -23,14 +25,14 @@ def run_smalt(
     map_index = out_prefix + '.map_index'
     clean_files = [map_index + '.' + x for x in ['smi', 'sma']]
     index_cmd = ' '.join([
-        'smalt index',
+        smalt, 'index',
         '-k', str(index_k),
         '-s', str(index_s),
         map_index,
         ref_fa
     ])
 
-    map_cmd = 'smalt map ' + extra_smalt_map_ops + ' '
+    map_cmd = smalt + ' map ' + extra_smalt_map_ops + ' '
 
     # depending on OS, -n can break smalt, so only use -n if it's > 1.
     if threads > 1:
@@ -51,7 +53,7 @@ def run_smalt(
             reads_rev,
         ])
 
-    map_cmd += ' | samtools view'
+    map_cmd += ' | ' + samtools + ' view'
 
     final_bam = out_prefix + '.bam'
     if sort:
@@ -66,8 +68,8 @@ def run_smalt(
     if sort:
         threads = min(4, threads)
         thread_mem = int(500 / threads)
-        sort_cmd = 'samtools sort -@' + str(threads) + ' -m ' + str(thread_mem) + 'M ' + intermediate_bam + ' ' + out_prefix
-        index_cmd = 'samtools index ' + final_bam
+        sort_cmd = samtools + ' sort -@' + str(threads) + ' -m ' + str(thread_mem) + 'M ' + intermediate_bam + ' ' + out_prefix
+        index_cmd = samtools + ' index ' + final_bam
         common.syscall(sort_cmd, verbose=verbose)
         common.syscall(index_cmd, verbose=verbose)
     for fname in clean_files:

@@ -26,7 +26,7 @@ def run():
     allowed_assemblers = ['velvet', 'spades']
     assembly_group.add_argument('--assembler', help='Assembler to use. Available options: ' + ','.join(allowed_assemblers) + ' [%(default)s]', choices=allowed_assemblers, default='spades', metavar='Assembler')
     assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs. This is also the value used for sspace -k when scaffolding [%(default)s]', default=10, metavar='INT')
-    assembly_group.add_argument('--assembler_k', help='kmer size to use with assembler. Default is 2/3 of the read length', metavar='INT')
+    assembly_group.add_argument('--assembler_k', type=int, help='kmer size to use with assembler. You can use 0 to set kmer to 2/3 of the read length. Warning - lower kmers are usually better. [%(default)s]', metavar='INT', default=21)
     assembly_group.add_argument('--spades_other', help='Put options string to be used with spades in quotes. This will NOT be sanity checked. Do not use -k or -t: for these options you should use the ariba run options --assembler_k and --threads')
 
     other_group = parser.add_argument_group('Other options')
@@ -37,16 +37,20 @@ def run():
     other_group.add_argument('--verbose', action='store_true', help='Be verbose')
 
     executables_group = parser.add_argument_group('executables locations')
-    executables_group.add_argument('--bcftools', help='Path to bcftools executable [%(default)s]', default='bcftools', metavar='PATH')
-    executables_group.add_argument('--gapfiller', help='Path to GapFiller executable [%(default)s]', default='GapFiller.pl', metavar='PATH')
-    executables_group.add_argument('--samtools', help='Path to samtools executable [%(default)s]', default='samtools', metavar='PATH')
-    executables_group.add_argument('--smalt', help='Path to SMALT executable [%(default)s]', default='smalt', metavar='PATH')
-    executables_group.add_argument('--spades', help='Path to SPAdes executable [%(default)s]', default='spades.py', metavar='PATH')
-    executables_group.add_argument('--sspace', help='Path to SSPACE executable [%(default)s]', default='SSPACE_Basic_v2.0.pl', metavar='PATH')
-    executables_group.add_argument('--velvet', help='Path to prefix of velvet{g,h} [%(default)s]', default='velvet', metavar='PATH')
+    executables_group.add_argument('--bcftools', help='bcftools executable [bcftools]', metavar='PATH')
+    executables_group.add_argument('--gapfiller', help='GapFiller executable [GapFiller.pl]', metavar='PATH')
+    executables_group.add_argument('--nucmer', help=argparse.SUPPRESS, default='nucmer')
+    executables_group.add_argument('--samtools', help='samtools executable [samtools]', metavar='PATH')
+    executables_group.add_argument('--smalt', help='SMALT executable [smalt]', metavar='PATH')
+    executables_group.add_argument('--spades', help='SPAdes executable [spades.py]',  metavar='PATH')
+    executables_group.add_argument('--sspace', help='SSPACE executable [SSPACE_Basic_v2.0.pl]', metavar='PATH')
+    executables_group.add_argument('--velvet', help='prefix of velvet{g,h} executables [velvet]', metavar='PATH')
+    executables_group.add_argument('--velvetg', help=argparse.SUPPRESS)
+    executables_group.add_argument('--velveth', help=argparse.SUPPRESS)
 
     options = parser.parse_args()
     ariba.external_progs.check_versions(options, verbose=options.verbose)
+    sys.exit()
     pyfastaq.sequences.codon2aa = pyfastaq.genetic_codes.codes[options.genetic_code]
 
     c = ariba.clusters.Clusters(
@@ -54,7 +58,7 @@ def run():
           options.reads_1,
           options.reads_2,
           options.outdir,
-          assembly_kmer=None,
+          assembly_kmer=options.assembler_k,
           assembler=options.assembler,
           threads=options.threads,
           verbose=options.verbose,
@@ -71,6 +75,7 @@ def run():
           bcftools_exe=options.bcftools,
           gapfiller_exe=options.gapfiller,
           samtools_exe=options.samtools,
+          smalt_exe=options.smalt,
           spades_exe=options.spades,
           sspace_exe=options.sspace,
           velvet_exe=options.velvet,
