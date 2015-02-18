@@ -50,7 +50,6 @@ def run():
 
     options = parser.parse_args()
     ariba.external_progs.check_versions(options, verbose=options.verbose)
-    sys.exit()
     pyfastaq.sequences.codon2aa = pyfastaq.genetic_codes.codes[options.genetic_code]
 
     c = ariba.clusters.Clusters(
