@@ -5,34 +5,9 @@ import glob
 from setuptools import setup, find_packages
 
 
-required_progs = [
-    'bcftools',
-    'GapFiller.pl',
-    'SSPACE_Basic_v2.0.pl',
-    'samtools',
-    'smalt',
-]
-
-print('Checking that dependencies are found in path...')
-found_all_progs = True
-for program in required_progs:
-    if shutil.which(program) is None:
-        found_all_progs = False
-        found = ' NOT FOUND'
-    else:
-        found = ' OK'
-    print(found, program, sep='\t')
-if not found_all_progs:
-    print('Cannot install because some required programs not found.', file=sys.stderr)
-    sys.exit(1)
-
-
-print('... all dependencies found')
-
-
 setup(
     name='ariba',
-    version='0.0.1',
+    version='0.1.0',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
     author='Martin Hunt',
