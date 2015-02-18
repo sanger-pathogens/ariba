@@ -15,7 +15,7 @@ class Clusters:
       reads_1,
       reads_2,
       outdir,
-      assembly_kmer=None,
+      assembly_kmer=21,
       threads=1,
       verbose=False,
       assembler='velvet',

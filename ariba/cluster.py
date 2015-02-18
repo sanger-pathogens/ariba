@@ -13,7 +13,7 @@ class Error (Exception): pass
 class Cluster:
     def __init__(self,
       root_dir,
-      assembly_kmer=None,
+      assembly_kmer=0,
       assembler='velvet',
       max_insert=1000,
       min_scaff_depth=10,
@@ -131,14 +131,14 @@ class Cluster:
 
     def _set_assembly_kmer(self, k):
         '''If the kmer not given, uses 2/3 of the mean read length (using first 1000 forward and first 1000 reverse reads)'''
-        if k is not None:
-            self.assembly_kmer = k
-        else:
+        if k == 0:
             read_length1 = pyfastaq.tasks.mean_length(self.reads1, limit=1000)
             read_length2 = pyfastaq.tasks.mean_length(self.reads2, limit=1000)
             self.assembly_kmer = round( (read_length1 + read_length2) / 3)
             if self.assembly_kmer % 2 == 0:
                 self.assembly_kmer += 1
+        else:
+            self.assembly_kmer = k
 
 
     def _assemble_with_velvet(self):
