@@ -38,6 +38,7 @@ def run():
     other_group.add_argument('--threads', type=int, help='Number of threads for smalt and spades [%(default)s]', default=1, metavar='INT')
     other_group.add_argument('--assembled_threshold', type=float, help='If proportion of gene assembled (regardless of into how many contigs) is at least this value then the flag gene_assembled is set [%(default)s]', default=0.95, metavar='FLOAT (between 0 and 1)')
     other_group.add_argument('--unique_threshold', type=float, help='If proportion of bases in gene assembled more than once is <= this value, then the flag unique_contig is set [%(default)s]', default=0.03, metavar='FLOAT (between 0 and 1)')
+    other_group.add_argument('--clean', type=int, choices=[0,1,2], help='Specify how much cleaning to do. 0=none, 1=some, 2=only keep the report [%(default)s]', default=1, metavar='INT')
     other_group.add_argument('--verbose', action='store_true', help='Be verbose')
 
     executables_group = parser.add_argument_group('executables locations')
@@ -87,6 +88,7 @@ def run():
           velvet_exe=options.velvet,
           cdhit_seq_identity_threshold=options.cdhit_seq_identity_threshold,
           cdhit_length_diff_cutoff=options.cdhit_length_diff_cutoff,
+          clean=options.clean,
         )
     c.run()
 

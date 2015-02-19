@@ -39,12 +39,14 @@ class Clusters:
       velvet_exe='velvet', # prefix of velvet{g,h}
       cdhit_seq_identity_threshold=0.9,
       cdhit_length_diff_cutoff=0.9,
+      clean=1,
     ):
         self.db_fasta = os.path.abspath(db_fasta)
         self.reads_1 = os.path.abspath(reads_1)
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
         self.clusters_outdir = os.path.join(self.outdir, 'Clusters')
+        self.clean = clean
 
         self.assembler = assembler
         assert self.assembler in ['velvet', 'spades']
@@ -278,7 +280,8 @@ class Clusters:
                 spades_exe=self.spades_exe,
                 sspace_exe=self.sspace_exe,
                 velvet_exe=self.velvet,
-                spades_other=self.spades_other
+                spades_other=self.spades_other,
+                clean=self.clean,
             )
 
             self.clusters[gene].run()
@@ -320,6 +323,30 @@ class Clusters:
         workbook.save(self.report_file_xls)
 
 
+    def _clean(self):
+        to_clean = [
+            [
+            ],
+            [
+                self.bam
+            ],
+            [
+                self.db_fasta_clustered,
+                self.db_fasta_clustered + '.fai',
+            ]
+        ]
+
+        for i in range(self.clean + 1):
+            for fname in to_clean[i]:
+                if os.path.exists(fname):
+                    if self.verbose:
+                        print('  rm', fname)
+                    os.unlink(fname)
+
+        if self.clean >= 2:
+            if self.verbose:
+                print('  rm -r', self.clusters_outdir)
+                shutil.rmtree(self.clusters_outdir)
 
 
     def run(self):
@@ -345,6 +372,9 @@ class Clusters:
             print('{:_^79}'.format(' Writing report files '))
         self._write_reports()
         if self.verbose:
-            print('Finished writing report files. All done!')
+            print('Finished writing report files. Cleaning files')
+        self._clean()
+        if self.verbose:
+            print('\nAll done!\n')
 
         os.chdir(cwd)

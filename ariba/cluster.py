@@ -40,6 +40,7 @@ class Cluster:
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
       spades_other=None,
+      clean=1,
     ):
 
         self.root_dir = os.path.abspath(root_dir)
@@ -106,6 +107,7 @@ class Cluster:
         self.unique_threshold = unique_threshold
         self.status_flag = flag.Flag()
         self.flag_file = os.path.join(self.root_dir, 'flag')
+        self.clean = clean
 
         self.assembly_dir = os.path.join(self.root_dir, 'Assembly')
         try:
@@ -385,6 +387,7 @@ class Cluster:
             else:
                 to_revcomp.add(hit.qry_name)
 
+        os.unlink(tmp_coords)
         in_both = to_revcomp.intersection(not_revcomp)
         for name in in_both:
             print('WARNING: hits to both strands of gene for scaffold. Interpretation of any variants cannot be trusted', name, file=sys.stderr)
@@ -719,6 +722,49 @@ class Cluster:
                         ])
 
 
+    def _clean(self):
+        if self.verbose:
+            print('Cleaning', self.root_dir)
+
+        if self.clean > 0:
+            if self.verbose:
+                print('  rm -r', self.assembly_dir)
+            shutil.rmtree(self.assembly_dir)
+
+        to_clean = [
+            [
+                'assembly.reads_mapped.unsorted.bam',
+            ],
+            [
+                'assembly.fa.fai',
+                'assembly.reads_mapped.bam.scaff',
+                'assembly.reads_mapped.bam.soft_clipped',
+                'assembly.reads_mapped.bam.unmapped_mates',
+                'assembly_vs_gene.coords',
+                'assembly_vs_gene.coords.snps',
+                'genes.fa',
+                'genes.fa.fai',
+                'reads_1.fq',
+                'reads_2.fq',
+            ],
+            [
+                'assembly.fa.fai',
+                'assembly.reads_mapped.bam',
+                'assembly.reads_mapped.bam.vcf',
+                'assembly_vs_gene.coords',
+                'assembly_vs_gene.coords.snps',
+            ]
+        ]
+
+        for i in range(self.clean + 1):
+            for fname in to_clean[i]:
+                fullname = os.path.join(self.root_dir, fname)
+                if os.path.exists(fullname):
+                    if self.verbose:
+                        print('  rm', fname)
+                    os.unlink(fullname)
+
+
     def run(self):
         self.gene = self._choose_best_gene()
 
@@ -766,3 +812,4 @@ class Cluster:
             self._get_vcf_variant_counts()
 
         self._make_report_lines()
+        self._clean()
