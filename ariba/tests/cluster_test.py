@@ -52,7 +52,7 @@ class TestCluster(unittest.TestCase):
         for d in dirs:
             clean_cluster_dir(d)
             with self.assertRaises(cluster.Error):
-                c = cluster.Cluster(d)
+                c = cluster.Cluster(d, 'name')
             clean_cluster_dir(d)
 
 
@@ -60,7 +60,7 @@ class TestCluster(unittest.TestCase):
         '''test _get_total_alignment_score'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_get_total_alignment_score')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         got_score = c._get_total_alignment_score('1')
         expected_score = 1500
         self.assertEqual(got_score, expected_score)
@@ -71,7 +71,7 @@ class TestCluster(unittest.TestCase):
         '''test _get_best_gene_by_alignment_score'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_get_best_gene_by_alignment_score')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         got_name = c._get_best_gene_by_alignment_score()
         self.assertEqual(got_name, '1')
         clean_cluster_dir(cluster_dir)
@@ -81,7 +81,7 @@ class TestCluster(unittest.TestCase):
         '''test _choose_best_gene'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_choose_best_gene')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         expected_gene = pyfastaq.sequences.Fasta('1', ''.join([
             'AGCGCCTAGCTTTGGCACTTCAGGAGCGCCCGGAAATAATGGCGGGCGATGAAGGTTCTG',
             'TAGGTACGCAAGATCCCTCTTAATCACAGTGGTGTAATCTGCGGGTCAGACCCTGTTAAC',
@@ -100,10 +100,10 @@ class TestCluster(unittest.TestCase):
         '''test _set_assembly_kmer'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_set_assembly_kmer')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, assembly_kmer=42)
+        c = cluster.Cluster(cluster_dir, 'name', assembly_kmer=42)
         self.assertEqual(c.assembly_kmer, 42)
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(os.path.join(data_dir, 'cluster_test_set_assembly_kmer'))
+        c = cluster.Cluster(os.path.join(data_dir, 'cluster_test_set_assembly_kmer'), 'name')
         self.assertEqual(c.assembly_kmer, 5)
         clean_cluster_dir(cluster_dir)
 
@@ -112,7 +112,7 @@ class TestCluster(unittest.TestCase):
         '''test _assemble_with_spades'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_assemble_with_spades')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         shutil.copyfile(os.path.join(data_dir, 'cluster_test_assemble_with_spades.gene.fa'), c.gene_fa)
         c._assemble_with_spades(unittest=True)
         self.assertEqual(c.status_flag.to_number(), 0)
@@ -123,7 +123,7 @@ class TestCluster(unittest.TestCase):
         '''test _assemble_with_spades handles spades fail'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_assemble_with_spades')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         shutil.copyfile(os.path.join(data_dir, 'cluster_test_assemble_with_spades.gene.fa'), c.gene_fa)
         c._assemble_with_spades()
         self.assertEqual(c.status_flag.to_number(), 64)
@@ -134,7 +134,7 @@ class TestCluster(unittest.TestCase):
         '''test _scaffold_with_sspace'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_scaffold_with_sspace')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         shutil.copyfile(
             os.path.join(data_dir, 'cluster_test_scaffold_with_sspace.contigs.fa'),
             c.assembly_contigs
@@ -149,7 +149,7 @@ class TestCluster(unittest.TestCase):
         '''test _gap_fill_with_gapfiller no gaps'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_gapfill_with_gapfiller')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         shutil.copyfile(
             os.path.join(data_dir, 'cluster_test_gapfill_with_gapfiller.scaffolds_no_gaps.fa'),
             c.scaffolder_scaffolds
@@ -164,7 +164,7 @@ class TestCluster(unittest.TestCase):
         '''test _gap_fill_with_gapfiller with gaps'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_gapfill_with_gapfiller')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         shutil.copyfile(
             os.path.join(data_dir, 'cluster_test_gapfill_with_gapfiller.scaffolds_with_gaps.fa'),
             c.scaffolder_scaffolds
@@ -179,7 +179,7 @@ class TestCluster(unittest.TestCase):
         '''test _rename_scaffolds'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_rename_scaffolds')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         c.gene = pyfastaq.sequences.Fasta('name_of_gene', 'AAACCCGGGTTT')
         infile = os.path.join(data_dir, 'cluster_test_rename_scaffolds.in.fa')
         outfile = os.path.join(data_dir, 'cluster_test_rename_scaffolds.out.fa')
@@ -194,7 +194,7 @@ class TestCluster(unittest.TestCase):
         '''test _fix_contig_orientation'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_fix_contig_orientation')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         scaffs_in = os.path.join(data_dir, 'cluster_test_fix_contig_orientation.in.fa')
         scaffs_out = os.path.join(data_dir, 'cluster_test_fix_contig_orientation.out.fa')
         shutil.copyfile(scaffs_in, c.gapfilled_scaffolds)
@@ -208,7 +208,7 @@ class TestCluster(unittest.TestCase):
         '''test _load_final_contigs'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_load_final_contigs')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         contigs_file = os.path.join(data_dir, 'cluster_test_load_final_contigs.contigs.fa')
         shutil.copyfile(contigs_file, c.final_assembly_fa)
         c._load_final_contigs()
@@ -226,7 +226,7 @@ class TestCluster(unittest.TestCase):
         cluster_dir = os.path.join(data_dir, 'cluster_test_parse_assembly_vs_gene_coords')
         coords_file = os.path.join(data_dir, 'cluster_test_parse_assembly_vs_gene_coords.coords')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         shutil.copyfile(coords_file, c.assembly_vs_gene_coords)
         c.gene = pyfastaq.sequences.Fasta('gene', 'AAACCCGGGTTT')
         c._parse_assembly_vs_gene_coords()
@@ -245,7 +245,7 @@ class TestCluster(unittest.TestCase):
         '''test _parse_assembly_bam'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_parse_assembly_bam')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         bam = os.path.join(data_dir, 'cluster_test_parse_assembly_bam.bam')
         assembly_fa = os.path.join(data_dir, 'cluster_test_parse_assembly_bam.assembly.fa')
         shutil.copyfile(bam, c.final_assembly_bam)
@@ -261,7 +261,7 @@ class TestCluster(unittest.TestCase):
         '''test _nucmer_hits_to_scaff_coords'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         hits = [
             ['1', '10', '1', '10', '10', '10', '100.00', '1000', '1000', '1', '1', 'gene', 'scaff1'],
             ['9', '42', '9', '42', '34', '34', '100.00', '1000', '1000', '1', '1', 'gene', 'scaff1'],
@@ -296,7 +296,7 @@ class TestCluster(unittest.TestCase):
         '''test _nucmer_hits_to_ref_coords'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         hits = [
             ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'contig1'],
             ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'gene', 'contig1']
@@ -317,7 +317,7 @@ class TestCluster(unittest.TestCase):
         '''test _whole_gene_covered_by_nucmer_hits'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         c.gene = pyfastaq.sequences.Fasta('gene', 'ACGTGTGCAT')
         hit1 = ['1', '10', '1', '10', '10', '10', '100.00', '10', '10', '1', '1', 'gene', 'contig1']
         hit2 = ['1', '5', '1', '5', '5', '5', '100.00', '10', '10', '1', '1', 'gene', 'contig2']
@@ -339,7 +339,7 @@ class TestCluster(unittest.TestCase):
         '''test _gene_coverage_unique'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         c.gene = pyfastaq.sequences.Fasta('gene', 'ACGTGTGCAT')
         hit1 = ['1', '10', '1', '10', '10', '10', '100.00', '10', '10', '1', '1', 'gene', 'contig1']
         hit2 = ['1', '5', '1', '5', '5', '5', '100.00', '10', '10', '1', '1', 'gene', 'contig2']
@@ -353,7 +353,7 @@ class TestCluster(unittest.TestCase):
         '''test _gene_covered_by_complete_contig_with_orf'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         gene_no_orf = pyfastaq.sequences.Fasta('gene', 'GATTGAGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         c.gene = gene
@@ -385,7 +385,7 @@ class TestCluster(unittest.TestCase):
         '''test _gene_covered_by_at_least_one_full_length_contig'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         hit1 = ['1', '39', '1', '39', '39', '39', '100.00', '39', '39', '1', '1', 'gene', 'contig1']
         hit2 = ['1', '20', '1', '20', '20', '20', '100.00', '39', '39', '1', '1', 'gene', 'contig1']
@@ -405,7 +405,7 @@ class TestCluster(unittest.TestCase):
         '''test _get_mummer_variants'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         snp_file = os.path.join(data_dir, 'cluster_test_get_mummer_variants.none.snps')
         shutil.copyfile(snp_file, c.assembly_vs_gene_coords + '.snps')
         c._get_mummer_variants()
@@ -432,7 +432,7 @@ class TestCluster(unittest.TestCase):
         '''test filter_mummer_variants'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tT\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tA\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
@@ -448,7 +448,7 @@ class TestCluster(unittest.TestCase):
         '''test _get_codon_start'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         tests = [
             (0, 5, 3),
             (0, 0, 0),
@@ -470,7 +470,7 @@ class TestCluster(unittest.TestCase):
         '''test _get_variant_effect'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
@@ -516,7 +516,7 @@ class TestCluster(unittest.TestCase):
         '''test _make_assembly_vcf'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         c.final_assembly_fa = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.fa')
         c.final_assembly_bam = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.bam')
         expected_vcf = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.vcf')
@@ -536,7 +536,7 @@ class TestCluster(unittest.TestCase):
         '''test _get_vcf_variant_counts'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
         hit = ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'scaff1']
         c.nucmer_hits = {
             'scaff1': [pymummer.alignment.Alignment('\t'.join(hit))]
@@ -553,7 +553,7 @@ class TestCluster(unittest.TestCase):
         '''test _make_report_lines'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'cluster_name')
         c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         c.variants = {'contig': [[v1]]}
@@ -562,6 +562,7 @@ class TestCluster(unittest.TestCase):
         expected = [[
             'gene',
             42,
+            'cluster_name',
             39,
             'SNP',
             'SYN',

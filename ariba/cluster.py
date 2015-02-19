@@ -13,6 +13,7 @@ class Error (Exception): pass
 class Cluster:
     def __init__(self,
       root_dir,
+      name,
       assembly_kmer=0,
       assembler='velvet',
       max_insert=1000,
@@ -45,6 +46,7 @@ class Cluster:
         if not os.path.exists(self.root_dir):
             raise Error('Directory ' + self.root_dir + ' not found. Cannot continue')
 
+        self.name = name
         self.reads1 = os.path.join(self.root_dir, 'reads_1.fq')
         self.reads2 = os.path.join(self.root_dir, 'reads_2.fq')
         self.gene_fa = os.path.join(self.root_dir, 'gene.fa')
@@ -690,7 +692,7 @@ class Cluster:
         self.report_lines = []
 
         if len(self.variants) == 0:
-            self.report_lines.append([self.gene.id, self.status_flag.to_number(), len(self.gene)] + ['.'] * 11)
+            self.report_lines.append([self.gene.id, self.status_flag.to_number(), self.name, len(self.gene)] + ['.'] * 11)
 
         for contig in self.variants:
             for variants in self.variants[contig]:
@@ -701,6 +703,7 @@ class Cluster:
                         self.report_lines.append([
                             self.gene.id,
                             self.status_flag.to_number(),
+                            self.name,
                             len(self.gene),
                             pymummer.variant.var_types[v.var_type],
                             effect,

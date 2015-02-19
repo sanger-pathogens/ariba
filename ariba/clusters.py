@@ -44,6 +44,7 @@ class Clusters:
         self.reads_1 = os.path.abspath(reads_1)
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
+        self.clusters_outdir = os.path.join(self.outdir, 'Clusters')
 
         self.assembler = assembler
         assert self.assembler in ['velvet', 'spades']
@@ -102,12 +103,11 @@ class Clusters:
         self.cdhit_seq_identity_threshold = cdhit_seq_identity_threshold
         self.cdhit_length_diff_cutoff = cdhit_length_diff_cutoff
 
-        try:
-            os.mkdir(self.outdir)
-        except:
-            raise Error('Error mkdir ' + self.outdir)
-
-        os.chdir(self.outdir)
+        for d in [self.outdir, self.clusters_outdir]:
+            try:
+                os.mkdir(d)
+            except:
+                raise Error('Error mkdir ' + d)
 
     def _run_cdhit(self):
         r = cdhit.Runner(
@@ -203,7 +203,7 @@ class Clusters:
                     assert ref not in filehandles_1
                     assert ref not in filehandles_2
 
-                    new_dir = os.path.join(self.outdir, ref)
+                    new_dir = os.path.join(self.clusters_outdir, ref)
                     try:
                         os.mkdir(new_dir)
                     except:
@@ -257,6 +257,7 @@ class Clusters:
 
             self.clusters[gene] = cluster.Cluster(
                 new_dir,
+                gene,
                 assembly_kmer=self.assembly_kmer,
                 assembler=self.assembler,
                 max_insert=self.insert_proper_pair_max,
@@ -287,6 +288,7 @@ class Clusters:
         columns = [
             '#gene',
             'flag',
+            'cluster',
             'gene_len',
             'var_type',
             'var_effect',
@@ -321,6 +323,9 @@ class Clusters:
 
 
     def run(self):
+        cwd = os.getcwd()
+        os.chdir(self.outdir)
+
         if self.verbose:
             print('{:_^79}'.format(' Running cd-hit '))
         self._run_cdhit() 
@@ -341,3 +346,5 @@ class Clusters:
         self._write_reports()
         if self.verbose:
             print('Finished writing report files. All done!')
+
+        os.chdir(cwd)

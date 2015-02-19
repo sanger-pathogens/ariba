@@ -79,10 +79,10 @@ class TestClusters(unittest.TestCase):
         ]
 
         got = [
-            os.path.join(clusters_dir, 'ref1/reads_1.fq'),
-            os.path.join(clusters_dir, 'ref1/reads_2.fq'),
-            os.path.join(clusters_dir, 'ref2/reads_1.fq'),
-            os.path.join(clusters_dir, 'ref2/reads_2.fq'),
+            os.path.join(clusters_dir, 'Clusters/ref1/reads_1.fq'),
+            os.path.join(clusters_dir, 'Clusters/ref1/reads_2.fq'),
+            os.path.join(clusters_dir, 'Clusters/ref2/reads_1.fq'),
+            os.path.join(clusters_dir, 'Clusters/ref2/reads_2.fq'),
         ]
 
 
