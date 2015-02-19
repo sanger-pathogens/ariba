@@ -17,7 +17,7 @@ def clean_cluster_dir(d, exclude=None):
         return
 
     '''Cleans up all files made except original ones in a cluster directory'''
-    keep = set(['gene.fa', 'reads_1.fq', 'reads_2.fq'])
+    keep = set(['genes.fa', 'reads_1.fq', 'reads_2.fq'])
     if exclude is not None:
         for f in exclude:
             keep.add(f)
@@ -31,12 +31,20 @@ def clean_cluster_dir(d, exclude=None):
                 os.unlink(full_path)
 
 
+def load_gene(filename):
+    file_reader = pyfastaq.sequences.file_reader(filename)
+    seq = None
+    for seq in file_reader:
+        pass
+    return seq
+
+
 class TestCluster(unittest.TestCase):
     def test_init_fail_files_missing(self):
         '''test init_fail_files_missing'''
         dirs = [
             'cluster_test_directorynotexist'
-            'cluster_test_init_no_gene_fa',
+            'cluster_test_init_no_genes_fa',
             'cluster_test_init_no_reads_1',
             'cluster_test_init_no_reads_2',
         ]
@@ -48,14 +56,43 @@ class TestCluster(unittest.TestCase):
             clean_cluster_dir(d)
 
 
-    def test_get_gene(self):
-        '''test _get_gene'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_get_gene')
+    def test_get_total_alignment_score(self):
+        '''test _get_total_alignment_score'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_get_total_alignment_score')
         clean_cluster_dir(cluster_dir)
         c = cluster.Cluster(cluster_dir)
-        expected = pyfastaq.sequences.Fasta('name_of_gene', 'CATGCGAAAGAAAAC')
-        got = c._get_gene()
-        self.assertEqual(expected, got)
+        got_score = c._get_total_alignment_score('1')
+        expected_score = 1500
+        self.assertEqual(got_score, expected_score)
+        clean_cluster_dir(cluster_dir)
+
+
+    def test_get_best_gene_by_alignment_score(self):
+        '''test _get_best_gene_by_alignment_score'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_get_best_gene_by_alignment_score')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir)
+        got_name = c._get_best_gene_by_alignment_score()
+        self.assertEqual(got_name, '1')
+        clean_cluster_dir(cluster_dir)
+
+
+    def test_choose_best_gene(self):
+        '''test _choose_best_gene'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_choose_best_gene')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir)
+        expected_gene = pyfastaq.sequences.Fasta('1', ''.join([
+            'AGCGCCTAGCTTTGGCACTTCAGGAGCGCCCGGAAATAATGGCGGGCGATGAAGGTTCTG',
+            'TAGGTACGCAAGATCCCTCTTAATCACAGTGGTGTAATCTGCGGGTCAGACCCTGTTAAC',
+            'CCGTGGCTTTCACACTCCCTCCTATGGGTAATCAATCCAGAAAGGGGCCGAAATGCAAAA',
+            'GTCTTAAGGACTCTGCGAGGCAAAGTACGGGCGAACTAAACCCCCGTGACAGGTCAGACG',
+            'TTGTTTCGGCAATCTGTCGCGCTCCCACACCTATAAGCGTACACCGTCTCTTCTGCCAGC',
+        ]))
+        expected_gene_fa = os.path.join(data_dir, 'cluster_test_choose_best_gene.gene.fa')
+        got = c._choose_best_gene()
+        self.assertEqual(got, expected_gene)
+        self.assertTrue(filecmp.cmp(expected_gene_fa, c.gene_fa, shallow=False))
         clean_cluster_dir(cluster_dir)
 
 
@@ -71,21 +108,12 @@ class TestCluster(unittest.TestCase):
         clean_cluster_dir(cluster_dir)
 
 
-    #def test_assemble_with_velvet(self):
-    #    '''test _assemble_with_velvet'''
-    #    cluster_dir = os.path.join(data_dir, 'cluster_test_assemble_with_velvet')
-    #    clean_cluster_dir(cluster_dir, exclude=set(['gene.reads_mapped.unsorted.bam']))
-    #    c = cluster.Cluster(cluster_dir)
-    #    c._assemble_with_velvet()
-    #    self.assertEqual(c.status_flag.to_number(), 0)
-    #    clean_cluster_dir(cluster_dir, exclude=set(['gene.reads_mapped.unsorted.bam']))
-
-
     def test_assemble_with_spades(self):
         '''test _assemble_with_spades'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_assemble_with_spades')
         clean_cluster_dir(cluster_dir)
         c = cluster.Cluster(cluster_dir)
+        shutil.copyfile(os.path.join(data_dir, 'cluster_test_assemble_with_spades.gene.fa'), c.gene_fa)
         c._assemble_with_spades(unittest=True)
         self.assertEqual(c.status_flag.to_number(), 0)
         clean_cluster_dir(cluster_dir)
@@ -96,6 +124,7 @@ class TestCluster(unittest.TestCase):
         cluster_dir = os.path.join(data_dir, 'cluster_test_assemble_with_spades')
         clean_cluster_dir(cluster_dir)
         c = cluster.Cluster(cluster_dir)
+        shutil.copyfile(os.path.join(data_dir, 'cluster_test_assemble_with_spades.gene.fa'), c.gene_fa)
         c._assemble_with_spades()
         self.assertEqual(c.status_flag.to_number(), 64)
         clean_cluster_dir(cluster_dir)
@@ -110,6 +139,7 @@ class TestCluster(unittest.TestCase):
             os.path.join(data_dir, 'cluster_test_scaffold_with_sspace.contigs.fa'),
             c.assembly_contigs
         )
+        #shutil.copyfile(os.path.join(data_dir, 'cluster_test_scaffold_with_sspace.gene.fa'), c.gene_fa)
         c._scaffold_with_sspace()
         self.assertTrue(os.path.exists(c.scaffolder_scaffolds))
         clean_cluster_dir(cluster_dir)
@@ -124,6 +154,7 @@ class TestCluster(unittest.TestCase):
             os.path.join(data_dir, 'cluster_test_gapfill_with_gapfiller.scaffolds_no_gaps.fa'),
             c.scaffolder_scaffolds
         )
+        c.gene = pyfastaq.sequences.Fasta('name_of_gene', 'AAACCCGGGTTT')
         c._gap_fill_with_gapfiller()
         self.assertTrue(os.path.exists(c.gapfilled_scaffolds))
         clean_cluster_dir(cluster_dir)
@@ -138,6 +169,7 @@ class TestCluster(unittest.TestCase):
             os.path.join(data_dir, 'cluster_test_gapfill_with_gapfiller.scaffolds_with_gaps.fa'),
             c.scaffolder_scaffolds
         )
+        c.gene = pyfastaq.sequences.Fasta('name_of_gene', 'AAACCCGGGTTT')
         c._gap_fill_with_gapfiller()
         self.assertTrue(os.path.exists(c.gapfilled_scaffolds))
         clean_cluster_dir(cluster_dir)
@@ -148,6 +180,7 @@ class TestCluster(unittest.TestCase):
         cluster_dir = os.path.join(data_dir, 'cluster_test_rename_scaffolds')
         clean_cluster_dir(cluster_dir)
         c = cluster.Cluster(cluster_dir)
+        c.gene = pyfastaq.sequences.Fasta('name_of_gene', 'AAACCCGGGTTT')
         infile = os.path.join(data_dir, 'cluster_test_rename_scaffolds.in.fa')
         outfile = os.path.join(data_dir, 'cluster_test_rename_scaffolds.out.fa')
         tmpfile = 'tmp.fa'
@@ -165,6 +198,7 @@ class TestCluster(unittest.TestCase):
         scaffs_in = os.path.join(data_dir, 'cluster_test_fix_contig_orientation.in.fa')
         scaffs_out = os.path.join(data_dir, 'cluster_test_fix_contig_orientation.out.fa')
         shutil.copyfile(scaffs_in, c.gapfilled_scaffolds)
+        shutil.copyfile(os.path.join(data_dir, 'cluster_test_fix_contig_orientation.gene.fa'), c.gene_fa)
         c._fix_contig_orientation()
         self.assertTrue(filecmp.cmp(scaffs_out, c.final_assembly_fa, shallow=False))
         clean_cluster_dir(cluster_dir)
@@ -194,6 +228,7 @@ class TestCluster(unittest.TestCase):
         clean_cluster_dir(cluster_dir)
         c = cluster.Cluster(cluster_dir)
         shutil.copyfile(coords_file, c.assembly_vs_gene_coords)
+        c.gene = pyfastaq.sequences.Fasta('gene', 'AAACCCGGGTTT')
         c._parse_assembly_vs_gene_coords()
         line1 = ['1', '1000', '1', '1000', '1000', '1000', '100.00', '1000', '1000', '1', '1', 'gene', 'contig1']
         line2 = ['1', '240', '1', '240', '240', '240', '100.00', '1000', '580', '1', '1', 'gene', 'contig2']

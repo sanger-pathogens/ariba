@@ -5,7 +5,7 @@ import shutil
 import operator
 import pyfastaq
 import pymummer
-from ariba import common, mapping, bam_parse, flag
+from ariba import common, mapping, bam_parse, flag, faidx
 
 class Error (Exception): pass
 
@@ -48,13 +48,13 @@ class Cluster:
         self.reads1 = os.path.join(self.root_dir, 'reads_1.fq')
         self.reads2 = os.path.join(self.root_dir, 'reads_2.fq')
         self.gene_fa = os.path.join(self.root_dir, 'gene.fa')
+        self.genes_fa = os.path.join(self.root_dir, 'genes.fa')
         self.gene_bam = os.path.join(self.root_dir, 'gene.reads_mapped.bam')
 
-        for fname in [self.reads1, self.reads2, self.gene_fa]:
+        for fname in [self.reads1, self.reads2, self.genes_fa]:
             if not os.path.exists(fname):
                 raise Error('File ' + fname + ' not found. Cannot continue')
 
-        self.gene = self._get_gene()
 
         self.max_insert = max_insert
         self.min_scaff_depth = min_scaff_depth
@@ -123,7 +123,48 @@ class Cluster:
         self.variants = {}
 
 
-    def _get_gene(self):
+    def _get_total_alignment_score(self, gene_name):
+        tmp_bam = os.path.join(self.root_dir, 'tmp.get_total_alignment_score.bam')
+        assert not os.path.exists(tmp_bam)
+        tmp_fa = os.path.join(self.root_dir, 'tmp.get_total_alignment_score.ref.fa')
+        assert not os.path.exists(tmp_fa)
+        faidx.write_fa_subset([gene_name], self.genes_fa, tmp_fa, samtools_exe=self.samtools_exe, verbose=self.verbose)
+        mapping.run_smalt(
+            self.reads1,
+            self.reads2,
+            tmp_fa,
+            tmp_bam[:-4],
+            threads=self.threads,
+            samtools=self.samtools_exe,
+            smalt=self.smalt_exe,
+            verbose=self.verbose,
+        ) 
+
+        score = mapping.get_total_alignment_score(tmp_bam)
+        os.unlink(tmp_bam)
+        os.unlink(tmp_fa)
+        os.unlink(tmp_fa + '.fai')
+        return score
+
+
+    def _get_best_gene_by_alignment_score(self):
+        file_reader = pyfastaq.sequences.file_reader(self.genes_fa)
+        best_score = 0
+        best_gene_name = None
+        for seq in file_reader:
+            score = self._get_total_alignment_score(seq.id)
+            if self.verbose:
+                print('Total alignment score for gene', seq.id, 'is', score)
+            if score > best_score:
+                best_score = score
+                best_gene_name = seq.id
+
+        return best_gene_name
+
+
+    def _choose_best_gene(self):
+        gene_name = self._get_best_gene_by_alignment_score()
+        faidx.write_fa_subset([gene_name], self.genes_fa, self.gene_fa, samtools_exe=self.samtools_exe, verbose=self.verbose)
         seqs = {}
         pyfastaq.tasks.file_to_dict(self.gene_fa, seqs)
         assert len(seqs) == 1
@@ -676,6 +717,8 @@ class Cluster:
 
 
     def run(self):
+        self.gene = self._choose_best_gene()
+
         if self.assembler == 'velvet':
             self._assemble_with_velvet()
         elif self.assembler == 'spades':
