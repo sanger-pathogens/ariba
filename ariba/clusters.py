@@ -107,6 +107,7 @@ class Clusters:
         except:
             raise Error('Error mkdir ' + self.outdir)
 
+        os.chdir(self.outdir)
 
     def _run_cdhit(self):
         r = cdhit.Runner(
