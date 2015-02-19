@@ -46,6 +46,7 @@ class Clusters:
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
         self.clusters_outdir = os.path.join(self.outdir, 'Clusters')
+        self.clusters_info_file = os.path.join(self.outdir, 'clusters.tsv')
         self.clean = clean
 
         self.assembler = assembler
@@ -121,6 +122,15 @@ class Clusters:
             verbose=self.verbose,
         )
         self.cluster_ids = r.run()
+
+
+    def _write_clusters_info_file(self):
+        f = pyfastaq.utils.open_file_write(self.clusters_info_file)
+        print('#Cluster\tGene', file=f)
+        for c in sorted([int(x) for x in self.cluster_ids]):
+            for seqname in sorted(list(self.cluster_ids[str(c)])):
+                print(c, seqname, sep='\t', file=f)
+        pyfastaq.utils.close(f)
 
 
     def _map_reads_to_clustered_genes(self):
@@ -333,6 +343,7 @@ class Clusters:
             [
                 self.db_fasta_clustered,
                 self.db_fasta_clustered + '.fai',
+                self.clusters_info_file,
             ]
         ]
 
@@ -356,7 +367,9 @@ class Clusters:
         if self.verbose:
             print('{:_^79}'.format(' Running cd-hit '))
         self._run_cdhit() 
+        self._write_clusters_info_file()
         if self.verbose:
+            print('Finished cd-hit\n')
             print('{:_^79}'.format(' Mapping reads to clustered genes '))
         self._map_reads_to_clustered_genes()
         if self.verbose:
