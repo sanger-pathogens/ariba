@@ -13,7 +13,7 @@ class Runner:
       self,
       infile,
       outfile,
-      seq_idenity_threshold=0.9,
+      seq_identity_threshold=0.9,
       threads=1,
       length_diff_cutoff=0.9,
       verbose=False,
@@ -24,7 +24,7 @@ class Runner:
 
         self.infile = os.path.abspath(infile)
         self.outfile = os.path.abspath(outfile)
-        self.seq_idenity_threshold = seq_idenity_threshold
+        self.seq_identity_threshold = seq_identity_threshold
         self.threads = threads
         self.length_diff_cutoff = length_diff_cutoff
         self.verbose = verbose
@@ -45,7 +45,7 @@ class Runner:
             'cd-hit',
             '-i', infile_renamed,
             '-o', cdhit_fasta,
-            '-c', str(self.seq_idenity_threshold),
+            '-c', str(self.seq_identity_threshold),
             '-T', str(self.threads),
             '-s', str(self.length_diff_cutoff),
             '-bak 1',
