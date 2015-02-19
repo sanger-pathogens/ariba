@@ -42,6 +42,7 @@ def run():
 
     executables_group = parser.add_argument_group('executables locations')
     executables_group.add_argument('--bcftools', help='bcftools executable [bcftools]', metavar='PATH')
+    executables_group.add_argument('--cdhit', help=argparse.SUPPRESS)
     executables_group.add_argument('--gapfiller', help='GapFiller executable [GapFiller.pl]', metavar='PATH')
     executables_group.add_argument('--nucmer', help=argparse.SUPPRESS, default='nucmer')
     executables_group.add_argument('--samtools', help='samtools executable [samtools]', metavar='PATH')
