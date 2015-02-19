@@ -1,5 +1,6 @@
 __all__ = [
     'bam_parse',
+    'cdhit',
     'cluster',
     'clusters',
     'common',
