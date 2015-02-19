@@ -116,16 +116,6 @@ class TestClusters(unittest.TestCase):
         self.assertEqual(self.clusters.insert_sspace_sd, 0.91)
 
 
-    def test_write_gene_fa(self):
-        '''Test _write_gene_fa'''
-        self.clusters.db_fasta = os.path.join(data_dir, 'clusters_test_write_gene_fa.db.fa')
-        expected = os.path.join(data_dir, 'clusters_test_write_gene_fa.out.fa')
-        tmp_file = 'tmp.test_write_gene_fa.fa'
-        self.clusters._write_gene_fa('gene2', tmp_file)
-        self.assertTrue(filecmp.cmp(expected, tmp_file, shallow=False))
-        os.unlink(tmp_file)
-
-
     def test_write_reports(self):
         class FakeCluster:
             def __init__(self, lines):

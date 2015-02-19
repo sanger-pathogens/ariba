@@ -4,7 +4,7 @@ import shutil
 import openpyxl
 import pysam
 import pyfastaq
-from ariba import cluster, common, mapping, histogram
+from ariba import cdhit, cluster, common, mapping, histogram, faidx
 
 class Error (Exception): pass
 
@@ -37,6 +37,8 @@ class Clusters:
       spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
+      cdhit_seq_identity_threshold=0.9,
+      cdhit_length_diff_cutoff=0.9,
     ):
         self.db_fasta = os.path.abspath(db_fasta)
         self.reads_1 = os.path.abspath(reads_1)
@@ -48,6 +50,8 @@ class Clusters:
         self.assembly_kmer = assembly_kmer
         self.spades_other = spades_other
 
+        self.db_fasta_clustered = os.path.join(self.outdir, 'genes.clustered.fa')
+        self.cluster_ids = {}
         self.bam_prefix = os.path.join(self.outdir, 'map_all_reads')
         self.bam = self.bam_prefix + '.bam'
         self.report_file_tsv = os.path.join(self.outdir, 'report.tsv')
@@ -95,17 +99,32 @@ class Clusters:
 
         self.velvet = velvet_exe
 
+        self.cdhit_seq_identity_threshold = cdhit_seq_identity_threshold
+        self.cdhit_length_diff_cutoff = cdhit_length_diff_cutoff
+
         try:
             os.mkdir(self.outdir)
         except:
             raise Error('Error mkdir ' + self.outdir)
 
 
-    def _map_reads(self):
+    def _run_cdhit(self):
+        r = cdhit.Runner(
+            self.db_fasta,
+            self.db_fasta_clustered, 
+            seq_identity_threshold=self.cdhit_seq_identity_threshold,
+            threads=self.threads,
+            length_diff_cutoff=self.cdhit_length_diff_cutoff,
+            verbose=self.verbose,
+        )
+        self.cluster_ids = r.run()
+
+
+    def _map_reads_to_clustered_genes(self):
         mapping.run_smalt(
             self.reads_1,
             self.reads_2,
-            self.db_fasta,
+            self.db_fasta_clustered,
             self.bam_prefix,
             index_k=self.smalt_k,
             index_s=self.smalt_s,
@@ -215,19 +234,6 @@ class Clusters:
             print()
 
 
-    def _write_gene_fa(self, gene_name, outfile):
-        if not os.path.exists(self.db_fasta + '.fai'):
-            common.syscall(self.samtools_exe + ' faidx ' + self.db_fasta, verbose=self.verbose)
-
-        common.syscall(' '.join([
-            self.samtools_exe + ' faidx',
-            self.db_fasta,
-            gene_name,
-            '>', outfile
-        ]))
-
-
-
     def _init_and_run_clusters(self):
         if len(self.cluster_to_dir) == 0:
             raise Error('Did not get any reads mapped to genes. Cannot continue')
@@ -239,7 +245,15 @@ class Clusters:
             if self.verbose:
                 print('\nAssembling cluster', counter, 'of', str(len(self.cluster_to_dir)) + ':', gene)
             new_dir = self.cluster_to_dir[gene]
-            self._write_gene_fa(gene, os.path.join(new_dir, 'gene.fa'))
+
+            faidx.write_fa_subset(
+                self.cluster_ids[gene],
+                self.db_fasta,
+                os.path.join(new_dir, 'genes.fa'),
+                samtools_exe=self.samtools_exe,
+                verbose=self.verbose
+            )
+
             self.clusters[gene] = cluster.Cluster(
                 new_dir,
                 assembly_kmer=self.assembly_kmer,
@@ -307,8 +321,11 @@ class Clusters:
 
     def run(self):
         if self.verbose:
-            print('{:_^79}'.format(' Mapping reads to reference genes '))
-        self._map_reads()
+            print('{:_^79}'.format(' Running cd-hit '))
+        self._run_cdhit() 
+        if self.verbose:
+            print('{:_^79}'.format(' Mapping reads to clustered genes '))
+        self._map_reads_to_clustered_genes()
         if self.verbose:
             print('Finished mapping\n')
             print('{:_^79}'.format(' Generating clusters '))
