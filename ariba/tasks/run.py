@@ -12,6 +12,10 @@ def run():
     parser.add_argument('reads_2', help='Name of rev reads fastq file')
     parser.add_argument('outdir', help='Output directory (must not already exist)')
 
+    cdhit_group = parser.add_argument_group('cd-hit options')
+    cdhit_group.add_argument('--cdhit_seq_identity_threshold', type=float, help='Sequence identity threshold (cd-hit option -c) [%(default)s]', default=0.9, metavar='FLOAT')
+    cdhit_group.add_argument('--cdhit_length_diff_cutoff', type=float, help='length difference cutoff (cd-hit option -s) [%(default)s]', default=0.9, metavar='FLOAT')
+
     smalt_group = parser.add_argument_group('smalt options')
     smalt_group.add_argument('--smalt_k', type=int, help='kmer to use when indexing with smalt (smalt index -k) [%(default)s]', default=13, metavar='INT')
     smalt_group.add_argument('--smalt_s', type=int, help='Step length to use when indexing with smalt (see smalt index -s) [%(default)s]', default=2, metavar='INT')
@@ -80,6 +84,8 @@ def run():
           spades_exe=options.spades,
           sspace_exe=options.sspace,
           velvet_exe=options.velvet,
+          cdhit_seq_identity_threshold=options.cdhit_seq_identity_threshold,
+          cdhit_length_diff_cutoff=options.cdhit_length_diff_cutoff,
         )
     c.run()
 
