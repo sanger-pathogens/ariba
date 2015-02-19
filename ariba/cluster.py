@@ -152,6 +152,17 @@ class Cluster:
 
 
     def _get_best_gene_by_alignment_score(self):
+        cluster_size = pyfastaq.tasks.count_sequences(self.genes_fa)
+        if cluster_size == 1:
+            seqs = {}
+            pyfastaq.tasks.file_to_dict(self.genes_fa, seqs)
+            assert len(seqs) == 1
+            if self.verbose:
+                print('No need to choose gene for this cluster (it only has one gene)')
+            return list(seqs.values())[0].id
+
+        if self.verbose:
+            print('Choosing best gene from cluster of', cluster_size, 'genes...')
         file_reader = pyfastaq.sequences.file_reader(self.genes_fa)
         best_score = 0
         best_gene_name = None
