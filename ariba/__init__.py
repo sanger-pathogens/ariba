@@ -5,6 +5,7 @@ __all__ = [
     'clusters',
     'common',
     'external_progs',
+    'faidx',
     'flag',
     'histogram',
     'link',
