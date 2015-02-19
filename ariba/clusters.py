@@ -246,7 +246,7 @@ class Clusters:
         for gene in sorted(self.cluster_to_dir):
             counter += 1
             if self.verbose:
-                print('\nAssembling cluster', counter, 'of', str(len(self.cluster_to_dir)) + ':', gene)
+                print('\nAssembling cluster', counter, 'of', str(len(self.cluster_to_dir)))
             new_dir = self.cluster_to_dir[gene]
 
             faidx.write_fa_subset(
