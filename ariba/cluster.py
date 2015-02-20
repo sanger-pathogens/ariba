@@ -5,7 +5,7 @@ import shutil
 import operator
 import pyfastaq
 import pymummer
-from ariba import common, mapping, bam_parse, flag
+from ariba import common, mapping, bam_parse, flag, faidx
 
 class Error (Exception): pass
 
@@ -13,6 +13,7 @@ class Error (Exception): pass
 class Cluster:
     def __init__(self,
       root_dir,
+      name,
       assembly_kmer=0,
       assembler='velvet',
       max_insert=1000,
@@ -39,22 +40,24 @@ class Cluster:
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
       spades_other=None,
+      clean=1,
     ):
 
         self.root_dir = os.path.abspath(root_dir)
         if not os.path.exists(self.root_dir):
             raise Error('Directory ' + self.root_dir + ' not found. Cannot continue')
 
+        self.name = name
         self.reads1 = os.path.join(self.root_dir, 'reads_1.fq')
         self.reads2 = os.path.join(self.root_dir, 'reads_2.fq')
         self.gene_fa = os.path.join(self.root_dir, 'gene.fa')
+        self.genes_fa = os.path.join(self.root_dir, 'genes.fa')
         self.gene_bam = os.path.join(self.root_dir, 'gene.reads_mapped.bam')
 
-        for fname in [self.reads1, self.reads2, self.gene_fa]:
+        for fname in [self.reads1, self.reads2, self.genes_fa]:
             if not os.path.exists(fname):
                 raise Error('File ' + fname + ' not found. Cannot continue')
 
-        self.gene = self._get_gene()
 
         self.max_insert = max_insert
         self.min_scaff_depth = min_scaff_depth
@@ -104,6 +107,7 @@ class Cluster:
         self.unique_threshold = unique_threshold
         self.status_flag = flag.Flag()
         self.flag_file = os.path.join(self.root_dir, 'flag')
+        self.clean = clean
 
         self.assembly_dir = os.path.join(self.root_dir, 'Assembly')
         try:
@@ -123,7 +127,64 @@ class Cluster:
         self.variants = {}
 
 
-    def _get_gene(self):
+    def _get_total_alignment_score(self, gene_name):
+        tmp_bam = os.path.join(self.root_dir, 'tmp.get_total_alignment_score.bam')
+        assert not os.path.exists(tmp_bam)
+        tmp_fa = os.path.join(self.root_dir, 'tmp.get_total_alignment_score.ref.fa')
+        assert not os.path.exists(tmp_fa)
+        faidx.write_fa_subset([gene_name], self.genes_fa, tmp_fa, samtools_exe=self.samtools_exe, verbose=self.verbose)
+        mapping.run_smalt(
+            self.reads1,
+            self.reads2,
+            tmp_fa,
+            tmp_bam[:-4],
+            threads=self.threads,
+            samtools=self.samtools_exe,
+            smalt=self.smalt_exe,
+            verbose=self.verbose,
+        ) 
+
+        score = mapping.get_total_alignment_score(tmp_bam)
+        os.unlink(tmp_bam)
+        os.unlink(tmp_fa)
+        os.unlink(tmp_fa + '.fai')
+        return score
+
+
+    def _get_best_gene_by_alignment_score(self):
+        cluster_size = pyfastaq.tasks.count_sequences(self.genes_fa)
+        if cluster_size == 1:
+            seqs = {}
+            pyfastaq.tasks.file_to_dict(self.genes_fa, seqs)
+            assert len(seqs) == 1
+            gene_name = list(seqs.values())[0].id
+            if self.verbose:
+                print('No need to choose gene for this cluster because only has one gene:', gene_name)
+            return gene_name
+
+        if self.verbose:
+            print('\nChoosing best gene from cluster of', cluster_size, 'genes...')
+        file_reader = pyfastaq.sequences.file_reader(self.genes_fa)
+        best_score = 0
+        best_gene_name = None
+        for seq in file_reader:
+            score = self._get_total_alignment_score(seq.id)
+            if self.verbose:
+                print('Total alignment score for gene', seq.id, 'is', score)
+            if score > best_score:
+                best_score = score
+                best_gene_name = seq.id
+
+        if self.verbose:
+            print('Best gene is', best_gene_name, 'with total alignment score of', best_score)
+            print()
+
+        return best_gene_name
+
+
+    def _choose_best_gene(self):
+        gene_name = self._get_best_gene_by_alignment_score()
+        faidx.write_fa_subset([gene_name], self.genes_fa, self.gene_fa, samtools_exe=self.samtools_exe, verbose=self.verbose)
         seqs = {}
         pyfastaq.tasks.file_to_dict(self.gene_fa, seqs)
         assert len(seqs) == 1
@@ -342,6 +403,7 @@ class Cluster:
             else:
                 to_revcomp.add(hit.qry_name)
 
+        os.unlink(tmp_coords)
         in_both = to_revcomp.intersection(not_revcomp)
         for name in in_both:
             print('WARNING: hits to both strands of gene for scaffold. Interpretation of any variants cannot be trusted', name, file=sys.stderr)
@@ -649,7 +711,7 @@ class Cluster:
         self.report_lines = []
 
         if len(self.variants) == 0:
-            self.report_lines.append([self.gene.id, self.status_flag.to_number(), len(self.gene)] + ['.'] * 11)
+            self.report_lines.append([self.gene.id, self.status_flag.to_number(), self.name, len(self.gene)] + ['.'] * 11)
 
         for contig in self.variants:
             for variants in self.variants[contig]:
@@ -660,6 +722,7 @@ class Cluster:
                         self.report_lines.append([
                             self.gene.id,
                             self.status_flag.to_number(),
+                            self.name,
                             len(self.gene),
                             pymummer.variant.var_types[v.var_type],
                             effect,
@@ -675,7 +738,52 @@ class Cluster:
                         ])
 
 
+    def _clean(self):
+        if self.verbose:
+            print('Cleaning', self.root_dir)
+
+        if self.clean > 0:
+            if self.verbose:
+                print('  rm -r', self.assembly_dir)
+            shutil.rmtree(self.assembly_dir)
+
+        to_clean = [
+            [
+                'assembly.reads_mapped.unsorted.bam',
+            ],
+            [
+                'assembly.fa.fai',
+                'assembly.reads_mapped.bam.scaff',
+                'assembly.reads_mapped.bam.soft_clipped',
+                'assembly.reads_mapped.bam.unmapped_mates',
+                'assembly_vs_gene.coords',
+                'assembly_vs_gene.coords.snps',
+                'genes.fa',
+                'genes.fa.fai',
+                'reads_1.fq',
+                'reads_2.fq',
+            ],
+            [
+                'assembly.fa.fai',
+                'assembly.reads_mapped.bam',
+                'assembly.reads_mapped.bam.vcf',
+                'assembly_vs_gene.coords',
+                'assembly_vs_gene.coords.snps',
+            ]
+        ]
+
+        for i in range(self.clean + 1):
+            for fname in to_clean[i]:
+                fullname = os.path.join(self.root_dir, fname)
+                if os.path.exists(fullname):
+                    if self.verbose:
+                        print('  rm', fname)
+                    os.unlink(fullname)
+
+
     def run(self):
+        self.gene = self._choose_best_gene()
+
         if self.assembler == 'velvet':
             self._assemble_with_velvet()
         elif self.assembler == 'spades':
@@ -720,3 +828,4 @@ class Cluster:
             self._get_vcf_variant_counts()
 
         self._make_report_lines()
+        self._clean()

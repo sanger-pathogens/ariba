@@ -79,10 +79,10 @@ class TestClusters(unittest.TestCase):
         ]
 
         got = [
-            os.path.join(clusters_dir, 'ref1/reads_1.fq'),
-            os.path.join(clusters_dir, 'ref1/reads_2.fq'),
-            os.path.join(clusters_dir, 'ref2/reads_1.fq'),
-            os.path.join(clusters_dir, 'ref2/reads_2.fq'),
+            os.path.join(clusters_dir, 'Clusters/ref1/reads_1.fq'),
+            os.path.join(clusters_dir, 'Clusters/ref1/reads_2.fq'),
+            os.path.join(clusters_dir, 'Clusters/ref2/reads_1.fq'),
+            os.path.join(clusters_dir, 'Clusters/ref2/reads_2.fq'),
         ]
 
 
@@ -114,16 +114,6 @@ class TestClusters(unittest.TestCase):
         self.clusters._set_insert_size_data()
         self.assertEqual(self.clusters.insert_size, 5.5)
         self.assertEqual(self.clusters.insert_sspace_sd, 0.91)
-
-
-    def test_write_gene_fa(self):
-        '''Test _write_gene_fa'''
-        self.clusters.db_fasta = os.path.join(data_dir, 'clusters_test_write_gene_fa.db.fa')
-        expected = os.path.join(data_dir, 'clusters_test_write_gene_fa.out.fa')
-        tmp_file = 'tmp.test_write_gene_fa.fa'
-        self.clusters._write_gene_fa('gene2', tmp_file)
-        self.assertTrue(filecmp.cmp(expected, tmp_file, shallow=False))
-        os.unlink(tmp_file)
 
 
     def test_write_reports(self):

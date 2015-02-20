@@ -13,7 +13,7 @@ def syscall(cmd, allow_fail=False, verbose=False):
         print('The following command failed with exit code', error.returncode, file=sys.stderr)
         print(cmd, file=sys.stderr)
         print('\nThe output was:\n', file=sys.stderr)
-        print(errors, file=sys.stderr)
+        print(errors, file=sys.stderr, flush=True)
 
         if allow_fail:
             return False, errors

@@ -60,3 +60,11 @@ class TestMapping(unittest.TestCase):
         os.unlink(out_prefix + '.bam.bai')
         os.unlink(out_prefix + '.unsorted.bam')
 
+
+    def test_get_total_alignment_score(self):
+        '''Test get_total_alignment_score'''
+        bam = os.path.join(data_dir, 'mapping_test_get_total_alignment_score.bam')
+        expected = 219
+        got = mapping.get_total_alignment_score(bam)
+        self.assertEqual(got, expected)
+

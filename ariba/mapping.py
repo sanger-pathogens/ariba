@@ -1,4 +1,5 @@
 import os
+import pysam
 from ariba import common
 
 class Error (Exception): pass
@@ -74,3 +75,16 @@ def run_smalt(
         common.syscall(index_cmd, verbose=verbose)
     for fname in clean_files:
         os.unlink(fname)
+
+
+def get_total_alignment_score(bam):
+    '''Returns total of AS: tags in the input BAM'''
+    sam_reader = pysam.Samfile(bam, "rb")
+    total = 0
+    for sam in sam_reader.fetch(until_eof=True):
+        try:
+            total += sam.opt('AS')
+        except:
+            pass
+    return total
+

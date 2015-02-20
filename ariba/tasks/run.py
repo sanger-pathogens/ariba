@@ -12,6 +12,10 @@ def run():
     parser.add_argument('reads_2', help='Name of rev reads fastq file')
     parser.add_argument('outdir', help='Output directory (must not already exist)')
 
+    cdhit_group = parser.add_argument_group('cd-hit options')
+    cdhit_group.add_argument('--cdhit_seq_identity_threshold', type=float, help='Sequence identity threshold (cd-hit option -c) [%(default)s]', default=0.9, metavar='FLOAT')
+    cdhit_group.add_argument('--cdhit_length_diff_cutoff', type=float, help='length difference cutoff (cd-hit option -s) [%(default)s]', default=0.9, metavar='FLOAT')
+
     smalt_group = parser.add_argument_group('smalt options')
     smalt_group.add_argument('--smalt_k', type=int, help='kmer to use when indexing with smalt (smalt index -k) [%(default)s]', default=13, metavar='INT')
     smalt_group.add_argument('--smalt_s', type=int, help='Step length to use when indexing with smalt (see smalt index -s) [%(default)s]', default=2, metavar='INT')
@@ -34,10 +38,12 @@ def run():
     other_group.add_argument('--threads', type=int, help='Number of threads for smalt and spades [%(default)s]', default=1, metavar='INT')
     other_group.add_argument('--assembled_threshold', type=float, help='If proportion of gene assembled (regardless of into how many contigs) is at least this value then the flag gene_assembled is set [%(default)s]', default=0.95, metavar='FLOAT (between 0 and 1)')
     other_group.add_argument('--unique_threshold', type=float, help='If proportion of bases in gene assembled more than once is <= this value, then the flag unique_contig is set [%(default)s]', default=0.03, metavar='FLOAT (between 0 and 1)')
+    other_group.add_argument('--clean', type=int, choices=[0,1,2], help='Specify how much cleaning to do. 0=none, 1=some, 2=only keep the report [%(default)s]', default=1, metavar='INT')
     other_group.add_argument('--verbose', action='store_true', help='Be verbose')
 
     executables_group = parser.add_argument_group('executables locations')
     executables_group.add_argument('--bcftools', help='bcftools executable [bcftools]', metavar='PATH')
+    executables_group.add_argument('--cdhit', help=argparse.SUPPRESS)
     executables_group.add_argument('--gapfiller', help='GapFiller executable [GapFiller.pl]', metavar='PATH')
     executables_group.add_argument('--nucmer', help=argparse.SUPPRESS, default='nucmer')
     executables_group.add_argument('--samtools', help='samtools executable [samtools]', metavar='PATH')
@@ -80,6 +86,9 @@ def run():
           spades_exe=options.spades,
           sspace_exe=options.sspace,
           velvet_exe=options.velvet,
+          cdhit_seq_identity_threshold=options.cdhit_seq_identity_threshold,
+          cdhit_length_diff_cutoff=options.cdhit_length_diff_cutoff,
+          clean=options.clean,
         )
     c.run()
 
