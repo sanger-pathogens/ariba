@@ -11,6 +11,7 @@ Installation
 ------------
 
 ARIBA has the following dependencies, which need to be installed:
+  * [cd-hit] [cdhit] version >= 4.6
   * [samtools and bcftools] [samtools]  version >= 1.2
   * [SSPACE-basic scaffolder] [sspace]
   * [GapFiller] [gapfiller]
@@ -39,6 +40,7 @@ Usage
 Please read the [ARIBA wiki page] [ARIBA wiki] for usage instructions.
 
 
+  [cdhit]: http://weizhongli-lab.org/cd-hit/
   [ARIBA wiki]: https://github.com/sanger-pathogens/ariba/wiki
   [gapfiller]: http://www.baseclear.com/genomics/bioinformatics/basetools/gapfiller
   [mummer]: http://mummer.sourceforge.net/
