@@ -224,6 +224,8 @@ class Clusters:
                     self.cluster_to_dir[ref] = new_dir
                     filehandles_1[ref] = pyfastaq.utils.open_file_write(os.path.join(new_dir, 'reads_1.fq'))
                     filehandles_2[ref] = pyfastaq.utils.open_file_write(os.path.join(new_dir, 'reads_2.fq'))
+                    if self.verbose:
+                        print('New cluster with reads that hit:', ref, flush=True)
 
                 print(read1, file=filehandles_1[ref])
                 print(read2, file=filehandles_2[ref])
@@ -234,6 +236,8 @@ class Clusters:
             pyfastaq.utils.close(filehandles_1[ref])
             pyfastaq.utils.close(filehandles_2[ref])
 
+        if self.verbose:
+            print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)
 
     def _set_insert_size_data(self):
         assert len(self.insert_hist) > 0
@@ -365,27 +369,27 @@ class Clusters:
         os.chdir(self.outdir)
 
         if self.verbose:
-            print('{:_^79}'.format(' Running cd-hit '))
+            print('{:_^79}'.format(' Running cd-hit '), flush=True)
         self._run_cdhit() 
         self._write_clusters_info_file()
         if self.verbose:
             print('Finished cd-hit\n')
-            print('{:_^79}'.format(' Mapping reads to clustered genes '))
+            print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
         self._map_reads_to_clustered_genes()
         if self.verbose:
             print('Finished mapping\n')
-            print('{:_^79}'.format(' Generating clusters '))
+            print('{:_^79}'.format(' Generating clusters '), flush=True)
         self._bam_to_clusters_reads()
         self._set_insert_size_data()
         if self.verbose:
-            print('{:_^79}'.format(' Assembling each cluster '))
+            print('{:_^79}'.format(' Assembling each cluster '), flush=True)
         self._init_and_run_clusters()
         if self.verbose:
             print('Finished assembling clusters\n')
-            print('{:_^79}'.format(' Writing report files '))
+            print('{:_^79}'.format(' Writing report files '), flush=True)
         self._write_reports()
         if self.verbose:
-            print('Finished writing report files. Cleaning files')
+            print('Finished writing report files. Cleaning files', flush=True)
         self._clean()
         if self.verbose:
             print('\nAll done!\n')
