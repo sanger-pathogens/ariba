@@ -157,12 +157,13 @@ class Cluster:
             seqs = {}
             pyfastaq.tasks.file_to_dict(self.genes_fa, seqs)
             assert len(seqs) == 1
+            gene_name = list(seqs.values())[0].id
             if self.verbose:
-                print('No need to choose gene for this cluster (it only has one gene)')
-            return list(seqs.values())[0].id
+                print('No need to choose gene for this cluster because only has one gene:', gene_name)
+            return gene_name
 
         if self.verbose:
-            print('Choosing best gene from cluster of', cluster_size, 'genes...')
+            print('\nChoosing best gene from cluster of', cluster_size, 'genes...')
         file_reader = pyfastaq.sequences.file_reader(self.genes_fa)
         best_score = 0
         best_gene_name = None
@@ -173,6 +174,10 @@ class Cluster:
             if score > best_score:
                 best_score = score
                 best_gene_name = seq.id
+
+        if self.verbose:
+            print('Best gene is', best_gene_name, 'with total alignment score of', best_score)
+            print()
 
         return best_gene_name
 
