@@ -351,6 +351,31 @@ class TestCluster(unittest.TestCase):
         clean_cluster_dir(cluster_dir)
 
 
+    def test_nucmer_hits_to_gene_cov_per_contig(self):
+        '''test _nucmer_hits_to_gene_cov_per_contig'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        hits = [
+            ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'contig1'],
+            ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'gene', 'contig1'],
+            ['100', '110', '200', '210', '11', '11', '99.42', '1000', '1000', '1', '1', 'gene', 'contig2'],
+        ]
+        c.nucmer_hits = {
+            'contig1': [
+                pymummer.alignment.Alignment('\t'.join(hits[0])),
+                pymummer.alignment.Alignment('\t'.join(hits[1])),
+            ],
+            'contig2': [
+                pymummer.alignment.Alignment('\t'.join(hits[2])),
+            ]
+        }
+        
+        expected = {'contig1': 85, 'contig2': 11}
+        self.assertEqual(expected, c._nucmer_hits_to_gene_cov_per_contig())
+        clean_cluster_dir(cluster_dir)
+
+
     def test_whole_gene_covered_by_nucmer_hits(self):
         '''test _whole_gene_covered_by_nucmer_hits'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')

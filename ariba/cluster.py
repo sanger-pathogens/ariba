@@ -488,6 +488,15 @@ class Cluster:
         return coords
 
 
+    def _nucmer_hits_to_gene_cov_per_contig(self):
+        cov = {}
+        for contig in self.nucmer_hits:
+            coords = self._nucmer_hits_to_ref_coords(contig)
+            pyfastaq.intervals.merge_overlapping_in_list(coords)
+            cov[contig] = pyfastaq.intervals.length_sum_from_list(coords)
+        return cov
+
+
     def _whole_gene_covered_by_nucmer_hits(self):
         covered = self._nucmer_hits_to_ref_coords()
         pyfastaq.intervals.merge_overlapping_in_list(covered)
