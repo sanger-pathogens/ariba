@@ -125,6 +125,7 @@ class Cluster:
         self.final_assembly_vcf = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.vcf')
         self.final_assembly = {}
         self.variants = {}
+        self.percent_identities = {}
 
 
     def _get_total_alignment_score(self, gene_name):
@@ -446,6 +447,18 @@ class Cluster:
             if contig not in self.nucmer_hits:
                 self.nucmer_hits[contig] = []
             self.nucmer_hits[contig].append(copy.copy(hit))
+
+
+    def _nucmer_hits_to_percent_identity(self):
+        self.percent_identities = {}
+        for contig in self.nucmer_hits:
+            product_sum = 0
+            length_sum = 0
+            for hit in self.nucmer_hits[contig]:
+                product_sum += hit.hit_length_qry * hit.percent_identity
+                length_sum += hit.hit_length_qry
+            assert length_sum > 0
+            self.percent_identities[contig] = round(product_sum / length_sum, 2)
 
 
     def _nucmer_hits_to_scaff_coords(self):
