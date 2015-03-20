@@ -581,6 +581,7 @@ class TestCluster(unittest.TestCase):
         c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         c.variants = {'contig': [[v1]]}
+        c.percent_identities = {'contig': 92.42}
         c.status_flag.set_flag(42)
         c._make_report_lines()
         expected = [[
@@ -588,6 +589,7 @@ class TestCluster(unittest.TestCase):
             42,
             'cluster_name',
             39,
+            92.42,
             'SNP',
             'SYN',
             '.',

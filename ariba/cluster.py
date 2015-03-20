@@ -724,7 +724,16 @@ class Cluster:
         self.report_lines = []
 
         if len(self.variants) == 0:
-            self.report_lines.append([self.gene.id, self.status_flag.to_number(), self.name, len(self.gene)] + ['.'] * 11)
+            for contig in self.percent_identities:
+                self.report_lines.append([
+                    self.gene.id,
+                    self.status_flag.to_number(),
+                    self.name,
+                    len(self.gene),
+                    self.percent_identities[contig],
+                  ] + \
+                  ['.'] * 6 + [contig] + ['.'] * 4
+                )
 
         for contig in self.variants:
             for variants in self.variants[contig]:
@@ -737,6 +746,7 @@ class Cluster:
                             self.status_flag.to_number(),
                             self.name,
                             len(self.gene),
+                            self.percent_identities[contig],
                             pymummer.variant.var_types[v.var_type],
                             effect,
                             new_bases,
@@ -834,6 +844,7 @@ class Cluster:
             # compare gene and assembly
             self._run_nucmer(self.final_assembly_fa, self.assembly_vs_gene_coords, show_snps=True)
             self._parse_assembly_vs_gene_coords()
+            self._nucmer_hits_to_percent_identity()
             self._get_mummer_variants()
             self._filter_mummer_variants()
             self._update_flag_from_nucmer_file()
