@@ -42,7 +42,7 @@ class Runner:
         new_to_old_name = self._enumerate_fasta(self.infile, infile_renamed)
 
         cmd = ' '.join([
-            'cd-hit',
+            'cd-hit-est',
             '-i', infile_renamed,
             '-o', cdhit_fasta,
             '-c', str(self.seq_identity_threshold),
