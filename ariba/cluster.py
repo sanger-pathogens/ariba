@@ -125,6 +125,7 @@ class Cluster:
         self.final_assembly_vcf = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.vcf')
         self.final_assembly = {}
         self.variants = {}
+        self.percent_identities = {}
 
 
     def _get_total_alignment_score(self, gene_name):
@@ -448,6 +449,18 @@ class Cluster:
             self.nucmer_hits[contig].append(copy.copy(hit))
 
 
+    def _nucmer_hits_to_percent_identity(self):
+        self.percent_identities = {}
+        for contig in self.nucmer_hits:
+            product_sum = 0
+            length_sum = 0
+            for hit in self.nucmer_hits[contig]:
+                product_sum += hit.hit_length_qry * hit.percent_identity
+                length_sum += hit.hit_length_qry
+            assert length_sum > 0
+            self.percent_identities[contig] = round(product_sum / length_sum, 2)
+
+
     def _nucmer_hits_to_scaff_coords(self):
         coords = {}
         for l in self.nucmer_hits.values():
@@ -462,11 +475,26 @@ class Cluster:
         return coords
 
 
-    def _nucmer_hits_to_ref_coords(self):
+    def _nucmer_hits_to_ref_coords(self, contig=None):
         coords = []
-        for l in self.nucmer_hits.values():
-            coords += [hit.ref_coords() for hit in l]
+        if contig is None:
+            keys = list(self.nucmer_hits.keys())
+        else:
+            keys = [contig]
+
+        for key in keys:
+            coords += [hit.ref_coords() for hit in self.nucmer_hits[key]]
+        coords.sort()
         return coords
+
+
+    def _nucmer_hits_to_gene_cov_per_contig(self):
+        cov = {}
+        for contig in self.nucmer_hits:
+            coords = self._nucmer_hits_to_ref_coords(contig)
+            pyfastaq.intervals.merge_overlapping_in_list(coords)
+            cov[contig] = pyfastaq.intervals.length_sum_from_list(coords)
+        return cov
 
 
     def _whole_gene_covered_by_nucmer_hits(self):
@@ -709,9 +737,20 @@ class Cluster:
 
     def _make_report_lines(self):
         self.report_lines = []
+        cov_per_contig = self._nucmer_hits_to_gene_cov_per_contig()
 
         if len(self.variants) == 0:
-            self.report_lines.append([self.gene.id, self.status_flag.to_number(), self.name, len(self.gene)] + ['.'] * 11)
+            for contig in self.percent_identities:
+                self.report_lines.append([
+                    self.gene.id,
+                    self.status_flag.to_number(),
+                    self.name,
+                    len(self.gene),
+                    cov_per_contig[contig],
+                    self.percent_identities[contig],
+                  ] + \
+                  ['.'] * 6 + [contig, len(self.final_assembly[contig])] + ['.'] * 3
+                )
 
         for contig in self.variants:
             for variants in self.variants[contig]:
@@ -724,6 +763,8 @@ class Cluster:
                             self.status_flag.to_number(),
                             self.name,
                             len(self.gene),
+                            cov_per_contig[contig],
+                            self.percent_identities[contig],
                             pymummer.variant.var_types[v.var_type],
                             effect,
                             new_bases,
@@ -821,6 +862,7 @@ class Cluster:
             # compare gene and assembly
             self._run_nucmer(self.final_assembly_fa, self.assembly_vs_gene_coords, show_snps=True)
             self._parse_assembly_vs_gene_coords()
+            self._nucmer_hits_to_percent_identity()
             self._get_mummer_variants()
             self._filter_mummer_variants()
             self._update_flag_from_nucmer_file()

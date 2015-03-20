@@ -257,6 +257,30 @@ class TestCluster(unittest.TestCase):
         clean_cluster_dir(cluster_dir)
 
 
+    def test_nucmer_hits_to_percent_identity(self):
+        '''test _nucmer_hits_to_percent_identity'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        hits = [
+            ['1', '10', '1', '10', '10', '10', '90.00', '1000', '1000', '1', '1', 'gene', 'scaff1'],
+            ['9', '42', '9', '42', '34', '34', '100.00', '1000', '1000', '1', '1', 'gene', 'scaff1'],
+            ['1', '42', '1', '42', '42', '42', '42.42', '1000', '1000', '1', '1', 'gene', 'scaff2'],
+        ]
+        c.nucmer_hits = {
+            'scaff1': [
+                pymummer.alignment.Alignment('\t'.join(hits[0])),
+                pymummer.alignment.Alignment('\t'.join(hits[1])),
+            ],
+            'scaff2': [
+                pymummer.alignment.Alignment('\t'.join(hits[2])),
+            ]
+        }
+        expected = {'scaff1': round((90*10 + 100*34) / (10+34), 2), 'scaff2': 42.42}
+        c._nucmer_hits_to_percent_identity() 
+        self.assertEqual(expected, c.percent_identities) 
+
+
     def test_nucmer_hits_to_scaff_coords(self):
         '''test _nucmer_hits_to_scaff_coords'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
@@ -269,7 +293,7 @@ class TestCluster(unittest.TestCase):
             ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'scaff2'],
         ]
         c.nucmer_hits = {
-            'contig2': [
+            'scaff1': [
                 pymummer.alignment.Alignment('\t'.join(hits[0])),
                 pymummer.alignment.Alignment('\t'.join(hits[1])),
                 pymummer.alignment.Alignment('\t'.join(hits[2])),
@@ -299,17 +323,56 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(cluster_dir, 'name')
         hits = [
             ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'contig1'],
-            ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'gene', 'contig1']
+            ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'gene', 'contig1'],
+            ['100', '110', '200', '210', '11', '11', '99.42', '1000', '1000', '1', '1', 'gene', 'contig2'],
         ]
         c.nucmer_hits = {
             'contig1': [
                 pymummer.alignment.Alignment('\t'.join(hits[0])),
                 pymummer.alignment.Alignment('\t'.join(hits[1])),
+            ],
+            'contig2': [
+                pymummer.alignment.Alignment('\t'.join(hits[2])),
             ]
         }
         got_coords = c._nucmer_hits_to_ref_coords()
-        expected = [pyfastaq.intervals.Interval(0,41), pyfastaq.intervals.Interval(99, 141)]
+        expected = [
+            pyfastaq.intervals.Interval(0,41),
+            pyfastaq.intervals.Interval(99, 109),
+            pyfastaq.intervals.Interval(99, 141),
+        ]
         self.assertEqual(got_coords, expected)
+
+        got_coords = c._nucmer_hits_to_ref_coords(contig='contig2')
+        expected = [
+            pyfastaq.intervals.Interval(99, 109),
+        ]
+        self.assertEqual(got_coords, expected)
+        clean_cluster_dir(cluster_dir)
+
+
+    def test_nucmer_hits_to_gene_cov_per_contig(self):
+        '''test _nucmer_hits_to_gene_cov_per_contig'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        hits = [
+            ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'contig1'],
+            ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'gene', 'contig1'],
+            ['100', '110', '200', '210', '11', '11', '99.42', '1000', '1000', '1', '1', 'gene', 'contig2'],
+        ]
+        c.nucmer_hits = {
+            'contig1': [
+                pymummer.alignment.Alignment('\t'.join(hits[0])),
+                pymummer.alignment.Alignment('\t'.join(hits[1])),
+            ],
+            'contig2': [
+                pymummer.alignment.Alignment('\t'.join(hits[2])),
+            ]
+        }
+        
+        expected = {'contig1': 85, 'contig2': 11}
+        self.assertEqual(expected, c._nucmer_hits_to_gene_cov_per_contig())
         clean_cluster_dir(cluster_dir)
 
 
@@ -556,7 +619,11 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(cluster_dir, 'cluster_name')
         c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+
+        nucmer_hit = ['1', '10', '1', '10', '10', '10', '90.00', '1000', '1000', '1', '1', 'gene', 'contig']
+        c.nucmer_hits = {'contig': [pymummer.alignment.Alignment('\t'.join(nucmer_hit))]}
         c.variants = {'contig': [[v1]]}
+        c.percent_identities = {'contig': 92.42}
         c.status_flag.set_flag(42)
         c._make_report_lines()
         expected = [[
@@ -564,6 +631,8 @@ class TestCluster(unittest.TestCase):
             42,
             'cluster_name',
             39,
+            10,
+            92.42,
             'SNP',
             'SYN',
             '.',
