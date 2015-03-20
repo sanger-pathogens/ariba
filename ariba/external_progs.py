@@ -15,7 +15,7 @@ def is_in_path(prog):
 
 prog_to_default = {
     'bcftools': 'bcftools',
-    'cdhit': 'cd-hit',
+    'cdhit': 'cd-hit-est',
     'gapfiller': 'GapFiller.pl',
     'nucmer' : 'nucmer',
     'samtools': 'samtools',
