@@ -307,6 +307,7 @@ class Clusters:
             'flag',
             'cluster',
             'gene_len',
+            'assembled',
             'pc_ident',
             'var_type',
             'var_effect',

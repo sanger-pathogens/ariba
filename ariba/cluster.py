@@ -737,7 +737,7 @@ class Cluster:
 
     def _make_report_lines(self):
         self.report_lines = []
-         
+        cov_per_contig = self._nucmer_hits_to_gene_cov_per_contig()
 
         if len(self.variants) == 0:
             for contig in self.percent_identities:
@@ -746,6 +746,7 @@ class Cluster:
                     self.status_flag.to_number(),
                     self.name,
                     len(self.gene),
+                    cov_per_contig[contig],
                     self.percent_identities[contig],
                   ] + \
                   ['.'] * 6 + [contig, len(self.final_assembly[contig])] + ['.'] * 3
@@ -762,6 +763,7 @@ class Cluster:
                             self.status_flag.to_number(),
                             self.name,
                             len(self.gene),
+                            cov_per_contig[contig],
                             self.percent_identities[contig],
                             pymummer.variant.var_types[v.var_type],
                             effect,

@@ -1,3 +1,3 @@
-#gene	flag	cluster	gene_len	pc_ident	var_type	var_effect	new_aa	gene_start	gene_end	gene_nt	scaffold	scaff_len	scaff_start	scaff_end	scaff_nt
+#gene	flag	cluster	gene_len	assembled	pc_ident	var_type	var_effect	new_aa	gene_start	gene_end	gene_nt	scaffold	scaff_len	scaff_start	scaff_end	scaff_nt
 gene1 line1
 gene2 line2

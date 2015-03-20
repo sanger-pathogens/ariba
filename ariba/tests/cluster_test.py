@@ -619,6 +619,9 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(cluster_dir, 'cluster_name')
         c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+
+        nucmer_hit = ['1', '10', '1', '10', '10', '10', '90.00', '1000', '1000', '1', '1', 'gene', 'contig']
+        c.nucmer_hits = {'contig': [pymummer.alignment.Alignment('\t'.join(nucmer_hit))]}
         c.variants = {'contig': [[v1]]}
         c.percent_identities = {'contig': 92.42}
         c.status_flag.set_flag(42)
@@ -628,6 +631,7 @@ class TestCluster(unittest.TestCase):
             42,
             'cluster_name',
             39,
+            10,
             92.42,
             'SNP',
             'SYN',
