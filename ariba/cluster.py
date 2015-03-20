@@ -475,10 +475,16 @@ class Cluster:
         return coords
 
 
-    def _nucmer_hits_to_ref_coords(self):
+    def _nucmer_hits_to_ref_coords(self, contig=None):
         coords = []
-        for l in self.nucmer_hits.values():
-            coords += [hit.ref_coords() for hit in l]
+        if contig is None:
+            keys = list(self.nucmer_hits.keys())
+        else:
+            keys = [contig]
+
+        for key in keys:
+            coords += [hit.ref_coords() for hit in self.nucmer_hits[key]]
+        coords.sort()
         return coords
 
 
@@ -722,6 +728,7 @@ class Cluster:
 
     def _make_report_lines(self):
         self.report_lines = []
+         
 
         if len(self.variants) == 0:
             for contig in self.percent_identities:

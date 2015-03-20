@@ -323,16 +323,30 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(cluster_dir, 'name')
         hits = [
             ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'contig1'],
-            ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'gene', 'contig1']
+            ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'gene', 'contig1'],
+            ['100', '110', '200', '210', '11', '11', '99.42', '1000', '1000', '1', '1', 'gene', 'contig2'],
         ]
         c.nucmer_hits = {
             'contig1': [
                 pymummer.alignment.Alignment('\t'.join(hits[0])),
                 pymummer.alignment.Alignment('\t'.join(hits[1])),
+            ],
+            'contig2': [
+                pymummer.alignment.Alignment('\t'.join(hits[2])),
             ]
         }
         got_coords = c._nucmer_hits_to_ref_coords()
-        expected = [pyfastaq.intervals.Interval(0,41), pyfastaq.intervals.Interval(99, 141)]
+        expected = [
+            pyfastaq.intervals.Interval(0,41),
+            pyfastaq.intervals.Interval(99, 109),
+            pyfastaq.intervals.Interval(99, 141),
+        ]
+        self.assertEqual(got_coords, expected)
+
+        got_coords = c._nucmer_hits_to_ref_coords(contig='contig2')
+        expected = [
+            pyfastaq.intervals.Interval(99, 109),
+        ]
         self.assertEqual(got_coords, expected)
         clean_cluster_dir(cluster_dir)
 
