@@ -732,7 +732,7 @@ class Cluster:
                     len(self.gene),
                     self.percent_identities[contig],
                   ] + \
-                  ['.'] * 6 + [contig] + ['.'] * 4
+                  ['.'] * 6 + [contig, len(self.final_assembly[contig])] + ['.'] * 3
                 )
 
         for contig in self.variants:
