@@ -5,6 +5,7 @@ import sys
 
 
 tasks = {
+    'refcheck': 'Check or fix input genes FASTA',
     'run': 'Run the ARIBA local assembly pipeline',
     'flag': 'Translate the meaning of a flag output by the pipeline',
     'version': 'Print version and exit',
@@ -12,6 +13,7 @@ tasks = {
 
 
 ordered_tasks = [
+    'refcheck',
     'run',
     'flag',
     'version',
