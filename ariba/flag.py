@@ -39,6 +39,9 @@ class Flag:
                 n += flag_bits[f]
         return n
 
+    def __eq__(self, other):
+       return type(other) is type(self) and self.__dict__ == other.__dict__
+
 
     def __str__(self):
         return str(self.to_number())
@@ -50,4 +53,8 @@ class Flag:
             x_or_not = 'X' if self.flags[f] else ' '
             lines.append('[' + x_or_not + '] ' + f)
         return '\n'.join(lines)
+
+
+    def has(self, s):
+        return self.flags[s]
 
