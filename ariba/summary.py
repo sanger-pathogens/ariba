@@ -175,6 +175,7 @@ class Summary:
 
     def _write_tsv(self):
         f = pyfastaq.utils.open_file_write(self.outfile)
+        print('#', end='', file=f)
         for row in self.rows_out:
             print('\t'.join([str(x) for x in row]), file=f)
         pyfastaq.utils.close(f)
