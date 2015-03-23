@@ -1,0 +1,5 @@
+#gene	flag	cluster	gene_len	assembled	pc_ident	var_type	var_effect	new_aa	gene_start	gene_end	gene_nt	scaffold	scaff_len	scaff_start	scaff_end	scaff_nt
+gene1	27	1	822	822	100.0	.	.	.	.	.	.	gene1.scaffold.1	1490	.	.	.
+gene2	15	2	780	780	100.0	.	.	.	.	.	.	gene2.scaffold.2	1124	.	.	.
+gene2	15	2	780	770	99.0	.	.	.	.	.	.	gene2.scaffold.3	1097	.	.	.
+gene3	187	3	750	750	98.93	SNP	SYN	.	318	318	C	gene3.scaffold.1	1047	319	319	G

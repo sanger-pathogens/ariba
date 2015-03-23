@@ -12,6 +12,7 @@ __all__ = [
     'mapping',
     'refcheck',
     'scaffold_graph',
+    'summary',
     'tasks',
 ]
 
