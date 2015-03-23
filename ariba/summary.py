@@ -1,3 +1,4 @@
+import os
 import openpyxl
 import pyfastaq
 from ariba import flag
