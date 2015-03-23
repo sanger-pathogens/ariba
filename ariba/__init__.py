@@ -10,6 +10,7 @@ __all__ = [
     'histogram',
     'link',
     'mapping',
+    'refcheck',
     'scaffold_graph',
     'tasks',
 ]
