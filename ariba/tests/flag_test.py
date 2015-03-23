@@ -53,3 +53,11 @@ class TestFlag(unittest.TestCase):
 
         self.assertEqual(expected, f.to_long_string())
 
+
+    def test_has(self):
+        '''Test has'''
+        for x in flag.flags_in_order:
+            f = flag.Flag(0)
+            self.assertFalse(f.has(x))
+            f.add(x)
+            self.assertTrue(f.has(x))
