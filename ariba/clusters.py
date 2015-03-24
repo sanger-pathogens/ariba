@@ -88,18 +88,20 @@ class Clusters:
 
         self.bcftools_exe = bcftools_exe
 
-        self.gapfiller_exe = shutil.which(gapfiller_exe)
-        if self.gapfiller_exe is None:
-            raise Error('Error! ' + gapfiller_exe + ' not found in path')
-        self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
+        self.sspace_exe = shutil.which(sspace_exe)
+        if self.sspace_exe is None:
+            print('WARNING: SSPACE not found. Scaffolding and gap filling will be skipped!', file=sys.stderr)
+            self.gapfiller_exe = None
+        else:
+            self.sspace_exe = os.path.realpath(self.sspace_exe) # otherwise sspace dies loading packages
+            self.gapfiller_exe = shutil.which(gapfiller_exe)
+            if self.gapfiller_exe is None:
+                print('WARNING: GapFiller not found. No gap filling will be run after scaffolding!', file=sys.stderr)
+            else:
+                self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
 
         self.samtools_exe = samtools_exe
         self.spades_exe = spades_exe
-
-        self.sspace_exe = shutil.which(sspace_exe)
-        if self.sspace_exe is None:
-            raise Error('Error! ' + sspace_exe + ' not found in path')
-        self.sspace_exe = os.path.realpath(self.sspace_exe) # otherwise sspace dies loading packages
 
         self.velvet = velvet_exe
 

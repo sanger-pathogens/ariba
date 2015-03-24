@@ -80,18 +80,17 @@ class Cluster:
 
         self.bcftools_exe = bcftools_exe
 
-        self.gapfiller_exe = shutil.which(gapfiller_exe)
-        if self.gapfiller_exe is None:
-            raise Error('Error! ' + gapfiller_exe + ' not found in path')
-        self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
+        self.sspace_exe = shutil.which(sspace_exe)
+        if self.sspace_exe is None:
+            self.gapfiller_exe = None
+        else:
+            self.sspace_exe = os.path.realpath(self.sspace_exe) # otherwise sspace dies loading packages
+            self.gapfiller_exe = shutil.which(gapfiller_exe)
+            if self.gapfiller_exe is not None:
+                self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
 
         self.samtools_exe = samtools_exe
         self.smalt_exe = smalt_exe
-
-        self.sspace_exe = shutil.which(sspace_exe)
-        if self.sspace_exe is None:
-            raise Error('Error! ' + sspace_exe + ' not found in path')
-        self.sspace_exe = os.path.realpath(self.sspace_exe) # otherwise sspace dies loading packages
 
         if self.assembler == 'velvet':
             self.velveth = velvet_exe + 'h'
@@ -305,6 +304,13 @@ class Cluster:
             raise Error('Error mkdir '+  self.scaffold_dir)
 
         cwd = os.getcwd()
+
+        if self.sspace_exe is None:
+            os.chdir(self.assembly_dir)
+            os.symlink(os.path.basename(self.assembly_contigs), os.path.basename(self.scaffolder_scaffolds))
+            os.chdir(cwd)
+            return
+
         os.chdir(self.scaffold_dir)
         lib_file = 'lib'
         with open(lib_file, 'w') as f:
@@ -339,7 +345,7 @@ class Cluster:
 
         cwd = os.getcwd()
 
-        if not self._has_gaps_to_fill(self.scaffolder_scaffolds):
+        if self.gapfiller_exe is None or not self._has_gaps_to_fill(self.scaffolder_scaffolds):
             self._rename_scaffolds(self.scaffolder_scaffolds, self.gapfilled_scaffolds)
             return
 

@@ -13,12 +13,16 @@ Installation
 ARIBA has the following dependencies, which need to be installed:
   * [cd-hit] [cdhit] version >= 4.6
   * [samtools and bcftools] [samtools]  version >= 1.2
-  * [SSPACE-basic scaffolder] [sspace]
-  * [GapFiller] [gapfiller]
   * [MUMmer] [mummer] version >= 3.23
   * [SMALT] [smalt] version >= 0.7.4
   * Either [SPAdes] [spades] version >= 3.5.0 or [Velvet] [velvet] version >= 1.2.07
     (SPAdes is recommended)
+
+ARIBA has the following optional dependencies. If they are installed,
+they will be used. Otherwise scaffolding and gap filling will be
+skipped.
+  * [SSPACE-basic scaffolder] [sspace]
+  * [GapFiller] [gapfiller]
 
 Once the dependencies are installed, install ARIBA using pip:
 
