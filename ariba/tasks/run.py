@@ -57,7 +57,7 @@ def run():
     options = parser.parse_args()
     if options.assembler == 'velvet':
         options.velvet = 'velvet'
-    ariba.external_progs.check_versions(options, verbose=options.verbose)
+    ariba.external_progs.check_versions(options, verbose=options.verbose, not_required=set(['sspace', 'gapfiller']))
     pyfastaq.sequences.genetic_code = options.genetic_code
 
     c = ariba.clusters.Clusters(

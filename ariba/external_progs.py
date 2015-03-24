@@ -74,13 +74,16 @@ def set_path(prog, opts):
     exec('opts.' + prog + ' = "' + prog_to_default[prog] + '"')
 
 
-def get_version(prog, path=None):
+def get_version(prog, path=None, raise_error=True):
     assert prog in prog_to_version_cmd
     if path is None:
         path = prog
 
     if not is_in_path(path):
-        raise Error('Error getting version of ' + path + ' - not found in path.')
+        if raise_error:
+            raise Error('Error getting version of ' + path + ' - not found in path.')
+        else:
+            return 'Not_in_path', 'Not_in_path'
 
     path = shutil.which(path)
 
@@ -100,7 +103,10 @@ def get_version(prog, path=None):
     return 'UNKNOWN ...\n I tried running this to get the version: "' + cmd + '"\n and the output didn\'t match this regular expression: "' + regex.pattern + '"', path
 
 
-def check_versions(opts, verbose=False):
+def check_versions(opts, verbose=False, not_required=None):
+    if not_required is None:
+        not_required = set()
+
     if verbose:
         print('{:_^79}'.format(' Checking dependencies and their versions '))
         print('tool', 'version', 'path', sep='\t')
@@ -124,22 +130,33 @@ def check_versions(opts, verbose=False):
         raise Error('Assembler ' + opts.assembler + ' not recognised. Cannot continue')
 
     errors = []
+    failed_to_find = set()
 
     for prog in to_check:
         set_path(prog, opts)
-        version, path = get_version(prog, path=eval('opts.' + prog))
+        version, path = get_version(prog, path=eval('opts.' + prog), raise_error=prog not in not_required)
         if verbose:
             print(prog, version, path, sep='\t')
+        if path == 'Not_in_path':
+            print('\nWARNING:', prog, 'not found in path, so will be skipped during assembly\n', file=sys.stderr)
 
         if prog in min_versions and LooseVersion(version) < LooseVersion(min_versions[prog]):
             errors.append(' '.join(['Found version', version, 'of', prog, 'which is too low! Please update to at least', min_versions[prog] + '\n   Found it here:', path]))
+            failed_to_find.add(prog)
 
     if len(errors):
         for e in errors:
             print('\n*** Error! Bad dependency! ***', file=sys.stderr)
             print(e, file=sys.stderr)
             print()
-        raise Error('Cannot continue. Some dependencies need updating')
+        if len(failed_to_find.difference(not_required)) > 0:
+            raise Error('Cannot continue. Some dependencies need updating')
+        else:
+            assert failed_to_find.issubset(not_required)
+            if 'sspace' in failed_to_find:
+                print('WARNING: SSPACE not found. Will not run scaffolding or gap filling', file=sys.stderr)
+            elif 'gapfiller' in failed_to_find:
+                print('WARNING: GapFiller not found. Will not run gap filling after scaffolding', file=sys.stderr)
 
     if verbose:
-        print('\n... dependencies look OK.\n')
+        print('\nDependencies look OK (but check in case there are warnings about SSPACE or GapFiller)\n')
