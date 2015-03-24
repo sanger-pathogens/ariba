@@ -5,12 +5,13 @@ class Error (Exception): pass
 
 
 class Checker:
-    def __init__(self, infile, min_length=1):
+    def __init__(self, infile, min_length=1, max_length=10000):
         self.infile = os.path.abspath(infile)
         if not os.path.exists(self.infile):
             raise Error('File not found: "' + self.infile + '". Cannot continue')
 
         self.min_length = min_length
+        self.max_length = max_length
 
 
     def check(self, error_code_on_exit=None):
@@ -21,6 +22,8 @@ class Checker:
                 return False, 'Not a gene', seq
             elif len(seq) < self.min_length:
                 return False, 'Too short', seq
+            elif len(seq) > self.max_length:
+                return False, 'Too long', seq
            
         return True, None, None
 
@@ -42,6 +45,11 @@ class Checker:
                 print(seq.id, 'Too short. Skipping', sep='\t', file=log_out_fh)
                 print(seq, file=bad_seqs_out_fh)
                 continue
+            elif len(seq) > self.max_length:
+                print(seq.id, 'Too long. Skipping', sep='\t', file=log_out_fh)
+                print(seq, file=bad_seqs_out_fh)
+                continue
+
 
             if not seq.looks_like_gene():
                 seq.revcomp()

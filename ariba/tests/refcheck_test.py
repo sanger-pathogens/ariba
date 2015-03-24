@@ -32,11 +32,19 @@ class TestRefcheck(unittest.TestCase):
         self.assertEqual(c.check(), (False, 'Too short', seq))
 
 
+    def test_check_file_fail_too_long(self):
+        '''test check file fail long gene'''
+        infile = os.path.join(data_dir, 'refcheck_test_check_too_long.fa')
+        c = refcheck.Checker(infile, max_length=6)
+        seq = pyfastaq.sequences.Fasta('gene1', 'TTGTGGTGA')
+        self.assertEqual(c.check(), (False, 'Too long', seq))
+
+
     def test_check_fix(self):
         '''test fix'''
         infile = os.path.join(data_dir, 'refcheck_test_fix_in.fa')
         tmp_prefix = 'tmp.refcheck_test_fix.out'
-        c = refcheck.Checker(infile, min_length=10)
+        c = refcheck.Checker(infile, min_length=10, max_length=25)
         c.fix(tmp_prefix)
         for x in ['fa', 'log', 'rename', 'removed.fa']:
             expected = os.path.join(data_dir, 'refcheck_test_fix_out.' + x)
