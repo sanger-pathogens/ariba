@@ -26,7 +26,7 @@ skipped.
 
 Once the dependencies are installed, install ARIBA using pip:
 
-    pip3 install pyfastaq
+    pip3 install ariba
 
 Alternatively, you can download the latest release from this github repository,
 or clone the repository. Then run the tests:
