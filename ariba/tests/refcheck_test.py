@@ -38,7 +38,7 @@ class TestRefcheck(unittest.TestCase):
         tmp_prefix = 'tmp.refcheck_test_fix.out'
         c = refcheck.Checker(infile, min_length=10)
         c.fix(tmp_prefix)
-        for x in ['fa', 'log', 'rename']:
+        for x in ['fa', 'log', 'rename', 'removed.fa']:
             expected = os.path.join(data_dir, 'refcheck_test_fix_out.' + x)
             got = tmp_prefix + '.' + x
             self.assertTrue(filecmp.cmp(expected, got, shallow=False))

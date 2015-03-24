@@ -29,15 +29,18 @@ class Checker:
         file_reader = pyfastaq.sequences.file_reader(self.infile)
         old2new_out = outprefix + '.rename'
         fasta_out = outprefix + '.fa'
+        bad_seqs_out = outprefix + '.removed.fa'
         log_out = outprefix + '.log'
         names = {}
         old2new_out_fh = pyfastaq.utils.open_file_write(old2new_out)
         fasta_out_fh = pyfastaq.utils.open_file_write(fasta_out)
+        bad_seqs_out_fh = pyfastaq.utils.open_file_write(bad_seqs_out)
         log_out_fh = pyfastaq.utils.open_file_write(log_out)
 
         for seq in file_reader:
             if len(seq) < self.min_length:
                 print(seq.id, 'Too short. Skipping', sep='\t', file=log_out_fh)
+                print(seq, file=bad_seqs_out_fh)
                 continue
 
             if not seq.looks_like_gene():
@@ -46,6 +49,8 @@ class Checker:
                     print(seq.id, 'Reverse complemented', sep='\t', file=log_out_fh)
                 else:
                     print(seq.id, 'Does not look like a gene. Skipping', sep='\t', file=log_out_fh)
+                    seq.revcomp()
+                    print(seq, file=bad_seqs_out_fh)
                     continue
                 
             original_id = seq.id
@@ -63,5 +68,6 @@ class Checker:
             print(seq, file=fasta_out_fh)
 
         pyfastaq.utils.close(fasta_out_fh)
+        pyfastaq.utils.close(bad_seqs_out_fh)
         pyfastaq.utils.close(log_out_fh)
         pyfastaq.utils.close(old2new_out_fh)

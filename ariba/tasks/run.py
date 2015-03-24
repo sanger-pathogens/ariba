@@ -34,7 +34,7 @@ def run():
     assembly_group.add_argument('--spades_other', help='Put options string to be used with spades in quotes. This will NOT be sanity checked. Do not use -k or -t: for these options you should use the ariba run options --assembler_k and --threads')
 
     other_group = parser.add_argument_group('Other options')
-    other_group.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1 (default) or 4', choices=[1,4], default=1, metavar='INT')
+    other_group.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
     other_group.add_argument('--threads', type=int, help='Number of threads for smalt and spades [%(default)s]', default=1, metavar='INT')
     other_group.add_argument('--assembled_threshold', type=float, help='If proportion of gene assembled (regardless of into how many contigs) is at least this value then the flag gene_assembled is set [%(default)s]', default=0.95, metavar='FLOAT (between 0 and 1)')
     other_group.add_argument('--unique_threshold', type=float, help='If proportion of bases in gene assembled more than once is <= this value, then the flag unique_contig is set [%(default)s]', default=0.03, metavar='FLOAT (between 0 and 1)')
@@ -58,7 +58,7 @@ def run():
     if options.assembler == 'velvet':
         options.velvet = 'velvet'
     ariba.external_progs.check_versions(options, verbose=options.verbose)
-    pyfastaq.sequences.codon2aa = pyfastaq.genetic_codes.codes[options.genetic_code]
+    pyfastaq.sequences.genetic_code = options.genetic_code
 
     c = ariba.clusters.Clusters(
           options.db_fasta,
