@@ -58,7 +58,7 @@ def run():
     if options.assembler == 'velvet':
         options.velvet = 'velvet'
     ariba.external_progs.check_versions(options, verbose=options.verbose)
-    pyfastaq.sequences.codon2aa = pyfastaq.genetic_codes.codes[options.genetic_code]
+    pyfastaq.sequences.genetic_code = options.genetic_code
 
     c = ariba.clusters.Clusters(
           options.db_fasta,
