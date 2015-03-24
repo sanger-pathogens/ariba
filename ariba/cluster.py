@@ -127,6 +127,15 @@ class Cluster:
         self.percent_identities = {}
 
 
+    def _get_read_counts(self):
+        count1 = pyfastaq.tasks.count_sequences(self.reads1) 
+        count2 = pyfastaq.tasks.count_sequences(self.reads2) 
+        if count1 == count2:
+            return count1 + count2
+        else:
+            raise Error('Different number of fwd/rev reads in cluster ' + self.name + '! Cannot continue')
+
+
     def _get_total_alignment_score(self, gene_name):
         tmp_bam = os.path.join(self.root_dir, 'tmp.get_total_alignment_score.bam')
         assert not os.path.exists(tmp_bam)
