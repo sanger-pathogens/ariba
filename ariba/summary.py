@@ -8,6 +8,7 @@ class Error (Exception): pass
 columns = [
     'gene',
     'flag',
+    'reads',
     'cluster',
     'gene_len',
     'assembled',
@@ -26,6 +27,7 @@ columns = [
 ]
 
 int_columns = [
+    'reads',
     'gene_len',
     'assembled',
     'gene_start',

@@ -307,6 +307,7 @@ class Clusters:
         columns = [
             '#gene',
             'flag',
+            'reads',
             'cluster',
             'gene_len',
             'assembled',

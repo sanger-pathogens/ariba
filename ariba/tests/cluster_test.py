@@ -56,6 +56,25 @@ class TestCluster(unittest.TestCase):
             clean_cluster_dir(d)
 
 
+    def test_get_read_counts(self):
+        '''test _get_read_counts pass'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_get_read_counts')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        self.assertEqual(2, c._get_read_counts())
+        clean_cluster_dir(cluster_dir)
+
+
+    def test_get_read_counts_fail(self):
+        '''test _get_read_counts fail'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_get_read_counts_fail')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        with self.assertRaises(cluster.Error):
+            c._get_read_counts()
+        clean_cluster_dir(cluster_dir)
+
+
     def test_get_total_alignment_score(self):
         '''test _get_total_alignment_score'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_get_total_alignment_score')
@@ -629,6 +648,7 @@ class TestCluster(unittest.TestCase):
         expected = [[
             'gene',
             42,
+            2,
             'cluster_name',
             39,
             10,
