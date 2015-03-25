@@ -31,6 +31,13 @@ def clean_cluster_dir(d, exclude=None):
                 os.unlink(full_path)
 
 
+def file2lines(filename):
+    f = pyfastaq.utils.open_file_read(filename)
+    lines = f.readlines()
+    pyfastaq.utils.close(f) 
+    return lines
+
+
 def load_gene(filename):
     file_reader = pyfastaq.sequences.file_reader(filename)
     seq = None
@@ -602,7 +609,7 @@ class TestCluster(unittest.TestCase):
         c.final_assembly_fa = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.fa')
         c.final_assembly_bam = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.bam')
         expected_vcf = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.vcf')
-        expected_depths = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.read_depths')
+        expected_depths = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.read_depths.gz')
         c._make_assembly_vcf()
 
         def get_vcf_call_lines(fname):
@@ -613,7 +620,7 @@ class TestCluster(unittest.TestCase):
         expected_lines = get_vcf_call_lines(expected_vcf)
         got_lines = get_vcf_call_lines(c.final_assembly_vcf)
         self.assertEqual(expected_lines, got_lines)
-        self.assertTrue(filecmp.cmp(expected_depths, c.final_assembly_read_depths, shallow=False))
+        self.assertEqual(file2lines(expected_depths), file2lines(c.final_assembly_read_depths))
         clean_cluster_dir(cluster_dir)
 
 

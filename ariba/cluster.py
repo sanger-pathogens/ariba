@@ -2,6 +2,7 @@ import os
 import copy
 import sys
 import shutil
+import pysam
 import operator
 import pyfastaq
 import pymummer
@@ -121,10 +122,11 @@ class Cluster:
         self.gapfilled_scaffolds = os.path.join(self.assembly_dir, 'scaffolds.gapfilled.fa')
         self.final_assembly_fa = os.path.join(self.root_dir, 'assembly.fa')
         self.final_assembly_bam = os.path.join(self.root_dir, 'assembly.reads_mapped.bam')
-        self.final_assembly_read_depths = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.read_depths')
+        self.final_assembly_read_depths = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.read_depths.gz')
         self.final_assembly_vcf = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.vcf')
         self.final_assembly = {}
         self.variants = {}
+        self.variant_depths = {}
         self.percent_identities = {}
 
 
@@ -728,10 +730,13 @@ class Cluster:
             self.bcftools_exe, 'query',
             r'''-f '%CHROM\t%POS\t%REF\t%ALT\t%DP\t%DP4]\n' ''',
             '>',
-            self.final_assembly_read_depths
+            self.final_assembly_read_depths + '.tmp'
         ])
 
         common.syscall(cmd, verbose=self.verbose)
+        pysam.tabix_compress(self.final_assembly_read_depths + '.tmp', self.final_assembly_read_depths)
+        pysam.tabix_index(self.final_assembly_read_depths, seq_col=0, start_col=1, end_col=1)
+        os.unlink(self.final_assembly_read_depths + '.tmp')
 
         cmd = ' '.join([
             self.bcftools_exe, 'call -m -v',
