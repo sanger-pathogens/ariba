@@ -602,6 +602,7 @@ class TestCluster(unittest.TestCase):
         c.final_assembly_fa = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.fa')
         c.final_assembly_bam = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.bam')
         expected_vcf = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.vcf')
+        expected_depths = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.read_depths')
         c._make_assembly_vcf()
 
         def get_vcf_call_lines(fname):
@@ -612,6 +613,8 @@ class TestCluster(unittest.TestCase):
         expected_lines = get_vcf_call_lines(expected_vcf)
         got_lines = get_vcf_call_lines(c.final_assembly_vcf)
         self.assertEqual(expected_lines, got_lines)
+        self.assertTrue(filecmp.cmp(expected_depths, c.final_assembly_read_depths, shallow=False))
+        clean_cluster_dir(cluster_dir)
 
 
     def test_get_vcf_variant_counts(self):

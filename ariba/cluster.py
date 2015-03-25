@@ -121,6 +121,7 @@ class Cluster:
         self.gapfilled_scaffolds = os.path.join(self.assembly_dir, 'scaffolds.gapfilled.fa')
         self.final_assembly_fa = os.path.join(self.root_dir, 'assembly.fa')
         self.final_assembly_bam = os.path.join(self.root_dir, 'assembly.reads_mapped.bam')
+        self.final_assembly_read_depths = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.read_depths')
         self.final_assembly_vcf = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.vcf')
         self.final_assembly = {}
         self.variants = {}
@@ -705,6 +706,7 @@ class Cluster:
 
 
     def _make_assembly_vcf(self):
+        tmp_vcf = self.final_assembly_vcf + '.tmp'
         cmd = ' '.join([
             self.samtools_exe, 'mpileup',
             '-t DV',
@@ -713,8 +715,28 @@ class Cluster:
             '-u',
             '-v',
             self.final_assembly_bam,
+            '>',
+            tmp_vcf
+        ])
+
+        common.syscall(cmd, verbose=self.verbose)
+
+        cmd = ' '.join([
+            self.bcftools_exe, 'call -m',
+            tmp_vcf,
             '|',
-            self.bcftools_exe, 'call -v -m |',
+            self.bcftools_exe, 'query',
+            r'''-f '%CHROM\t%POS\t%REF\t%ALT\t%DP\t%DP4]\n' ''',
+            '>',
+            self.final_assembly_read_depths
+        ])
+
+        common.syscall(cmd, verbose=self.verbose)
+
+        cmd = ' '.join([
+            self.bcftools_exe, 'call -m -v',
+            tmp_vcf,
+            '|',
             self.bcftools_exe, 'filter',
             '-i', '"MIN(DP)>=' + str(self.bcf_min_dp),
                   ' & MIN(DV)>=' + str(self.bcf_min_dv),
@@ -724,6 +746,13 @@ class Cluster:
         ])
 
         common.syscall(cmd, verbose=self.verbose)
+        os.unlink(tmp_vcf)
+
+
+    def _get_read_depths(self, bam, ref, position):
+        '''Returns total read depth and depth of reads supporting alternative (if present)'''
+        pass
+
 
 
     def _get_vcf_variant_counts(self):
