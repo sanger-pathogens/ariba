@@ -753,12 +753,14 @@ class Cluster:
     def _make_report_lines(self):
         self.report_lines = []
         cov_per_contig = self._nucmer_hits_to_gene_cov_per_contig()
+        total_reads = self._get_read_counts()
 
         if len(self.variants) == 0:
             for contig in self.percent_identities:
                 self.report_lines.append([
                     self.gene.id,
                     self.status_flag.to_number(),
+                    total_reads,
                     self.name,
                     len(self.gene),
                     cov_per_contig[contig],
@@ -776,6 +778,7 @@ class Cluster:
                         self.report_lines.append([
                             self.gene.id,
                             self.status_flag.to_number(),
+                            total_reads,
                             self.name,
                             len(self.gene),
                             cov_per_contig[contig],

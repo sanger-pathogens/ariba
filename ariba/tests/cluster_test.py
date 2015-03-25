@@ -648,6 +648,7 @@ class TestCluster(unittest.TestCase):
         expected = [[
             'gene',
             42,
+            2,
             'cluster_name',
             39,
             10,
