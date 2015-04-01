@@ -654,6 +654,7 @@ class TestCluster(unittest.TestCase):
         c.variants = {'contig': [[v1]]}
         c.percent_identities = {'contig': 92.42}
         c.status_flag.set_flag(42)
+        c.assembled_ok = True
         c._make_report_lines()
         expected = [[
             'gene',
@@ -677,3 +678,26 @@ class TestCluster(unittest.TestCase):
         ]]
         self.assertEqual(expected, c.report_lines)
         clean_cluster_dir(cluster_dir)
+
+
+    def test_make_report_lines_assembly_fail(self):
+        '''test _make_report_lines when assembly fails'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'cluster_name')
+        c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
+        c.status_flag.set_flag(64)
+        c.assembled_ok = False
+        c._make_report_lines()
+        expected = [
+            [
+                'gene',
+                64,
+                2,
+                'cluster_name',
+                39,
+            ] + ['.'] * 13
+        ]
+        self.assertEqual(expected, c.report_lines)
+        clean_cluster_dir(cluster_dir)
+        
