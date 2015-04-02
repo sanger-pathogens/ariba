@@ -623,6 +623,23 @@ class TestCluster(unittest.TestCase):
         self.assertEqual(file2lines(expected_depths), file2lines(c.final_assembly_read_depths))
         clean_cluster_dir(cluster_dir)
 
+    def test_get_assembly_read_depths(self):
+        '''test _get_assembly_read_depths'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_get_assembly_read_depths.gz')
+        tests = [
+            ( ('ref1', 42), None ),
+            ( ('ref2', 1), None ),
+            ( ('ref1', 0), ('G', '.', '1', '1') ),
+            ( ('ref1', 2), ('T', 'A', '3', '2,1') ),
+            ( ('ref1', 3), ('C', 'A,G', '42', '21,11,10') )
+        ]
+ 
+        for t in tests:
+            self.assertEqual(c._get_assembly_read_depths(t[0][0], t[0][1]), t[1])
+
 
     def test_get_vcf_variant_counts(self):
         '''test _get_vcf_variant_counts'''

@@ -754,10 +754,20 @@ class Cluster:
         os.unlink(tmp_vcf)
 
 
-    def _get_read_depths(self, bam, ref, position):
+    def _get_assembly_read_depths(self, ref, position):
         '''Returns total read depth and depth of reads supporting alternative (if present)'''
-        pass
-
+        assert os.path.exists(self.final_assembly_read_depths)
+        assert os.path.exists(self.final_assembly_read_depths + '.tbi')
+        tbx = pysam.TabixFile(self.final_assembly_read_depths)
+        try:
+            rows = [x for x in tbx.fetch(ref, position, position + 1)]
+        except:
+            return None
+        if len(rows) == 1:
+            r, p, ref_base, alt_base, ref_counts, alt_counts = rows[0].rstrip().split()
+            return ref_base, alt_base, ref_counts, alt_counts
+        else:
+            return None
 
 
     def _get_vcf_variant_counts(self):
