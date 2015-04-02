@@ -31,6 +31,13 @@ def clean_cluster_dir(d, exclude=None):
                 os.unlink(full_path)
 
 
+def file2lines(filename):
+    f = pyfastaq.utils.open_file_read(filename)
+    lines = f.readlines()
+    pyfastaq.utils.close(f) 
+    return lines
+
+
 def load_gene(filename):
     file_reader = pyfastaq.sequences.file_reader(filename)
     seq = None
@@ -491,7 +498,7 @@ class TestCluster(unittest.TestCase):
         snp_file = os.path.join(data_dir, 'cluster_test_get_mummer_variants.none.snps')
         shutil.copyfile(snp_file, c.assembly_vs_gene_coords + '.snps')
         c._get_mummer_variants()
-        self.assertEqual(c.variants, {})
+        self.assertEqual(c.mummer_variants, {})
 
         clean_cluster_dir(cluster_dir)
         snp_file = os.path.join(data_dir, 'cluster_test_get_mummer_variants.snp.snps')
@@ -506,7 +513,7 @@ class TestCluster(unittest.TestCase):
         }
         shutil.copyfile(snp_file, c.assembly_vs_gene_coords + '.snps')
         c._get_mummer_variants()
-        self.assertEqual(c.variants, expected)
+        self.assertEqual(c.mummer_variants, expected)
         clean_cluster_dir(cluster_dir)
 
 
@@ -519,10 +526,10 @@ class TestCluster(unittest.TestCase):
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tT\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tA\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v3 = pymummer.variant.Variant(pymummer.snp.Snp('12\tG\tT\t12\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
-        c.variants = {'contig': [[v1, v2], v3]}
+        c.mummer_variants = {'contig': [[v1, v2], v3]}
         c._filter_mummer_variants()
         expected = {'contig': [[v1, v2]]}
-        self.assertEqual(expected, c.variants)
+        self.assertEqual(expected, c.mummer_variants)
         clean_cluster_dir(cluster_dir)
 
 
@@ -602,6 +609,7 @@ class TestCluster(unittest.TestCase):
         c.final_assembly_fa = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.fa')
         c.final_assembly_bam = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.bam')
         expected_vcf = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.vcf')
+        expected_depths = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.read_depths.gz')
         c._make_assembly_vcf()
 
         def get_vcf_call_lines(fname):
@@ -612,6 +620,67 @@ class TestCluster(unittest.TestCase):
         expected_lines = get_vcf_call_lines(expected_vcf)
         got_lines = get_vcf_call_lines(c.final_assembly_vcf)
         self.assertEqual(expected_lines, got_lines)
+        self.assertEqual(file2lines(expected_depths), file2lines(c.final_assembly_read_depths))
+        clean_cluster_dir(cluster_dir)
+
+    def test_get_assembly_read_depths(self):
+        '''test _get_assembly_read_depths'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_get_assembly_read_depths.gz')
+        tests = [
+            ( ('ref1', 42), None ),
+            ( ('ref2', 1), None ),
+            ( ('ref1', 0), ('G', '.', 1, '1') ),
+            ( ('ref1', 2), ('T', 'A', 3, '2,1') ),
+            ( ('ref1', 3), ('C', 'A,G', 42, '21,11,10') )
+        ]
+ 
+        for t in tests:
+            self.assertEqual(c._get_assembly_read_depths(t[0][0], t[0][1]), t[1])
+
+    def test_get_samtools_variant_positions(self):
+        '''test _get_samtools_variant_positions'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        c.final_assembly_vcf = os.path.join(data_dir, 'cluster_test_get_samtools_variant_positions.vcf')
+        expected = [
+            ('16__cat_2_M35190.scaffold.1', 92),
+            ('16__cat_2_M35190.scaffold.1', 179),
+            ('16__cat_2_M35190.scaffold.1', 263),
+            ('16__cat_2_M35190.scaffold.6', 93)
+        ] 
+        self.assertEqual(expected, c._get_samtools_variant_positions())
+
+
+    def test_get_samtools_variants(self):
+        '''test _get_samtools_variants'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        c.final_assembly_vcf = os.path.join(data_dir, 'cluster_test_get_samtools_variants.vcf')
+        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_get_samtools_variants.read_depths.gz')
+        positions = [
+            ('16__cat_2_M35190.scaffold.1', 92),
+            ('16__cat_2_M35190.scaffold.1', 179),
+            ('16__cat_2_M35190.scaffold.1', 263),
+            ('16__cat_2_M35190.scaffold.6', 93)
+        ]
+        expected = {
+            '16__cat_2_M35190.scaffold.1': {
+                92: ('T', 'A', 123, '65,58'),
+                179: ('A', 'T', 86, '41,45'),
+                263: ('G', 'C', 97, '53,44'),
+            },
+            '16__cat_2_M35190.scaffold.6': {
+                93: ('T', 'G', 99, '56,43')
+            }
+        }
+
+        got = c._get_samtools_variants(positions)
+        self.assertEqual(expected, got)
 
 
     def test_get_vcf_variant_counts(self):
@@ -641,9 +710,11 @@ class TestCluster(unittest.TestCase):
 
         nucmer_hit = ['1', '10', '1', '10', '10', '10', '90.00', '1000', '1000', '1', '1', 'gene', 'contig']
         c.nucmer_hits = {'contig': [pymummer.alignment.Alignment('\t'.join(nucmer_hit))]}
-        c.variants = {'contig': [[v1]]}
+        c.mummer_variants = {'contig': [[v1]]}
         c.percent_identities = {'contig': 92.42}
         c.status_flag.set_flag(42)
+        c.assembled_ok = True
+        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_make_report_lines.read_depths.gz')
         c._make_report_lines()
         expected = [[
             'gene',
@@ -664,6 +735,32 @@ class TestCluster(unittest.TestCase):
             6,
             6,
             'T',
+            42,
+            'G',
+            '22,20'
         ]]
         self.assertEqual(expected, c.report_lines)
         clean_cluster_dir(cluster_dir)
+
+
+    def test_make_report_lines_assembly_fail(self):
+        '''test _make_report_lines when assembly fails'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'cluster_name')
+        c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
+        c.status_flag.set_flag(64)
+        c.assembled_ok = False
+        c._make_report_lines()
+        expected = [
+            [
+                'gene',
+                64,
+                2,
+                'cluster_name',
+                39,
+            ] + ['.'] * 16
+        ]
+        self.assertEqual(expected, c.report_lines)
+        clean_cluster_dir(cluster_dir)
+        

@@ -323,6 +323,9 @@ class Clusters:
             'scaff_start',
             'scaff_end',
             'scaff_nt',
+            'read_depth',
+            'alt_bases',
+            'ref_alt_depth'
         ]
 
         f = pyfastaq.utils.open_file_write(self.report_file_tsv)

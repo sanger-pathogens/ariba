@@ -1,3 +1,3 @@
-#gene	flag	reads	cluster	gene_len	assembled	pc_ident	var_type	var_effect	new_aa	gene_start	gene_end	gene_nt	scaffold	scaff_len	scaff_start	scaff_end	scaff_nt
-gene1	27	142	1	822	822	100.0	.	.	.	.	.	.	gene1.scaffold.1	1490	.	.	.
-gene3	27	144	3	750	750	98.93	.	.	.	.	.	.	gene3.scaffold.1	1047	.	.	.
+#gene	flag	reads	cluster	gene_len	assembled	pc_ident	var_type	var_effect	new_aa	gene_start	gene_end	gene_nt	scaffold	scaff_len	scaff_start	scaff_end	scaff_nt	read_depth	alt_bases	ref_alt_depth
+gene1	27	142	1	822	822	100.0	.	.	.	.	.	.	gene1.scaffold.1	1490	.	.	.	.	.	.
+gene3	27	144	3	750	750	98.93	.	.	.	.	.	.	gene3.scaffold.1	1047	.	.	.	.	.	.
