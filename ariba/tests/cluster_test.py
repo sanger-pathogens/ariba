@@ -498,7 +498,7 @@ class TestCluster(unittest.TestCase):
         snp_file = os.path.join(data_dir, 'cluster_test_get_mummer_variants.none.snps')
         shutil.copyfile(snp_file, c.assembly_vs_gene_coords + '.snps')
         c._get_mummer_variants()
-        self.assertEqual(c.variants, {})
+        self.assertEqual(c.mummer_variants, {})
 
         clean_cluster_dir(cluster_dir)
         snp_file = os.path.join(data_dir, 'cluster_test_get_mummer_variants.snp.snps')
@@ -513,7 +513,7 @@ class TestCluster(unittest.TestCase):
         }
         shutil.copyfile(snp_file, c.assembly_vs_gene_coords + '.snps')
         c._get_mummer_variants()
-        self.assertEqual(c.variants, expected)
+        self.assertEqual(c.mummer_variants, expected)
         clean_cluster_dir(cluster_dir)
 
 
@@ -526,10 +526,10 @@ class TestCluster(unittest.TestCase):
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tT\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tA\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v3 = pymummer.variant.Variant(pymummer.snp.Snp('12\tG\tT\t12\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
-        c.variants = {'contig': [[v1, v2], v3]}
+        c.mummer_variants = {'contig': [[v1, v2], v3]}
         c._filter_mummer_variants()
         expected = {'contig': [[v1, v2]]}
-        self.assertEqual(expected, c.variants)
+        self.assertEqual(expected, c.mummer_variants)
         clean_cluster_dir(cluster_dir)
 
 
@@ -641,6 +641,28 @@ class TestCluster(unittest.TestCase):
             self.assertEqual(c._get_assembly_read_depths(t[0][0], t[0][1]), t[1])
 
 
+    def test_get_samtools_variants(self):
+        '''test _get_samtools_variants'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        c.final_assembly_vcf = os.path.join(data_dir, 'cluster_test_get_samtools_variants.vcf')
+        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_get_samtools_variants.read_depths.gz')
+        expected = {
+            '16__cat_2_M35190.scaffold.1': [
+                ('T', 'A', '123', '65,58'),
+                ('A', 'T', '86', '41,45'),
+                ('G', 'C', '97', '53,44'),
+            ],
+            '16__cat_2_M35190.scaffold.6': [
+                ('T', 'G', '99', '56,43')
+            ]
+        }
+
+        got = c._get_samtools_variants()
+        self.assertEqual(expected, got)
+
+
     def test_get_vcf_variant_counts(self):
         '''test _get_vcf_variant_counts'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
@@ -668,7 +690,7 @@ class TestCluster(unittest.TestCase):
 
         nucmer_hit = ['1', '10', '1', '10', '10', '10', '90.00', '1000', '1000', '1', '1', 'gene', 'contig']
         c.nucmer_hits = {'contig': [pymummer.alignment.Alignment('\t'.join(nucmer_hit))]}
-        c.variants = {'contig': [[v1]]}
+        c.mummer_variants = {'contig': [[v1]]}
         c.percent_identities = {'contig': 92.42}
         c.status_flag.set_flag(42)
         c.assembled_ok = True

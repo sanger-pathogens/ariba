@@ -125,7 +125,8 @@ class Cluster:
         self.final_assembly_read_depths = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.read_depths.gz')
         self.final_assembly_vcf = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.vcf')
         self.final_assembly = {}
-        self.variants = {}
+        self.mummer_variants = {}
+        self.samtools_variants = {}
         self.variant_depths = {}
         self.percent_identities = {}
 
@@ -590,7 +591,7 @@ class Cluster:
         if not os.path.exists(snp_file):
             raise Error('File not found ' + snp_file)
         variants = pymummer.snp_file.get_all_variants(snp_file)
-        self.variants = {}
+        self.mummer_variants = {}
 
         if len(variants) == 0:
             return
@@ -599,12 +600,12 @@ class Cluster:
         variants.sort(key=operator.attrgetter('ref_start'))
 
         for v in variants:
-            if v.qry_name not in self.variants:
-                self.variants[v.qry_name] = []
-            self.variants[v.qry_name].append(v)
+            if v.qry_name not in self.mummer_variants:
+                self.mummer_variants[v.qry_name] = []
+            self.mummer_variants[v.qry_name].append(v)
 
-        for contig in self.variants:
-            l = self.variants[contig]
+        for contig in self.mummer_variants:
+            l = self.mummer_variants[contig]
             if len(l) > 1:
                 new_l = [[l[0]]]
                 previous_codon_start = self._get_codon_start(0, l[0].ref_start)
@@ -615,22 +616,22 @@ class Cluster:
                     else:
                         new_l.append([variant])
                         previous_codon_start = codon_start
-                self.variants[contig] = new_l
+                self.mummer_variants[contig] = new_l
             else:
-                self.variants[contig] = [l]
+                self.mummer_variants[contig] = [l]
 
 
     def _filter_mummer_variants(self):
-        if len(self.variants) == 0:
+        if len(self.mummer_variants) == 0:
             return
 
-        for contig in self.variants:
-            variants = self.variants[contig]
+        for contig in self.mummer_variants:
+            variants = self.mummer_variants[contig]
             for i in range(len(variants)):
                 t = self._get_variant_effect(variants[i])
                 if t is not None and t[0] in ['TRUNC', 'FSHIFT']:
                     break
-            self.variants[contig] = variants[:i+1]
+            self.mummer_variants[contig] = variants[:i+1]
 
 
     def _get_codon_start(self, gene_start, position):
@@ -770,6 +771,25 @@ class Cluster:
             return None
 
 
+    def _get_samtools_variants(self):
+        assert os.path.exists(self.final_assembly_vcf)
+        assert os.path.exists(self.final_assembly_read_depths)
+        variants = {}
+        f = pyfastaq.utils.open_file_read(self.final_assembly_vcf)
+        positions = [l.rstrip().split('\t')[0:2] for l in f if not l.startswith('#')]
+        pyfastaq.utils.close(f)
+        for t in positions:
+            print(t)
+            name, pos = t[0], int(t[1]) - 1
+            depths = self._get_assembly_read_depths(name, pos)
+            if depths is None:
+                raise Error('Error getting read depths for sequence ' + name + ' at position ' + t[1])
+            if name not in variants:
+                variants[name] = []
+            variants[name].append(depths)
+        return variants
+
+
     def _get_vcf_variant_counts(self):
         scaff_coords = self._nucmer_hits_to_scaff_coords()
         self.vcf_variant_counts = {}
@@ -814,7 +834,7 @@ class Cluster:
 
         cov_per_contig = self._nucmer_hits_to_gene_cov_per_contig()
 
-        if len(self.variants) == 0:
+        if len(self.mummer_variants) == 0:
             for contig in self.percent_identities:
                 self.report_lines.append([
                     self.gene.id,
@@ -828,8 +848,8 @@ class Cluster:
                   ['.'] * 6 + [contig, len(self.final_assembly[contig])] + ['.'] * 3
                 )
 
-        for contig in self.variants:
-            for variants in self.variants[contig]:
+        for contig in self.mummer_variants:
+            for variants in self.mummer_variants[contig]:
                 t = self._get_variant_effect(variants)
                 if t is not None:
                     effect, new_bases = t
