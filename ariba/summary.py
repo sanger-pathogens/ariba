@@ -26,7 +26,7 @@ columns = [
     'scaff_nt',
     'read_depth',
     'alt_bases',
-    'alt_depth'
+    'ref_alt_depth'
 ]
 
 int_columns = [

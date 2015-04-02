@@ -44,7 +44,7 @@ class TestSummry(unittest.TestCase):
             'scaff_nt': 'C',
             'read_depth': 42,
             'alt_bases': 'A',
-            'alt_depth': '22,20'
+            'ref_alt_depth': '22,20'
         }
         self.assertEqual(s._line2dict(line), expected)
 
