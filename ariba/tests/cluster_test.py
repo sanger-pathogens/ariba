@@ -640,6 +640,20 @@ class TestCluster(unittest.TestCase):
         for t in tests:
             self.assertEqual(c._get_assembly_read_depths(t[0][0], t[0][1]), t[1])
 
+    def test_get_samtools_variant_positions(self):
+        '''test _get_samtools_variant_positions'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'name')
+        c.final_assembly_vcf = os.path.join(data_dir, 'cluster_test_get_samtools_variant_positions.vcf')
+        expected = [
+            ('16__cat_2_M35190.scaffold.1', 92),
+            ('16__cat_2_M35190.scaffold.1', 179),
+            ('16__cat_2_M35190.scaffold.1', 263),
+            ('16__cat_2_M35190.scaffold.6', 93)
+        ] 
+        self.assertEqual(expected, c._get_samtools_variant_positions())
+
 
     def test_get_samtools_variants(self):
         '''test _get_samtools_variants'''
@@ -648,18 +662,24 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(cluster_dir, 'name')
         c.final_assembly_vcf = os.path.join(data_dir, 'cluster_test_get_samtools_variants.vcf')
         c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_get_samtools_variants.read_depths.gz')
+        positions = [
+            ('16__cat_2_M35190.scaffold.1', 92),
+            ('16__cat_2_M35190.scaffold.1', 179),
+            ('16__cat_2_M35190.scaffold.1', 263),
+            ('16__cat_2_M35190.scaffold.6', 93)
+        ]
         expected = {
-            '16__cat_2_M35190.scaffold.1': [
-                ('T', 'A', '123', '65,58'),
-                ('A', 'T', '86', '41,45'),
-                ('G', 'C', '97', '53,44'),
-            ],
-            '16__cat_2_M35190.scaffold.6': [
-                ('T', 'G', '99', '56,43')
-            ]
+            '16__cat_2_M35190.scaffold.1': {
+                92: ('T', 'A', '123', '65,58'),
+                179: ('A', 'T', '86', '41,45'),
+                263: ('G', 'C', '97', '53,44'),
+            },
+            '16__cat_2_M35190.scaffold.6': {
+                93: ('T', 'G', '99', '56,43')
+            }
         }
 
-        got = c._get_samtools_variants()
+        got = c._get_samtools_variants(positions)
         self.assertEqual(expected, got)
 
 

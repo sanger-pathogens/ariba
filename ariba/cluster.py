@@ -771,22 +771,28 @@ class Cluster:
             return None
 
 
-    def _get_samtools_variants(self):
+    def _get_samtools_variant_positions(self):
+        assert os.path.exists(self.final_assembly_vcf)
+        f = pyfastaq.utils.open_file_read(self.final_assembly_vcf)
+        positions = [l.rstrip().split('\t')[0:2] for l in f if not l.startswith('#')]
+        positions = [(t[0], int(t[1]) - 1) for t in positions]
+        pyfastaq.utils.close(f)
+        return positions
+        
+
+    def _get_samtools_variants(self, positions):
         assert os.path.exists(self.final_assembly_vcf)
         assert os.path.exists(self.final_assembly_read_depths)
         variants = {}
-        f = pyfastaq.utils.open_file_read(self.final_assembly_vcf)
-        positions = [l.rstrip().split('\t')[0:2] for l in f if not l.startswith('#')]
-        pyfastaq.utils.close(f)
         for t in positions:
             print(t)
-            name, pos = t[0], int(t[1]) - 1
+            name, pos = t[0], t[1]
             depths = self._get_assembly_read_depths(name, pos)
             if depths is None:
                 raise Error('Error getting read depths for sequence ' + name + ' at position ' + t[1])
             if name not in variants:
-                variants[name] = []
-            variants[name].append(depths)
+                variants[name] = {}
+            variants[name][t[1]] = depths
         return variants
 
 
