@@ -632,9 +632,9 @@ class TestCluster(unittest.TestCase):
         tests = [
             ( ('ref1', 42), None ),
             ( ('ref2', 1), None ),
-            ( ('ref1', 0), ('G', '.', '1', '1') ),
-            ( ('ref1', 2), ('T', 'A', '3', '2,1') ),
-            ( ('ref1', 3), ('C', 'A,G', '42', '21,11,10') )
+            ( ('ref1', 0), ('G', '.', 1, '1') ),
+            ( ('ref1', 2), ('T', 'A', 3, '2,1') ),
+            ( ('ref1', 3), ('C', 'A,G', 42, '21,11,10') )
         ]
  
         for t in tests:
@@ -670,12 +670,12 @@ class TestCluster(unittest.TestCase):
         ]
         expected = {
             '16__cat_2_M35190.scaffold.1': {
-                92: ('T', 'A', '123', '65,58'),
-                179: ('A', 'T', '86', '41,45'),
-                263: ('G', 'C', '97', '53,44'),
+                92: ('T', 'A', 123, '65,58'),
+                179: ('A', 'T', 86, '41,45'),
+                263: ('G', 'C', 97, '53,44'),
             },
             '16__cat_2_M35190.scaffold.6': {
-                93: ('T', 'G', '99', '56,43')
+                93: ('T', 'G', 99, '56,43')
             }
         }
 
@@ -714,6 +714,7 @@ class TestCluster(unittest.TestCase):
         c.percent_identities = {'contig': 92.42}
         c.status_flag.set_flag(42)
         c.assembled_ok = True
+        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_make_report_lines.read_depths.gz')
         c._make_report_lines()
         expected = [[
             'gene',
@@ -734,6 +735,9 @@ class TestCluster(unittest.TestCase):
             6,
             6,
             'T',
+            42,
+            'G',
+            '22,20'
         ]]
         self.assertEqual(expected, c.report_lines)
         clean_cluster_dir(cluster_dir)
@@ -755,7 +759,7 @@ class TestCluster(unittest.TestCase):
                 2,
                 'cluster_name',
                 39,
-            ] + ['.'] * 13
+            ] + ['.'] * 16
         ]
         self.assertEqual(expected, c.report_lines)
         clean_cluster_dir(cluster_dir)

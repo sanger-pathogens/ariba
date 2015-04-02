@@ -21,7 +21,7 @@ class TestSummry(unittest.TestCase):
 
     def test_line2dict(self):
         '''Test _line2dict'''
-        line = '\t'.join(['gene1', '187', '42', '3', '750', '750', '98.93', 'SNP', 'SYN', '.', '66', '66', 'A', 'gene1.scaffold.1', '1047', '67', '67', 'C'])
+        line = '\t'.join(['gene1', '187', '42', '3', '750', '750', '98.93', 'SNP', 'SYN', '.', '66', '66', 'A', 'gene1.scaffold.1', '1047', '67', '67', 'C', '42', 'A', '22,20'])
         s = summary.Summary('out', filenames=['spam', 'eggs'])
         expected = {
             'gene': 'gene1',
@@ -41,7 +41,10 @@ class TestSummry(unittest.TestCase):
             'scaff_len': 1047,
             'scaff_start': 67,
             'scaff_end': 67,
-            'scaff_nt': 'C'
+            'scaff_nt': 'C',
+            'read_depth': 42,
+            'alt_bases': 'A',
+            'alt_depth': '22,20'
         }
         self.assertEqual(s._line2dict(line), expected)
 
@@ -52,10 +55,10 @@ class TestSummry(unittest.TestCase):
         infile = os.path.join(data_dir, 'summary_test_load_file.in.tsv')
 
         lines = [
-            ['gene1', '27', '42', '1', '822', '822', '100.0', '.', '.', '.', '.', '.', '.', 'gene1.scaffold.1', '1490', '.', '.', '.'],
-            ['gene2', '15', '44', '2', '780', '780', '100.0', '.', '.', '.', '.', '.', '.', 'gene2.scaffold.2', '1124', '.', '.', '.'],
-            ['gene2', '15', '46', '2', '780', '770', '99.0', '.', '.', '.', '.', '.', '.', 'gene2.scaffold.3', '1097', '.', '.', '.'],
-            ['gene3', '187', '48', '3', '750', '750', '98.93', 'SNP', 'SYN', '.', '318', '318', 'C', 'gene3.scaffold.1', '1047', '319', '319', 'G']
+            ['gene1', '27', '42', '1', '822', '822', '100.0', '.', '.', '.', '.', '.', '.', 'gene1.scaffold.1', '1490', '.', '.', '.', '.', '.', '.'],
+            ['gene2', '15', '44', '2', '780', '780', '100.0', '.', '.', '.', '.', '.', '.', 'gene2.scaffold.2', '1124', '.', '.', '.', '.', '.', '.'],
+            ['gene2', '15', '46', '2', '780', '770', '99.0', '.', '.', '.', '.', '.', '.', 'gene2.scaffold.3', '1097', '.', '.', '.', '.', '.', '.'],
+            ['gene3', '187', '48', '3', '750', '750', '98.93', 'SNP', 'SYN', '.', '318', '318', 'C', 'gene3.scaffold.1', '1047', '319', '319', 'G', '.', '.', '.']
 ]
         dicts = [s._line2dict('\t'.join(x)) for x in lines]
         expected = {'gene1': [dicts[0]], 'gene2': dicts[1:3], 'gene3': [dicts[3]]}

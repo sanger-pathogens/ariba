@@ -24,6 +24,9 @@ columns = [
     'scaff_start',
     'scaff_end',
     'scaff_nt',
+    'read_depth',
+    'alt_bases',
+    'alt_depth'
 ]
 
 int_columns = [
@@ -35,6 +38,7 @@ int_columns = [
     'scaff_len',
     'scaff_start',
     'scaff_end',
+    'read_depth',
 ]
 
 

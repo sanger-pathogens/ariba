@@ -1,5 +1,6 @@
 import os
 import copy
+from operator import itemgetter
 import sys
 import shutil
 import pysam
@@ -126,7 +127,6 @@ class Cluster:
         self.final_assembly_vcf = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.vcf')
         self.final_assembly = {}
         self.mummer_variants = {}
-        self.samtools_variants = {}
         self.variant_depths = {}
         self.percent_identities = {}
 
@@ -766,13 +766,14 @@ class Cluster:
             return None
         if len(rows) == 1:
             r, p, ref_base, alt_base, ref_counts, alt_counts = rows[0].rstrip().split()
-            return ref_base, alt_base, ref_counts, alt_counts
+            return ref_base, alt_base, int(ref_counts), alt_counts
         else:
             return None
 
 
     def _get_samtools_variant_positions(self):
-        assert os.path.exists(self.final_assembly_vcf)
+        if not os.path.exists(self.final_assembly_vcf):
+            return []
         f = pyfastaq.utils.open_file_read(self.final_assembly_vcf)
         positions = [l.rstrip().split('\t')[0:2] for l in f if not l.startswith('#')]
         positions = [(t[0], int(t[1]) - 1) for t in positions]
@@ -780,10 +781,14 @@ class Cluster:
         return positions
         
 
-    def _get_samtools_variants(self, positions):
-        assert os.path.exists(self.final_assembly_vcf)
-        assert os.path.exists(self.final_assembly_read_depths)
+    def _get_samtools_variants(self, positions=None):
+        if positions is None:
+            positions = self._get_samtools_variant_positions()
         variants = {}
+        if len(positions) == 0:
+            return variants
+        if not (os.path.exists(self.final_assembly_vcf) and os.path.exists(self.final_assembly_read_depths)):
+            return variants
         for t in positions:
             print(t)
             name, pos = t[0], t[1]
@@ -834,25 +839,13 @@ class Cluster:
                     '.',
                     '.',
                   ] + \
-                  ['.'] * 11
+                  ['.'] * 14
             )
             return
 
         cov_per_contig = self._nucmer_hits_to_gene_cov_per_contig()
+        samtools_variants = self._get_samtools_variants()
 
-        if len(self.mummer_variants) == 0:
-            for contig in self.percent_identities:
-                self.report_lines.append([
-                    self.gene.id,
-                    self.status_flag.to_number(),
-                    total_reads,
-                    self.name,
-                    len(self.gene),
-                    cov_per_contig[contig],
-                    self.percent_identities[contig],
-                  ] + \
-                  ['.'] * 6 + [contig, len(self.final_assembly[contig])] + ['.'] * 3
-                )
 
         for contig in self.mummer_variants:
             for variants in self.mummer_variants[contig]:
@@ -860,6 +853,12 @@ class Cluster:
                 if t is not None:
                     effect, new_bases = t
                     for v in variants:
+                        depths = self._get_assembly_read_depths(contig, v.qry_start) 
+                        if depths is None:
+                            raise Error('Error getting depth info on contig "' + contig + '" at position ' + str(v.qry_start + 1) + ' from file ' + self.final_assembly_read_depths)
+                        else:
+                            ref_base, alt_base, ref_counts, alt_counts = depths
+
                         self.report_lines.append([
                             self.gene.id,
                             self.status_flag.to_number(),
@@ -879,8 +878,57 @@ class Cluster:
                             v.qry_start + 1,
                             v.qry_end + 1,
                             v.qry_base,
+                            ref_counts,
+                            alt_base,
+                            alt_counts,
                         ])
 
+                        if contig in samtools_variants and v.qry_start in samtools_variants[contig]:
+                            del samtools_variants[contig][v.qry_start]
+                            if len(samtools_variants[contig]) == 0: 
+                                del samtools_variants[contig]
+
+            if contig in samtools_variants: 
+                for pos in samtools_variants[contig]:
+                    ref_base, alt_base, ref_counts, alt_counts = samtools_variants[contig][pos]
+                    self.report_lines.append(
+                      [
+                        self.gene.id,
+                        self.status_flag.to_number(),
+                        total_reads,
+                        self.name,
+                        len(self.gene),
+                        cov_per_contig[contig],
+                        self.percent_identities[contig],
+                      ] + \
+                      ['.'] * 6 + \
+                      [
+                        contig,
+                        len(self.final_assembly[contig]),
+                        pos + 1,
+                        pos + 1,
+                        ref_base,
+                        ref_counts,
+                        alt_base,
+                        alt_counts
+                      ]
+                    )
+                        
+        if len(self.report_lines) == 0:
+            for contig in self.percent_identities:
+                self.report_lines.append([
+                    self.gene.id,
+                    self.status_flag.to_number(),
+                    total_reads,
+                    self.name,
+                    len(self.gene),
+                    cov_per_contig[contig],
+                    self.percent_identities[contig],
+                  ] + \
+                  ['.'] * 6 + [contig, len(self.final_assembly[contig])] + ['.'] * 6
+                )
+
+        self.report_lines.sort(key=itemgetter(0, 14, 15))
 
     def _clean(self):
         if self.verbose:
