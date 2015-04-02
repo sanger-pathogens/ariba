@@ -34,6 +34,7 @@ class Clusters:
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
       smalt_exe='smalt',
+      bowtie2_exe='bowtie2',
       spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
@@ -68,6 +69,7 @@ class Clusters:
         self.smalt_min_id = smalt_min_id
         self.max_insert = max_insert
         self.smalt_exe = smalt_exe
+        self.bowtie2_exe = bowtie2_exe
 
         self.insert_hist_bin = 10
         self.insert_hist = histogram.Histogram(self.insert_hist_bin)
@@ -136,17 +138,14 @@ class Clusters:
 
 
     def _map_reads_to_clustered_genes(self):
-        mapping.run_smalt(
+        mapping.run_bowtie2(
             self.reads_1,
             self.reads_2,
             self.db_fasta_clustered,
             self.bam_prefix,
-            index_k=self.smalt_k,
-            index_s=self.smalt_s,
             threads=self.threads,
             samtools=self.samtools_exe,
-            smalt=self.smalt_exe,
-            minid=self.smalt_min_id,
+            bowtie2=self.bowtie2_exe,
             verbose=self.verbose,
         )
 

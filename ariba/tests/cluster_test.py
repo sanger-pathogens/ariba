@@ -88,7 +88,7 @@ class TestCluster(unittest.TestCase):
         clean_cluster_dir(cluster_dir)
         c = cluster.Cluster(cluster_dir, 'name')
         got_score = c._get_total_alignment_score('1')
-        expected_score = 1500
+        expected_score = 3000
         self.assertEqual(got_score, expected_score)
         clean_cluster_dir(cluster_dir)
 

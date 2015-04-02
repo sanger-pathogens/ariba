@@ -37,6 +37,7 @@ class Cluster:
       bcftools_exe='bcftools',
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
+      bowtie2_exe='bowtie2',
       smalt_exe='smalt',
       spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
@@ -93,6 +94,7 @@ class Cluster:
 
         self.samtools_exe = samtools_exe
         self.smalt_exe = smalt_exe
+        self.bowtie2_exe = bowtie2_exe
 
         if self.assembler == 'velvet':
             self.velveth = velvet_exe + 'h'
@@ -146,14 +148,14 @@ class Cluster:
         tmp_fa = os.path.join(self.root_dir, 'tmp.get_total_alignment_score.ref.fa')
         assert not os.path.exists(tmp_fa)
         faidx.write_fa_subset([gene_name], self.genes_fa, tmp_fa, samtools_exe=self.samtools_exe, verbose=self.verbose)
-        mapping.run_smalt(
+        mapping.run_bowtie2(
             self.reads1,
             self.reads2,
             tmp_fa,
             tmp_bam[:-4],
             threads=self.threads,
             samtools=self.samtools_exe,
-            smalt=self.smalt_exe,
+            bowtie2=self.bowtie2_exe,
             verbose=self.verbose,
         ) 
 
@@ -218,7 +220,7 @@ class Cluster:
 
     def _assemble_with_velvet(self):
         # map reads to reference gene to make BAM input to velvet columbus
-        mapping.run_smalt(
+        mapping.run_bowtie2(
             self.reads1,
             self.reads2,
             self.gene_fa,
@@ -226,7 +228,7 @@ class Cluster:
             threads=self.threads,
             sort=True,
             samtools=self.samtools_exe,
-            smalt=self.smalt_exe,
+            bowtie2=self.bowtie2_exe,
             verbose=self.verbose,
         )
 
@@ -996,7 +998,7 @@ class Cluster:
             self._load_final_contigs()
 
             # map reads to assembly
-            mapping.run_smalt(
+            mapping.run_bowtie2(
                 self.reads1,
                 self.reads2,
                 self.final_assembly_fa,
@@ -1004,7 +1006,7 @@ class Cluster:
                 threads=self.threads,
                 sort=True,
                 samtools=self.samtools_exe,
-                smalt=self.smalt_exe,
+                bowtie2=self.bowtie2_exe,
                 verbose=self.verbose,
             )
             self._parse_assembly_bam()

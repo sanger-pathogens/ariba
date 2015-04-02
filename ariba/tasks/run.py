@@ -16,11 +16,6 @@ def run():
     cdhit_group.add_argument('--cdhit_seq_identity_threshold', type=float, help='Sequence identity threshold (cd-hit option -c) [%(default)s]', default=0.9, metavar='FLOAT')
     cdhit_group.add_argument('--cdhit_length_diff_cutoff', type=float, help='length difference cutoff (cd-hit option -s) [%(default)s]', default=0.9, metavar='FLOAT')
 
-    smalt_group = parser.add_argument_group('smalt options')
-    smalt_group.add_argument('--smalt_k', type=int, help='kmer to use when indexing with smalt (smalt index -k) [%(default)s]', default=13, metavar='INT')
-    smalt_group.add_argument('--smalt_s', type=int, help='Step length to use when indexing with smalt (see smalt index -s) [%(default)s]', default=2, metavar='INT')
-    smalt_group.add_argument('--smalt_min_id', type=float, help='Minimum identity to report a match (smalt map -y) [%(default)s]', default=0.9, metavar='FLOAT')
-
     nucmer_group = parser.add_argument_group('nucmer options')
     nucmer_group.add_argument('--nucmer_min_id', type=int, help='Minimum alignment identity (delta-filter -i) [%(default)s]', default=90, metavar='INT')
     nucmer_group.add_argument('--nucmer_min_len', type=int, help='Minimum alignment length (delta-filter -i) [%(default)s]', default=50, metavar='INT')
@@ -35,7 +30,7 @@ def run():
 
     other_group = parser.add_argument_group('Other options')
     other_group.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
-    other_group.add_argument('--threads', type=int, help='Number of threads for smalt and spades [%(default)s]', default=1, metavar='INT')
+    other_group.add_argument('--threads', type=int, help='Number of threads for bowtie2 and spades [%(default)s]', default=1, metavar='INT')
     other_group.add_argument('--assembled_threshold', type=float, help='If proportion of gene assembled (regardless of into how many contigs) is at least this value then the flag gene_assembled is set [%(default)s]', default=0.95, metavar='FLOAT (between 0 and 1)')
     other_group.add_argument('--unique_threshold', type=float, help='If proportion of bases in gene assembled more than once is <= this value, then the flag unique_contig is set [%(default)s]', default=0.03, metavar='FLOAT (between 0 and 1)')
     other_group.add_argument('--clean', type=int, choices=[0,1,2], help='Specify how much cleaning to do. 0=none, 1=some, 2=only keep the report [%(default)s]', default=1, metavar='INT')
@@ -43,11 +38,11 @@ def run():
 
     executables_group = parser.add_argument_group('executables locations')
     executables_group.add_argument('--bcftools', help='bcftools executable [bcftools]', metavar='PATH')
+    executables_group.add_argument('--bowtie2', help='bowtie2 executable [bowtie2]', metavar='PATH')
     executables_group.add_argument('--cdhit', help=argparse.SUPPRESS)
     executables_group.add_argument('--gapfiller', help='GapFiller executable [GapFiller.pl]', metavar='PATH')
     executables_group.add_argument('--nucmer', help=argparse.SUPPRESS, default='nucmer')
     executables_group.add_argument('--samtools', help='samtools executable [samtools]', metavar='PATH')
-    executables_group.add_argument('--smalt', help='SMALT executable [smalt]', metavar='PATH')
     executables_group.add_argument('--spades', help='SPAdes executable [spades.py]',  metavar='PATH')
     executables_group.add_argument('--sspace', help='SSPACE executable [SSPACE_Basic_v2.0.pl]', metavar='PATH')
     executables_group.add_argument('--velvet', help='prefix of velvet{g,h} executables [velvet]', metavar='PATH')
@@ -69,9 +64,6 @@ def run():
           assembler=options.assembler,
           threads=options.threads,
           verbose=options.verbose,
-          smalt_k=options.smalt_k,
-          smalt_s=options.smalt_s,
-          smalt_min_id=options.smalt_min_id,
           min_scaff_depth=options.min_scaff_depth,
           nucmer_min_id=options.nucmer_min_id,
           nucmer_min_len=options.nucmer_min_len,
@@ -82,7 +74,7 @@ def run():
           bcftools_exe=options.bcftools,
           gapfiller_exe=options.gapfiller,
           samtools_exe=options.samtools,
-          smalt_exe=options.smalt,
+          bowtie2_exe=options.bowtie2,
           spades_exe=options.spades,
           sspace_exe=options.sspace,
           velvet_exe=options.velvet,
