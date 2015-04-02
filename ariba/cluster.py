@@ -711,7 +711,7 @@ class Cluster:
         tmp_vcf = self.final_assembly_vcf + '.tmp'
         cmd = ' '.join([
             self.samtools_exe, 'mpileup',
-            '-t DV',
+            '-t INFO/DPR,DV',
             '-A',
             '-f', self.final_assembly_fa,
             '-u',
@@ -728,7 +728,7 @@ class Cluster:
             tmp_vcf,
             '|',
             self.bcftools_exe, 'query',
-            r'''-f '%CHROM\t%POS\t%REF\t%ALT\t%DP\t%DP4]\n' ''',
+            r'''-f '%CHROM\t%POS\t%REF\t%ALT\t%DP\t%DPR]\n' ''',
             '>',
             self.final_assembly_read_depths + '.tmp'
         ])
