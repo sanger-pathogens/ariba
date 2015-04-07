@@ -1,0 +1,4 @@
+gene1	Too short. Skipping
+revcomp	Reverse complemented
+not_a_gene	Does not look like a gene. Skipping
+too_long	Too long. Skipping
