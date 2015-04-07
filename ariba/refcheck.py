@@ -18,7 +18,6 @@ class Checker:
         file_reader = pyfastaq.sequences.file_reader(self.infile)
 
         for seq in file_reader:
-            seq.seq = seq.seq.upper()
             if not seq.looks_like_gene():
                 return False, 'Not a gene', seq
             elif len(seq) < self.min_length:
