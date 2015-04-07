@@ -38,6 +38,7 @@ class Cluster:
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
       bowtie2_exe='bowtie2',
+      bowtie2_preset='very-sensitive-local',
       smalt_exe='smalt',
       spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
@@ -95,6 +96,7 @@ class Cluster:
         self.samtools_exe = samtools_exe
         self.smalt_exe = smalt_exe
         self.bowtie2_exe = bowtie2_exe
+        self.bowtie2_preset = bowtie2_preset
 
         if self.assembler == 'velvet':
             self.velveth = velvet_exe + 'h'
@@ -156,6 +158,7 @@ class Cluster:
             threads=self.threads,
             samtools=self.samtools_exe,
             bowtie2=self.bowtie2_exe,
+            bowtie2_preset=self.bowtie2_preset,
             verbose=self.verbose,
         ) 
 
@@ -229,6 +232,7 @@ class Cluster:
             sort=True,
             samtools=self.samtools_exe,
             bowtie2=self.bowtie2_exe,
+            bowtie2_preset=self.bowtie2_preset,
             verbose=self.verbose,
         )
 
@@ -1007,6 +1011,7 @@ class Cluster:
                 sort=True,
                 samtools=self.samtools_exe,
                 bowtie2=self.bowtie2_exe,
+                bowtie2_preset=self.bowtie2_preset,
                 verbose=self.verbose,
             )
             self._parse_assembly_bam()

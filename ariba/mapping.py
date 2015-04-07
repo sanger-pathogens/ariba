@@ -15,6 +15,7 @@ def run_bowtie2(
       sort=False,
       samtools='samtools',
       bowtie2='bowtie2',
+      bowtie2_preset='very-sensitive-local',
       verbose=False
     ):
 
@@ -36,7 +37,7 @@ def run_bowtie2(
     map_cmd = ' '.join([
         bowtie2,
         '--threads', str(threads),
-        '--very-sensitive-local',
+        '--' + bowtie2_preset,
         '-X', str(max_insert),
         '-x', map_index,
         '-1', reads_fwd,

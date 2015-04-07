@@ -35,6 +35,7 @@ class Clusters:
       samtools_exe='samtools',
       smalt_exe='smalt',
       bowtie2_exe='bowtie2',
+      bowtie2_preset='very-sensitive-local',
       spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       velvet_exe='velvet', # prefix of velvet{g,h}
@@ -70,6 +71,7 @@ class Clusters:
         self.max_insert = max_insert
         self.smalt_exe = smalt_exe
         self.bowtie2_exe = bowtie2_exe
+        self.bowtie2_preset = bowtie2_preset
 
         self.insert_hist_bin = 10
         self.insert_hist = histogram.Histogram(self.insert_hist_bin)
@@ -146,6 +148,7 @@ class Clusters:
             threads=self.threads,
             samtools=self.samtools_exe,
             bowtie2=self.bowtie2_exe,
+            bowtie2_preset=self.bowtie2_preset,
             verbose=self.verbose,
         )
 
@@ -292,6 +295,8 @@ class Clusters:
                 bcftools_exe=self.bcftools_exe,
                 gapfiller_exe=self.gapfiller_exe,
                 samtools_exe=self.samtools_exe,
+                bowtie2_exe=self.bowtie2_exe,
+                bowtie2_preset=self.bowtie2_preset,
                 spades_exe=self.spades_exe,
                 sspace_exe=self.sspace_exe,
                 velvet_exe=self.velvet,
