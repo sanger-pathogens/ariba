@@ -5,6 +5,61 @@ from ariba import common
 class Error (Exception): pass
 
 
+def run_bowtie2(
+      reads_fwd,
+      reads_rev,
+      ref_fa,
+      out_prefix,
+      threads=1,
+      max_insert=1000,
+      sort=False,
+      samtools='samtools',
+      bowtie2='bowtie2',
+      verbose=False
+    ):
+
+    map_index = out_prefix + '.map_index'
+    clean_files = [map_index + '.' + x + '.bt2' for x in ['1', '2', '3', '4', 'rev.1', 'rev.2']]
+    index_cmd = ' '.join([
+        bowtie2 + '-build',
+        '-q',
+        ref_fa,
+        map_index
+    ])
+
+    final_bam = out_prefix + '.bam'
+    if sort:
+        intermediate_bam = out_prefix + '.unsorted.bam'
+    else:
+        intermediate_bam = final_bam
+
+    map_cmd = ' '.join([
+        bowtie2,
+        '--threads', str(threads),
+        '--very-sensitive-local',
+        '-X', str(max_insert),
+        '-x', map_index,
+        '-1', reads_fwd,
+        '-2', reads_rev,
+        '|', samtools, 'view',
+        '-bS -T', ref_fa,
+        '- >', intermediate_bam
+    ])
+
+    common.syscall(index_cmd, verbose=verbose)
+    common.syscall(map_cmd, verbose=verbose)
+
+    if sort:
+        threads = min(4, threads)
+        thread_mem = int(500 / threads)
+        sort_cmd = samtools + ' sort -@' + str(threads) + ' -m ' + str(thread_mem) + 'M ' + intermediate_bam + ' ' + out_prefix
+        index_cmd = samtools + ' index ' + final_bam
+        common.syscall(sort_cmd, verbose=verbose)
+        common.syscall(index_cmd, verbose=verbose)
+    for fname in clean_files:
+        os.unlink(fname)
+
+
 def run_smalt(
       reads_fwd,
       reads_rev,

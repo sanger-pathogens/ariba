@@ -15,6 +15,7 @@ def is_in_path(prog):
 
 prog_to_default = {
     'bcftools': 'bcftools',
+    'bowtie2': 'bowtie2',
     'cdhit': 'cd-hit-est',
     'gapfiller': 'GapFiller.pl',
     'nucmer' : 'nucmer',
@@ -36,6 +37,7 @@ prog_to_env_var = {
 
 prog_to_version_cmd = {
     'bcftools': ('', re.compile('^Version: ([0-9\.]+)')),
+    'bowtie2': ('--version', re.compile('.*bowtie2-align version (.*)$')),
     'cdhit': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
     'gapfiller': ('', re.compile('^Usage: .*pl \[GapFiller_(.*)\]')),
     'nucmer': ('--version', re.compile('^NUCmer \(NUCleotide MUMmer\) version ([0-9\.]+)')),
@@ -50,6 +52,7 @@ prog_to_version_cmd = {
 
 min_versions = {
     'bcftools': '1.2',
+    'bowtie2': '2.1.0',
     'cd-hit': '4.6',
     'nucmer': '3.1',
     'samtools': '1.2',
@@ -113,9 +116,9 @@ def check_versions(opts, verbose=False, not_required=None):
 
     to_check = [
         'bcftools',
+        'bowtie2',
         'cdhit',
         'nucmer',
-        'smalt',
         'samtools',
         'sspace',
         'gapfiller',
