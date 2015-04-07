@@ -18,6 +18,7 @@ class Checker:
         file_reader = pyfastaq.sequences.file_reader(self.infile)
 
         for seq in file_reader:
+            seq.seq = seq.seq.upper()
             if not seq.looks_like_gene():
                 return False, 'Not a gene', seq
             elif len(seq) < self.min_length:
@@ -41,6 +42,7 @@ class Checker:
         log_out_fh = pyfastaq.utils.open_file_write(log_out)
 
         for seq in file_reader:
+            seq.seq = seq.seq.upper()
             if len(seq) < self.min_length:
                 print(seq.id, 'Too short. Skipping', sep='\t', file=log_out_fh)
                 print(seq, file=bad_seqs_out_fh)
