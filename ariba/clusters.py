@@ -246,6 +246,7 @@ class Clusters:
     def _set_insert_size_data(self):
         assert len(self.insert_hist) > 0
         (x, self.insert_size, pc95, self.insert_sspace_sd) = self.insert_hist.stats()
+        self.insert_sspace_sd = min(1, self.insert_sspace_sd)
         self.insert_proper_pair_max = 1.1 * pc95
         if self.verbose:
             print('\nInsert size information from reads mapped to reference genes:')
