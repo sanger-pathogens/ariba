@@ -770,6 +770,14 @@ class Cluster:
             rows = [x for x in tbx.fetch(ref, position, position + 1)]
         except:
             return None
+
+        if len(rows) > 1: # which happens with indels, mutiple lines for same base of reference
+            test_rows = [x for x in rows if x.rstrip().split()[3] != '.']
+            if len(test_rows) != 1:
+                rows = [rows[-1]]
+            else:
+                rows = test_rows
+
         if len(rows) == 1:
             r, p, ref_base, alt_base, ref_counts, alt_counts = rows[0].rstrip().split()
             return ref_base, alt_base, int(ref_counts), alt_counts
