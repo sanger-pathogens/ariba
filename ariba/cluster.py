@@ -202,6 +202,8 @@ class Cluster:
 
     def _choose_best_gene(self):
         gene_name = self._get_best_gene_by_alignment_score()
+        if gene_name is None:
+            return None
         faidx.write_fa_subset([gene_name], self.genes_fa, self.gene_fa, samtools_exe=self.samtools_exe, verbose=self.verbose)
         seqs = {}
         pyfastaq.tasks.file_to_dict(self.gene_fa, seqs)
@@ -804,7 +806,6 @@ class Cluster:
         if not (os.path.exists(self.final_assembly_vcf) and os.path.exists(self.final_assembly_read_depths)):
             return variants
         for t in positions:
-            print(t)
             name, pos = t[0], t[1]
             depths = self._get_assembly_read_depths(name, pos)
             if depths is None:
@@ -844,12 +845,14 @@ class Cluster:
         total_reads = self._get_read_counts()
 
         if not self.assembled_ok:
+            gene_name = 'NA' if self.gene is None else self.gene.id
+            gene_length = '.' if self.gene is None else len(self.gene)
             self.report_lines.append([
-                    self.gene.id,
+                    gene_name,
                     self.status_flag.to_number(),
                     total_reads,
                     self.name,
-                    len(self.gene),
+                    gene_length,
                     '.',
                     '.',
                   ] + \
@@ -989,11 +992,13 @@ class Cluster:
 
     def run(self):
         self.gene = self._choose_best_gene()
-
-        if self.assembler == 'velvet':
-            self._assemble_with_velvet()
-        elif self.assembler == 'spades':
-            self._assemble_with_spades()
+        if self.gene is None:
+            self.assembled_ok = False
+        else:
+            if self.assembler == 'velvet':
+                self._assemble_with_velvet()
+            elif self.assembler == 'spades':
+                self._assemble_with_spades()
 
         # velvet can finish successfully, but make an empty contigs file
         if self.assembled_ok:
