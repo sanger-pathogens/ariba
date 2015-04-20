@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ariba',
-    version='0.3.0',
+    version='0.3.1',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
     author='Martin Hunt',
