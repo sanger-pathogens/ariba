@@ -136,8 +136,8 @@ class Cluster:
 
 
     def _get_read_counts(self):
-        count1 = pyfastaq.tasks.count_sequences(self.reads1) 
-        count2 = pyfastaq.tasks.count_sequences(self.reads2) 
+        count1 = pyfastaq.tasks.count_sequences(self.reads1)
+        count2 = pyfastaq.tasks.count_sequences(self.reads2)
         if count1 == count2:
             return count1 + count2
         else:
@@ -160,7 +160,7 @@ class Cluster:
             bowtie2=self.bowtie2_exe,
             bowtie2_preset=self.bowtie2_preset,
             verbose=self.verbose,
-        ) 
+        )
 
         score = mapping.get_total_alignment_score(tmp_bam)
         os.unlink(tmp_bam)
@@ -795,7 +795,7 @@ class Cluster:
         positions = [(t[0], int(t[1]) - 1) for t in positions]
         pyfastaq.utils.close(f)
         return positions
-        
+
 
     def _get_samtools_variants(self, positions=None):
         if positions is None:
@@ -870,11 +870,17 @@ class Cluster:
                 if t is not None:
                     effect, new_bases = t
                     for v in variants:
-                        depths = self._get_assembly_read_depths(contig, v.qry_start) 
+                        depths = self._get_assembly_read_depths(contig, v.qry_start)
                         if depths is None:
-                            raise Error('Error getting depth info on contig "' + contig + '" at position ' + str(v.qry_start + 1) + ' from file ' + self.final_assembly_read_depths)
-                        else:
-                            ref_base, alt_base, ref_counts, alt_counts = depths
+                            # this happens with low coverage contigs. It can get assembled, but
+                            # there are some bases that do not have reads mapped to them.
+                            # If mummer called a variant at one of these, then we're looking
+                            # for read dpeth where there is none.
+                            print('Warning: could not get read depth info on contig "' + contig + '" at position ', str(v.qry_start + 1), 'from file', self.final_assembly_read_depths, file=sys.stderr)
+                            print(' - a variant was called at this position using nucmer, but there is no read depth (probably a mapping artefact', file=sys.stderr)
+                            depths = ['.'] * 4
+
+                        ref_base, alt_base, ref_counts, alt_counts = depths
 
                         self.report_lines.append([
                             self.gene.id,
@@ -902,10 +908,10 @@ class Cluster:
 
                         if contig in samtools_variants and v.qry_start in samtools_variants[contig]:
                             del samtools_variants[contig][v.qry_start]
-                            if len(samtools_variants[contig]) == 0: 
+                            if len(samtools_variants[contig]) == 0:
                                 del samtools_variants[contig]
 
-            if contig in samtools_variants: 
+            if contig in samtools_variants:
                 for pos in samtools_variants[contig]:
                     ref_base, alt_base, ref_counts, alt_counts = samtools_variants[contig][pos]
                     self.report_lines.append(
@@ -930,7 +936,7 @@ class Cluster:
                         alt_counts
                       ]
                     )
-                        
+
         if len(self.report_lines) == 0:
             for contig in self.percent_identities:
                 self.report_lines.append([
