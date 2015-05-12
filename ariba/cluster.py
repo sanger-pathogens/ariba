@@ -877,7 +877,7 @@ class Cluster:
                             # If mummer called a variant at one of these, then we're looking
                             # for read dpeth where there is none.
                             print('Warning: could not get read depth info on contig "' + contig + '" at position ', str(v.qry_start + 1), 'from file', self.final_assembly_read_depths, file=sys.stderr)
-                            print(' - a variant was called at this position using nucmer, but there is no read depth (probably a mapping artefact', file=sys.stderr)
+                            print(' - a variant was called at this position using nucmer, but there is no read depth (probably a mapping artifact)', file=sys.stderr)
                             depths = ['.'] * 4
 
                         ref_base, alt_base, ref_counts, alt_counts = depths
