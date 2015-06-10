@@ -41,6 +41,7 @@ class Clusters:
       velvet_exe='velvet', # prefix of velvet{g,h}
       cdhit_seq_identity_threshold=0.9,
       cdhit_length_diff_cutoff=0.9,
+      run_cd_hit=True,
       clean=1,
     ):
         self.db_fasta = os.path.abspath(db_fasta)
@@ -111,6 +112,7 @@ class Clusters:
 
         self.cdhit_seq_identity_threshold = cdhit_seq_identity_threshold
         self.cdhit_length_diff_cutoff = cdhit_length_diff_cutoff
+        self.run_cd_hit = run_cd_hit
 
         for d in [self.outdir, self.clusters_outdir]:
             try:
@@ -121,13 +123,18 @@ class Clusters:
     def _run_cdhit(self):
         r = cdhit.Runner(
             self.db_fasta,
-            self.db_fasta_clustered, 
+            self.db_fasta_clustered,
             seq_identity_threshold=self.cdhit_seq_identity_threshold,
             threads=self.threads,
             length_diff_cutoff=self.cdhit_length_diff_cutoff,
             verbose=self.verbose,
         )
-        self.cluster_ids = r.run()
+        if self.run_cd_hit:
+            self.cluster_ids = r.run()
+        else:
+            if self.verbose:
+                print('Skipping cd-hit because --no_cdhit option used')
+            self.cluster_ids = r.fake_run()
 
 
     def _write_clusters_info_file(self):
@@ -338,7 +345,7 @@ class Clusters:
 
         columns[0] = 'gene'
         workbook = openpyxl.Workbook()
-        worksheet = workbook.worksheets[0] 
+        worksheet = workbook.worksheets[0]
         worksheet.title = 'ARIBA_report'
         worksheet.append(columns)
 
@@ -383,7 +390,7 @@ class Clusters:
 
         if self.verbose:
             print('{:_^79}'.format(' Running cd-hit '), flush=True)
-        self._run_cdhit() 
+        self._run_cdhit()
         self._write_clusters_info_file()
         if self.verbose:
             print('Finished cd-hit\n')
