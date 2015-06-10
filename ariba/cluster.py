@@ -434,8 +434,9 @@ class Cluster:
         os.unlink(tmp_coords)
         in_both = to_revcomp.intersection(not_revcomp)
         for name in in_both:
-            print('WARNING: hits to both strands of gene for scaffold. Interpretation of any variants cannot be trusted', name, file=sys.stderr)
+            print('WARNING: hits to both strands of gene for scaffold. Interpretation of any variants cannot be trusted for this scaffold:', name, file=sys.stderr)
             to_revcomp.remove(name)
+            self.status_flag.add('hit_both_strands')
 
         f = pyfastaq.utils.open_file_write(self.final_assembly_fa)
         seq_reader = pyfastaq.sequences.file_reader(self.gapfilled_scaffolds)

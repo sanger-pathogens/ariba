@@ -10,6 +10,7 @@ flags_in_order = [
     'scaffold_graph_bad',
     'assembly_fail',
     'variants_suggest_collapsed_repeat',
+    'hit_both_strands',
 ]
 
 
@@ -26,7 +27,7 @@ class Flag:
         for f in self.flags:
             if flag_bits[f] & n != 0:
                 self.flags[f] = True
-                
+
 
     def add(self, f):
         self.flags[f] = True

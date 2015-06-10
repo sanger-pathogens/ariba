@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ariba',
-    version='0.3.2',
+    version='0.4.0',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
     author='Martin Hunt',
@@ -15,8 +15,8 @@ setup(
     url='https://github.com/sanger-pathogens/ariba',
     scripts=glob.glob('scripts/*'),
     test_suite='nose.collector',
+    tests_require=['nose >= 1.3'],
     install_requires=[
-        'nose >= 1.3',
         'openpyxl',
         'pyfastaq >= 3.0.1',
         'pysam >= 0.8.1',
