@@ -30,6 +30,25 @@ class Runner:
         self.verbose = verbose
 
 
+    def fake_run(self):
+        '''Doesn't actually run cd-hit. Instead, puts each input sequence into its own cluster. So it's as if cdhit was run, but didn't cluster anything'''
+        cluster_to_name = {}
+        found_names = set()
+        seq_reader = pyfastaq.sequences.file_reader(self.infile)
+        f = pyfastaq.utils.open_file_write(self.outfile)
+        for seq in seq_reader:
+            if seq.id in found_names:
+                raise Error('Sequence name "' + seq.id + '" not unique. Cannot continue')
+            found_names.add(seq.id)
+            cluster_number = str(len(cluster_to_name))
+            cluster_to_name[cluster_number] = {seq.id}
+            seq.id = cluster_number
+            print(seq, file=f)
+
+        pyfastaq.utils.close(f)
+        return cluster_to_name
+
+
     def run(self):
         tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
         cdhit_fasta = os.path.join(tmpdir, 'cdhit')
@@ -51,7 +70,7 @@ class Runner:
             '-bak 1',
         ])
 
-        common.syscall(cmd, verbose=self.verbose) 
+        common.syscall(cmd, verbose=self.verbose)
 
         cluster_representatives = self._get_ids(cdhit_fasta)
         clusters, cluster_rep_to_cluster = self._parse_cluster_info_file(cluster_info_outfile, new_to_old_name, cluster_representatives)
@@ -64,7 +83,7 @@ class Runner:
         rename_file = outfile + '.tmp.rename_info'
         assert not os.path.exists(rename_file)
         pyfastaq.tasks.enumerate_names(infile, outfile, rename_file=rename_file)
-        
+
         with open(rename_file) as f:
             lines = [x.rstrip().split('\t') for x in f.readlines() if x != '#old\tnew\n']
             new_to_old_name = {x[1]: x[0] for x in lines}

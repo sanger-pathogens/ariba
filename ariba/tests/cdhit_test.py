@@ -78,3 +78,32 @@ class TestCdhit(unittest.TestCase):
         self.assertEqual(clusters, expected_clusters)
         self.assertTrue(filecmp.cmp(tmpfile, expected_outfile, shallow=False))
         os.unlink(tmpfile)
+
+
+    def test_fake_run(self):
+        '''test fake_run'''
+        infile = os.path.join(data_dir, 'cdhit_test_fake_run.in.fa')
+        expected_outfile = os.path.join(data_dir, 'cdhit_test_fake_run.out.fa')
+        tmpfile = 'tmp.cdhit_test_fake_run.out.fa'
+        r = cdhit.Runner(infile, tmpfile)
+        clusters = r.fake_run()
+        expected_clusters = {
+            '0': {'seq1'},
+            '1': {'seq2'},
+            '2': {'seq3'},
+            '3': {'seq4'},
+        }
+        self.assertEqual(clusters, expected_clusters)
+        self.assertTrue(filecmp.cmp(tmpfile, expected_outfile, shallow=False))
+        os.unlink(tmpfile)
+
+
+    def test_fake_run_fail(self):
+        '''test fake_run with non-unique names'''
+        infile = os.path.join(data_dir, 'cdhit_test_fake_run.non-unique.in.fa')
+        tmpfile = 'tmp.cdhit_test_fake_run.out.non-unique.fa'
+        r = cdhit.Runner(infile, tmpfile)
+        with self.assertRaises(cdhit.Error):
+            clusters = r.fake_run()
+        os.unlink(tmpfile)
+
