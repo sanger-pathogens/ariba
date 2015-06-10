@@ -13,6 +13,7 @@ def run():
     parser.add_argument('outdir', help='Output directory (must not already exist)')
 
     cdhit_group = parser.add_argument_group('cd-hit options')
+    cdhit_group.add_argument('--no_cdhit', action='store_true', help='Do not run cd-hit')
     cdhit_group.add_argument('--cdhit_seq_identity_threshold', type=float, help='Sequence identity threshold (cd-hit option -c) [%(default)s]', default=0.9, metavar='FLOAT')
     cdhit_group.add_argument('--cdhit_length_diff_cutoff', type=float, help='length difference cutoff (cd-hit option -s) [%(default)s]', default=0.9, metavar='FLOAT')
 
@@ -84,6 +85,7 @@ def run():
           cdhit_seq_identity_threshold=options.cdhit_seq_identity_threshold,
           cdhit_length_diff_cutoff=options.cdhit_length_diff_cutoff,
           clean=options.clean,
+          run_cd_hit=(not options.no_cdhit)
         )
     c.run()
 
