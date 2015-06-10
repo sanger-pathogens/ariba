@@ -8,14 +8,14 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 class TestFlag(unittest.TestCase):
     def test_init_and_to_number(self):
         '''Test __init__ and to_number'''
-        for i in range(128):
+        for i in range(512):
             f = flag.Flag(i)
             self.assertEqual(f.to_number(), i)
 
 
     def test_set_flag(self):
         '''Test set_flag'''
-        for i in range(128):
+        for i in range(512):
             f = flag.Flag()
             f.set_flag(i)
             self.assertEqual(f.to_number(), i)
@@ -24,7 +24,7 @@ class TestFlag(unittest.TestCase):
     def test_add(self):
         '''Test add'''
         f = flag.Flag()
-        expected = [1, 3, 7, 15, 31, 63, 127, 255]
+        expected = [1, 3, 7, 15, 31, 63, 127, 255, 511]
         for i in range(len(flag.flags_in_order)):
             f.add(flag.flags_in_order[i])
             self.assertEqual(f.to_number(), expected[i])
@@ -32,7 +32,7 @@ class TestFlag(unittest.TestCase):
 
     def test_str(self):
         '''Test __str__'''
-        for i in range(256):
+        for i in range(512):
             f = flag.Flag(i)
             self.assertEqual(str(f), str(i))
 
@@ -49,6 +49,7 @@ class TestFlag(unittest.TestCase):
             '[ ] scaffold_graph_bad',
             '[ ] assembly_fail',
             '[ ] variants_suggest_collapsed_repeat',
+            '[ ] hit_both_strands',
         ])
 
         self.assertEqual(expected, f.to_long_string())
