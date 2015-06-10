@@ -62,7 +62,7 @@ class TestSummry(unittest.TestCase):
 ]
         dicts = [s._line2dict('\t'.join(x)) for x in lines]
         expected = {'gene1': [dicts[0]], 'gene2': dicts[1:3], 'gene3': [dicts[3]]}
-        got = s._load_file(infile) 
+        got = s._load_file(infile)
         self.assertEqual(expected, got)
 
 
@@ -73,6 +73,7 @@ class TestSummry(unittest.TestCase):
             (0, 0),
             (64, 0),
             (7, 1),
+            (259, 1),
             (15, 2),
             (27, 3),
         ]
@@ -97,7 +98,7 @@ class TestSummry(unittest.TestCase):
             ['filename', 'gene1', 'gene2', 'gene3'],
             [infiles[0], 3, 2, 0],
             [infiles[1], 3, 0, 3],
-        ]    
+        ]
         self.assertEqual(expected, s.rows_out)
 
 
@@ -110,7 +111,7 @@ class TestSummry(unittest.TestCase):
             ['file2', 1, 0, 3],
             ['file3', 2, 0, 4],
         ]
-        
+
         expected = [
             ['filename', 'gene1', 'gene3'],
             ['file2', 1, 3],

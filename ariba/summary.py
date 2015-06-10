@@ -70,7 +70,7 @@ class Summary:
         filenames = [x.rstrip() for x in f.readlines()]
         pyfastaq.utils.close(f)
         return filenames
-    
+
 
     def _check_files_exist(self):
         for fname in self.filenames:
@@ -119,7 +119,7 @@ class Summary:
         if f.has('assembly_fail') or not f.has('gene_assembled') or self._pc_id_of_longest(l) <= self.min_id:
             return 0
 
-        if not f.has('complete_orf'):
+        if f.has('hit_both_strands') or (not f.has('complete_orf')):
             return 1
 
         if f.has('unique_contig') and f.has('gene_assembled_into_one_contig'):
@@ -185,11 +185,11 @@ class Summary:
         for row in self.rows_out:
             print('\t'.join([str(x) for x in row]), file=f)
         pyfastaq.utils.close(f)
-        
+
 
     def _write_xls(self):
         workbook = openpyxl.Workbook()
-        worksheet = workbook.worksheets[0] 
+        worksheet = workbook.worksheets[0]
         worksheet.title = 'ARIBA_summary'
         for row in self.rows_out:
             worksheet.append(row)
