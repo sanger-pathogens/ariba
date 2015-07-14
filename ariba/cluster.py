@@ -289,7 +289,7 @@ class Cluster:
             '-o', self.assembler_dir,
             '-k', str(self.assembly_kmer),
             '--threads', str(self.threads),
-            '--trusted-contigs', self.gene_fa,
+            '--untrusted-contigs', self.gene_fa,
         ])
         if self.spades_other is not None:
             cmd += ' ' + self.spades_other
