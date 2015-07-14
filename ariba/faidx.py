@@ -13,7 +13,7 @@ def write_fa_subset(seq_names, infile, outfile, samtools_exe='samtools', verbose
         common.syscall(' '.join([
             samtools_exe + ' faidx',
             infile,
-            name,
+            '"' + name + '"',
             '>>', outfile
         ]))
 
