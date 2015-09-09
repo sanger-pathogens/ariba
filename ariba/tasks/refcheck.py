@@ -18,14 +18,14 @@ def run():
     checker = ariba.refcheck.Checker(
         options.infile,
         min_length=options.min_length,
-        max_length=options.max_length
+        max_length=options.max_length,
+        outprefix=options.outprefix
     )
- 
-    if options.outprefix:
-        checker.fix(options.outprefix)
-    else:
-        ok, reason, seq = checker.check()
-        if not ok:
-            print('The following sequence not OK, for the reason:', reason)
-            print(seq)
-            sys.exit(1)
+
+    ok, reason, seq = checker.run()
+
+    if options.outprefix is None and not ok:
+        print('The following sequence not OK, for the reason:', reason)
+        print(seq)
+        sys.exit(1)
+
