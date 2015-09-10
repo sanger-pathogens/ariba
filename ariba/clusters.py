@@ -62,6 +62,7 @@ class Clusters:
         self.bam = self.bam_prefix + '.bam'
         self.report_file_tsv = os.path.join(self.outdir, 'report.tsv')
         self.report_file_xls = os.path.join(self.outdir, 'report.xls')
+        self.catted_assembled_genes_fasta = os.path.join(self.outdir, 'assembled_genes.fa')
         self.threads = threads
         self.verbose = verbose
 
@@ -360,6 +361,19 @@ class Clusters:
         workbook.save(self.report_file_xls)
 
 
+    def _write_catted_assembled_genes_fasta(self):
+        f = pyfastaq.utils.open_file_write(self.catted_assembled_genes_fasta)
+
+        for gene in sorted(self.clusters):
+            cluster_fasta = self.clusters[gene].final_assembled_genes_fa
+            if os.path.exists(cluster_fasta):
+                file_reader = pyfastaq.sequences.file_reader(cluster_fasta)
+                for seq in file_reader:
+                    print(seq, file=f)
+
+        pyfastaq.utils.close(f)
+
+
     def _clean(self):
         to_clean = [
             [
@@ -418,6 +432,7 @@ class Clusters:
         if self.verbose:
             print('{:_^79}'.format(' Writing report files '), flush=True)
         self._write_reports()
+        self._write_catted_assembled_genes_fasta()
         if self.verbose:
             print('Finished writing report files. Cleaning files', flush=True)
         self._clean()

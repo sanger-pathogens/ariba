@@ -65,8 +65,8 @@ class TestClusters(unittest.TestCase):
     def test_bam_to_clusters_reads(self):
         '''test _bam_to_clusters_reads'''
         clusters_dir = 'tmp.Cluster.test_bam_to_clusters_reads'
-        reads1 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_1.fq')    
-        reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_2.fq')    
+        reads1 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_1.fq')
+        reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_2.fq')
         ref = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.db.fa')
         c = clusters.Clusters(ref, reads1, reads2, clusters_dir)
         shutil.copyfile(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.bam'), c.bam)
@@ -110,7 +110,7 @@ class TestClusters(unittest.TestCase):
             10: 1,
         }
         self.clusters.insert_hist.bin_width=1
-       
+
         self.clusters._set_insert_size_data()
         self.assertEqual(self.clusters.insert_size, 5.5)
         self.assertEqual(self.clusters.insert_sspace_sd, 0.91)
@@ -131,3 +131,18 @@ class TestClusters(unittest.TestCase):
         self.assertTrue(filecmp.cmp(expected, self.clusters.report_file_tsv, shallow=False))
         self.assertTrue(os.path.exists(self.clusters.report_file_xls))
 
+
+    def test_write_catted_assembled_genes_fasta(self):
+        '''test _write_catted_assembled_genes_fasta'''
+        class FakeCluster:
+            def __init__(self, filename):
+                self.final_assembled_genes_fa = filename
+
+        self.clusters.clusters = {
+            'gene1': FakeCluster(os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.in.gene1.fa')),
+            'gene2': FakeCluster(os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.in.gene2.fa')),
+        }
+
+        self.clusters._write_catted_assembled_genes_fasta()
+        expected = os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.expected.out.fa')
+        self.assertTrue(filecmp.cmp(expected, self.clusters.catted_assembled_genes_fasta, shallow=False))
