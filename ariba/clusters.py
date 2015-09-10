@@ -379,7 +379,9 @@ class Clusters:
             [
             ],
             [
-                self.bam
+                self.bam,
+                self.db_fasta,
+                self.db_fasta + '.fai',
             ],
             [
                 self.db_fasta_clustered,
