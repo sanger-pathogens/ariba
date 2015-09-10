@@ -44,7 +44,6 @@ class Clusters:
       run_cd_hit=True,
       clean=1,
     ):
-        self.db_fasta = os.path.abspath(db_fasta)
         self.reads_1 = os.path.abspath(reads_1)
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
@@ -57,7 +56,7 @@ class Clusters:
         self.assembly_kmer = assembly_kmer
         self.spades_other = spades_other
 
-        self.db_fasta_clustered = os.path.join(self.outdir, 'genes.clustered.fa')
+        self.db_fasta_clustered = os.path.join(self.outdir, 'input_genes.clustered.fa')
         self.cluster_ids = {}
         self.bam_prefix = os.path.join(self.outdir, 'map_all_reads')
         self.bam = self.bam_prefix + '.bam'
@@ -119,6 +118,10 @@ class Clusters:
                 os.mkdir(d)
             except:
                 raise Error('Error mkdir ' + d)
+
+        self.db_fasta = os.path.join(self.outdir, 'input_genes.not_clustered.fa')
+        pyfastaq.tasks.to_fasta(db_fasta, self.db_fasta, check_unique=True)
+
 
     def _run_cdhit(self):
         r = cdhit.Runner(
