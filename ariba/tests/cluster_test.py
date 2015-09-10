@@ -34,7 +34,7 @@ def clean_cluster_dir(d, exclude=None):
 def file2lines(filename):
     f = pyfastaq.utils.open_file_read(filename)
     lines = f.readlines()
-    pyfastaq.utils.close(f) 
+    pyfastaq.utils.close(f)
     return lines
 
 
@@ -303,8 +303,8 @@ class TestCluster(unittest.TestCase):
             ]
         }
         expected = {'scaff1': round((90*10 + 100*34) / (10+34), 2), 'scaff2': 42.42}
-        c._nucmer_hits_to_percent_identity() 
-        self.assertEqual(expected, c.percent_identities) 
+        c._nucmer_hits_to_percent_identity()
+        self.assertEqual(expected, c.percent_identities)
 
 
     def test_nucmer_hits_to_scaff_coords(self):
@@ -396,10 +396,39 @@ class TestCluster(unittest.TestCase):
                 pymummer.alignment.Alignment('\t'.join(hits[2])),
             ]
         }
-        
+
         expected = {'contig1': 85, 'contig2': 11}
         self.assertEqual(expected, c._nucmer_hits_to_gene_cov_per_contig())
         clean_cluster_dir(cluster_dir)
+
+
+    def test_nucmer_hits_to_assembled_gene_sequences(self):
+        '''test _nucmer_hits_to_assembled_gene_sequences'''
+        ref_gene = pyfastaq.sequences.Fasta('ref_gene', 'ATGGTACAAGACGGCCCTTTGCAGTCCTGTGTACTTGCGGGTCGCTCCTTTGCATTGAATTATCGAACATCGTCGCGTTCAAGATCCCGCGAAAAAAATTATAGATCGCAGGATATCACTGCCAGTGGCATCTGTGTAAGCGCTTAG')
+        assembly = {
+            'contig1': pyfastaq.sequences.Fasta('contig1', 'CATCTATGCTGCATCGATCACTGACGTATCATCATCAGCGTACTGACGTATTAGTTTGTAATGGTACAAGACGGCCCTTTGCAGTCCTGTGTACTTGCGGGTCGCTCCTTTGCATTGAATTATCGAACATCGTCGCGTTCAAGATCCCGCGAAAAAAATTATAGATCGCAGGATATCACTGCCAGTGGCATCTGTGTAAGCGCTTAGACGTCGTACTACTGTATATGCATCGATCTGAA'),
+            'contig2': pyfastaq.sequences.Fasta('contig2', 'AGTGATATCCTGCGATCTATAATTTTTTTCGCGGGATCTTGAACGCGACGATGTTCGATAATTCAATGCAAAGGAGCGACCCGCAAGTACACAGGACTGCAAA')
+        }
+
+        hits = [
+            ['1', '147', '61', '207', '147', '147', '100.00', '147', '239', '1', '1', 'ref_gene', 'contig1'],
+            ['18', '120', '103', '1', '103', '103', '100.00', '147', '103', '1', '-1', 'ref_gene', 'contig2']
+        ]
+        nucmer_hits = {
+            'contig1': [
+                pymummer.alignment.Alignment('\t'.join(hits[0])),
+            ],
+            'contig2': [
+                pymummer.alignment.Alignment('\t'.join(hits[1])),
+            ]
+        }
+
+        assembly_fasta = os.path.join(data_dir, 'cluster_test_nucmer_hits_to_assembled_gene_sequences.assembly.fa')
+        tmp_outfile = 'tmp.test_nucmer_hits_to_assembled_gene_sequences.out.fa'
+        expected_outfile = os.path.join(data_dir, 'cluster_test_nucmer_hits_to_assembled_gene_sequences.expected.out.fa')
+        cluster.Cluster._nucmer_hits_to_assembled_gene_sequences(nucmer_hits, ref_gene, assembly, tmp_outfile)
+        self.assertTrue(filecmp.cmp(tmp_outfile, expected_outfile, shallow=False))
+        os.unlink(tmp_outfile)
 
 
     def test_whole_gene_covered_by_nucmer_hits(self):
@@ -637,7 +666,7 @@ class TestCluster(unittest.TestCase):
             ( ('ref1', 3), ('C', 'A,G', 42, '21,11,10') ),
             ( ('ref1', 4), ('C', 'AC', 41, '0,42') )
         ]
- 
+
         for t in tests:
             self.assertEqual(c._get_assembly_read_depths(t[0][0], t[0][1]), t[1])
 
@@ -652,7 +681,7 @@ class TestCluster(unittest.TestCase):
             ('16__cat_2_M35190.scaffold.1', 179),
             ('16__cat_2_M35190.scaffold.1', 263),
             ('16__cat_2_M35190.scaffold.6', 93)
-        ] 
+        ]
         self.assertEqual(expected, c._get_samtools_variant_positions())
 
 
@@ -764,4 +793,4 @@ class TestCluster(unittest.TestCase):
         ]
         self.assertEqual(expected, c.report_lines)
         clean_cluster_dir(cluster_dir)
-        
+

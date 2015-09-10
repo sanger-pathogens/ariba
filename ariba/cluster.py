@@ -129,6 +129,7 @@ class Cluster:
         self.final_assembly_bam = os.path.join(self.root_dir, 'assembly.reads_mapped.bam')
         self.final_assembly_read_depths = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.read_depths.gz')
         self.final_assembly_vcf = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.vcf')
+        self.final_assembled_genes_fa = os.path.join(self.root_dir, 'assembly.genes.fa')
         self.final_assembly = {}
         self.mummer_variants = {}
         self.variant_depths = {}
@@ -523,6 +524,38 @@ class Cluster:
             pyfastaq.intervals.merge_overlapping_in_list(coords)
             cov[contig] = pyfastaq.intervals.length_sum_from_list(coords)
         return cov
+
+
+    @staticmethod
+    def _nucmer_hits_to_assembled_gene_sequences(nucmer_hits, ref_gene, assembly, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
+
+        for contig in sorted(nucmer_hits):
+            for hit in nucmer_hits[contig]:
+                qry_coords = hit.qry_coords()
+                fa = assembly[hit.qry_name].subseq(qry_coords.start, qry_coords.end + 1)
+                if hit.on_same_strand():
+                    strand = '+'
+                else:
+                    fa.revcomp()
+                    strand = '-'
+                ref_coords = hit.ref_coords()
+                fa.id = '.'.join([
+                    ref_gene.id,
+                    str(ref_coords.start + 1),
+                    str(ref_coords.end + 1),
+                    contig,
+                    str(qry_coords.start + 1),
+                    str(qry_coords.end + 1),
+                    strand
+                ])
+
+                if hit.hit_length_ref == hit.ref_length:
+                    fa.id += '.complete'
+
+                print(fa, file=f)
+
+        pyfastaq.utils.close(f)
 
 
     def _whole_gene_covered_by_nucmer_hits(self):
@@ -1046,6 +1079,7 @@ class Cluster:
             self._update_flag_from_nucmer_file()
             self._make_assembly_vcf()
             self._get_vcf_variant_counts()
+            self._nucmer_hits_to_assembled_gene_sequences(self.nucmer_hits, self.gene, self.final_assembly, self.final_assembled_genes_fa)
 
         self._make_report_lines()
         self._clean()
