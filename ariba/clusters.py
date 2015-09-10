@@ -44,7 +44,6 @@ class Clusters:
       run_cd_hit=True,
       clean=1,
     ):
-        self.db_fasta = os.path.abspath(db_fasta)
         self.reads_1 = os.path.abspath(reads_1)
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
@@ -57,12 +56,13 @@ class Clusters:
         self.assembly_kmer = assembly_kmer
         self.spades_other = spades_other
 
-        self.db_fasta_clustered = os.path.join(self.outdir, 'genes.clustered.fa')
+        self.db_fasta_clustered = os.path.join(self.outdir, 'input_genes.clustered.fa')
         self.cluster_ids = {}
         self.bam_prefix = os.path.join(self.outdir, 'map_all_reads')
         self.bam = self.bam_prefix + '.bam'
         self.report_file_tsv = os.path.join(self.outdir, 'report.tsv')
         self.report_file_xls = os.path.join(self.outdir, 'report.xls')
+        self.catted_assembled_genes_fasta = os.path.join(self.outdir, 'assembled_genes.fa')
         self.threads = threads
         self.verbose = verbose
 
@@ -119,6 +119,10 @@ class Clusters:
                 os.mkdir(d)
             except:
                 raise Error('Error mkdir ' + d)
+
+        self.db_fasta = os.path.join(self.outdir, 'input_genes.not_clustered.fa')
+        pyfastaq.tasks.to_fasta(db_fasta, self.db_fasta, check_unique=True)
+
 
     def _run_cdhit(self):
         r = cdhit.Runner(
@@ -357,12 +361,27 @@ class Clusters:
         workbook.save(self.report_file_xls)
 
 
+    def _write_catted_assembled_genes_fasta(self):
+        f = pyfastaq.utils.open_file_write(self.catted_assembled_genes_fasta)
+
+        for gene in sorted(self.clusters):
+            cluster_fasta = self.clusters[gene].final_assembled_genes_fa
+            if os.path.exists(cluster_fasta):
+                file_reader = pyfastaq.sequences.file_reader(cluster_fasta)
+                for seq in file_reader:
+                    print(seq, file=f)
+
+        pyfastaq.utils.close(f)
+
+
     def _clean(self):
         to_clean = [
             [
             ],
             [
-                self.bam
+                self.bam,
+                self.db_fasta,
+                self.db_fasta + '.fai',
             ],
             [
                 self.db_fasta_clustered,
@@ -400,14 +419,22 @@ class Clusters:
             print('Finished mapping\n')
             print('{:_^79}'.format(' Generating clusters '), flush=True)
         self._bam_to_clusters_reads()
-        self._set_insert_size_data()
+        if len(self.cluster_to_dir) > 0:
+            self._set_insert_size_data()
+            if self.verbose:
+                print('{:_^79}'.format(' Assembling each cluster '), flush=True)
+            self._init_and_run_clusters()
+            if self.verbose:
+                print('Finished assembling clusters\n')
+        else:
+            if self.verbose:
+                print('No reads mapped. Skipping all assemblies', flush=True)
+            print('WARNING: no reads mapped to reference genes. Therefore no local assemblies will be run', file=sys.stderr)
+
         if self.verbose:
-            print('{:_^79}'.format(' Assembling each cluster '), flush=True)
-        self._init_and_run_clusters()
-        if self.verbose:
-            print('Finished assembling clusters\n')
             print('{:_^79}'.format(' Writing report files '), flush=True)
         self._write_reports()
+        self._write_catted_assembled_genes_fasta()
         if self.verbose:
             print('Finished writing report files. Cleaning files', flush=True)
         self._clean()
