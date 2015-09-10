@@ -400,12 +400,19 @@ class Clusters:
             print('Finished mapping\n')
             print('{:_^79}'.format(' Generating clusters '), flush=True)
         self._bam_to_clusters_reads()
-        self._set_insert_size_data()
+        if len(self.cluster_to_dir) > 0:
+            self._set_insert_size_data()
+            if self.verbose:
+                print('{:_^79}'.format(' Assembling each cluster '), flush=True)
+            self._init_and_run_clusters()
+            if self.verbose:
+                print('Finished assembling clusters\n')
+        else:
+            if self.verbose:
+                print('No reads mapped. Skipping all assemblies', flush=True)
+            print('WARNING: no reads mapped to reference genes. Therefore no local assemblies will be run', file=sys.stderr)
+
         if self.verbose:
-            print('{:_^79}'.format(' Assembling each cluster '), flush=True)
-        self._init_and_run_clusters()
-        if self.verbose:
-            print('Finished assembling clusters\n')
             print('{:_^79}'.format(' Writing report files '), flush=True)
         self._write_reports()
         if self.verbose:
