@@ -11,6 +11,7 @@ flags_in_order = [
     'assembly_fail',
     'variants_suggest_collapsed_repeat',
     'hit_both_strands',
+    'has_nonsynonymous_variants',
 ]
 
 
