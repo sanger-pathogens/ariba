@@ -75,7 +75,8 @@ class TestSummry(unittest.TestCase):
             (7, 1),
             (259, 1),
             (15, 2),
-            (27, 3),
+            (539, 3),
+            (27, 4),
         ]
 
         for t in tests:
@@ -96,8 +97,8 @@ class TestSummry(unittest.TestCase):
         s._gather_output_rows()
         expected = [
             ['filename', 'gene1', 'gene2', 'gene3'],
-            [infiles[0], 3, 2, 0],
-            [infiles[1], 3, 0, 3],
+            [infiles[0], 4, 2, 0],
+            [infiles[1], 4, 0, 4],
         ]
         self.assertEqual(expected, s.rows_out)
 

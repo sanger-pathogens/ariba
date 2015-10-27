@@ -122,10 +122,13 @@ class Summary:
         if f.has('hit_both_strands') or (not f.has('complete_orf')):
             return 1
 
-        if f.has('unique_contig') and f.has('gene_assembled_into_one_contig'):
-            return 3
-
-        return 2
+        if f.has('unique_contig') and f.has('gene_assembled_into_one_contig') and f.has('complete_orf'):
+            if f.has('has_nonsynonymous_variants'):
+                return 3
+            else:
+                return 4
+        else:
+            return 2
 
 
     def _pc_id_of_longest(self, l):
