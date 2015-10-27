@@ -730,7 +730,50 @@ class TestCluster(unittest.TestCase):
         clean_cluster_dir(cluster_dir)
 
 
-    def test_make_report_lines(self):
+    def test_make_report_lines_nonsynonymous(self):
+        '''test _make_report_lines'''
+        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
+        clean_cluster_dir(cluster_dir)
+        c = cluster.Cluster(cluster_dir, 'cluster_name')
+        c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
+        v1 = pymummer.variant.Variant(pymummer.snp.Snp('8\tA\tG\t8\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+
+        nucmer_hit = ['1', '10', '1', '10', '10', '10', '90.00', '1000', '1000', '1', '1', 'gene', 'contig']
+        c.nucmer_hits = {'contig': [pymummer.alignment.Alignment('\t'.join(nucmer_hit))]}
+        c.mummer_variants = {'contig': [[v1]]}
+        c.percent_identities = {'contig': 92.42}
+        c.status_flag.set_flag(42)
+        c.assembled_ok = True
+        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_make_report_lines.read_depths.gz')
+        c._make_report_lines()
+        expected = [[
+            'gene',
+            554,
+            2,
+            'cluster_name',
+            39,
+            10,
+            92.42,
+            'SNP',
+            'NONSYN',
+            'E3G',
+            8,
+            8,
+            'A',
+            'contig',
+            39,
+            8,
+            8,
+            'G',
+            '.',
+            '.',
+            '.'
+        ]]
+        self.assertEqual(expected, c.report_lines)
+        clean_cluster_dir(cluster_dir)
+
+
+    def test_make_report_lines_synonymous(self):
         '''test _make_report_lines'''
         cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
         clean_cluster_dir(cluster_dir)
