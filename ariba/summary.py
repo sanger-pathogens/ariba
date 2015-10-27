@@ -48,6 +48,7 @@ class Summary:
       outfile,
       filenames=None,
       fofn=None,
+      filter_output=True,
       min_id=90.0
     ):
         if filenames is None and fofn is None:
@@ -61,6 +62,7 @@ class Summary:
         if fofn is not None:
             self.filenames.extend(self._load_fofn(fofn))
 
+        self.filter_output = filter_output
         self.min_id = min_id
         self.outfile = outfile
 
@@ -168,6 +170,9 @@ class Summary:
 
 
     def _filter_output_rows(self):
+        if not self.filter_output:
+            return
+
         # remove rows that are all zeros
         self.rows_out = [x for x in self.rows_out if x[1:] != [0]*(len(x)-1)]
 
