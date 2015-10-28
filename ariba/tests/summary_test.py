@@ -1,4 +1,5 @@
 import unittest
+import copy
 import filecmp
 import os
 from ariba import summary, flag
@@ -75,7 +76,8 @@ class TestSummry(unittest.TestCase):
             (7, 1),
             (259, 1),
             (15, 2),
-            (27, 3),
+            (539, 3),
+            (27, 4),
         ]
 
         for t in tests:
@@ -96,13 +98,13 @@ class TestSummry(unittest.TestCase):
         s._gather_output_rows()
         expected = [
             ['filename', 'gene1', 'gene2', 'gene3'],
-            [infiles[0], 3, 2, 0],
-            [infiles[1], 3, 0, 3],
+            [infiles[0], 4, 2, 0],
+            [infiles[1], 4, 0, 4],
         ]
         self.assertEqual(expected, s.rows_out)
 
 
-    def test_filter_output_rows(self):
+    def test_filter_output_rows_filter_true(self):
         '''Test _filter_output_rows'''
         s = summary.Summary('out', filenames=['spam', 'eggs'])
         s.rows_out = [
@@ -120,6 +122,22 @@ class TestSummry(unittest.TestCase):
 
         s._filter_output_rows()
         self.assertEqual(s.rows_out, expected)
+
+
+    def test_filter_output_rows_filter_false(self):
+        '''Test _filter_output_rows'''
+        s = summary.Summary('out', filenames=['spam', 'eggs'], filter_output=False)
+        rows_out = [
+            ['filename', 'gene1', 'gene2', 'gene3'],
+            ['file1', 0, 0, 0],
+            ['file2', 1, 0, 3],
+            ['file3', 2, 0, 4],
+        ]
+
+        s.rows_out = copy.copy(rows_out)
+
+        s._filter_output_rows()
+        self.assertEqual(s.rows_out, rows_out)
 
 
     def test_write_tsv(self):

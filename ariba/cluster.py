@@ -874,7 +874,10 @@ class Cluster:
             self.status_flag.add('variants_suggest_collapsed_repeat')
 
 
-    def _make_report_lines(self):
+    def _initial_make_report_lines(self):
+        '''Makes report lines. While they are being made, we discover if there were
+        and non-synonymous variants. This affects the flag, which also gets updated
+        by the function. To then fix the report lines, must run _update_flag_in_report_lines()'''
         self.report_lines = []
         total_reads = self._get_read_counts()
 
@@ -903,6 +906,9 @@ class Cluster:
                 t = self._get_variant_effect(variants)
                 if t is not None:
                     effect, new_bases = t
+                    if effect != 'SYN':
+                        self.status_flag.add('has_nonsynonymous_variants')
+
                     for v in variants:
                         depths = self._get_assembly_read_depths(contig, v.qry_start)
                         if depths is None:
@@ -986,6 +992,20 @@ class Cluster:
                 )
 
         self.report_lines.sort(key=itemgetter(0, 14, 15))
+
+
+    def _update_flag_in_report_lines(self):
+        '''This corrects the flag in all the report lines made by _initial_make_report_lines()'''
+        flag_column = 1
+        if self.status_flag.has('has_nonsynonymous_variants'):
+            for line in self.report_lines:
+                line[flag_column] = self.status_flag.to_number()
+
+
+    def _make_report_lines(self):
+        self._initial_make_report_lines()
+        self._update_flag_in_report_lines()
+
 
     def _clean(self):
         if self.verbose:

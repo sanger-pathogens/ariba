@@ -24,7 +24,7 @@ class TestFlag(unittest.TestCase):
     def test_add(self):
         '''Test add'''
         f = flag.Flag()
-        expected = [1, 3, 7, 15, 31, 63, 127, 255, 511]
+        expected = [1, 3, 7, 15, 31, 63, 127, 255, 511, 1023]
         for i in range(len(flag.flags_in_order)):
             f.add(flag.flags_in_order[i])
             self.assertEqual(f.to_number(), expected[i])
@@ -50,6 +50,7 @@ class TestFlag(unittest.TestCase):
             '[ ] assembly_fail',
             '[ ] variants_suggest_collapsed_repeat',
             '[ ] hit_both_strands',
+            '[ ] has_nonsynonymous_variants',
         ])
 
         self.assertEqual(expected, f.to_long_string())

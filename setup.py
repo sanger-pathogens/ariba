@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ariba',
-    version='0.5.0',
+    version='0.6.0',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
     author='Martin Hunt',
@@ -18,9 +18,9 @@ setup(
     tests_require=['nose >= 1.3'],
     install_requires=[
         'openpyxl',
-        'pyfastaq >= 3.0.1',
+        'pyfastaq >= 3.10.0',
         'pysam >= 0.8.1',
-        'pymummer>=0.0.2'
+        'pymummer>=0.6.1'
     ],
     license='GPLv3',
     classifiers=[

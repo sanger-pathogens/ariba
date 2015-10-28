@@ -48,6 +48,7 @@ class Summary:
       outfile,
       filenames=None,
       fofn=None,
+      filter_output=True,
       min_id=90.0
     ):
         if filenames is None and fofn is None:
@@ -61,6 +62,7 @@ class Summary:
         if fofn is not None:
             self.filenames.extend(self._load_fofn(fofn))
 
+        self.filter_output = filter_output
         self.min_id = min_id
         self.outfile = outfile
 
@@ -122,10 +124,13 @@ class Summary:
         if f.has('hit_both_strands') or (not f.has('complete_orf')):
             return 1
 
-        if f.has('unique_contig') and f.has('gene_assembled_into_one_contig'):
-            return 3
-
-        return 2
+        if f.has('unique_contig') and f.has('gene_assembled_into_one_contig') and f.has('complete_orf'):
+            if f.has('has_nonsynonymous_variants'):
+                return 3
+            else:
+                return 4
+        else:
+            return 2
 
 
     def _pc_id_of_longest(self, l):
@@ -165,6 +170,9 @@ class Summary:
 
 
     def _filter_output_rows(self):
+        if not self.filter_output:
+            return
+
         # remove rows that are all zeros
         self.rows_out = [x for x in self.rows_out if x[1:] != [0]*(len(x)-1)]
 
