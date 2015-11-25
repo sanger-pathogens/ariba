@@ -1,7 +1,7 @@
 import os
 import openpyxl
 import pyfastaq
-from ariba import flag
+from ariba import flag, common
 
 class Error (Exception): pass
 
@@ -49,6 +49,7 @@ class Summary:
       filenames=None,
       fofn=None,
       filter_output=True,
+      js_candy_prefix=None,
       min_id=90.0
     ):
         if filenames is None and fofn is None:
@@ -65,6 +66,7 @@ class Summary:
         self.filter_output = filter_output
         self.min_id = min_id
         self.outfile = outfile
+        self.js_candy_prefix = js_candy_prefix
 
 
     def _load_fofn(self, fofn):
@@ -204,6 +206,55 @@ class Summary:
         workbook.save(self.outfile)
 
 
+    @staticmethod
+    def _distance_score_between_values(value1, value2):
+        if value1 != value2 and 0 in [value1, value2]:
+            return 1
+        else:
+            return 0
+
+
+    @classmethod
+    def _distance_score_between_lists(cls, scores1, scores2):
+        assert len(scores1) == len(scores2)
+        return sum([cls._distance_score_between_values(scores1[i], scores2[i]) for i in range(1, len(scores1))])
+
+
+    def _write_distance_matrix(self, outfile):
+        if len(self.rows_out) < 3:
+            raise Error('Cannot calculate distance matrix to make tree for js_candy.\n' +
+                        'Only one sample present.')
+
+        if len(self.rows_out[0]) < 2:
+            raise Error('Cannot calculate distance matrix to make tree for js_candy.\n' +
+                        'No genes present in output')
+
+        with open(outfile, 'w') as f:
+            sample_names = [x[0] for x in self.rows_out]
+            print(*sample_names[1:], sep='\t', file=f)
+
+            for i in range(1,len(self.rows_out)):
+                scores = []
+                for j in range(2, len(self.rows_out)):
+                    scores.append(self._distance_score_between_lists(self.rows_out[i], self.rows_out[j]))
+                print(self.rows_out[i][0], *scores, sep='\t', file=f)
+
+
+    @staticmethod
+    def _newick_from_dist_matrix(distance_file, outfile):
+        r_script = outfile + '.tmp.R'
+
+        with open(r_script, 'w') as f:
+            print('library(ape)', file=f)
+            print('a=read.table("', distance_file, '", header=TRUE, row.names=1)', sep='', file=f)
+            print('h=hclust(dist(a))', file=f)
+            print('write.tree(as.phylo(h), file="', outfile, '")', sep='', file=f)
+
+        common.syscall('R CMD BATCH ' + r_script)
+        os.unlink(r_script + 'out')
+        os.unlink(r_script)
+
+
     def run(self):
         self._check_files_exist()
         self._gather_output_rows()
@@ -213,4 +264,5 @@ class Summary:
         else:
             self._write_tsv()
 
-
+        if self.js_candy_prefix is not None:
+            self._write_js_candy_files()
