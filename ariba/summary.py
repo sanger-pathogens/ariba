@@ -1,7 +1,7 @@
 import os
 import openpyxl
 import pyfastaq
-from ariba import flag
+from ariba import flag, common
 
 class Error (Exception): pass
 
@@ -49,6 +49,7 @@ class Summary:
       filenames=None,
       fofn=None,
       filter_output=True,
+      js_candy_prefix=None,
       min_id=90.0
     ):
         if filenames is None and fofn is None:
@@ -65,6 +66,7 @@ class Summary:
         self.filter_output = filter_output
         self.min_id = min_id
         self.outfile = outfile
+        self.js_candy_prefix = js_candy_prefix
 
 
     def _load_fofn(self, fofn):
@@ -195,6 +197,16 @@ class Summary:
         pyfastaq.utils.close(f)
 
 
+    def _write_js_candy_csv(self, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
+        # js candy needs the "name" column.
+        # Names must match those used in the tree file
+        print('name', *self.rows_out[0][1:], sep=',', file=f)
+        for row in self.rows_out[1:]:
+            print(*row, sep=',', file=f)
+        pyfastaq.utils.close(f)
+
+
     def _write_xls(self):
         workbook = openpyxl.Workbook()
         worksheet = workbook.worksheets[0]
@@ -202,6 +214,65 @@ class Summary:
         for row in self.rows_out:
             worksheet.append(row)
         workbook.save(self.outfile)
+
+
+    @staticmethod
+    def _distance_score_between_values(value1, value2):
+        if value1 != value2 and 0 in [value1, value2]:
+            return 1
+        else:
+            return 0
+
+
+    @classmethod
+    def _distance_score_between_lists(cls, scores1, scores2):
+        assert len(scores1) == len(scores2)
+        return sum([cls._distance_score_between_values(scores1[i], scores2[i]) for i in range(1, len(scores1))])
+
+
+    def _write_distance_matrix(self, outfile):
+        if len(self.rows_out) < 3:
+            raise Error('Cannot calculate distance matrix to make tree for js_candy.\n' +
+                        'Only one sample present.')
+
+        if len(self.rows_out[0]) < 2:
+            raise Error('Cannot calculate distance matrix to make tree for js_candy.\n' +
+                        'No genes present in output')
+
+        with open(outfile, 'w') as f:
+            sample_names = [x[0] for x in self.rows_out]
+            print(*sample_names[1:], sep='\t', file=f)
+
+            for i in range(1,len(self.rows_out)):
+                scores = []
+                for j in range(2, len(self.rows_out)):
+                    scores.append(self._distance_score_between_lists(self.rows_out[i], self.rows_out[j]))
+                print(self.rows_out[i][0], *scores, sep='\t', file=f)
+
+
+    @staticmethod
+    def _newick_from_dist_matrix(distance_file, outfile):
+        r_script = outfile + '.tmp.R'
+
+        with open(r_script, 'w') as f:
+            print('library(ape)', file=f)
+            print('a=read.table("', distance_file, '", header=TRUE, row.names=1)', sep='', file=f)
+            print('h=hclust(dist(a))', file=f)
+            print('write.tree(as.phylo(h), file="', outfile, '")', sep='', file=f)
+
+        common.syscall('R CMD BATCH --no-save ' + r_script)
+        os.unlink(r_script + 'out')
+        os.unlink(r_script)
+
+
+    def _write_js_candy_files(self, outprefix):
+        distance_file = outprefix + '.distance_matrix'
+        tree_file = outprefix + '.tre'
+        csv_file = outprefix + '.csv'
+        self._write_distance_matrix(distance_file)
+        self._newick_from_dist_matrix(distance_file, tree_file)
+        os.unlink(distance_file)
+        self._write_js_candy_csv(csv_file)
 
 
     def run(self):
@@ -213,4 +284,5 @@ class Summary:
         else:
             self._write_tsv()
 
-
+        if self.js_candy_prefix is not None:
+            self._write_js_candy_files(self.js_candy_prefix)
