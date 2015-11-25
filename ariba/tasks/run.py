@@ -1,4 +1,5 @@
 import argparse
+import sys
 import pyfastaq
 import ariba
 
@@ -29,6 +30,10 @@ def run():
     assembly_group.add_argument('--assembler_k', type=int, help='kmer size to use with assembler. You can use 0 to set kmer to 2/3 of the read length. Warning - lower kmers are usually better. [%(default)s]', metavar='INT', default=21)
     assembly_group.add_argument('--spades_other', help='Put options string to be used with spades in quotes. This will NOT be sanity checked. Do not use -k or -t: for these options you should use the ariba run options --assembler_k and --threads [%(default)s]', default="--only-assembler", metavar="OPTIONS")
 
+    refcheck_group = parser.add_argument_group('refcheck options')
+    refcheck_group.add_argument('--refcheck_min_length', type=int, help='Minimum allowed length in nucleotides of reference gene [%(default)s]', metavar='INT', default=6)
+    refcheck_group.add_argument('--refcheck_max_length', type=int, help='Maximum allowed length in nucleotides of reference gene [%(default)s]', metavar='INT', default=10000)
+
     other_group = parser.add_argument_group('Other options')
     other_group.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
     other_group.add_argument('--threads', type=int, help='Number of threads for bowtie2 and spades [%(default)s]', default=1, metavar='INT')
@@ -57,6 +62,24 @@ def run():
         options.velvet = 'velvet'
     ariba.external_progs.check_versions(options, verbose=options.verbose, not_required=set(['sspace', 'gapfiller']))
     pyfastaq.sequences.genetic_code = options.genetic_code
+
+
+    checker = ariba.refcheck.Checker(
+        options.db_fasta,
+        min_length=options.refcheck_min_length,
+        max_length=options.refcheck_max_length,
+    )
+    ok, reason, seq = checker.run()
+
+    if not ok:
+        print('\nInput reference file of genes failed refcheck! Cannot continue.', file=sys.stderr)
+        print('The first failed sequence is:\n', file=sys.stderr)
+        print(seq, file=sys.stderr)
+        print('\nIt failed for the reason:', reason, file=sys.stderr)
+        print('\nTo make a new fasta file called new_genes.fa, with the bad genes fixed/removed run:\n', file=sys.stderr)
+        print('    ariba refcheck -o new_genes', options.db_fasta, file=sys.stderr)
+        sys.exit(1)
+
 
     c = ariba.clusters.Clusters(
           options.db_fasta,
