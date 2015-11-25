@@ -265,6 +265,16 @@ class Summary:
         os.unlink(r_script)
 
 
+    def _write_js_candy_files(self, outprefix):
+        distance_file = outprefix + '.distance_matrix'
+        tree_file = outprefix + '.tre'
+        csv_file = outprefix + '.csv'
+        self._write_distance_matrix(distance_file)
+        self._newick_from_dist_matrix(distance_file, tree_file)
+        os.unlink(distance_file)
+        self._write_js_candy_csv(csv_file)
+
+
     def run(self):
         self._check_files_exist()
         self._gather_output_rows()
@@ -275,4 +285,4 @@ class Summary:
             self._write_tsv()
 
         if self.js_candy_prefix is not None:
-            self._write_js_candy_files()
+            self._write_js_candy_files(self.js_candy_prefix)

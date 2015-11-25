@@ -228,3 +228,22 @@ class TestSummry(unittest.TestCase):
         self.assertTrue(filecmp.cmp(expected, tmp_tree, shallow=False))
         os.unlink(tmp_tree)
 
+
+    def test_write_js_candy_files(self):
+        '''Test _write_js_candy_files'''
+        tmp_prefix = 'tmp.test.write_js_candy_files'
+        s = summary.Summary('out', filenames=['spam', 'eggs'])
+        s.rows_out = [
+            ['filename', 'gene1', 'gene2', 'gene3'],
+            ['file1', 0, 1, 0],
+            ['file2', 1, 0, 3],
+            ['file3', 0, 0, 4],
+        ]
+        s._write_js_candy_files(tmp_prefix)
+        expected_csv = os.path.join(data_dir, 'summary_test_write_js_candy_files.csv')
+        expected_tre = os.path.join(data_dir, 'summary_test_write_js_candy_files.tre')
+        self.assertTrue(filecmp.cmp(expected_csv, tmp_prefix + '.csv', shallow=False))
+        self.assertTrue(filecmp.cmp(expected_tre, tmp_prefix + '.tre', shallow=False))
+        os.unlink(tmp_prefix + '.csv')
+        os.unlink(tmp_prefix + '.tre')
+
