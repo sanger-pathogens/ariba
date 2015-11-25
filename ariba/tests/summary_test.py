@@ -155,6 +155,21 @@ class TestSummry(unittest.TestCase):
         os.unlink(tmp_out)
 
 
+    def test_write_js_candy_csv(self):
+        '''Test _write_js_candy_csv'''
+        tmp_out = 'tmp.test_write_js_candy.csv'
+        s = summary.Summary(tmp_out, filenames=['spam', 'eggs'])
+        s.rows_out = [
+            ['filename', 'gene1', 'gene3'],
+            ['file1', 1, 3],
+            ['file2', 2, 4],
+        ]
+        s._write_js_candy_csv(tmp_out)
+        expected = os.path.join(data_dir, 'summary_test_write_js_candy_csv.csv')
+        self.assertTrue(filecmp.cmp(expected, tmp_out, shallow=False))
+        os.unlink(tmp_out)
+
+
     def test_distance_score_bewteen_values(self):
         '''Test _distance_score_bewteen_values'''
         tests = [
