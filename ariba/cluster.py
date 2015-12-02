@@ -11,6 +11,7 @@ from ariba import common, mapping, bam_parse, flag, faidx
 
 class Error (Exception): pass
 
+unittest=False
 
 class Cluster:
     def __init__(self,
@@ -33,7 +34,6 @@ class Cluster:
       bcf_min_qual=20,
       assembled_threshold=0.95,
       unique_threshold=0.03,
-      verbose=False,
       bcftools_exe='bcftools',
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
@@ -107,7 +107,6 @@ class Cluster:
         self.sspace_sd = sspace_sd
 
         self.threads = threads
-        self.verbose = verbose
         self.assembled_threshold = assembled_threshold
         self.unique_threshold = unique_threshold
         self.status_flag = flag.Flag()
@@ -135,6 +134,16 @@ class Cluster:
         self.variant_depths = {}
         self.percent_identities = {}
 
+        # The log filehandle self.log_fh is set at the start of the run() method.
+        # Lots of other methods use self.log_fh. But for unit testing, run() isn't
+        # run. So we need to set this to something for unit testing.
+        # On the other hand, setting it here breaks a real run of ARIBA because
+        # multiprocessing complains with the error:
+        # TypeError: cannot serialize '_io.TextIOWrapper' object.
+        # Hence the following two lines...
+        if unittest:
+            self.log_fh = sys.stdout
+
 
     def _get_read_counts(self):
         count1 = pyfastaq.tasks.count_sequences(self.reads1)
@@ -150,7 +159,7 @@ class Cluster:
         assert not os.path.exists(tmp_bam)
         tmp_fa = os.path.join(self.root_dir, 'tmp.get_total_alignment_score.ref.fa')
         assert not os.path.exists(tmp_fa)
-        faidx.write_fa_subset([gene_name], self.genes_fa, tmp_fa, samtools_exe=self.samtools_exe, verbose=self.verbose)
+        faidx.write_fa_subset([gene_name], self.genes_fa, tmp_fa, samtools_exe=self.samtools_exe, verbose=True, verbose_filehandle=self.log_fh)
         mapping.run_bowtie2(
             self.reads1,
             self.reads2,
@@ -160,7 +169,8 @@ class Cluster:
             samtools=self.samtools_exe,
             bowtie2=self.bowtie2_exe,
             bowtie2_preset=self.bowtie2_preset,
-            verbose=self.verbose,
+            verbose=True,
+            verbose_filehandle=self.log_fh
         )
 
         score = mapping.get_total_alignment_score(tmp_bam)
@@ -177,26 +187,22 @@ class Cluster:
             pyfastaq.tasks.file_to_dict(self.genes_fa, seqs)
             assert len(seqs) == 1
             gene_name = list(seqs.values())[0].id
-            if self.verbose:
-                print('No need to choose gene for this cluster because only has one gene:', gene_name)
+            print('No need to choose gene for this cluster because only has one gene:', gene_name, file=self.log_fh)
             return gene_name
 
-        if self.verbose:
-            print('\nChoosing best gene from cluster of', cluster_size, 'genes...')
+        print('\nChoosing best gene from cluster of', cluster_size, 'genes...', file=self.log_fh)
         file_reader = pyfastaq.sequences.file_reader(self.genes_fa)
         best_score = 0
         best_gene_name = None
         for seq in file_reader:
             score = self._get_total_alignment_score(seq.id)
-            if self.verbose:
-                print('Total alignment score for gene', seq.id, 'is', score)
+            print('Total alignment score for gene', seq.id, 'is', score, file=self.log_fh)
             if score > best_score:
                 best_score = score
                 best_gene_name = seq.id
 
-        if self.verbose:
-            print('Best gene is', best_gene_name, 'with total alignment score of', best_score)
-            print()
+        print('Best gene is', best_gene_name, 'with total alignment score of', best_score, file=self.log_fh)
+        print()
 
         return best_gene_name
 
@@ -205,7 +211,7 @@ class Cluster:
         gene_name = self._get_best_gene_by_alignment_score()
         if gene_name is None:
             return None
-        faidx.write_fa_subset([gene_name], self.genes_fa, self.gene_fa, samtools_exe=self.samtools_exe, verbose=self.verbose)
+        faidx.write_fa_subset([gene_name], self.genes_fa, self.gene_fa, samtools_exe=self.samtools_exe, verbose=True, verbose_filehandle=self.log_fh)
         seqs = {}
         pyfastaq.tasks.file_to_dict(self.gene_fa, seqs)
         assert len(seqs) == 1
@@ -236,7 +242,8 @@ class Cluster:
             samtools=self.samtools_exe,
             bowtie2=self.bowtie2_exe,
             bowtie2_preset=self.bowtie2_preset,
-            verbose=self.verbose,
+            verbose=True,
+            verbose_filehandle=self.log_fh
         )
 
         cmd = ' '.join([
@@ -251,7 +258,7 @@ class Cluster:
         os.chdir(self.assembly_dir)
         velvet_contigs = os.path.join(os.path.split(self.assembler_dir)[1], 'contigs.fa')
 
-        self.velveth_ok, err = common.syscall(cmd, verbose=self.verbose, allow_fail=True)
+        self.velveth_ok, err = common.syscall(cmd, verbose=True, allow_fail=True, verbose_filehandle=self.log_fh)
         if not self.velveth_ok:
             with open('velveth_errors', 'w') as f:
                 print(err, file=f)
@@ -270,7 +277,7 @@ class Cluster:
             '-cov_cutoff auto',
         ])
 
-        self.assembled_ok, err = common.syscall(cmd, verbose=self.verbose, allow_fail=True)
+        self.assembled_ok, err = common.syscall(cmd, verbose=True, allow_fail=True, verbose_filehandle=self.log_fh)
         if self.assembled_ok:
             os.symlink(velvet_contigs, os.path.basename(self.assembly_contigs))
         else:
@@ -304,7 +311,7 @@ class Cluster:
             open(spades_contigs, 'w').close()
             self.assembled_ok = True
         else:
-            self.assembled_ok, err = common.syscall(cmd, verbose=self.verbose, allow_fail=True)
+            self.assembled_ok, err = common.syscall(cmd, verbose=True, allow_fail=True, verbose_filehandle=self.log_fh)
         if self.assembled_ok:
             os.symlink(spades_contigs, os.path.basename(self.assembly_contigs))
         else:
@@ -346,7 +353,7 @@ class Cluster:
         ])
 
         sspace_scaffolds = os.path.abspath('standard_output.final.scaffolds.fasta')
-        common.syscall(cmd, verbose=self.verbose)
+        common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
         os.chdir(self.assembly_dir)
         os.symlink(os.path.relpath(sspace_scaffolds), os.path.basename(self.scaffolder_scaffolds))
         os.chdir(cwd)
@@ -388,7 +395,7 @@ class Cluster:
         ])
 
         gapfilled_scaffolds = os.path.join(self.gapfill_dir, 'standard_output', 'standard_output.gapfilled.final.fa')
-        common.syscall(cmd, verbose=self.verbose)
+        common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
         self._rename_scaffolds(gapfilled_scaffolds, self.gapfilled_scaffolds)
         os.chdir(cwd)
 
@@ -764,7 +771,7 @@ class Cluster:
             tmp_vcf
         ])
 
-        common.syscall(cmd, verbose=self.verbose)
+        common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
 
         cmd = ' '.join([
             self.bcftools_exe, 'call -m',
@@ -776,7 +783,7 @@ class Cluster:
             self.final_assembly_read_depths + '.tmp'
         ])
 
-        common.syscall(cmd, verbose=self.verbose)
+        common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
         pysam.tabix_compress(self.final_assembly_read_depths + '.tmp', self.final_assembly_read_depths)
         pysam.tabix_index(self.final_assembly_read_depths, seq_col=0, start_col=1, end_col=1)
         os.unlink(self.final_assembly_read_depths + '.tmp')
@@ -793,7 +800,7 @@ class Cluster:
             '-o', self.final_assembly_vcf
         ])
 
-        common.syscall(cmd, verbose=self.verbose)
+        common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
         os.unlink(tmp_vcf)
 
 
@@ -1008,12 +1015,10 @@ class Cluster:
 
 
     def _clean(self):
-        if self.verbose:
-            print('Cleaning', self.root_dir)
+        print('Cleaning', self.root_dir, file=self.log_fh)
 
         if self.clean > 0:
-            if self.verbose:
-                print('  rm -r', self.assembly_dir)
+            print('  rm -r', self.assembly_dir, file=self.log_fh)
             shutil.rmtree(self.assembly_dir)
 
         to_clean = [
@@ -1045,12 +1050,13 @@ class Cluster:
             for fname in to_clean[i]:
                 fullname = os.path.join(self.root_dir, fname)
                 if os.path.exists(fullname):
-                    if self.verbose:
-                        print('  rm', fname)
+                    print('  rm', fname, file=self.log_fh)
                     os.unlink(fullname)
 
 
     def run(self):
+        self.logfile = os.path.join(self.root_dir, 'log.txt')
+        self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
         self.gene = self._choose_best_gene()
         if self.gene is None:
             self.assembled_ok = False
@@ -1085,7 +1091,8 @@ class Cluster:
                 samtools=self.samtools_exe,
                 bowtie2=self.bowtie2_exe,
                 bowtie2_preset=self.bowtie2_preset,
-                verbose=self.verbose,
+                verbose=True,
+                verbose_filehandle=self.log_fh
             )
             self._parse_assembly_bam()
 
@@ -1103,3 +1110,8 @@ class Cluster:
 
         self._make_report_lines()
         self._clean()
+        pyfastaq.utils.close(self.log_fh)
+
+        # This stops multiprocessing complaining with the error:
+        # multiprocessing.pool.MaybeEncodingError: Error sending result: '[<ariba.cluster.Cluster object at 0x7ffa50f8bcd0>]'. Reason: 'TypeError("cannot serialize '_io.TextIOWrapper' object",)'
+        self.log_fh = None

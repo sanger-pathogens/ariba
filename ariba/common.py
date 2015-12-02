@@ -3,9 +3,9 @@ import subprocess
 
 version = '0.6.0'
 
-def syscall(cmd, allow_fail=False, verbose=False):
+def syscall(cmd, allow_fail=False, verbose=False, verbose_filehandle=sys.stdout):
     if verbose:
-        print('syscall:', cmd, flush=True)
+        print('syscall:', cmd, flush=True, file=verbose_filehandle)
     try:
         subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as error:

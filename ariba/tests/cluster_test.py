@@ -10,6 +10,7 @@ from ariba import cluster, flag
 
 modules_dir = os.path.dirname(os.path.abspath(cluster.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
+cluster.unittest = True
 
 
 def clean_cluster_dir(d, exclude=None):

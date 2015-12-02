@@ -1,4 +1,5 @@
 import os
+import sys
 import pysam
 from ariba import common
 
@@ -16,7 +17,8 @@ def run_bowtie2(
       samtools='samtools',
       bowtie2='bowtie2',
       bowtie2_preset='very-sensitive-local',
-      verbose=False
+      verbose=False,
+      verbose_filehandle=sys.stdout
     ):
 
     map_index = out_prefix + '.map_index'
@@ -47,16 +49,16 @@ def run_bowtie2(
         '- >', intermediate_bam
     ])
 
-    common.syscall(index_cmd, verbose=verbose)
-    common.syscall(map_cmd, verbose=verbose)
+    common.syscall(index_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
+    common.syscall(map_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
 
     if sort:
         threads = min(4, threads)
         thread_mem = int(500 / threads)
         sort_cmd = samtools + ' sort -@' + str(threads) + ' -m ' + str(thread_mem) + 'M ' + intermediate_bam + ' ' + out_prefix
         index_cmd = samtools + ' index ' + final_bam
-        common.syscall(sort_cmd, verbose=verbose)
-        common.syscall(index_cmd, verbose=verbose)
+        common.syscall(sort_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
+        common.syscall(index_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
     for fname in clean_files:
         os.unlink(fname)
 
