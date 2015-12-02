@@ -2,11 +2,17 @@ import os
 import sys
 import shutil
 import openpyxl
+import multiprocessing
 import pysam
 import pyfastaq
 from ariba import cdhit, cluster, common, mapping, histogram, faidx
 
 class Error (Exception): pass
+
+
+def _run_cluster(obj):
+    obj.run()
+    return obj
 
 
 class Clusters:
@@ -272,11 +278,12 @@ class Clusters:
             raise Error('Did not get any reads mapped to genes. Cannot continue')
 
         counter = 0
+        cluster_list = []
 
         for gene in sorted(self.cluster_to_dir):
             counter += 1
             if self.verbose:
-                print('\nAssembling cluster', counter, 'of', str(len(self.cluster_to_dir)))
+                print('\nConstructing cluster', counter, 'of', str(len(self.cluster_to_dir)))
             new_dir = self.cluster_to_dir[gene]
 
             faidx.write_fa_subset(
@@ -287,7 +294,7 @@ class Clusters:
                 verbose=self.verbose
             )
 
-            self.clusters[gene] = cluster.Cluster(
+            cluster_list.append(cluster.Cluster(
                 new_dir,
                 gene,
                 assembly_kmer=self.assembly_kmer,
@@ -300,7 +307,7 @@ class Clusters:
                 sspace_k=self.min_scaff_depth,
                 reads_insert=self.insert_size,
                 sspace_sd=self.insert_sspace_sd,
-                threads=self.threads,
+                threads=1, # clusters now run in parallel, so this should always be 1!
                 assembled_threshold=self.assembled_threshold,
                 unique_threshold=self.unique_threshold,
                 verbose=self.verbose,
@@ -314,9 +321,11 @@ class Clusters:
                 velvet_exe=self.velvet,
                 spades_other=self.spades_other,
                 clean=self.clean,
-            )
+            ))
 
-            self.clusters[gene].run()
+        pool = multiprocessing.Pool(self.threads)
+        cluster_list = pool.map(_run_cluster, cluster_list)
+        self.clusters = {c.name: c for c in cluster_list}
 
 
     def _write_reports(self):
