@@ -201,8 +201,8 @@ class Cluster:
                 best_score = score
                 best_gene_name = seq.id
 
-        print('Best gene is', best_gene_name, 'with total alignment score of', best_score, file=self.log_fh)
-        print()
+        print('\nBest gene is', best_gene_name, 'with total alignment score of', best_score, file=self.log_fh)
+        print(file=self.log_fh)
 
         return best_gene_name
 
