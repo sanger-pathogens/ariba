@@ -1,12 +1,23 @@
 import os
+import itertools
 import sys
 import shutil
 import openpyxl
+import multiprocessing
 import pysam
 import pyfastaq
 from ariba import cdhit, cluster, common, mapping, histogram, faidx
 
 class Error (Exception): pass
+
+
+def _run_cluster(obj, verbose):
+    if verbose:
+        print('Start running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
+    obj.run()
+    if verbose:
+        print('Finished running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
+    return obj
 
 
 class Clusters:
@@ -122,6 +133,7 @@ class Clusters:
 
         self.db_fasta = os.path.join(self.outdir, 'input_genes.not_clustered.fa')
         pyfastaq.tasks.to_fasta(db_fasta, self.db_fasta, check_unique=True)
+        common.syscall(self.samtools_exe + ' faidx ' + self.db_fasta)
 
 
     def _run_cdhit(self):
@@ -254,6 +266,7 @@ class Clusters:
         if self.verbose:
             print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)
 
+
     def _set_insert_size_data(self):
         assert len(self.insert_hist) > 0
         (x, self.insert_size, pc95, self.insert_sspace_sd) = self.insert_hist.stats()
@@ -272,11 +285,12 @@ class Clusters:
             raise Error('Did not get any reads mapped to genes. Cannot continue')
 
         counter = 0
+        cluster_list = []
 
         for gene in sorted(self.cluster_to_dir):
             counter += 1
             if self.verbose:
-                print('\nAssembling cluster', counter, 'of', str(len(self.cluster_to_dir)))
+                print('Constructing cluster', counter, 'of', str(len(self.cluster_to_dir)))
             new_dir = self.cluster_to_dir[gene]
 
             faidx.write_fa_subset(
@@ -287,7 +301,7 @@ class Clusters:
                 verbose=self.verbose
             )
 
-            self.clusters[gene] = cluster.Cluster(
+            cluster_list.append(cluster.Cluster(
                 new_dir,
                 gene,
                 assembly_kmer=self.assembly_kmer,
@@ -300,10 +314,9 @@ class Clusters:
                 sspace_k=self.min_scaff_depth,
                 reads_insert=self.insert_size,
                 sspace_sd=self.insert_sspace_sd,
-                threads=self.threads,
+                threads=1, # clusters now run in parallel, so this should always be 1!
                 assembled_threshold=self.assembled_threshold,
                 unique_threshold=self.unique_threshold,
-                verbose=self.verbose,
                 bcftools_exe=self.bcftools_exe,
                 gapfiller_exe=self.gapfiller_exe,
                 samtools_exe=self.samtools_exe,
@@ -314,9 +327,11 @@ class Clusters:
                 velvet_exe=self.velvet,
                 spades_other=self.spades_other,
                 clean=self.clean,
-            )
+            ))
 
-            self.clusters[gene].run()
+        pool = multiprocessing.Pool(self.threads)
+        cluster_list = pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose)))
+        self.clusters = {c.name: c for c in cluster_list}
 
 
     def _write_reports(self):
