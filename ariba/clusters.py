@@ -13,10 +13,10 @@ class Error (Exception): pass
 
 def _run_cluster(obj, verbose):
     if verbose:
-        print('Start running cluster', obj.name, 'in directory', obj.root_dir)
+        print('Start running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
     obj.run()
     if verbose:
-        print('Finished running cluster', obj.name, 'in directory', obj.root_dir)
+        print('Finished running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
     return obj
 
 
