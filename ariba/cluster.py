@@ -133,6 +133,7 @@ class Cluster:
         self.mummer_variants = {}
         self.variant_depths = {}
         self.percent_identities = {}
+        self.total_reads = None
 
         # The log filehandle self.log_fh is set at the start of the run() method.
         # Lots of other methods use self.log_fh. But for unit testing, run() isn't
@@ -146,10 +147,14 @@ class Cluster:
 
 
     def _get_read_counts(self):
+        if self.total_reads is not None:
+            return self.total_reads
+
         count1 = pyfastaq.tasks.count_sequences(self.reads1)
         count2 = pyfastaq.tasks.count_sequences(self.reads2)
         if count1 == count2:
-            return count1 + count2
+            self.total_reads = count1 + count2
+            return self.total_reads
         else:
             raise Error('Different number of fwd/rev reads in cluster ' + self.name + '! Cannot continue')
 
@@ -311,14 +316,19 @@ class Cluster:
             open(spades_contigs, 'w').close()
             self.assembled_ok = True
         else:
-            self.assembled_ok, err = common.syscall(cmd, verbose=True, allow_fail=True, verbose_filehandle=self.log_fh)
+            self.assembled_ok, err = common.syscall(cmd, verbose=True, allow_fail=True, verbose_filehandle=self.log_fh, print_errors=False)
         if self.assembled_ok:
             os.symlink(spades_contigs, os.path.basename(self.assembly_contigs))
         else:
-            with open('spades_errors', 'w') as f:
+            spades_errors_file = os.path.join(self.root_dir, 'spades_errors')
+            with open(spades_errors_file, 'w') as f:
                 print(err, file=f)
             f.close()
             self.status_flag.add('assembly_fail')
+            total_reads = self._get_read_counts()
+            print('WARNING: assembly failed for cluster', self.name, 'which is usually due to not enough reads for this cluster (from spurious mapping) and nothing to worry about.', file=sys.stderr)
+            print('WARNING: assembly failed for cluster', self.name, ' ... number of reads for this cluster:', total_reads, file=sys.stderr)
+            print('WARNING: assembly failed for cluster', self.name, ' ... SPAdes errors written to:', spades_errors_file, file=sys.stderr)
 
         os.chdir(cwd)
 
