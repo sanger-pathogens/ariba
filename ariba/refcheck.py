@@ -5,7 +5,7 @@ class Error (Exception): pass
 
 
 class Checker:
-    def __init__(self, infile, min_length=1, max_length=10000, outprefix=None):
+    def __init__(self, infile, min_length=1, max_length=10000, outprefix=None, genetic_code=11):
         self.infile = os.path.abspath(infile)
         if not os.path.exists(self.infile):
             raise Error('File not found: "' + self.infile + '". Cannot continue')
@@ -13,6 +13,7 @@ class Checker:
         self.min_length = min_length
         self.max_length = max_length
         self.outprefix = outprefix
+        pyfastaq.sequences.genetic_code = genetic_code
 
 
     def run(self):

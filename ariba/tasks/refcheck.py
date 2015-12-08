@@ -14,12 +14,12 @@ def run():
     parser.add_argument('infile', help='Input file containing genes to be checked', metavar='Filename')
     options = parser.parse_args()
 
-    pyfastaq.sequences.genetic_code = options.genetic_code
     checker = ariba.refcheck.Checker(
         options.infile,
         min_length=options.min_length,
         max_length=options.max_length,
-        outprefix=options.outprefix
+        outprefix=options.outprefix,
+        genetic_code=options.genetic_code
     )
 
     ok, reason, seq = checker.run()
