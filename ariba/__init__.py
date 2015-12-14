@@ -1,4 +1,5 @@
 __all__ = [
+    'amino_acid_variant',
     'bam_parse',
     'cdhit',
     'cluster',
