@@ -20,7 +20,8 @@ setup(
         'openpyxl',
         'pyfastaq >= 3.10.0',
         'pysam >= 0.8.1',
-        'pymummer>=0.6.1'
+        'pymummer>=0.6.1',
+        'bs4',
     ],
     license='GPLv3',
     classifiers=[
