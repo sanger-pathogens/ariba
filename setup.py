@@ -21,6 +21,7 @@ setup(
         'pyfastaq >= 3.10.0',
         'pysam >= 0.8.1',
         'pymummer>=0.6.1',
+        'beautifulsoup4'
     ],
     license='GPLv3',
     classifiers=[
