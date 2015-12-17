@@ -1,12 +1,12 @@
 import unittest
 import os
-from ariba import amino_acid_variant
+from ariba import sequence_variant
 
-modules_dir = os.path.dirname(os.path.abspath(amino_acid_variant.__file__))
+modules_dir = os.path.dirname(os.path.abspath(sequence_variant.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 
-class TestAminAcidVariant(unittest.TestCase):
+class TestSequenceVariant(unittest.TestCase):
     def test_init_fails(self):
         '''Test init fails'''
         bad_variants = [
@@ -19,8 +19,8 @@ class TestAminAcidVariant(unittest.TestCase):
         ]
 
         for var in bad_variants:
-            with self.assertRaises(amino_acid_variant.Error):
-                v = amino_acid_variant.Variant(var)
+            with self.assertRaises(sequence_variant.Error):
+                v = sequence_variant.Variant(var)
 
 
     def test_init_ok(self):
@@ -28,7 +28,7 @@ class TestAminAcidVariant(unittest.TestCase):
         variants = ['I42K', 'i42k', 'I42k', 'i42K']
 
         for var in variants:
-            aa_var = amino_acid_variant.Variant(var)
+            aa_var = sequence_variant.Variant(var)
             self.assertEqual(41, aa_var.position)
             self.assertEqual('I', aa_var.wild_aa)
             self.assertEqual('K', aa_var.variant_aa)
@@ -40,7 +40,7 @@ class TestAminAcidVariant(unittest.TestCase):
         expected = 'I42K'
 
         for var in variants:
-            self.assertEqual(expected, str(amino_acid_variant.Variant(var)))
+            self.assertEqual(expected, str(sequence_variant.Variant(var)))
 
 
     def test_agrees_with_protein_seq(self):
@@ -54,6 +54,6 @@ class TestAminAcidVariant(unittest.TestCase):
         ]
 
         for var, expected in tests:
-            variant = amino_acid_variant.Variant(var)
+            variant = sequence_variant.Variant(var)
             self.assertEqual(expected, variant.agrees_with_protein_seq(protein_seq))
 

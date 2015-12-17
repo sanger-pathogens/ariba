@@ -1,5 +1,4 @@
 __all__ = [
-    'amino_acid_variant',
     'bam_parse',
     'cdhit',
     'cluster',
@@ -14,6 +13,7 @@ __all__ = [
     'refcheck',
     'ref_genes_getter',
     'scaffold_graph',
+    'sequence_variant',
     'summary',
     'tasks',
 ]
