@@ -7,8 +7,8 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 
 class TestSequenceVariant(unittest.TestCase):
-    def test_init_fails(self):
-        '''Test init fails'''
+    def test_init_fails_on_bad_variant_strings(self):
+        '''Test init fails on bad variant strings'''
         bad_variants = [
             'x',
             'x1',
@@ -20,7 +20,7 @@ class TestSequenceVariant(unittest.TestCase):
 
         for var in bad_variants:
             with self.assertRaises(sequence_variant.Error):
-                v = sequence_variant.Variant(var)
+                v = sequence_variant.Variant('p', var)
 
 
     def test_init_ok(self):
@@ -28,10 +28,10 @@ class TestSequenceVariant(unittest.TestCase):
         variants = ['I42K', 'i42k', 'I42k', 'i42K']
 
         for var in variants:
-            aa_var = sequence_variant.Variant(var)
+            aa_var = sequence_variant.Variant('p', var)
             self.assertEqual(41, aa_var.position)
-            self.assertEqual('I', aa_var.wild_aa)
-            self.assertEqual('K', aa_var.variant_aa)
+            self.assertEqual('I', aa_var.wild_value)
+            self.assertEqual('K', aa_var.variant_value)
 
 
     def test_init_str(self):
@@ -40,7 +40,7 @@ class TestSequenceVariant(unittest.TestCase):
         expected = 'I42K'
 
         for var in variants:
-            self.assertEqual(expected, str(sequence_variant.Variant(var)))
+            self.assertEqual(expected, str(sequence_variant.Variant('p', var)))
 
 
     def test_sanity_check_against_seq(self):
@@ -54,6 +54,6 @@ class TestSequenceVariant(unittest.TestCase):
         ]
 
         for var, expected in tests:
-            variant = sequence_variant.Variant(var)
+            variant = sequence_variant.Variant('p', var)
             self.assertEqual(expected, variant.sanity_check_against_seq(seq))
 
