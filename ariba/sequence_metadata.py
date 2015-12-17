@@ -17,8 +17,22 @@ class SequenceMetadata:
         else:
             raise Error('Too many columns in this line:\n' + line)
 
-        if variant_type == '.':
+        self.variant_type = variant_type
+
+        if self.variant_type == '.':
             self.variant = None
         else:
-            self.variant = sequence_variant.Variant(variant_type, variant_string)
+            self.variant = sequence_variant.Variant(self.variant_type, variant_string)
 
+
+    def __str__(self):
+        fields = [self.name, self.variant_type]
+        if self.variant is None:
+            fields.append('.')
+        else:
+            fields.append(str(self.variant))
+
+        if self.free_text:
+            return '\t'.join(fields + [self.free_text])
+        else:
+            return '\t'.join(fields)

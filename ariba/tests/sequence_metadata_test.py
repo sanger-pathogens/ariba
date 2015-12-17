@@ -27,7 +27,20 @@ class TestSequenceMetadata(unittest.TestCase):
         '''test init ok on good input'''
         data = sequence_metadata.SequenceMetadata('gene\tn\tI42L\tspam spam wonderful spam')
         self.assertEqual(data.name, 'gene')
-        self.assertEqual(data.variant.variant_type, sequence_variant.NUCLEOTIDE_SNP)
+        self.assertEqual(data.variant_type, 'n')
         self.assertEqual(data.variant.wild_value, 'I')
         self.assertEqual(data.variant.variant_value, 'L')
         self.assertEqual(data.free_text, 'spam spam wonderful spam')
+
+
+    def test_str(self):
+        '''test __str__'''
+        lines = [
+            'gene1\tn\tA42G\tspam',
+            'gene2\t.\t.',
+            'gene3\t.\t.\teggs',
+            'gene4\tp\tI42K\tthis mutation kills tardigrades',
+        ]
+
+        for line in lines:
+            self.assertEqual(line, str(sequence_metadata.SequenceMetadata(line)))
