@@ -1,23 +1,18 @@
+import pyfastaq
 import re
 
 class Error (Exception): pass
 
 
-NUCLEOTIDE_SNP = 1
-AMINO_ACID_SNP = 2
-
-variant_type_strings = {
-    'n': NUCLEOTIDE_SNP,
-    'p': AMINO_ACID_SNP,
-}
+allowed_variant_types = {'n', 'p'}
 
 class Variant:
     def __init__(self, variant_type, variant_string):
-        try:
-            self.variant_type = variant_type_strings[variant_type]
-        except:
+        if variant_type not in allowed_variant_types:
             raise Error('Error! Variant type "' + variant_type + '" not recognised.\n' + \
-                        'Must be one of:' + ', '.join(variant_type_strings.keys()))
+                        'Must be one of:' + ', '.join(allowed_variant_types))
+
+            self.variant_type = variant_type
 
 
         m = re.match('^([A-Z])([0-9]+)([A-Z])$', variant_string.upper())
@@ -36,5 +31,8 @@ class Variant:
         return ''.join([self.wild_value, str(self.position + 1), self.variant_value])
 
 
-    def sanity_check_against_seq(self, seq):
+    def sanity_check_against_seq(self, seq, translate_seq=False):
+        if translate_seq:
+            seq = pyfastaq.sequences.Fasta('x', seq).translate().seq
+
         return len(seq) >= self.position + 1 and seq[self.position].upper() in [self.wild_value, self.variant_value]

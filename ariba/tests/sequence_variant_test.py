@@ -43,8 +43,8 @@ class TestSequenceVariant(unittest.TestCase):
             self.assertEqual(expected, str(sequence_variant.Variant('p', var)))
 
 
-    def test_sanity_check_against_seq(self):
-        '''test sanity_check_against_seq'''
+    def test_sanity_check_against_seq_no_translate(self):
+        '''test sanity_check_against_seq with translate False'''
         seq = 'BrissSpecialStvff'
         tests = [
             ('I3K', True),
@@ -56,4 +56,19 @@ class TestSequenceVariant(unittest.TestCase):
         for var, expected in tests:
             variant = sequence_variant.Variant('p', var)
             self.assertEqual(expected, variant.sanity_check_against_seq(seq))
+
+
+    def test_sanity_check_against_seq_translate(self):
+        '''test sanity_check_against_seq with translate True'''
+        seq = 'AGTACGACGTAC'  # translates to STTY
+        tests = [
+            ('S1X', True),
+            ('x1s', True),
+            ('a1y', False),
+            ('x5y', False)
+        ]
+
+        for var, expected in tests:
+            variant = sequence_variant.Variant('p', var)
+            self.assertEqual(expected, variant.sanity_check_against_seq(seq, translate_seq=True))
 
