@@ -21,5 +21,5 @@ class Variant:
         return ''.join([self.wild_aa, str(self.position + 1), self.variant_aa])
 
 
-    def agrees_with_protein_seq(self, protein_seq):
-        return len(protein_seq) >= self.position + 1 and protein_seq[self.position].upper() in [self.wild_aa, self.variant_aa]
+    def sanity_check_against_seq(self, seq):
+        return len(seq) >= self.position + 1 and seq[self.position].upper() in [self.wild_aa, self.variant_aa]

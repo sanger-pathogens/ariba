@@ -43,9 +43,9 @@ class TestSequenceVariant(unittest.TestCase):
             self.assertEqual(expected, str(sequence_variant.Variant(var)))
 
 
-    def test_agrees_with_protein_seq(self):
-        '''test agrees_with_protein_seq'''
-        protein_seq = 'BrissSpecialStvff'
+    def test_sanity_check_against_seq(self):
+        '''test sanity_check_against_seq'''
+        seq = 'BrissSpecialStvff'
         tests = [
             ('I3K', True),
             ('K3I', True),
@@ -55,5 +55,5 @@ class TestSequenceVariant(unittest.TestCase):
 
         for var, expected in tests:
             variant = sequence_variant.Variant(var)
-            self.assertEqual(expected, variant.agrees_with_protein_seq(protein_seq))
+            self.assertEqual(expected, variant.sanity_check_against_seq(seq))
 
