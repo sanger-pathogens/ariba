@@ -11,6 +11,7 @@ __all__ = [
     'link',
     'mapping',
     'refcheck',
+    'reference_data',
     'ref_genes_getter',
     'scaffold_graph',
     'sequence_metadata',
