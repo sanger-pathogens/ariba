@@ -1,0 +1,5 @@
+g1 Remove: too short. Length: 5
+g2 Remove: too long. Length: 100
+g3 Kept, but needed to reverse complement
+g4 Does not look like a gene (does not start with start codon, or contains internal stop codons. Translation: EEP
+g5 Does not look like a gene (does not start with start codon, or contains internal stop codons. Translation: M*P

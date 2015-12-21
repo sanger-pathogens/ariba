@@ -52,7 +52,7 @@ class TestReferenceData(unittest.TestCase):
         d1 = {'a': 1, 'b':2, 'c': 42}
         d2 = {'a': 42}
         d3 = {'a': 11, 'b': 'xyz'}
-        self.assertEqual({'a'}, reference_data.ReferenceData.dict_keys_intersection([d1, d2, d3]))
+        self.assertEqual({'a'}, reference_data.ReferenceData._dict_keys_intersection([d1, d2, d3]))
 
 
     def test_get_filename(self):
@@ -126,7 +126,7 @@ class TestReferenceData(unittest.TestCase):
 
 
     def test_filter_bad_variant_data(self):
-        '''Test filter_bad_variant_data'''
+        '''Test _filter_bad_variant_data'''
         presence_absence_fa = os.path.join(data_dir, 'reference_data_filter_bad_data_presence_absence.in.fa')
         expected_presence_absence_fa = os.path.join(data_dir, 'reference_data_filter_bad_data_presence_absence.expected.fa')
         variants_only_fa = os.path.join(data_dir, 'reference_data_filter_bad_data_variants_only.in.fa')
@@ -143,7 +143,7 @@ class TestReferenceData(unittest.TestCase):
         )
 
         outprefix = 'tmp.test_filter_bad_variant_data'
-        refdata.filter_bad_variant_data(outprefix)
+        refdata._filter_bad_variant_data(outprefix)
 
         self.assertTrue(filecmp.cmp(expected_tsv, outprefix + '.tsv'))
         self.assertTrue(filecmp.cmp(expected_variants_only_fa, outprefix + '.variants_only.fa'))
@@ -155,3 +155,33 @@ class TestReferenceData(unittest.TestCase):
         os.unlink(outprefix + '.non_coding.fa')
         os.unlink(outprefix + '.log')
 
+
+    def test_gene_seq_is_ok(self):
+        '''Test _gene_seq_is_ok'''
+        tests = [
+            (pyfastaq.sequences.Fasta('x', 'ACGTG'), False, 'Remove: too short. Length: 5'),
+            (pyfastaq.sequences.Fasta('x', 'A' * 100), False, 'Remove: too long. Length: 100'),
+            (pyfastaq.sequences.Fasta('x', 'TTAGAGCAT'), True, 'Kept, but needed to reverse complement'),
+            (pyfastaq.sequences.Fasta('x', 'GAGGAGCCG'), False, 'Does not look like a gene (does not start with start codon, or contains internal stop codons. Translation: EEP'),
+            (pyfastaq.sequences.Fasta('x', 'ATGTAACCT'), False, 'Does not look like a gene (does not start with start codon, or contains internal stop codons. Translation: M*P'),
+            (pyfastaq.sequences.Fasta('x', 'ATGCCTGAG'), True, None)
+        ]
+
+        for seq, ok, message in tests:
+            self.assertEqual((ok, message), reference_data.ReferenceData._gene_seq_is_ok(seq, 6, 99, 1))
+
+
+    def test_remove_bad_genes(self):
+        '''Test _remove_bad_genes'''
+        presence_absence_fasta = os.path.join(data_dir, 'reference_data_remove_bad_genes.in.fa')
+        refdata = reference_data.ReferenceData(presence_absence_fa=presence_absence_fasta, max_gene_length=99)
+        tmp_log = 'tmp.test_remove_bad_genes.log'
+        refdata._remove_bad_genes(refdata.seq_dicts['presence_absence'], tmp_log)
+        expected = {
+            'g3': pyfastaq.sequences.Fasta('g3', 'ATGCTCTAA'),
+            'g6': pyfastaq.sequences.Fasta('g6', 'ATGCCTGAG')
+        }
+        self.assertEqual(expected, refdata.seq_dicts['presence_absence'])
+        expected_log = os.path.join(data_dir, 'reference_data_test_remove_bad_genes.log')
+        self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
+        os.unlink(tmp_log)

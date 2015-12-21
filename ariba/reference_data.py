@@ -31,14 +31,15 @@ class ReferenceData:
             raise Error('Error! Must supply at least one of presence_absence_fa, variants_only_fa, non_coding_fa. Cannot continue')
 
         self.metadata = self._load_metadata_tsv(metadata_tsv)
-        pyfastaq.sequences.genetic_code = genetic_code
-        common_names = self.dict_keys_intersection(list(self.seq_dicts.values()))
+        self.genetic_code = genetic_code
+        pyfastaq.sequences.genetic_code = self.genetic_code
+        common_names = self._dict_keys_intersection(list(self.seq_dicts.values()))
         if len(common_names):
             raise Error('Error! Non-unique names found in input fasta files:\n' + '\n'.join(common_names))
 
 
     @staticmethod
-    def dict_keys_intersection(dicts):
+    def _dict_keys_intersection(dicts):
         dicts = [x for x in dicts if x is not None]
         if len(dicts) == 0:
             return set()
@@ -63,6 +64,9 @@ class ReferenceData:
 
     @staticmethod
     def _load_metadata_tsv(filename):
+        if filename is None:
+            return {}
+
         f = pyfastaq.utils.open_file_read(filename)
         metadata_dict = {}
 
@@ -122,13 +126,13 @@ class ReferenceData:
         pyfastaq.utils.close(f)
 
 
-    def write_sequences(self, filename, sequences_to_write):
+    def _write_sequences(self, filename, sequences_to_write):
         assert sequences_to_write in self.seq_dicts and sequences_to_write in self.seq_filenames
         if self.seq_filenames[sequences_to_write] is not None:
             self._write_dict_of_sequences(self.seq_dicts[sequences_to_write], filename)
 
 
-    def filter_bad_variant_data(self, out_prefix):
+    def _filter_bad_variant_data(self, out_prefix):
         genes_to_remove = set()
         variants_only_genes_not_found = set(self.seq_dicts['variants_only'].keys())
         log_file = out_prefix + '.log'
@@ -183,7 +187,50 @@ class ReferenceData:
 
         pyfastaq.utils.close(log_fh)
         self._write_metadata_tsv(self.metadata, tsv_file)
-        self.write_sequences(out_prefix + '.presence_absence.fa', 'presence_absence')
-        self.write_sequences(out_prefix + '.non_coding.fa', 'non_coding')
-        self.write_sequences(out_prefix + '.variants_only.fa', 'variants_only')
+        self._write_sequences(out_prefix + '.presence_absence.fa', 'presence_absence')
+        self._write_sequences(out_prefix + '.non_coding.fa', 'non_coding')
+        self._write_sequences(out_prefix + '.variants_only.fa', 'variants_only')
 
+
+    @staticmethod
+    def _gene_seq_is_ok(seq, min_length, max_length, genetic_code):
+        seq.seq = seq.seq.upper()
+        if len(seq) < min_length:
+            return False, 'Remove: too short. Length: ' + str(len(seq))
+        elif len(seq) > max_length:
+            return False, 'Remove: too long. Length: ' + str(len(seq))
+        elif not seq.looks_like_gene(translation_table=genetic_code):
+            seq.revcomp()
+            if seq.looks_like_gene(translation_table=genetic_code):
+                return True, 'Kept, but needed to reverse complement'
+            else:
+                seq.revcomp()
+                return False, 'Does not look like a gene (does not start with start codon, or contains internal stop codons. Translation: ' + seq.translate().seq
+
+        return True, None
+
+
+    def _remove_bad_genes(self, seqs_dict, log_file):
+        if len(seqs_dict) == 0:
+            return
+
+        log_fh = pyfastaq.utils.open_file_write(log_file)
+        to_remove = set()
+
+        for name, sequence in sorted(seqs_dict.items()):
+            ok, message = self._gene_seq_is_ok(sequence, self.min_gene_length, self.max_gene_length, self.genetic_code)
+            if message is not None:
+                print(name, message, file=log_fh)
+            if not ok:
+                to_remove.add(name)
+
+        pyfastaq.utils.close(log_fh)
+
+        for name in to_remove:
+            seqs_dict.pop(name)
+
+
+    def sanity_check(self, outprefix):
+        self._remove_bad_genes(self.seq_dicts['variants_only'], outprefix + '.00.check_fasta_variants_only.log')
+        self._remove_bad_genes(self.seq_dicts['presence_absence'], outprefix + '.00.check_fasta_presence_absence.log')
+        self._filter_bad_variant_data(out_prefix + '.01.check_variants')
