@@ -27,6 +27,17 @@ class Variant:
         self.position = int(self.position) - 1
 
 
+    def __eq__(self, other):
+       return type(other) is type(self) and self.__dict__ == other.__dict__
+
+
+    def __le__(self, other):
+        return self.position < other.position or \
+            (self.position == other.position and self.variant_type < other.variant_type) or \
+            (self.position == other.position and self.variant_type == other.variant_type and self.wild_value < other.wild_value) or \
+            (self.position == other.position and self.variant_type == other.variant_type and self.wild_value == other.wild_value and self,variant_value < other.variant_value)
+
+
     def __str__(self):
         return ''.join([self.wild_value, str(self.position + 1), self.variant_value])
 
