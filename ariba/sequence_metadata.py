@@ -25,6 +25,14 @@ class SequenceMetadata:
             self.variant = sequence_variant.Variant(self.variant_type, variant_string)
 
 
+    def __eq__(self, other):
+       return type(other) is type(self) and self.__dict__ == other.__dict__
+
+
+    def __le__(self, other):
+        return self.name < other.name or (self.name == other.name and self.variant < other.variant)
+
+
     def __str__(self):
         fields = [self.name, self.variant_type]
         if self.variant is None:
