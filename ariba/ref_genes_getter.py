@@ -3,12 +3,13 @@ class Error (Exception): pass
 import sys
 import os
 import shutil
+import re
 import requests
 import pyfastaq
 import urllib
 import time
 from bs4 import BeautifulSoup
-from ariba import refcheck, common
+from ariba import common
 
 
 class RefGenesGetter:
@@ -66,11 +67,20 @@ class RefGenesGetter:
         antibio_links = rows[row_index].find_all('a')
         print('Found', len(antibio_links), 'links to antibiotic resistance pages')
 
-        variants = set()
+        variants = []
 
         for antibio_link_obj in antibio_links:
             antibio_link = antibio_link_obj['href']
             soup = self._get_souped_request(antibio_link)
+
+            # get description
+            ontology_def = soup.find(id='ontology-definition-field')
+            if ontology_def is None:
+                description = None
+            else:
+                # there are sometimew newline characters in the description.
+                # replace all whitepace characters with a space
+                description = re.sub('\s', ' ', ontology_def.text)
 
             # get variants
             bioinf_tables = [x for x in soup.find_all('table') if 'Bioinformatics' in x.text]
@@ -85,7 +95,9 @@ class RefGenesGetter:
                 print('WARNING:', gene, 'No variants found on page', antibio_link)
             else:
                 new_variants = [x.text.split()[-1].split('<')[0] for x in variant_elements]
-                variants.update(new_variants)
+                for variant in new_variants:
+                    print('New variant:', variant, description)
+                    variants.append((variant, description))
 
 
         if len(variants):
@@ -96,40 +108,85 @@ class RefGenesGetter:
         return variants
 
 
-    def _write_card_variants_tsv(self, variants, outfile):
-        f = pyfastaq.utils.open_file_write(outfile)
-        for gene in sorted(variants):
-            print(gene,  ','.join(variants[gene]), sep='\t', file=f)
-        pyfastaq.utils.close(f)
+    def _get_card_variant_data(self, outfilehandle):
+        soup = self._get_souped_request('http://arpcard.mcmaster.ca/?q=CARD/search/mqt.35950.mqt.806')
+        table = soup.find(id='searchresultsTable')
+        links = {x.text : x['href'] for x in table.find_all('a')}
+
+        for gene, url in sorted(links.items()):
+            print('\nGetting info for gene', gene, 'from', url)
+            variants = self._get_card_gene_variant_info(gene, links[gene])
+            if len(variants) == 0:
+                print('WARNING: No valid variants found for gene', gene)
+            for variant, description in variants:
+                print(gene, 'p', variant, description, sep='\t', file=outfilehandle)
+
+
+    @staticmethod
+    def _card_parse_presence_absence(infile, outfile, metadata_fh):
+        presence_absence_ids = set()
+
+        file_reader = pyfastaq.sequences.file_reader(infile)
+        f_out = pyfastaq.utils.open_file_write(outfile)
+
+        for seq in file_reader:
+            try:
+                seq.id, description = seq.id.split(maxsplit=1)
+            except:
+                description = None
+
+            presence_absence_ids.add(seq.id)
+            print(seq, file=f_out)
+
+            if description is not None:
+                print(seq.id, '.', '.', description, sep='\t', file=metadata_fh)
+
+        pyfastaq.utils.close(f_out)
+        return presence_absence_ids
+
+
+    @staticmethod
+    def _card_parse_all_genes(infile, outfile, metadata_fh, presence_absence_ids):
+        file_reader = pyfastaq.sequences.file_reader(infile)
+        f_out = pyfastaq.utils.open_file_write(outfile)
+
+        for seq in file_reader:
+            try:
+                seq.id, description = seq.id.split(maxsplit=1)
+            except:
+                description = None
+
+            if seq.id in presence_absence_ids:
+                continue
+
+            print(seq, file=f_out)
+            if description is not None:
+                print(seq.id, '.', '.', description, sep='\t', file=metadata_fh)
+
+        pyfastaq.utils.close(f_out)
 
 
     def _get_from_card(self, outprefix):
-        all_ref_genes_fa_gz = outprefix + '.all_ref.genes.00.fa.gz'
+        tsv_fh = pyfastaq.utils.open_file_write(outprefix + '.metadata.tsv.test')
+        self._get_card_variant_data(tsv_fh)
+
+        print('Finished getting variant data. Getting FASTA files', flush=True)
+        all_ref_genes_fa_gz = outprefix + '.tmp.downloaded.all_genes.fa.gz'
+        presence_absence_fa_gz = outprefix + '.tmp.download.presence_absence.fa.gz'
+        variants_only_fa = outprefix + '.variants_only.fa'
+        presence_absence_fa = outprefix + '.presence_absence.fa'
         self._download_file('http://arpcard.mcmaster.ca/blast/db/nucleotide/AR-genes.fa.gz', all_ref_genes_fa_gz)
-        soup = self._get_souped_request('http://arpcard.mcmaster.ca/?q=CARD/search/mqt.35950.mqt.806')
-        table=soup.find(id='searchresultsTable')
-        links = {x.text : x['href'] for x in table.find_all('a')}
-        variants = {}
+        self._download_file('http://arpcard.mcmaster.ca/blast/db/nucleotide/ARmeta-genes.fa.gz', presence_absence_fa_gz)
 
-        for gene, url in sorted(links.items()):
-            print('\nGetting info for gene', gene, 'from', url, flush=True)
-            variants_strings = self._get_card_gene_variant_info(gene, links[gene])
-            if len(variants_strings) == 0:
-                print('WARNING: No valid variants found for gene', gene)
-            variants[gene] = variants_strings
+        print('Making presence_absence and variants_only fasta files, and udating metadata', flush=True)
+        presence_absence_ids = self._card_parse_presence_absence(presence_absence_fa_gz, presence_absence_fa, tsv_fh)
+        self._card_parse_all_genes(all_ref_genes_fa_gz, variants_only_fa, tsv_fh, presence_absence_ids)
+        pyfastaq.utils.close(tsv_fh)
 
-        self._write_card_variants_tsv(variants, outprefix + '.variants.tsv')
-
-        all_ref_genes_fa = outprefix + '.original_downloaded_genes.fa'
-        pyfastaq.utils.syscall('gunzip -c ' + all_ref_genes_fa_gz + ' > ' + all_ref_genes_fa)
-        print('\nProcessing reference gene fasta file', all_ref_genes_fa, flush=True)
-        all_ref_genes_fa_fixnames = outprefix + '.tmp.all_ref.genes.01.fixnames.fa'
-        pyfastaq.tasks.to_fasta(all_ref_genes_fa, all_ref_genes_fa_fixnames, strip_after_first_whitespace=True, check_unique=True)
-        refcheck_prefix = outprefix + '.tmp.all_ref.genes.02.refcheck'
-        refchecker = refcheck.Checker(all_ref_genes_fa_fixnames, outprefix=refcheck_prefix, genetic_code=self.genetic_code)
-        refchecker.run()
-        os.rename(refcheck_prefix + '.fa', outprefix + '.genes.fa')
-        print('Finished processing reference gene fasta file')
+        print('Deleting temporary downloaded files')
+        os.unlink(all_ref_genes_fa_gz)
+        os.unlink(presence_absence_fa_gz)
+        print('All done')
 
 
     def _get_from_resfinder(self, outprefix):
