@@ -167,7 +167,7 @@ class RefGenesGetter:
 
 
     def _get_from_card(self, outprefix):
-        tsv_fh = pyfastaq.utils.open_file_write(outprefix + '.metadata.tsv.test')
+        tsv_fh = pyfastaq.utils.open_file_write(outprefix + '.metadata.tsv')
         self._get_card_variant_data(tsv_fh)
 
         print('Finished getting variant data. Getting FASTA files', flush=True)
