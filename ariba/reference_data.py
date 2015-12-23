@@ -147,17 +147,20 @@ class ReferenceData:
 
         for gene_name, metadata_list in sorted(self.metadata.items()):
             if gene_name in presence_absence_removed:
-                print(gene_name, 'was removed from presence/absence fasta, so removing its metadata. Line of tsv was:', metadata, file=log_fh)
+                for metadata in metadata_list:
+                    print(gene_name, 'was removed from presence/absence fasta, so removing its metadata. Line of tsv was:', metadata, file=log_fh)
                 genes_to_remove.add(gene_name)
                 continue
             elif gene_name in variants_only_removed:
-                print(gene_name, 'was removed from variants only fasta, so removing its metadata. Line of tsv was:', metadata, file=log_fh)
+                for metadata in metadata_list:
+                    print(gene_name, 'was removed from variants only fasta, so removing its metadata. Line of tsv was:', metadata, file=log_fh)
                 genes_to_remove.add(gene_name)
                 continue
 
             gene_in_seq_dict = self._find_gene_in_seqs(gene_name, self.seq_dicts)
             if gene_in_seq_dict is None:
-                print(gene_name, 'is in input tsv file, but not found in any input sequence files. Removing. Line of tsv file was:', metadata, file=log_fh)
+                for metadata in metadata_list:
+                    print(gene_name, 'is in input tsv file, but not found in any input sequence files. Removing. Line of tsv file was:', metadata, file=log_fh)
                 genes_to_remove.add(gene_name)
                 continue
 
