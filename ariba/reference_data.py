@@ -250,3 +250,17 @@ class ReferenceData:
         variants_only_removed = self._remove_bad_genes(self.seq_dicts['variants_only'], outprefix + '.00.check_fasta_variants_only.log')
         presence_absence_removed = self._remove_bad_genes(self.seq_dicts['presence_absence'], outprefix + '.00.check_fasta_presence_absence.log')
         self._filter_bad_variant_data(outprefix + '.01.check_variants', variants_only_removed, presence_absence_removed)
+
+
+    def make_catted_fasta(self, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
+
+        for key in ['presence_absence', 'variants_only', 'non_coding']:
+            filename = self.seq_filenames[key]
+            if filename is not None:
+                file_reader = pyfastaq.sequences.file_reader(filename)
+                for seq in file_reader:
+                    print(seq, file=f)
+
+        pyfastaq.utils.close(f)
+

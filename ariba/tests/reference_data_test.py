@@ -187,3 +187,19 @@ class TestReferenceData(unittest.TestCase):
         expected_log = os.path.join(data_dir, 'reference_data_test_remove_bad_genes.log')
         self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
         os.unlink(tmp_log)
+
+    def test_make_catted_fasta(self):
+        '''Test make_catted_fasta'''
+        presence_absence_fa = os.path.join(data_dir, 'reference_data_make_catted_fasta.presence_absence.fa')
+        variants_only_fa = os.path.join(data_dir, 'reference_data_make_catted_fasta.variants_only.fa')
+        noncoding_fa = os.path.join(data_dir, 'reference_data_make_catted_fasta.noncoding.fa')
+        expected_fa = os.path.join(data_dir, 'reference_data_make_catted_fasta.expected.fa')
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=presence_absence_fa,
+            variants_only_fa=variants_only_fa,
+            non_coding_fa=noncoding_fa
+        )
+        tmp_out = 'tmp.test.make_catted_fasta.out.fa'
+        refdata.make_catted_fasta(tmp_out)
+        self.assertTrue(filecmp.cmp(expected_fa, tmp_out, shallow=False))
+        os.unlink(tmp_out)
