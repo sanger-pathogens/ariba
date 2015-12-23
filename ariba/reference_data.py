@@ -210,7 +210,8 @@ class ReferenceData:
                 return True, 'Kept, but needed to reverse complement'
             else:
                 seq.revcomp()
-                return False, 'Does not look like a gene (does not start with start codon, or contains internal stop codons. Translation: ' + seq.translate().seq
+                length_over_three = round(len(seq) / 3, 2)
+                return False, 'Does not look like a gene (does not start with start codon, length (' + str(len(seq)) + ') is not a multiple of 3 (length/3=' + str(length_over_three) + '), or contains internal stop codons). Translation: ' + seq.translate().seq
 
         return True, None
 
@@ -238,4 +239,4 @@ class ReferenceData:
     def sanity_check(self, outprefix):
         self._remove_bad_genes(self.seq_dicts['variants_only'], outprefix + '.00.check_fasta_variants_only.log')
         self._remove_bad_genes(self.seq_dicts['presence_absence'], outprefix + '.00.check_fasta_presence_absence.log')
-        self._filter_bad_variant_data(out_prefix + '.01.check_variants')
+        self._filter_bad_variant_data(outprefix + '.01.check_variants')

@@ -162,8 +162,8 @@ class TestReferenceData(unittest.TestCase):
             (pyfastaq.sequences.Fasta('x', 'ACGTG'), False, 'Remove: too short. Length: 5'),
             (pyfastaq.sequences.Fasta('x', 'A' * 100), False, 'Remove: too long. Length: 100'),
             (pyfastaq.sequences.Fasta('x', 'TTAGAGCAT'), True, 'Kept, but needed to reverse complement'),
-            (pyfastaq.sequences.Fasta('x', 'GAGGAGCCG'), False, 'Does not look like a gene (does not start with start codon, or contains internal stop codons. Translation: EEP'),
-            (pyfastaq.sequences.Fasta('x', 'ATGTAACCT'), False, 'Does not look like a gene (does not start with start codon, or contains internal stop codons. Translation: M*P'),
+            (pyfastaq.sequences.Fasta('x', 'GAGGAGCCG'), False, 'Does not look like a gene (does not start with start codon, length (9) is not a multiple of 3 (length/3=3.0), or contains internal stop codons). Translation: EEP'),
+            (pyfastaq.sequences.Fasta('x', 'ATGTAACCT'), False, 'Does not look like a gene (does not start with start codon, length (9) is not a multiple of 3 (length/3=3.0), or contains internal stop codons). Translation: M*P'),
             (pyfastaq.sequences.Fasta('x', 'ATGCCTGAG'), True, None)
         ]
 
