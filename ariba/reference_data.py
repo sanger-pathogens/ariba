@@ -1,4 +1,5 @@
 import os
+import sys
 import copy
 import pyfastaq
 from ariba import sequence_variant, sequence_metadata
@@ -71,7 +72,11 @@ class ReferenceData:
         metadata_dict = {}
 
         for line in f:
-            metadata = sequence_metadata.SequenceMetadata(line)
+            try:
+                metadata = sequence_metadata.SequenceMetadata(line)
+            except:
+                print('Problem with this line of metadata, which will be ignored:', line.rstrip(), file=sys.stderr)
+
             if metadata.name not in metadata_dict:
                 metadata_dict[metadata.name] = []
 
