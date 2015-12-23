@@ -143,7 +143,7 @@ class TestReferenceData(unittest.TestCase):
         )
 
         outprefix = 'tmp.test_filter_bad_variant_data'
-        refdata._filter_bad_variant_data(outprefix)
+        refdata._filter_bad_variant_data(outprefix, set(), set())
 
         self.assertTrue(filecmp.cmp(expected_tsv, outprefix + '.tsv'))
         self.assertTrue(filecmp.cmp(expected_variants_only_fa, outprefix + '.variants_only.fa'))
@@ -176,12 +176,16 @@ class TestReferenceData(unittest.TestCase):
         presence_absence_fasta = os.path.join(data_dir, 'reference_data_remove_bad_genes.in.fa')
         refdata = reference_data.ReferenceData(presence_absence_fa=presence_absence_fasta, max_gene_length=99)
         tmp_log = 'tmp.test_remove_bad_genes.log'
-        refdata._remove_bad_genes(refdata.seq_dicts['presence_absence'], tmp_log)
-        expected = {
+
+        expected_removed = {'g1', 'g2', 'g4', 'g5'}
+        got_removed = refdata._remove_bad_genes(refdata.seq_dicts['presence_absence'], tmp_log)
+        self.assertEqual(expected_removed, got_removed)
+
+        expected_dict = {
             'g3': pyfastaq.sequences.Fasta('g3', 'ATGCTCTAA'),
             'g6': pyfastaq.sequences.Fasta('g6', 'ATGCCTGAG')
         }
-        self.assertEqual(expected, refdata.seq_dicts['presence_absence'])
+        self.assertEqual(expected_dict, refdata.seq_dicts['presence_absence'])
         expected_log = os.path.join(data_dir, 'reference_data_test_remove_bad_genes.log')
         self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
         os.unlink(tmp_log)

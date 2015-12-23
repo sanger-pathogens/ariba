@@ -137,7 +137,7 @@ class ReferenceData:
             self._write_dict_of_sequences(self.seq_dicts[sequences_to_write], filename)
 
 
-    def _filter_bad_variant_data(self, out_prefix):
+    def _filter_bad_variant_data(self, out_prefix, presence_absence_removed, variants_only_removed):
         genes_to_remove = set()
         variants_only_genes_not_found = set(self.seq_dicts['variants_only'].keys())
         log_file = out_prefix + '.log'
@@ -146,6 +146,15 @@ class ReferenceData:
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
         for gene_name, metadata_list in sorted(self.metadata.items()):
+            if gene_name in presence_absence_removed:
+                print(gene_name, 'was removed from presence/absence fasta, so removing its metadata. Line of tsv was:', metadata, file=log_fh)
+                genes_to_remove.add(gene_name)
+                continue
+            elif gene_name in variants_only_removed:
+                print(gene_name, 'was removed from variants only fasta, so removing its metadata. Line of tsv was:', metadata, file=log_fh)
+                genes_to_remove.add(gene_name)
+                continue
+
             gene_in_seq_dict = self._find_gene_in_seqs(gene_name, self.seq_dicts)
             if gene_in_seq_dict is None:
                 print(gene_name, 'is in input tsv file, but not found in any input sequence files. Removing. Line of tsv file was:', metadata, file=log_fh)
@@ -217,11 +226,12 @@ class ReferenceData:
 
 
     def _remove_bad_genes(self, seqs_dict, log_file):
+        to_remove = set()
+
         if len(seqs_dict) == 0:
-            return
+            return to_remove
 
         log_fh = pyfastaq.utils.open_file_write(log_file)
-        to_remove = set()
 
         for name, sequence in sorted(seqs_dict.items()):
             ok, message = self._gene_seq_is_ok(sequence, self.min_gene_length, self.max_gene_length, self.genetic_code)
@@ -235,8 +245,10 @@ class ReferenceData:
         for name in to_remove:
             seqs_dict.pop(name)
 
+        return to_remove
+
 
     def sanity_check(self, outprefix):
-        self._remove_bad_genes(self.seq_dicts['variants_only'], outprefix + '.00.check_fasta_variants_only.log')
-        self._remove_bad_genes(self.seq_dicts['presence_absence'], outprefix + '.00.check_fasta_presence_absence.log')
-        self._filter_bad_variant_data(outprefix + '.01.check_variants')
+        variants_only_removed = self._remove_bad_genes(self.seq_dicts['variants_only'], outprefix + '.00.check_fasta_variants_only.log')
+        presence_absence_removed = self._remove_bad_genes(self.seq_dicts['presence_absence'], outprefix + '.00.check_fasta_presence_absence.log')
+        self._filter_bad_variant_data(outprefix + '.01.check_variants', variants_only_removed, presence_absence_removed)
