@@ -214,13 +214,8 @@ class ReferenceData:
         elif len(seq) > max_length:
             return False, 'Remove: too long. Length: ' + str(len(seq))
         elif not seq.looks_like_gene(translation_table=genetic_code):
-            seq.revcomp()
-            if seq.looks_like_gene(translation_table=genetic_code):
-                return True, 'Kept, but needed to reverse complement'
-            else:
-                seq.revcomp()
-                length_over_three = round(len(seq) / 3, 2)
-                return False, 'Does not look like a gene (does not start with start codon, length (' + str(len(seq)) + ') is not a multiple of 3 (length/3=' + str(length_over_three) + '), or contains internal stop codons). Translation: ' + seq.translate().seq
+            length_over_three = round(len(seq) / 3, 2)
+            return False, 'Does not look like a gene (does not start with start codon, length (' + str(len(seq)) + ') is not a multiple of 3 (length/3=' + str(length_over_three) + '), or contains internal stop codons). Translation: ' + seq.translate().seq
 
         return True, None
 

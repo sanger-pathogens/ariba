@@ -161,7 +161,6 @@ class TestReferenceData(unittest.TestCase):
         tests = [
             (pyfastaq.sequences.Fasta('x', 'ACGTG'), False, 'Remove: too short. Length: 5'),
             (pyfastaq.sequences.Fasta('x', 'A' * 100), False, 'Remove: too long. Length: 100'),
-            (pyfastaq.sequences.Fasta('x', 'TTAGAGCAT'), True, 'Kept, but needed to reverse complement'),
             (pyfastaq.sequences.Fasta('x', 'GAGGAGCCG'), False, 'Does not look like a gene (does not start with start codon, length (9) is not a multiple of 3 (length/3=3.0), or contains internal stop codons). Translation: EEP'),
             (pyfastaq.sequences.Fasta('x', 'ATGTAACCT'), False, 'Does not look like a gene (does not start with start codon, length (9) is not a multiple of 3 (length/3=3.0), or contains internal stop codons). Translation: M*P'),
             (pyfastaq.sequences.Fasta('x', 'ATGCCTGAG'), True, None)
@@ -177,13 +176,12 @@ class TestReferenceData(unittest.TestCase):
         refdata = reference_data.ReferenceData(presence_absence_fa=presence_absence_fasta, max_gene_length=99)
         tmp_log = 'tmp.test_remove_bad_genes.log'
 
-        expected_removed = {'g1', 'g2', 'g4', 'g5'}
+        expected_removed = {'g1', 'g2', 'g3', 'g4'}
         got_removed = refdata._remove_bad_genes(refdata.seq_dicts['presence_absence'], tmp_log)
         self.assertEqual(expected_removed, got_removed)
 
         expected_dict = {
-            'g3': pyfastaq.sequences.Fasta('g3', 'ATGCTCTAA'),
-            'g6': pyfastaq.sequences.Fasta('g6', 'ATGCCTGAG')
+            'g5': pyfastaq.sequences.Fasta('g5', 'ATGCCTGAG')
         }
         self.assertEqual(expected_dict, refdata.seq_dicts['presence_absence'])
         expected_log = os.path.join(data_dir, 'reference_data_test_remove_bad_genes.log')
