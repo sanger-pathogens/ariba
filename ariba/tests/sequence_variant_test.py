@@ -1,5 +1,6 @@
 import unittest
 import os
+import pyfastaq
 from ariba import sequence_variant
 
 modules_dir = os.path.dirname(os.path.abspath(sequence_variant.__file__))
@@ -72,3 +73,16 @@ class TestSequenceVariant(unittest.TestCase):
             variant = sequence_variant.Variant('p', var)
             self.assertEqual(expected, variant.sanity_check_against_seq(seq, translate_seq=True))
 
+
+    def test_has_variant(self):
+        '''test has_variant'''
+        seq = pyfastaq.sequences.Fasta('name', 'ATGTATTGCTGA') # translation: MYC*
+        tests = [
+            (sequence_variant.Variant('n', 'A2T'), True),
+            (sequence_variant.Variant('n', 'T2A'), False),
+            (sequence_variant.Variant('p', 'I2Y'), True),
+            (sequence_variant.Variant('p', 'Y2I'), False),
+        ]
+
+        for var, expected in tests:
+            self.assertEqual(expected, var.has_variant(seq))

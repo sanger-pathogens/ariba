@@ -12,7 +12,7 @@ class Variant:
             raise Error('Error! Variant type "' + variant_type + '" not recognised.\n' + \
                         'Must be one of:' + ', '.join(allowed_variant_types))
 
-            self.variant_type = variant_type
+        self.variant_type = variant_type
 
 
         m = re.match('^([A-Z])([0-9]+)([A-Z])$', variant_string.upper())
@@ -47,3 +47,14 @@ class Variant:
             seq = pyfastaq.sequences.Fasta('x', seq).translate().seq
 
         return len(seq) >= self.position + 1 and seq[self.position].upper() in [self.wild_value, self.variant_value]
+
+
+    def has_variant(self, seq):
+        if self.variant_type == 'p':
+            test_seq = seq.translate()
+        else:
+            test_seq = seq
+
+        assert self.position < len(test_seq)
+        return test_seq[self.position] == self.variant_value
+
