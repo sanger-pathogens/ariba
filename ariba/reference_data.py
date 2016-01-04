@@ -267,3 +267,17 @@ class ReferenceData:
 
     def sequence_type(self, sequence_name):
         return self._find_gene_in_seqs(sequence_name, self.seq_dicts)
+
+
+    def sequence(self, sequence_name):
+        d = self._find_gene_in_seqs(sequence_name, self.seq_dicts)
+        if d is None:
+            return None
+        else:
+            return self.seq_dicts[d][sequence_name]
+
+
+    def sequence_length(self, sequence_name):
+        seq = self.sequence(sequence_name)
+        assert seq is not None
+        return len(seq)

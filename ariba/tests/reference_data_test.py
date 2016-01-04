@@ -226,3 +226,19 @@ class TestReferenceData(unittest.TestCase):
 
         for name, expected in tests:
             self.assertEqual(expected, refdata.sequence_type(name))
+
+
+    def test_sequence(self):
+        '''Test sequence'''
+        presence_absence_fa = os.path.join(data_dir, 'reference_data_sequence.presence_absence.fa')
+        expected = pyfastaq.sequences.Fasta('pa', 'ATGTTTTAA')
+        refdata = reference_data.ReferenceData(presence_absence_fa=presence_absence_fa)
+        self.assertEqual(expected, refdata.sequence('pa'))
+
+
+    def test_sequence_length(self):
+        '''Test sequence_length'''
+        presence_absence_fa = os.path.join(data_dir, 'reference_data_sequence_length.presence_absence.fa')
+        refdata = reference_data.ReferenceData(presence_absence_fa=presence_absence_fa)
+        self.assertEqual(9, refdata.sequence_length('pa'))
+
