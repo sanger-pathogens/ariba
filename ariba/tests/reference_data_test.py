@@ -188,6 +188,7 @@ class TestReferenceData(unittest.TestCase):
         self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
         os.unlink(tmp_log)
 
+
     def test_make_catted_fasta(self):
         '''Test make_catted_fasta'''
         presence_absence_fa = os.path.join(data_dir, 'reference_data_make_catted_fasta.presence_absence.fa')
@@ -203,3 +204,25 @@ class TestReferenceData(unittest.TestCase):
         refdata.make_catted_fasta(tmp_out)
         self.assertTrue(filecmp.cmp(expected_fa, tmp_out, shallow=False))
         os.unlink(tmp_out)
+
+
+    def test_sequence_type(self):
+        '''Test sequence_type'''
+        presence_absence_fa = os.path.join(data_dir, 'reference_data_sequence_type.presence_absence.fa')
+        variants_only_fa = os.path.join(data_dir, 'reference_data_sequence_type.variants_only.fa')
+        noncoding_fa = os.path.join(data_dir, 'reference_data_sequence_type.noncoding.fa')
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=presence_absence_fa,
+            variants_only_fa=variants_only_fa,
+            non_coding_fa=noncoding_fa
+        )
+
+        tests = [
+            ('pa', 'presence_absence'),
+            ('var_only', 'variants_only'),
+            ('noncoding', 'non_coding'),
+            ('not_there', None)
+        ]
+
+        for name, expected in tests:
+            self.assertEqual(expected, refdata.sequence_type(name))

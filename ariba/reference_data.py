@@ -2,7 +2,7 @@ import os
 import sys
 import copy
 import pyfastaq
-from ariba import sequence_variant, sequence_metadata
+from ariba import sequence_metadata
 
 
 class Error (Exception): pass
@@ -264,3 +264,6 @@ class ReferenceData:
 
         pyfastaq.utils.close(f)
 
+
+    def sequence_type(self, sequence_name):
+        return self._find_gene_in_seqs(sequence_name, self.seq_dicts)
