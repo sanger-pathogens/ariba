@@ -22,7 +22,7 @@ def _run_cluster(obj, verbose):
 
 class Clusters:
     def __init__(self,
-      db_fasta,
+      refdata,
       reads_1,
       reads_2,
       outdir,
@@ -131,8 +131,9 @@ class Clusters:
             except:
                 raise Error('Error mkdir ' + d)
 
+        self.refdata = refdata
         self.db_fasta = os.path.join(self.outdir, 'input_genes.not_clustered.fa')
-        pyfastaq.tasks.to_fasta(db_fasta, self.db_fasta, check_unique=True)
+        self.refdata.make_catted_fasta(self.db_fasta)
         common.syscall(self.samtools_exe + ' faidx ' + self.db_fasta)
 
 
@@ -304,6 +305,7 @@ class Clusters:
             cluster_list.append(cluster.Cluster(
                 new_dir,
                 gene,
+                refdata=self.refdata,
                 assembly_kmer=self.assembly_kmer,
                 assembler=self.assembler,
                 max_insert=self.insert_proper_pair_max,

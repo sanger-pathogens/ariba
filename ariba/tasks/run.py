@@ -80,9 +80,10 @@ def run():
         print('    ariba refcheck -o new_genes', options.db_fasta, file=sys.stderr)
         sys.exit(1)
 
+    refdata = ariba.reference_data.ReferenceData(presence_absence_fa = options.db_fasta)
 
     c = ariba.clusters.Clusters(
-          options.db_fasta,
+          refdata,
           options.reads_1,
           options.reads_2,
           options.outdir,

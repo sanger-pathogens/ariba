@@ -7,7 +7,7 @@ import pysam
 import operator
 import pyfastaq
 import pymummer
-from ariba import common, mapping, bam_parse, flag, faidx
+from ariba import common, mapping, bam_parse, flag, faidx, reference_data
 
 class Error (Exception): pass
 
@@ -17,6 +17,7 @@ class Cluster:
     def __init__(self,
       root_dir,
       name,
+      refdata=None,
       assembly_kmer=0,
       assembler='velvet',
       max_insert=1000,
@@ -52,6 +53,8 @@ class Cluster:
             raise Error('Directory ' + self.root_dir + ' not found. Cannot continue')
 
         self.name = name
+        self.refdata = refdata
+
         self.reads1 = os.path.join(self.root_dir, 'reads_1.fq')
         self.reads2 = os.path.join(self.root_dir, 'reads_2.fq')
         self.gene_fa = os.path.join(self.root_dir, 'gene.fa')
