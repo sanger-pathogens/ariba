@@ -44,3 +44,7 @@ class SequenceMetadata:
             return '\t'.join(fields + [self.free_text])
         else:
             return '\t'.join(fields)
+
+
+    def has_variant(self, seq):
+        return self.variant is not None and self.variant.has_variant(seq)

@@ -1,5 +1,6 @@
 import unittest
 import os
+import pyfastaq
 from ariba import sequence_metadata, sequence_variant
 
 modules_dir = os.path.dirname(os.path.abspath(sequence_metadata.__file__))
@@ -44,3 +45,20 @@ class TestSequenceMetadata(unittest.TestCase):
 
         for line in lines:
             self.assertEqual(line, str(sequence_metadata.SequenceMetadata(line)))
+
+
+    def test_has_variant(self):
+        '''test has_variant'''
+        tests = [
+            ('gene1\t.\t.', False),
+            ('gene1\tn\tA2T', True),
+            ('gene1\tn\tT2A', False),
+            ('gene1\tp\tI2Y', True),
+            ('gene1\tp\tY2I', False),
+        ]
+
+        seq = pyfastaq.sequences.Fasta('name', 'ATGTATTGCTGA') # translation: MYC*
+
+        for line, expected in tests:
+            metadata = sequence_metadata.SequenceMetadata(line)
+            self.assertEqual(expected, metadata.has_variant(seq))
