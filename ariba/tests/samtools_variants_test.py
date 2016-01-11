@@ -1,21 +1,30 @@
 import unittest
 import os
+import pyfastaq
+import pymummer
 from ariba import samtools_variants
 
 modules_dir = os.path.dirname(os.path.abspath(samtools_variants.__file__))
+data_dir = os.path.join(modules_dir, 'tests', 'data')
+
+
+def file2lines(filename):
+    f = pyfastaq.utils.open_file_read(filename)
+    lines = f.readlines()
+    pyfastaq.utils.close(f)
+    return lines
 
 
 class TestSamtoolsVariants(unittest.TestCase):
     def test_make_vcf_and_read_depths_files(self):
         '''test _make_vcf_and_read_depths_files'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        c.final_assembly_fa = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.fa')
-        c.final_assembly_bam = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.bam')
-        expected_vcf = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.vcf')
-        expected_depths = os.path.join(data_dir, 'cluster_test_make_assembly_vcf.assembly.read_depths.gz')
-        c._make_assembly_vcf()
+        ref = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.assembly.fa')
+        bam = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.bam')
+        expected_vcf = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.expected.vcf')
+        expected_depths = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.expected.read_depths.gz')
+        tmp_prefix = 'tmp.test_make_vcf_and_read_depths_files'
+        sv = samtools_variants.SamtoolsVariants(ref, bam, tmp_prefix)
+        sv._make_vcf_and_read_depths_files()
 
         def get_vcf_call_lines(fname):
             with open(fname) as f:
@@ -23,18 +32,18 @@ class TestSamtoolsVariants(unittest.TestCase):
             return lines
 
         expected_lines = get_vcf_call_lines(expected_vcf)
-        got_lines = get_vcf_call_lines(c.final_assembly_vcf)
+        got_lines = get_vcf_call_lines(sv.vcf_file)
         self.assertEqual(expected_lines, got_lines)
-        self.assertEqual(file2lines(expected_depths), file2lines(c.final_assembly_read_depths))
-        clean_cluster_dir(cluster_dir)
+        self.assertEqual(file2lines(expected_depths), file2lines(sv.read_depths_file))
+        os.unlink(sv.vcf_file)
+        os.unlink(sv.read_depths_file)
+        os.unlink(sv.read_depths_file + '.tbi')
 
 
     def test_get_read_depths(self):
         '''test _get_read_depths'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_get_assembly_read_depths.gz')
+        read_depths_file = os.path.join(data_dir, 'samtools_variants_test_get_read_depths.gz')
+
         tests = [
             ( ('ref1', 42), None ),
             ( ('ref2', 1), None ),
@@ -44,32 +53,27 @@ class TestSamtoolsVariants(unittest.TestCase):
             ( ('ref1', 4), ('C', 'AC', 41, '0,42') )
         ]
 
-        for t in tests:
-            self.assertEqual(c._get_assembly_read_depths(t[0][0], t[0][1]), t[1])
+        for (name, position), expected in tests:
+            self.assertEqual(expected, samtools_variants.SamtoolsVariants._get_read_depths(read_depths_file, name, position))
 
 
     def test_get_variant_positions_from_vcf(self):
         '''test _get_variant_positions_from_vcf'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        c.final_assembly_vcf = os.path.join(data_dir, 'cluster_test_get_samtools_variant_positions.vcf')
+        vcf_file = os.path.join(data_dir, 'samtools_variants_test_get_variant_positions_from_vcf.vcf')
+
         expected = [
             ('16__cat_2_M35190.scaffold.1', 92),
             ('16__cat_2_M35190.scaffold.1', 179),
             ('16__cat_2_M35190.scaffold.1', 263),
             ('16__cat_2_M35190.scaffold.6', 93)
         ]
-        self.assertEqual(expected, c._get_samtools_variant_positions())
+        self.assertEqual(expected, samtools_variants.SamtoolsVariants._get_variant_positions_from_vcf(vcf_file))
 
 
     def test_get_variants(self):
         '''test _get_variants'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        c.final_assembly_vcf = os.path.join(data_dir, 'cluster_test_get_samtools_variants.vcf')
-        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_get_samtools_variants.read_depths.gz')
+        vcf_file = os.path.join(data_dir, 'samtools_variants_test_get_variants.vcf')
+        read_depths_file = os.path.join(data_dir, 'samtools_variants_test_get_variants.read_depths.gz')
         positions = [
             ('16__cat_2_M35190.scaffold.1', 92),
             ('16__cat_2_M35190.scaffold.1', 179),
@@ -87,24 +91,20 @@ class TestSamtoolsVariants(unittest.TestCase):
             }
         }
 
-        got = c._get_samtools_variants(positions)
+        got = samtools_variants.SamtoolsVariants._get_variants(vcf_file, read_depths_file, positions=positions)
         self.assertEqual(expected, got)
 
 
     def test_variants_in_coords(self):
-        '''test _get_variants_in_coords'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
+        '''test variants_in_coords'''
+        vcf_file = os.path.join(data_dir, 'samtools_variants_test_variants_in_coords.vcf')
+
         hit = ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'scaff1']
-        c.nucmer_hits = {
+        nucmer_hits = {
             'scaff1': [pymummer.alignment.Alignment('\t'.join(hit))]
         }
 
-        c.final_assembly_vcf = os.path.join(data_dir, 'cluster_test_get_vcf_variant_counts.vcf')
-        c._get_vcf_variant_counts()
-        expected = {'scaff1': 1}
-        self.assertEqual(expected, c.vcf_variant_counts)
-        clean_cluster_dir(cluster_dir)
+        got = samtools_variants.SamtoolsVariants.variants_in_coords(nucmer_hits, vcf_file)
+        self.assertEqual(1, got)
 
 
