@@ -1,143 +1,126 @@
 import unittest
+import sys
 import os
-import copy
 import shutil
 import filecmp
 import pyfastaq
-import pysam
-import pymummer
 from ariba import assembly
 
 modules_dir = os.path.dirname(os.path.abspath(assembly.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 
-class TestAssemblye(unittest.TestCase):
-    def test_set_assembly_kmer(self):
-        '''test _set_assembly_kmer'''
+class TestAssembly(unittest.TestCase):
+    def test_get_assembly_kmer(self):
+        '''test _get_assembly_kmer'''
         reads1 = os.path.join(data_dir, 'assembly_test_set_assembly_kmer_reads_1.fq')
         reads2 = os.path.join(data_dir, 'assembly_test_set_assembly_kmer_reads_2.fq')
-        got = assembly.Assembly._set_assembly_kmer(0, reads1, reads2)
+        got = assembly.Assembly._get_assembly_kmer(0, reads1, reads2)
         self.assertEqual(got, 5)
-        got = assembly.Assembly._set_assembly_kmer(42, reads1, reads2)
+        got = assembly.Assembly._get_assembly_kmer(42, reads1, reads2)
         self.assertEqual(got, 42)
 
 
     def test_assemble_with_spades(self):
         '''test _assemble_with_spades'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_assemble_with_spades')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        shutil.copyfile(os.path.join(data_dir, 'cluster_test_assemble_with_spades.gene.fa'), c.gene_fa)
-        c._assemble_with_spades(unittest=True)
-        self.assertEqual(c.status_flag.to_number(), 0)
-        clean_cluster_dir(cluster_dir)
+        reads1 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_1.fq')
+        reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
+        ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')
+        tmp_dir = 'tmp.test_assemble_with_spades'
+        a = assembly.Assembly(reads1, reads2, ref_fasta, tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
+        a._assemble_with_spades(unittest=True)
+        self.assertTrue(a.assembled_ok)
+        shutil.rmtree(tmp_dir)
 
 
     def test_assemble_with_spades_fail(self):
         '''test _assemble_with_spades handles spades fail'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_assemble_with_spades')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        shutil.copyfile(os.path.join(data_dir, 'cluster_test_assemble_with_spades.gene.fa'), c.gene_fa)
-        c._assemble_with_spades()
-        self.assertEqual(c.status_flag.to_number(), 64)
-        clean_cluster_dir(cluster_dir)
+        reads1 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_1.fq')
+        reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
+        ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')
+        tmp_dir = 'tmp.test_assemble_with_spades'
+        a = assembly.Assembly(reads1, reads2, ref_fasta, tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
+        a._assemble_with_spades(unittest=False)
+        self.assertFalse(a.assembled_ok)
+        shutil.rmtree(tmp_dir)
 
 
     def test_scaffold_with_sspace(self):
         '''test _scaffold_with_sspace'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_scaffold_with_sspace')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        shutil.copyfile(
-            os.path.join(data_dir, 'cluster_test_scaffold_with_sspace.contigs.fa'),
-            c.assembly_contigs
-        )
-        #shutil.copyfile(os.path.join(data_dir, 'cluster_test_scaffold_with_sspace.gene.fa'), c.gene_fa)
-        c._scaffold_with_sspace()
-        self.assertTrue(os.path.exists(c.scaffolder_scaffolds))
-        clean_cluster_dir(cluster_dir)
+        reads1 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_1.fq')
+        reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
+        ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')
+        tmp_dir = 'tmp.test_scaffold_with_sspace'
+        a = assembly.Assembly(reads1, reads2, ref_fasta, tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
+        a.assembly_contigs = os.path.join(data_dir, 'assembly_test_scaffold_with_sspace_contigs.fa')
+        a._scaffold_with_sspace()
+        self.assertTrue(os.path.exists(a.scaffolder_scaffolds))
+        shutil.rmtree(tmp_dir)
 
 
     def test_has_gaps_to_fill(self):
         '''test _has_gaps_to_fill'''
-        # FIXME
-        pass
-
-
-    def test_gap_fill_with_gapfiller_no_gaps(self):
-        '''test _gap_fill_with_gapfiller no gaps'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_gapfill_with_gapfiller')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        shutil.copyfile(
-            os.path.join(data_dir, 'cluster_test_gapfill_with_gapfiller.scaffolds_no_gaps.fa'),
-            c.scaffolder_scaffolds
-        )
-        c.gene = pyfastaq.sequences.Fasta('name_of_gene', 'AAACCCGGGTTT')
-        c._gap_fill_with_gapfiller()
-        self.assertTrue(os.path.exists(c.gapfilled_scaffolds))
-        clean_cluster_dir(cluster_dir)
-
-
-    def test_gap_fill_with_gapfiller_with_gaps(self):
-        '''test _gap_fill_with_gapfiller with gaps'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_gapfill_with_gapfiller')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        shutil.copyfile(
-            os.path.join(data_dir, 'cluster_test_gapfill_with_gapfiller.scaffolds_with_gaps.fa'),
-            c.scaffolder_scaffolds
-        )
-        c.gene = pyfastaq.sequences.Fasta('name_of_gene', 'AAACCCGGGTTT')
-        c._gap_fill_with_gapfiller()
-        self.assertTrue(os.path.exists(c.gapfilled_scaffolds))
-        clean_cluster_dir(cluster_dir)
-
-
-    def test_fix_contig_orientation(self):
-        '''test _fix_contig_orientation'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_fix_contig_orientation')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        scaffs_in = os.path.join(data_dir, 'cluster_test_fix_contig_orientation.in.fa')
-        scaffs_out = os.path.join(data_dir, 'cluster_test_fix_contig_orientation.out.fa')
-        shutil.copyfile(scaffs_in, c.gapfilled_scaffolds)
-        shutil.copyfile(os.path.join(data_dir, 'cluster_test_fix_contig_orientation.gene.fa'), c.gene_fa)
-        c._fix_contig_orientation()
-        self.assertTrue(filecmp.cmp(scaffs_out, c.final_assembly_fa, shallow=False))
-        clean_cluster_dir(cluster_dir)
+        no_gaps = os.path.join(data_dir, 'assembly_test_has_gaps_to_fill.no_gaps.fa')
+        has_gaps = os.path.join(data_dir, 'assembly_test_has_gaps_to_fill.has_gaps.fa')
+        self.assertTrue(assembly.Assembly._has_gaps_to_fill(has_gaps))
+        self.assertFalse(assembly.Assembly._has_gaps_to_fill(no_gaps))
 
 
     def test_rename_scaffolds(self):
         '''test _rename_scaffolds'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_rename_scaffolds')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        c.gene = pyfastaq.sequences.Fasta('name_of_gene', 'AAACCCGGGTTT')
-        infile = os.path.join(data_dir, 'cluster_test_rename_scaffolds.in.fa')
-        outfile = os.path.join(data_dir, 'cluster_test_rename_scaffolds.out.fa')
+        infile = os.path.join(data_dir, 'assembly_test_rename_scaffolds.in.fa')
+        outfile = os.path.join(data_dir, 'assembly_test_rename_scaffolds.out.fa')
         tmpfile = 'tmp.fa'
-        c._rename_scaffolds(infile, tmpfile)
+        assembly.Assembly._rename_scaffolds(infile, tmpfile, 'prefix')
         self.assertTrue(filecmp.cmp(outfile, tmpfile, shallow=False))
         os.unlink(tmpfile)
-        clean_cluster_dir(cluster_dir)
+
+
+    def test_gap_fill_with_gapfiller_no_gaps(self):
+        '''test _gap_fill_with_gapfiller no gaps'''
+        reads1 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_1.fq')
+        reads2 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_2.fq')
+        tmp_dir = 'tmp.gap_fill_with_gapfiller_no_gaps'
+        a = assembly.Assembly(reads1, reads2, 'ref.fa', tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
+        a.scaffolder_scaffolds = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller.scaffolds_no_gaps.fa')
+        a._gap_fill_with_gapfiller()
+        self.assertTrue(os.path.exists(a.gapfilled_scaffolds))
+        shutil.rmtree(tmp_dir)
+
+
+    def test_gap_fill_with_gapfiller_with_gaps(self):
+        '''test _gap_fill_with_gapfiller with gaps'''
+        reads1 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_1.fq')
+        reads2 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_2.fq')
+        tmp_dir = 'tmp.gap_fill_with_gapfiller_with_gaps'
+        a = assembly.Assembly(reads1, reads2, 'ref.fa', tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
+        a.scaffolder_scaffolds = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller.scaffolds_with_gaps.fa')
+        a._gap_fill_with_gapfiller()
+        self.assertTrue(os.path.exists(a.gapfilled_scaffolds))
+        shutil.rmtree(tmp_dir)
+
+
+    def test_fix_contig_orientation(self):
+        '''test _fix_contig_orientation'''
+        scaffs_in = os.path.join(data_dir, 'assembly_test_fix_contig_orientation.in.fa')
+        expected_out = os.path.join(data_dir, 'assembly_test_fix_contig_orientation.out.fa')
+        ref_fa = os.path.join(data_dir, 'assembly_test_fix_contig_orientation.ref.fa')
+        tmp_out = 'tmp.assembly_test_fix_contig_orientation.out.fa'
+        got = assembly.Assembly._fix_contig_orientation(scaffs_in, ref_fa, tmp_out)
+        expected = {'match_both_strands'}
+        self.assertTrue(filecmp.cmp(expected_out, tmp_out, shallow=False))
+        self.assertEqual(expected, got)
+        os.unlink(tmp_out)
 
 
     def test_parse_bam(self):
         '''test _parse_bam'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_parse_assembly_bam')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        bam = os.path.join(data_dir, 'cluster_test_parse_assembly_bam.bam')
-        assembly_fa = os.path.join(data_dir, 'cluster_test_parse_assembly_bam.assembly.fa')
-        shutil.copyfile(bam, c.final_assembly_bam)
-        shutil.copy(assembly_fa, c.final_assembly_fa)
-        c._load_final_contigs()
-        c._parse_assembly_bam()
-        for e in ['scaff', 'soft_clipped', 'unmapped_mates']:
-            self.assertTrue(os.path.exists(c.final_assembly_bam + '.' + e))
-        clean_cluster_dir(cluster_dir)
-
+        bam = os.path.join(data_dir, 'assembly_test_parse_assembly_bam.bam')
+        assembly_fa = os.path.join(data_dir, 'assembly_test_parse_assembly_bam.assembly.fa')
+        assembly_seqs = {}
+        pyfastaq.tasks.file_to_dict(assembly_fa, assembly_seqs)
+        self.assertTrue(assembly.Assembly._parse_bam(assembly_seqs, bam, 10, 1000))
+        os.unlink(bam + '.soft_clipped')
+        os.unlink(bam + '.unmapped_mates')
+        os.unlink(bam + '.scaff')
 

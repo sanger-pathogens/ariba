@@ -1,6 +1,8 @@
+import os
+import shutil
 import pyfastaq
 import pymummer
-from ariba import common, mapping
+from ariba import common, mapping, bam_parse
 
 class Error (Exception): pass
 
@@ -18,6 +20,11 @@ class Assembly:
       assembler='spades',
       bowtie2_exe='bowtie2',
       bowtie2_preset='very-sensitive-local',
+      max_insert=1000,
+      min_scaff_depth=10,
+      nucmer_min_id=90,
+      nucmer_min_len=50,
+      nucmer_breaklen=50,
       spades_other_options=None,
       sspace_k=20,
       sspace_sd=0.4,
@@ -27,18 +34,23 @@ class Assembly:
       sspace_exe='SSPACE_Basic_v2.0.pl',
       gapfiller_exe='GapFiller.pl',
     ):
-        self.reads1 = os.path.abspath(reads_1)
-        self.reads2 = os.path.abspath(reads_2)
+        self.reads1 = os.path.abspath(reads1)
+        self.reads2 = os.path.abspath(reads2)
         self.ref_fasta = os.path.abspath(ref_fasta)
         self.working_dir = os.path.abspath(working_dir)
         self.final_assembly_fa = os.path.abspath(final_assembly_fa)
         self.log_fh = log_fh
         self.scaff_name_prefix = scaff_name_prefix
 
-        self._set_assembly_kmer(assembly_kmer)
+        self.assembly_kmer = self._get_assembly_kmer(kmer, reads1, reads2)
         self.assembler = assembler
         self.bowtie2_exe = bowtie2_exe
         self.bowtie2_preset = bowtie2_preset
+        self.max_insert = max_insert
+        self.min_scaff_depth = min_scaff_depth
+        self.nucmer_min_id = nucmer_min_id
+        self.nucmer_min_len = nucmer_min_len
+        self.nucmer_breaklen = nucmer_breaklen
         self.spades_other_options = spades_other_options
         self.sspace_k = sspace_k
         self.sspace_sd = sspace_sd
@@ -60,18 +72,18 @@ class Assembly:
             if self.gapfiller_exe is not None:
                 self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
 
-        self.assembly_dir = os.path.join(self.working_dir, 'Assembly')
-        self.assembler_dir = os.path.join(self.assembly_dir, 'Assemble')
-        self.assembly_contigs = os.path.join(self.assembly_dir, 'contigs.fa')
-        self.scaffold_dir = os.path.join(self.assembly_dir, 'Scaffold')
-        self.scaffolder_scaffolds = os.path.join(self.assembly_dir, 'scaffolds.fa')
-        self.gapfill_dir = os.path.join(self.assembly_dir, 'Gapfill')
-        self.gapfilled_scaffolds = os.path.join(self.assembly_dir, 'scaffolds.gapfilled.fa')
+        #self.assembly_dir = os.path.join(self.working_dir, 'Assembly')
+        self.assembler_dir = os.path.join(self.working_dir, 'Assemble')
+        self.assembly_contigs = os.path.join(self.working_dir, 'contigs.fa')
+        self.scaffold_dir = os.path.join(self.working_dir, 'Scaffold')
+        self.scaffolder_scaffolds = os.path.join(self.working_dir, 'scaffolds.fa')
+        self.gapfill_dir = os.path.join(self.working_dir, 'Gapfill')
+        self.gapfilled_scaffolds = os.path.join(self.working_dir, 'scaffolds.gapfilled.fa')
         #self.final_assembly_fa = os.path.join(self.assembly_dir,
 
 
     @staticmethod
-    def _set_assembly_kmer(k, reads1, reads2):
+    def _get_assembly_kmer(k, reads1, reads2):
         '''If the kmer not given, uses 2/3 of the mean read length (using first 1000 forward and first 1000 reverse reads)'''
         if k == 0:
             read_length1 = pyfastaq.tasks.mean_length(reads1, limit=1000)
@@ -94,11 +106,14 @@ class Assembly:
             '-k', str(self.assembly_kmer),
             '--untrusted-contigs', self.ref_fasta,
         ])
-        if self.spades_other is not None:
-            cmd += ' ' + self.spades_other
+        if self.spades_other_options is not None:
+            cmd += ' ' + self.spades_other_options
 
         cwd = os.getcwd()
-        os.chdir(self.assembly_dir)
+        try:
+            os.chdir(self.working_dir)
+        except:
+            raise Error('Error chdir ' + self.working_dir)
         spades_contigs = os.path.join(os.path.split(self.assembler_dir)[1], 'scaffolds.fasta')
 
         if unittest:
@@ -114,10 +129,6 @@ class Assembly:
             with open(spades_errors_file, 'w') as f:
                 print(err, file=f)
             f.close()
-            #total_reads = self._get_read_counts()
-            #print('WARNING: assembly failed for cluster', self.name, 'which is usually due to not enough reads for this cluster (from spurious mapping) and nothing to worry about.', file=sys.stderr)
-            #print('WARNING: assembly failed for cluster', self.name, ' ... number of reads for this cluster:', total_reads, file=sys.stderr)
-            #print('WARNING: assembly failed for cluster', self.name, ' ... SPAdes errors written to:', spades_errors_file, file=sys.stderr)
 
         os.chdir(cwd)
 
@@ -153,7 +164,7 @@ class Assembly:
 
         sspace_scaffolds = os.path.abspath('standard_output.final.scaffolds.fasta')
         common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
-        os.chdir(self.assembly_dir)
+        os.chdir(self.working_dir)
         os.symlink(os.path.relpath(sspace_scaffolds), os.path.basename(self.scaffolder_scaffolds))
         os.chdir(cwd)
 
@@ -182,7 +193,6 @@ class Assembly:
     def _gap_fill_with_gapfiller(self):
         if not os.path.exists(self.scaffolder_scaffolds):
             raise Error('Cannot gap fill because scaffolds file not found: ' + self.scaffolder_scaffolds)
-
 
         cwd = os.getcwd()
 
@@ -213,12 +223,21 @@ class Assembly:
 
 
     @staticmethod
-    def _fix_contig_orientation(infile, outfile):
-        if not os.path.exists(infile):
-            raise Error('Cannot fix orientation of assembly contigs because file not found: ' + infile)
+    def _fix_contig_orientation(contigs_fa, ref_fa, outfile, min_id=90, min_length=50, breaklen=50):
+        '''Changes orientation of each contig to match the reference, when possible.
+           Returns a set of names of contigs that had hits in both orientations to the reference'''
+        if not os.path.exists(contigs_fa):
+            raise Error('Cannot fix orientation of assembly contigs because file not found: ' + contigs_fa)
 
         tmp_coords = os.path.join(outfile + '.tmp.rename.coords')
-        self._run_nucmer(infile, tmp_coords)
+        pymummer.nucmer.Runner(
+            ref_fa,
+            contigs_fa,
+            tmp_coords,
+            min_id=min_id,
+            min_length=min_length,
+            breaklen=breaklen,
+        ).run()
 
         to_revcomp = set()
         not_revcomp = set()
@@ -231,19 +250,16 @@ class Assembly:
 
         os.unlink(tmp_coords)
         in_both = to_revcomp.intersection(not_revcomp)
-        for name in in_both:
-            print('WARNING: hits to both strands of gene for scaffold. Interpretation of any variants cannot be trusted for this scaffold:', name, file=sys.stderr)
-            to_revcomp.remove(name)
-            # FIXME!
-            self.status_flag.add('hit_both_strands')
 
         f = pyfastaq.utils.open_file_write(outfile)
-        seq_reader = pyfastaq.sequences.file_reader(infile)
+        seq_reader = pyfastaq.sequences.file_reader(contigs_fa)
         for seq in seq_reader:
-            if seq.id in to_revcomp:
+            if seq.id in to_revcomp and seq.id not in in_both:
                 seq.revcomp()
             print(seq, file=f)
         pyfastaq.utils.close(f)
+
+        return in_both
 
 
     @staticmethod
@@ -254,7 +270,7 @@ class Assembly:
         bam_parser = bam_parse.Parser(bam, sequences)
         bam_parser.parse()
         bam_parser.write_files(bam)
-        self.scaff_graph_ok = bam_parser.scaff_graph_is_consistent(self.min_scaff_depth, self.max_insert)
+        return bam_parser.scaff_graph_is_consistent(min_scaff_depth, max_insert)
 
 
     def run(self):
@@ -272,7 +288,8 @@ class Assembly:
         if self.assembled_ok:
             self._scaffold_with_sspace()
             self._gap_fill_with_gapfiller()
-            self._fix_contig_orientation(self.gapfilled_scaffolds, self.final_assembly_fa)
+            contigs_both_strands = self._fix_contig_orientation(self.gapfilled_scaffolds, self.final_assembly_fa)
+            self.has_contigs_on_both_strands = len(contigs_both_strands) > 0
             pyfastaq.tasks.file_to_dict(self.final_assembly_fa, self.sequences)
 
             mapping.run_bowtie2(
@@ -289,5 +306,5 @@ class Assembly:
                 verbose_filehandle=self.log_fh
             )
 
-            self._parse_bam(self.sequences, self.final_assembly_bam, self.min_scaff_depth, self.max_insert)
+            self.scaff_graph_ok = self._parse_bam(self.sequences, self.final_assembly_bam, self.min_scaff_depth, self.max_insert)
 
