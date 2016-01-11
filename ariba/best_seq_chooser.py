@@ -25,7 +25,7 @@ class BestSeqChooser:
         self.threads = threads
 
 
-    def _total_alignment_score(seq_name)
+    def _total_alignment_score(self, seq_name):
         tmpdir = tempfile.mkdtemp(prefix='tmp.get_total_aln_score.', dir=os.getcwd())
         tmp_bam = os.path.join(tmpdir, 'tmp.get_total_alignment_score.bam')
         tmp_fa = os.path.join(tmpdir, 'tmp.get_total_alignment_score.ref.fa')
