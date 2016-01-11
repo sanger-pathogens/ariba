@@ -1,15 +1,16 @@
 import unittest
+import os
+import pymummer
+import pyfastaq
 from ariba import assembly_variants
 
 modules_dir = os.path.dirname(os.path.abspath(assembly_variants.__file__))
+data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 
 class TestAssemblyVariants(unittest.TestCase):
     def test_get_codon_start(self):
         '''test _get_codon_start'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
         tests = [
             (0, 5, 3),
             (0, 0, 0),
@@ -22,24 +23,20 @@ class TestAssemblyVariants(unittest.TestCase):
             (3, 7, 6),
             (3, 8, 6),
         ]
-        for t in tests:
-            self.assertEqual(c._get_codon_start(t[0], t[1]), t[2])
-        clean_cluster_dir(cluster_dir)
+        for start, position, expected in tests:
+            self.assertEqual(expected, assembly_variants.AssemblyVariants._get_codon_start(start, position))
 
 
-    def test_get_mummer_variants(self):
-        '''test _get_mummer_variants'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        snp_file = os.path.join(data_dir, 'cluster_test_get_mummer_variants.none.snps')
-        shutil.copyfile(snp_file, c.assembly_vs_gene_coords + '.snps')
-        c._get_mummer_variants()
-        self.assertEqual(c.mummer_variants, {})
+    def test_get_mummer_variants_no_variants(self):
+        '''test _get_mummer_variants when no variants'''
+        snp_file = os.path.join(data_dir, 'assembly_variants_test_get_mummer_variants.none.snps')
+        got = assembly_variants.AssemblyVariants._get_mummer_variants(snp_file)
+        self.assertEqual({}, got)
 
-        clean_cluster_dir(cluster_dir)
-        snp_file = os.path.join(data_dir, 'cluster_test_get_mummer_variants.snp.snps')
-        shutil.copyfile(snp_file, c.assembly_vs_gene_coords + '.snps')
+
+    def test_get_mummer_variants_has_variants(self):
+        '''test _get_mummer_variants when there are variants'''
+        snp_file = os.path.join(data_dir, 'assembly_variants_test_get_mummer_variants.snp.snps')
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('42\tA\tG\t42\t42\t42\t500\t500\t1\t1\tgene\tcontig1'))
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('42\tA\tG\t42\t42\t42\t500\t500\t1\t1\tgene\tcontig2'))
         v3 = pymummer.variant.Variant(pymummer.snp.Snp('40\tT\tC\t40\t42\t42\t500\t500\t1\t1\tgene\tcontig1'))
@@ -48,34 +45,13 @@ class TestAssemblyVariants(unittest.TestCase):
             'contig1': [[v4], [v3, v1]],
             'contig2': [[v2]]
         }
-        shutil.copyfile(snp_file, c.assembly_vs_gene_coords + '.snps')
-        c._get_mummer_variants()
-        self.assertEqual(c.mummer_variants, expected)
-        clean_cluster_dir(cluster_dir)
-
-
-    def test_filter_mummer_variants(self):
-        '''test filter_mummer_variants'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
-        v1 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tT\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
-        v2 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tA\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
-        v3 = pymummer.variant.Variant(pymummer.snp.Snp('12\tG\tT\t12\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
-        c.mummer_variants = {'contig': [[v1, v2], v3]}
-        c._filter_mummer_variants()
-        expected = {'contig': [[v1, v2]]}
-        self.assertEqual(expected, c.mummer_variants)
-        clean_cluster_dir(cluster_dir)
+        got = assembly_variants.AssemblyVariants._get_mummer_variants(snp_file)
+        self.assertEqual(expected, got)
 
 
     def test_get_variant_effect(self):
         '''test _get_variant_effect'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
+        ref_seq = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tA\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
@@ -110,8 +86,18 @@ class TestAssemblyVariants(unittest.TestCase):
             ([v11], ('DEL', 'R2_E3del')),
         ]
 
-        for t in variants:
-            self.assertEqual(t[1], c._get_variant_effect(t[0]))
+        for variant_list, expected in variants:
+            self.assertEqual(expected, assembly_variants.AssemblyVariants._get_variant_effect(variant_list, ref_seq))
 
-        clean_cluster_dir(cluster_dir)
+
+    def test_filter_mummer_variants(self):
+        '''test filter_mummer_variants'''
+        ref_seq = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
+        v1 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tT\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v2 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tA\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v3 = pymummer.variant.Variant(pymummer.snp.Snp('12\tG\tT\t12\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        mummer_variants = {'contig': [[v1, v2], v3]}
+        assembly_variants.AssemblyVariants._filter_mummer_variants(mummer_variants, ref_seq)
+        expected = {'contig': [[v1, v2]]}
+        self.assertEqual(expected, mummer_variants)
 
