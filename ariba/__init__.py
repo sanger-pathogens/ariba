@@ -1,5 +1,7 @@
 __all__ = [
     'assembly',
+    'assembly_compare',
+    'assembly_variants',
     'bam_parse',
     'best_seq_chooser',
     'cdhit',
