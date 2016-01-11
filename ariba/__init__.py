@@ -1,5 +1,7 @@
 __all__ = [
+    'assembly',
     'bam_parse',
+    'best_seq_chooser',
     'cdhit',
     'cluster',
     'clusters',

@@ -210,13 +210,13 @@ class ReferenceData:
 
 
     @staticmethod
-    def _gene_seq_is_ok(seq, min_length, max_length, genetic_code):
+    def _gene_seq_is_ok(seq, min_length, max_length):
         seq.seq = seq.seq.upper()
         if len(seq) < min_length:
             return False, 'Remove: too short. Length: ' + str(len(seq))
         elif len(seq) > max_length:
             return False, 'Remove: too long. Length: ' + str(len(seq))
-        elif not seq.looks_like_gene(translation_table=genetic_code):
+        elif not seq.looks_like_gene():
             length_over_three = round(len(seq) / 3, 2)
             return False, 'Does not look like a gene (does not start with start codon, length (' + str(len(seq)) + ') is not a multiple of 3 (length/3=' + str(length_over_three) + '), or contains internal stop codons). Translation: ' + seq.translate().seq
 
@@ -232,7 +232,7 @@ class ReferenceData:
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
         for name, sequence in sorted(seqs_dict.items()):
-            ok, message = self._gene_seq_is_ok(sequence, self.min_gene_length, self.max_gene_length, self.genetic_code)
+            ok, message = self._gene_seq_is_ok(sequence, self.min_gene_length, self.max_gene_length)
             if message is not None:
                 print(name, message, file=log_fh)
             if not ok:
@@ -281,3 +281,18 @@ class ReferenceData:
         seq = self.sequence(sequence_name)
         assert seq is not None
         return len(seq)
+
+
+    def all_non_wild_type_variants(self, ref_name):
+        ref_seq = self.sequence(ref_name)
+        if ref_seq is None:
+            return []
+
+        variants = []
+
+        for metadata_list in self.metadata[ref_name]:
+            for metadata in metadata_list:
+                if metadata.has_variant(ref_seq):
+                    variants.append(metadata)
+
+        return variants

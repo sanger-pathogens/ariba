@@ -167,7 +167,7 @@ class TestReferenceData(unittest.TestCase):
         ]
 
         for seq, ok, message in tests:
-            self.assertEqual((ok, message), reference_data.ReferenceData._gene_seq_is_ok(seq, 6, 99, 1))
+            self.assertEqual((ok, message), reference_data.ReferenceData._gene_seq_is_ok(seq, 6, 99))
 
 
     def test_remove_bad_genes(self):
@@ -242,3 +242,8 @@ class TestReferenceData(unittest.TestCase):
         refdata = reference_data.ReferenceData(presence_absence_fa=presence_absence_fa)
         self.assertEqual(9, refdata.sequence_length('pa'))
 
+
+    def test_all_non_wild_type_variants(self):
+        '''Test all_non_wild_type_variants'''
+        # FIXME
+        pass

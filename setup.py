@@ -18,7 +18,7 @@ setup(
     tests_require=['nose >= 1.3'],
     install_requires=[
         'openpyxl',
-        'pyfastaq >= 3.10.0',
+        'pyfastaq >= 3.11.1',
         'pysam >= 0.8.1',
         'pymummer>=0.6.1',
         'beautifulsoup4'
