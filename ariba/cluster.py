@@ -343,7 +343,7 @@ class Cluster:
               kmer=self.assembly_kmer,
               assembler=self.assembler,
               spades_other_options=self.spades_other_options,
-              sspace_k=self.sspace_k
+              sspace_k=self.sspace_k,
               sspace_sd=self.sspace_sd,
               reads_insert=self.reads_insert,
               spades_exe=self.spades_exe,
