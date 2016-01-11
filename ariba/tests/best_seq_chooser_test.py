@@ -1,38 +1,37 @@
 import unittest
+import sys
+import os
+import pyfastaq
 from ariba import best_seq_chooser
 
 modules_dir = os.path.dirname(os.path.abspath(best_seq_chooser.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
-cluster.unittest = True
 
 
 class TestBestSeqChooser(unittest.TestCase):
     def test_total_alignment_score(self):
         '''test _total_alignment_score'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_get_total_alignment_score')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        got_score = c._get_total_alignment_score('1')
-        expected_score = 3000
-        self.assertEqual(got_score, expected_score)
-        clean_cluster_dir(cluster_dir)
+        reads1 = os.path.join(data_dir, 'best_seq_chooser_total_alignment_score_reads_1.fq')
+        reads2 = os.path.join(data_dir, 'best_seq_chooser_total_alignment_score_reads_2.fq')
+        ref = os.path.join(data_dir, 'best_seq_chooser_total_alignment_score_ref_seqs.fa')
+        chooser = best_seq_chooser.BestSeqChooser(reads1, reads2, ref, sys.stdout)
+        self.assertEqual(3000, chooser._total_alignment_score('1'))
 
 
     def test_get_best_seq_by_alignment_score(self):
         '''test _get_best_seq_by_alignment_score'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_get_best_seq_by_alignment_score')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        got_name = c._get_best_seq_by_alignment_score()
-        self.assertEqual(got_name, '1')
-        clean_cluster_dir(cluster_dir)
+        reads1 = os.path.join(data_dir, 'best_seq_chooser_get_best_seq_by_alignment_score_reads_1.fq')
+        reads2 = os.path.join(data_dir, 'best_seq_chooser_get_best_seq_by_alignment_score_reads_2.fq')
+        ref = os.path.join(data_dir, 'best_seq_chooser_get_best_seq_by_alignment_score_ref.fa')
+        chooser = best_seq_chooser.BestSeqChooser(reads1, reads2, ref, sys.stdout)
+        self.assertEqual('1', chooser._get_best_seq_by_alignment_score())
 
 
     def test_best_seq(self):
         '''test best_seq'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_choose_best_seq')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
+        reads1 = os.path.join(data_dir, 'best_seq_chooser_best_seq_reads_1.fq')
+        reads2 = os.path.join(data_dir, 'best_seq_chooser_best_seq_reads_2.fq')
+        ref = os.path.join(data_dir, 'best_seq_chooser_best_seq_ref.fa')
         expected_seq = pyfastaq.sequences.Fasta('1', ''.join([
             'AGCGCCTAGCTTTGGCACTTCAGGAGCGCCCGGAAATAATGGCGGGCGATGAAGGTTCTG',
             'TAGGTACGCAAGATCCCTCTTAATCACAGTGGTGTAATCTGCGGGTCAGACCCTGTTAAC',
@@ -40,10 +39,9 @@ class TestBestSeqChooser(unittest.TestCase):
             'GTCTTAAGGACTCTGCGAGGCAAAGTACGGGCGAACTAAACCCCCGTGACAGGTCAGACG',
             'TTGTTTCGGCAATCTGTCGCGCTCCCACACCTATAAGCGTACACCGTCTCTTCTGCCAGC',
         ]))
-        expected_seq_fa = os.path.join(data_dir, 'cluster_test_choose_best_seq.seq.fa')
-        got = c._choose_best_seq()
-        self.assertEqual(got, expected_seq)
-        self.assertTrue(filecmp.cmp(expected_seq_fa, c.seq_fa, shallow=False))
-        clean_cluster_dir(cluster_dir)
 
-
+        tmp_file = 'tmp.best_seq.fa'
+        chooser = best_seq_chooser.BestSeqChooser(reads1, reads2, ref, sys.stdout)
+        got_seq = chooser.best_seq(tmp_file)
+        self.assertEqual(expected_seq, got_seq)
+        os.unlink(tmp_file)

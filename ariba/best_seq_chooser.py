@@ -1,6 +1,8 @@
 import shutil
 import tempfile
 import sys
+import os
+import pyfastaq
 from ariba import mapping, faidx
 
 class Error (Exception): pass
@@ -22,6 +24,7 @@ class BestSeqChooser:
         self.log_fh = log_fh
         self.samtools_exe = samtools_exe
         self.bowtie2_exe = bowtie2_exe
+        self.bowtie2_preset = bowtie2_preset
         self.threads = threads
 
 
@@ -36,7 +39,7 @@ class BestSeqChooser:
             tmp_fa,
             samtools_exe=self.samtools_exe,
             verbose=True,
-            verbose_filehandle=log_fh
+            verbose_filehandle=self.log_fh
         )
 
         mapping.run_bowtie2(
@@ -76,20 +79,21 @@ class BestSeqChooser:
             print('Total alignment score for sequence', seq.id, 'is', score, file=self.log_fh)
             if score > best_score:
                 best_score = score
-                best_sequence_name = seq.id
+                best_seq_name = seq.id
 
         print('\nBest sequence is', best_seq_name, 'with total alignment score of', best_score, file=self.log_fh)
         print(file=self.log_fh)
         return best_seq_name
 
 
-    def best_seq(self):
+    def best_seq(self, outfile):
+        '''Finds the closest matchng sequence, writes it to a FASTA file, and returns it as a pyfastaq.sequences.Fasta object'''
         seq_name = self._get_best_seq_by_alignment_score()
         if seq_name is None:
             return None
-        faidx.write_fa_subset([seq_name], self.references_fa, self.reference_fa, samtools_exe=self.samtools_exe, verbose=True, verbose_filehandle=self.log_fh)
+        faidx.write_fa_subset([seq_name], self.references_fa, outfile, samtools_exe=self.samtools_exe, verbose=True, verbose_filehandle=self.log_fh)
         seqs = {}
-        pyfastaq.tasks.file_to_dict(self.reference_fa, seqs)
+        pyfastaq.tasks.file_to_dict(outfile, seqs)
         assert len(seqs) == 1
         return list(seqs.values())[0]
 
