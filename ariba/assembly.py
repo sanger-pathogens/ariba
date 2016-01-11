@@ -67,7 +67,7 @@ class Assembly:
         self.scaffolder_scaffolds = os.path.join(self.assembly_dir, 'scaffolds.fa')
         self.gapfill_dir = os.path.join(self.assembly_dir, 'Gapfill')
         self.gapfilled_scaffolds = os.path.join(self.assembly_dir, 'scaffolds.gapfilled.fa')
-        self.final_assembly_fa = os.path.join(self.assembly_dir,
+        #self.final_assembly_fa = os.path.join(self.assembly_dir,
 
 
     @staticmethod
