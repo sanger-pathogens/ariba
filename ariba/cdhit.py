@@ -38,6 +38,7 @@ class Runner:
         f = pyfastaq.utils.open_file_write(self.outfile)
         for seq in seq_reader:
             if seq.id in found_names:
+                pyfastaq.utils.close(f)
                 raise Error('Sequence name "' + seq.id + '" not unique. Cannot continue')
             found_names.add(seq.id)
             cluster_number = str(len(cluster_to_name))
