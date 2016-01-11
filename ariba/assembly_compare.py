@@ -1,9 +1,5 @@
 import os
 import copy
-from operator import itemgetter
-import sys
-import shutil
-import pysam
 import pyfastaq
 import pymummer
 
@@ -12,7 +8,7 @@ class Error (Exception): pass
 class AssemblyCompare:
     def __init__(self,
       assembly_fa,
-      assembly_sequences
+      assembly_sequences,
       assembly_bam,
       ref_fa,
       ref_sequence,
@@ -112,7 +108,7 @@ class AssemblyCompare:
 
 
     @classmethod
-    def _nucmer_hits_to_ref_coords(nucmer_hits, contig=None):
+    def _nucmer_hits_to_ref_coords(cls, nucmer_hits, contig=None):
         '''Input is hits made by self._parse_nucmer_coords_file.
            Returns dictionary. Key = contig name. Value = list of coords in the
            reference sequence for that contig.
@@ -212,13 +208,13 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def _ref_covered_by_complete_contig_with_orf(nucmer_hits, ref_seq, contigs):
+    def _ref_covered_by_complete_contig_with_orf(nucmer_hits, contigs):
         '''Returns true iff there is a contig that covers the entire reference,
            and that contig has a complete open reading frame.
            nucmer_hits = hits made by self._parse_nucmer_coords_file.'''
         for l in nucmer_hits.values():
             for hit in l:
-                if hit.hit_length_ref == len(ref_seq):
+                if hit.hit_length_ref == hit.ref_length:
                     start = min(hit.qry_start, hit.qry_end)
                     end = max(hit.qry_start, hit.qry_end)
                     assembled_gene = pyfastaq.sequences.Fasta('x', contigs[hit.qry_name][start:end+1])
@@ -240,13 +236,13 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def _ref_covered_by_at_least_one_full_length_contig(nucmer_hits, ref_seq):
+    def _ref_covered_by_at_least_one_full_length_contig(nucmer_hits):
         '''Returns true iff there exists a contig that completely
            covers the reference sequence
            nucmer_hits = hits made by self._parse_nucmer_coords_file.'''
         for l in nucmer_hits.values():
             for hit in l:
-                if len(hit.ref_coords()) == len(ref_seq):
+                if len(hit.ref_coords()) == hit.ref_length:
                     return True
         return False
 
