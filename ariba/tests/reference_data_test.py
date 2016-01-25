@@ -245,5 +245,25 @@ class TestReferenceData(unittest.TestCase):
 
     def test_all_non_wild_type_variants(self):
         '''Test all_non_wild_type_variants'''
-        # FIXME
-        pass
+        tsv_file = os.path.join(data_dir, 'reference_data_test_all_non_wild_type_variants.tsv')
+        presence_absence_fa = os.path.join(data_dir, 'reference_data_test_all_non_wild_type_variants.ref.pres_abs.fa')
+        variants_only_fa = os.path.join(data_dir, 'reference_data_test_all_non_wild_type_variants.ref.var_only.fa')
+        noncoding_fa = os.path.join(data_dir, 'reference_data_test_all_non_wild_type_variants.ref.noncoding.fa')
+
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=presence_absence_fa,
+            variants_only_fa=variants_only_fa,
+            non_coding_fa=noncoding_fa,
+            metadata_tsv=tsv_file
+        )
+
+        m1 = sequence_metadata.SequenceMetadata('var_only_gene\tn\tG9C\tref has variant C instead of G')
+        m2 = sequence_metadata.SequenceMetadata('var_only_gene\tp\tI5V\tref has variant V instead of I')
+        m3 = sequence_metadata.SequenceMetadata('presence_absence_gene\tn\tA6C\tref has variant C instead of A')
+        m4 = sequence_metadata.SequenceMetadata('presence_absence_gene\tp\tA4G\tref has variant G instead of A')
+        m5 = sequence_metadata.SequenceMetadata('non_coding\tn\tC4T\tref has variant T instead of C')
+
+        self.assertEqual([m1, m2], refdata.all_non_wild_type_variants('var_only_gene'))
+        self.assertEqual([m3, m4], refdata.all_non_wild_type_variants('presence_absence_gene'))
+        self.assertEqual([m5], refdata.all_non_wild_type_variants('non_coding'))
+        self.assertEqual([], refdata.all_non_wild_type_variants('not_a_known_sequence'))
