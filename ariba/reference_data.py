@@ -285,14 +285,17 @@ class ReferenceData:
 
     def all_non_wild_type_variants(self, ref_name):
         ref_seq = self.sequence(ref_name)
-        if ref_seq is None or ref_name not in self.metadata:
-            return []
+        variants = {'n': {}, 'p': {}}
 
-        variants = []
+        if ref_seq is None or ref_name not in self.metadata:
+            return variants
 
         for metadata in self.metadata[ref_name]:
             if metadata.has_variant(ref_seq):
-                variants.append(metadata)
+                if metadata.variant.position not in variants[metadata.variant.variant_type]:
+                    variants[metadata.variant.variant_type][metadata.variant.position] = set()
+
+                variants[metadata.variant.variant_type][metadata.variant.position].add(metadata)
 
         return variants
 

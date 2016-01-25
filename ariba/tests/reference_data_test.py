@@ -263,7 +263,7 @@ class TestReferenceData(unittest.TestCase):
         m4 = sequence_metadata.SequenceMetadata('presence_absence_gene\tp\tA4G\tref has variant G instead of A')
         m5 = sequence_metadata.SequenceMetadata('non_coding\tn\tC4T\tref has variant T instead of C')
 
-        self.assertEqual([m1, m2], refdata.all_non_wild_type_variants('var_only_gene'))
-        self.assertEqual([m3, m4], refdata.all_non_wild_type_variants('presence_absence_gene'))
-        self.assertEqual([m5], refdata.all_non_wild_type_variants('non_coding'))
-        self.assertEqual([], refdata.all_non_wild_type_variants('not_a_known_sequence'))
+        self.assertEqual({'n': {8: {m1}}, 'p': {4: {m2}}}, refdata.all_non_wild_type_variants('var_only_gene'))
+        self.assertEqual({'n': {5: {m3}}, 'p': {3: {m4}}}, refdata.all_non_wild_type_variants('presence_absence_gene'))
+        self.assertEqual({'n': {3: {m5}}, 'p': {}}, refdata.all_non_wild_type_variants('non_coding'))
+        self.assertEqual({'n': {}, 'p': {}}, refdata.all_non_wild_type_variants('not_a_known_sequence'))
