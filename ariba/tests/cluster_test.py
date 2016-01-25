@@ -50,6 +50,9 @@ def load_gene(filename):
 class TestCluster(unittest.TestCase):
     def test_init_fail_files_missing(self):
         '''test init_fail_files_missing'''
+        refdata_fa = os.path.join(data_dir, 'cluster_test_init_refdata.fa')
+        refdata = reference_data.ReferenceData(presence_absence_fa=refdata_fa)
+
         dirs = [
             'cluster_test_directorynotexist'
             'cluster_test_init_no_genes_fa',
@@ -60,7 +63,7 @@ class TestCluster(unittest.TestCase):
         for d in dirs:
             clean_cluster_dir(d)
             with self.assertRaises(cluster.Error):
-                c = cluster.Cluster(d, 'name')
+                c = cluster.Cluster(d, 'name', refdata=refdata)
             clean_cluster_dir(d)
 
 
