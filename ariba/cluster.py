@@ -17,7 +17,7 @@ class Cluster:
     def __init__(self,
       root_dir,
       name,
-      refdata=None,
+      refdata,
       assembly_kmer=21,
       assembler='spades',
       max_insert=1000,
@@ -136,7 +136,6 @@ class Cluster:
         and non-synonymous variants. This affects the flag, which also gets updated
         by the function. To then fix the report lines, must run _update_flag_in_report_lines()'''
         self.report_lines = []
-        total_reads = self._get_read_counts()
         if self.ref_sequence is not None:
             this_sequence_type = self.refdata.sequence_type(self.name)
         else:
@@ -151,7 +150,7 @@ class Cluster:
                 self.ref_sequence.id,
                 self.refdata,
                 self.status_flag,
-                total_reads,
+                self.total_reads,
                 self.name,
             )
             self.report_lines.append(new_report_line)
@@ -201,7 +200,7 @@ class Cluster:
                         self.report_lines.append([
                             self.ref_sequence.id,
                             self.status_flag.to_number(),
-                            total_reads,
+                            self.total_reads,
                             self.name,
                             len(self.ref_sequence),
                             cov_per_contig[contig],
@@ -234,7 +233,7 @@ class Cluster:
                       [
                         self.ref_sequence.id,
                         self.status_flag.to_number(),
-                        total_reads,
+                        self.total_reads,
                         self.name,
                         len(self.ref_sequence),
                         cov_per_contig[contig],
@@ -258,7 +257,7 @@ class Cluster:
                 self.report_lines.append([
                     self.ref_sequence.id,
                     self.status_flag.to_number(),
-                    total_reads,
+                    self.total_reads,
                     self.name,
                     len(self.ref_sequence),
                     cov_per_contig[contig],

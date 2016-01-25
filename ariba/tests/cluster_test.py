@@ -64,27 +64,11 @@ class TestCluster(unittest.TestCase):
             clean_cluster_dir(d)
 
 
-    def test_get_read_counts(self):
-        '''test _get_read_counts pass'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_get_read_counts')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        self.assertEqual(2, c._get_read_counts())
-        clean_cluster_dir(cluster_dir)
-
-
-    def test_get_read_counts_fail(self):
-        '''test _get_read_counts fail'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_get_read_counts_fail')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'name')
-        with self.assertRaises(cluster.Error):
-            c._get_read_counts()
-        clean_cluster_dir(cluster_dir)
-
-
-
-
+    def test_count_reads(self):
+        '''test _count_reads pass'''
+        reads1 = os.path.join(data_dir, 'cluster_test_count_reads_1.fq')
+        reads2 = os.path.join(data_dir, 'cluster_test_count_reads_2.fq')
+        self.assertEqual(4, cluster.Cluster._count_reads(reads1, reads2))
 
 
     def test_make_report_lines_nonsynonymous(self):
