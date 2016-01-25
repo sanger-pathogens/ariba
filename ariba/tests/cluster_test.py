@@ -183,6 +183,3 @@ class TestCluster(unittest.TestCase):
         clean_cluster_dir(cluster_dir)
 
 
-# to test:
-# count_reads()
-
