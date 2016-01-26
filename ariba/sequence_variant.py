@@ -31,7 +31,7 @@ class Variant:
        return type(other) is type(self) and self.__dict__ == other.__dict__
 
 
-    def __le__(self, other):
+    def __lt__(self, other):
         return self.position < other.position or \
             (self.position == other.position and self.variant_type < other.variant_type) or \
             (self.position == other.position and self.variant_type == other.variant_type and self.wild_value < other.wild_value) or \
