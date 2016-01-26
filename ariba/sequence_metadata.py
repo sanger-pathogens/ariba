@@ -30,7 +30,7 @@ class SequenceMetadata:
        return type(other) is type(self) and self.__dict__ == other.__dict__
 
 
-    def __le__(self, other):
+    def __lt__(self, other):
         return self.name < other.name or (self.name == other.name and self.variant < other.variant)
 
 
