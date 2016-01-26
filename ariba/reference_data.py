@@ -78,9 +78,15 @@ class ReferenceData:
                 print('Problem with this line of metadata, which will be ignored:', line.rstrip(), file=sys.stderr)
 
             if metadata.name not in metadata_dict:
-                metadata_dict[metadata.name] = []
+                metadata_dict[metadata.name] = {'n': {}, 'p': {}, '.': set()}
 
-            metadata_dict[metadata.name].append(metadata)
+            if metadata.variant_type == '.':
+                metadata_dict[metadata.name]['.'].add(metadata)
+            else:
+                if metadata.variant.position not in metadata_dict[metadata.name][metadata.variant_type]:
+                    metadata_dict[metadata.name][metadata.variant_type][metadata.variant.position] = set()
+
+                metadata_dict[metadata.name][metadata.variant_type][metadata.variant.position].add(metadata)
 
         pyfastaq.utils.close(f)
         return metadata_dict
@@ -116,9 +122,20 @@ class ReferenceData:
     def _write_metadata_tsv(metadata, filename):
         f = pyfastaq.utils.open_file_write(filename)
 
-        for gene_name, variants in sorted(metadata.items()):
-            for variant in variants:
-                print(variant, sep='\t', file=f)
+        for gene_name, data_dict in sorted(metadata.items()):
+            for meta in data_dict['.']:
+                print(meta, file=f)
+
+            variants = []
+
+            for variant_type in ['n', 'p']:
+                for position in data_dict[variant_type]:
+                    for meta in data_dict[variant_type][position]:
+                        variants.append(meta)
+
+            variants.sort()
+            for v in variants:
+                print(v, file=f)
 
         pyfastaq.utils.close(f)
 
@@ -145,53 +162,69 @@ class ReferenceData:
         new_variants_fa_file = out_prefix + '.variants_only.fa'
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
-        for gene_name, metadata_list in sorted(self.metadata.items()):
+        for gene_name, metadata_dict in sorted(self.metadata.items()):
             if gene_name in presence_absence_removed:
-                for metadata in metadata_list:
-                    print(gene_name, 'was removed from presence/absence fasta, so removing its metadata. Line of tsv was:', metadata, file=log_fh)
+                print(gene_name, 'was removed from presence/absence fasta, so removing its metadata', file=log_fh)
                 genes_to_remove.add(gene_name)
                 continue
             elif gene_name in variants_only_removed:
-                for metadata in metadata_list:
-                    print(gene_name, 'was removed from variants only fasta, so removing its metadata. Line of tsv was:', metadata, file=log_fh)
+                print(gene_name, 'was removed from variants only fasta, so removing its metadata', file=log_fh)
                 genes_to_remove.add(gene_name)
                 continue
 
             gene_in_seq_dict = self._find_gene_in_seqs(gene_name, self.seq_dicts)
             if gene_in_seq_dict is None:
-                for metadata in metadata_list:
-                    print(gene_name, 'is in input tsv file, but not found in any input sequence files. Removing. Line of tsv file was:', metadata, file=log_fh)
+                print(gene_name, 'is in input tsv file, but not found in any input sequence files. Removing', file=log_fh)
                 genes_to_remove.add(gene_name)
                 continue
 
+            # take out any metadata that is not a variant and has no extra info.
             to_remove = []
 
-            for i in range(len(metadata_list)):
-                metadata = metadata_list[i]
-                if metadata.variant_type == '.':
-                    if metadata.free_text is None or gene_in_seq_dict == 'variants_only':
-                        print(gene_name, 'metadata has no info. Just gene name given. Removing. Line of file was:', metadata, file=log_fh)
-                        to_remove.append(i)
-                    continue
+            for metadata in metadata_dict['.']:
+                if metadata.free_text is None or gene_in_seq_dict == 'variants_only':
+                    print(gene_name, 'metadata has no info. Just gene name given. Removing. Line of file was:', metadata, file=log_fh)
+                    to_remove.append(metadata)
 
-                if gene_in_seq_dict == 'non_coding' and metadata.variant_type == 'p':
-                    print(gene_name, 'variant of type "p" for protein, but sequence is non-coding. Removing. Line of file was:', metadata, file=log_fh)
-                    to_remove.append(i)
-                    continue
+            for metadata in to_remove:
+                metadata_dict['.'].remove(metadata)
 
-                to_translate = metadata.variant_type == 'p'
-                if not metadata.variant.sanity_check_against_seq(self.seq_dicts[gene_in_seq_dict][gene_name], translate_seq=to_translate):
-                    print(gene_name, 'variant does not match reference. Removing. Line of file was:', metadata, file=log_fh)
-                    to_remove.append(i)
-                    continue
 
-                if gene_in_seq_dict == 'variants_only':
-                    variants_only_genes_not_found.discard(gene_name)
+            # if this is non_coding, we shouldn't have any amino acid variants
+            if gene_in_seq_dict == 'non_coding':
+                for position in metadata_dict['p']:
+                    for metadata in metadata_dict['p'][position]:
+                        print(gene_name, 'variant of type "p" for protein, but sequence is non-coding. Removing. Line of file was:', metadata, file=log_fh)
 
-            for i in sorted(to_remove, reverse=True):
-                metadata_list.pop(i)
+                metadata_dict['p'] = {}
 
-            if len(metadata_list) == 0 and gene_in_seq_dict == 'variants_only':
+
+            # take out variant metadata that doesn't make sense (eg bases not matching ref sequence)
+            for variant_type in ['n', 'p']:
+                positions_to_remove = []
+                for position in metadata_dict[variant_type]:
+                    meta_to_remove = []
+                    for metadata in metadata_dict[variant_type][position]:
+                        to_translate = variant_type == 'p'
+
+                        if not metadata.variant.sanity_check_against_seq(self.seq_dicts[gene_in_seq_dict][gene_name], translate_seq=to_translate):
+                            print(gene_name, 'variant does not match reference. Removing. Line of file was:', metadata, file=log_fh)
+                            meta_to_remove.append(metadata)
+                            continue
+
+                        if gene_in_seq_dict == 'variants_only':
+                            variants_only_genes_not_found.discard(gene_name)
+
+                    for metadata in meta_to_remove:
+                        metadata_dict[variant_type][position].remove(metadata)
+                    if len(metadata_dict[variant_type][position]) == 0:
+                        positions_to_remove.append(position)
+
+                for position in positions_to_remove:
+                    del metadata_dict[variant_type][position]
+
+
+            if gene_in_seq_dict == 'variants_only' and len(metadata_dict['n']) == len(metadata_dict['p']) == len(metadata_dict['.']) == 0:
                 print(gene_name, 'No remaining data after checks. Removing this sequence because it is in the variants only file', file=log_fh)
                 genes_to_remove.add(gene_name)
 
@@ -290,12 +323,14 @@ class ReferenceData:
         if ref_seq is None or ref_name not in self.metadata:
             return variants
 
-        for metadata in self.metadata[ref_name]:
-            if metadata.has_variant(ref_seq):
-                if metadata.variant.position not in variants[metadata.variant.variant_type]:
-                    variants[metadata.variant.variant_type][metadata.variant.position] = set()
+        for variant_type in ['n', 'p']:
+            for position, metadata_set in self.metadata[ref_name][variant_type].items():
+                for metadata in metadata_set:
+                    if metadata.has_variant(ref_seq):
+                        if position not in variants[variant_type]:
+                            variants[variant_type][position] = set()
 
-                variants[metadata.variant.variant_type][metadata.variant.position].add(metadata)
+                        variants[variant_type][position].add(metadata)
 
         return variants
 

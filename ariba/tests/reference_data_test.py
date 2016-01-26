@@ -25,12 +25,22 @@ class TestReferenceData(unittest.TestCase):
         '''Test init with good input'''
         tsv_file = os.path.join(data_dir, 'reference_data_init.tsv')
         presence_absence_fa = os.path.join(data_dir, 'reference_data_init_presence_absence.fa')
+        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\tfree text')
+        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tA42T\tfree text2')
+        meta3 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\tconfers killer rabbit resistance')
+        meta4 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\tremoves tardigrade's space-living capability")
+
         expected_metadata = {
-            'gene1': [
-                sequence_metadata.SequenceMetadata('gene1\tn\tA42G\tfree text'),
-                sequence_metadata.SequenceMetadata('gene1\tn\tG13T\tconfers killer rabbit resistance')
-            ],
-            'gene2': [sequence_metadata.SequenceMetadata("gene2\tp\tI42L\tremoves tardigrade's space-living capability")]
+            'gene1': {
+                'n': {12: {meta3}, 41: {meta1, meta2}},
+                'p': {},
+                '.': set(),
+            },
+            'gene2': {
+                'n': {},
+                'p': {41: {meta4}},
+                '.': set(),
+            }
         }
         ref_data = reference_data.ReferenceData(presence_absence_fa=presence_absence_fa, metadata_tsv=tsv_file)
         self.assertEqual(expected_metadata, ref_data.metadata)
@@ -68,12 +78,20 @@ class TestReferenceData(unittest.TestCase):
 
     def test_load_metadata_tsv(self):
         '''Test _load_metadata_tsv'''
+        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\tfree text')
+        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\tconfers killer rabbit resistance')
+        meta3 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\tremoves tardigrade's space-living capability")
         expected = {
-            'gene1': [
-                sequence_metadata.SequenceMetadata('gene1\tn\tA42G\tfree text'),
-                sequence_metadata.SequenceMetadata('gene1\tn\tG13T\tconfers killer rabbit resistance')
-            ],
-            'gene2': [sequence_metadata.SequenceMetadata("gene2\tp\tI42L\tremoves tardigrade's space-living capability")]
+            'gene1': {
+                'n': {12: {meta2}, 41: {meta1}},
+                'p': {},
+                '.': set(),
+            },
+            'gene2': {
+                'n': {},
+                'p': {41: {meta3}},
+                '.': set(),
+            }
         }
 
         tsv_file = os.path.join(data_dir, 'reference_data_load_metadata_tsv.tsv')
