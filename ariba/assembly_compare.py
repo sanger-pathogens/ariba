@@ -109,7 +109,7 @@ class AssemblyCompare:
 
 
     @classmethod
-    def _nucmer_hits_to_ref_coords(cls, nucmer_hits, contig=None):
+    def nucmer_hits_to_ref_coords(cls, nucmer_hits, contig=None):
         '''Input is hits made by self._parse_nucmer_coords_file.
            Returns dictionary. Key = contig name. Value = list of coords in the
            reference sequence for that contig.
@@ -133,7 +133,7 @@ class AssemblyCompare:
         cov = {}
 
         for contig in nucmer_hits:
-            coords = AssemblyCompare._nucmer_hits_to_ref_coords(nucmer_hits, contig=contig)
+            coords = AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits, contig=contig)
             pyfastaq.intervals.merge_overlapping_in_list(coords)
             cov[contig] = pyfastaq.intervals.length_sum_from_list(coords)
 
@@ -182,7 +182,7 @@ class AssemblyCompare:
         '''Returns true iff the reference sequence is covered by nucmer hits.
            nucmer_hits = hits made by self._parse_nucmer_coords_file.
            Counts as covered if (total ref bases covered) / len(ref_seq) >= threshold'''
-        covered = AssemblyCompare._nucmer_hits_to_ref_coords(nucmer_hits)
+        covered = AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits)
         pyfastaq.intervals.merge_overlapping_in_list(covered)
         return pyfastaq.intervals.length_sum_from_list(covered) / len(ref_seq) >= threshold
 
@@ -194,7 +194,7 @@ class AssemblyCompare:
            Needs a minimum proportin of the ref to be assembled more than once,
            determined by threshold.
            nucmer_hits = hits made by self._parse_nucmer_coords_file.'''
-        covered = AssemblyCompare._nucmer_hits_to_ref_coords(nucmer_hits)
+        covered = AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits)
         covered.sort()
         if len(covered) <= 1:
             return True

@@ -81,7 +81,7 @@ class TestAssemblyCompare(unittest.TestCase):
 
 
     def test_nucmer_hits_to_ref_coords(self):
-        '''test _nucmer_hits_to_ref_coords'''
+        '''test nucmer_hits_to_ref_coords'''
         hits = [
             ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'ref', 'contig1'],
             ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'ref', 'contig1'],
@@ -96,7 +96,7 @@ class TestAssemblyCompare(unittest.TestCase):
                 pymummer.alignment.Alignment('\t'.join(hits[2])),
             ]
         }
-        got = assembly_compare.AssemblyCompare._nucmer_hits_to_ref_coords(nucmer_hits)
+        got = assembly_compare.AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits)
         expected = [
             pyfastaq.intervals.Interval(0,41),
             pyfastaq.intervals.Interval(99, 109),
@@ -104,7 +104,7 @@ class TestAssemblyCompare(unittest.TestCase):
         ]
         self.assertEqual(expected, got)
 
-        got = assembly_compare.AssemblyCompare._nucmer_hits_to_ref_coords(nucmer_hits, contig='contig2')
+        got = assembly_compare.AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits, contig='contig2')
         expected = [
             pyfastaq.intervals.Interval(99, 109),
         ]
