@@ -112,7 +112,7 @@ class TestAssemblyCompare(unittest.TestCase):
 
 
     def test_ref_cov_per_contig(self):
-        '''test _ref_cov_per_contig'''
+        '''test ref_cov_per_contig'''
         hits = [
             ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'ref', 'contig1'],
             ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'ref', 'contig1'],
@@ -129,7 +129,7 @@ class TestAssemblyCompare(unittest.TestCase):
         }
 
         expected = {'contig1': 85, 'contig2': 11}
-        got = assembly_compare.AssemblyCompare._ref_cov_per_contig(nucmer_hits)
+        got = assembly_compare.AssemblyCompare.ref_cov_per_contig(nucmer_hits)
         self.assertEqual(expected, got)
 
 

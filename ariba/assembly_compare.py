@@ -124,7 +124,7 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def _ref_cov_per_contig(nucmer_hits):
+    def ref_cov_per_contig(nucmer_hits):
         '''Input is hits made by self._parse_nucmer_coords_file.
            Returns dictionary. key = contig name. Value = number of bases that
            match to the reference sequence.'''
