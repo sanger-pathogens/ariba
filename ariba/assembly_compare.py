@@ -35,6 +35,7 @@ class AssemblyCompare:
         self.unique_threhsold = unique_threhsold
 
         self.nucmer_coords_file = self.outprefix + '.nucmer.coords'
+        self.nucmer_snps_file = self.nucmer_coords_file + '.snps'
         self.assembled_ref_seqs_file = self.outprefix + '.assembled_refs.fasta'
 
 
