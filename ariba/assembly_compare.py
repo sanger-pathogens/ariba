@@ -9,7 +9,6 @@ class AssemblyCompare:
     def __init__(self,
       assembly_fa,
       assembly_sequences,
-      assembly_bam,
       ref_fa,
       ref_sequence,
       outprefix,
@@ -22,7 +21,6 @@ class AssemblyCompare:
     ):
         self.assembly_fa = os.path.abspath(assembly_fa)
         self.assembly_sequences = self.assembly_sequences
-        self.assembly_bam = os.path.abspath(assembly_bam)
         self.ref_fa = os.path.abspath(ref_fa)
         self.ref_sequence = ref_sequence
         self.outprefix = os.path.abspath(outprefix)
