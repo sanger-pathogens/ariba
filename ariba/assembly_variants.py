@@ -233,7 +233,7 @@ class AssemblyVariants:
 
     @staticmethod
     def _get_remaining_known_ref_variants(known_ref_variants, used_ref_variants, nucmer_coords):
-        '''Finds varaints where ref has the variant and so does the contig. Which means
+        '''Finds variants where ref has the variant and so does the contig. Which means
            that there was no mummer call to flag it up so need to look through the known
            ref variants. Also need to check that the variant is in a nucmer match to an
            assembly contig.'''

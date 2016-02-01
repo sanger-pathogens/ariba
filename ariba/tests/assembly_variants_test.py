@@ -335,7 +335,7 @@ class TestAssemblyVariants(unittest.TestCase):
 
 
     def test_get_variants_variants_only(self):
-        '''test get_variants varaints only'''
+        '''test get_variants variants only'''
         meta1 = sequence_metadata.SequenceMetadata('variants_only\tp\tD2E\tref has wild type D (GAT=D, GAA=E)')
         meta2 = sequence_metadata.SequenceMetadata('variants_only\tp\tS3R\tref has variant type R (AGA=R, AGT=S)')
         meta3 = sequence_metadata.SequenceMetadata('variants_only\tp\tD4E\tref has variant type E (GAA=E, GAC=D)')
