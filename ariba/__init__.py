@@ -17,6 +17,7 @@ __all__ = [
     'refcheck',
     'reference_data',
     'ref_genes_getter',
+    'report',
     'scaffold_graph',
     'sequence_metadata',
     'sequence_variant',

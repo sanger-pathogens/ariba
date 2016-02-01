@@ -32,21 +32,6 @@ def clean_cluster_dir(d, exclude=None):
                 os.unlink(full_path)
 
 
-def file2lines(filename):
-    f = pyfastaq.utils.open_file_read(filename)
-    lines = f.readlines()
-    pyfastaq.utils.close(f)
-    return lines
-
-
-def load_gene(filename):
-    file_reader = pyfastaq.sequences.file_reader(filename)
-    seq = None
-    for seq in file_reader:
-        pass
-    return seq
-
-
 class TestCluster(unittest.TestCase):
     def test_init_fail_files_missing(self):
         '''test init_fail_files_missing'''
@@ -54,17 +39,20 @@ class TestCluster(unittest.TestCase):
         refdata = reference_data.ReferenceData(presence_absence_fa=refdata_fa)
 
         dirs = [
-            'cluster_test_directorynotexist'
-            'cluster_test_init_no_genes_fa',
+            'cluster_test_init_no_refs_fa',
             'cluster_test_init_no_reads_1',
             'cluster_test_init_no_reads_2',
         ]
         dirs = [os.path.join(data_dir, d) for d in dirs]
         for d in dirs:
-            clean_cluster_dir(d)
+            tmpdir = 'tmp.cluster_test_init_fail_files_missing'
+            shutil.copytree(d, tmpdir)
             with self.assertRaises(cluster.Error):
-                c = cluster.Cluster(d, 'name', refdata=refdata)
-            clean_cluster_dir(d)
+                c = cluster.Cluster(tmpdir, 'name', refdata=refdata)
+            shutil.rmtree(tmpdir)
+
+        with self.assertRaises(cluster.Error):
+            c = cluster.Cluster('directorydoesnotexistshouldthrowerror', 'name', refdata=refdata)
 
 
     def test_count_reads(self):
@@ -74,112 +62,55 @@ class TestCluster(unittest.TestCase):
         self.assertEqual(4, cluster.Cluster._count_reads(reads1, reads2))
 
 
-    def test_make_report_lines_nonsynonymous(self):
-        '''test _make_report_lines'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'cluster_name')
-        c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
-        v1 = pymummer.variant.Variant(pymummer.snp.Snp('8\tA\tG\t8\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+    def test_full_run_choose_ref_fail(self):
+        '''test complete run of cluster when choosing ref seq fails'''
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail.presence_absence.fa')
+        )
+        tmpdir = 'tmp.test_full_run_choose_ref_fail'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail'), tmpdir)
 
-        nucmer_hit = ['1', '10', '1', '10', '10', '10', '90.00', '1000', '1000', '1', '1', 'gene', 'contig']
-        c.nucmer_hits = {'contig': [pymummer.alignment.Alignment('\t'.join(nucmer_hit))]}
-        c.mummer_variants = {'contig': [[v1]]}
-        c.percent_identities = {'contig': 92.42}
-        c.status_flag.set_flag(42)
-        c.assembled_ok = True
-        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_make_report_lines.read_depths.gz')
-        c._make_report_lines()
-        expected = [[
-            'gene',
-            554,
-            2,
-            'cluster_name',
-            39,
-            10,
-            92.42,
-            'SNP',
-            'NONSYN',
-            'E3G',
-            8,
-            8,
-            'A',
-            'contig',
-            39,
-            8,
-            8,
-            'G',
-            '.',
-            '.',
-            '.'
-        ]]
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata)
+        c.run()
+
+        expected = '\t'.join(['.', '.', '1088', '2', 'cluster_name'] + ['.'] * 18)
+        self.assertEqual([expected], c.report_lines)
+        self.assertTrue(c.status_flag.has('ref_seq_choose_fail'))
+        self.assertTrue(c.status_flag.has('assembly_fail'))
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_assembly_fail(self):
+        '''test complete run of cluster when assembly fails'''
+        refdata = reference_data.ReferenceData(
+            non_coding_fa=os.path.join(data_dir, 'cluster_test_full_run_assembly_fail.noncoding.fa')
+        )
+        tmpdir = 'tmp.test_full_run_assembly_fail'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_assembly_fail'), tmpdir)
+
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata)
+        c.run()
+
+        expected = '\t'.join(['noncoding_ref_seq', 'non_coding', '64', '4', 'cluster_name'] + ['.'] * 18)
+        self.assertEqual([expected], c.report_lines)
+        self.assertFalse(c.status_flag.has('ref_seq_choose_fail'))
+        self.assertTrue(c.status_flag.has('assembly_fail'))
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_non_coding(self):
+        '''test complete run of cluster on a noncoding sequence'''
+        refdata = reference_data.ReferenceData(
+            non_coding_fa=os.path.join(data_dir, 'cluster_test_full_run_ok_non_coding.fa')
+        )
+
+        tmpdir = 'tmp.test_full_run_ok_non_coding'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_non_coding'), tmpdir)
+
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
+        c.run()
+
+        expected = ['noncoding_ref1\tnon_coding\t19\t154\tcluster_name\t400\t' +  '\t'.join(['.'] * 17)]
         self.assertEqual(expected, c.report_lines)
-        clean_cluster_dir(cluster_dir)
-
-
-    def test_make_report_lines_synonymous(self):
-        '''test _make_report_lines'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        c = cluster.Cluster(cluster_dir, 'cluster_name')
-        c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
-        v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
-
-        nucmer_hit = ['1', '10', '1', '10', '10', '10', '90.00', '1000', '1000', '1', '1', 'gene', 'contig']
-        c.nucmer_hits = {'contig': [pymummer.alignment.Alignment('\t'.join(nucmer_hit))]}
-        c.mummer_variants = {'contig': [[v1]]}
-        c.percent_identities = {'contig': 92.42}
-        c.status_flag.set_flag(42)
-        c.assembled_ok = True
-        c.final_assembly_read_depths = os.path.join(data_dir, 'cluster_test_make_report_lines.read_depths.gz')
-        c._make_report_lines()
-        expected = [[
-            'gene',
-            42,
-            2,
-            'cluster_name',
-            39,
-            10,
-            92.42,
-            'SNP',
-            'SYN',
-            '.',
-            6,
-            6,
-            'C',
-            'contig',
-            39,
-            6,
-            6,
-            'T',
-            42,
-            'G',
-            '22,20'
-        ]]
-        self.assertEqual(expected, c.report_lines)
-        clean_cluster_dir(cluster_dir)
-
-
-    def test_make_report_lines_assembly_fail(self):
-        '''test _make_report_lines when assembly fails'''
-        cluster_dir = os.path.join(data_dir, 'cluster_test_generic')
-        clean_cluster_dir(cluster_dir)
-        refdata = reference_data.ReferenceData(presence_absence_fa=os.path.join(cluster_dir, 'genes.fa'))
-        c = cluster.Cluster(cluster_dir, 'cluster_name', refdata=refdata)
-        c.gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
-        c.status_flag.set_flag(64)
-        c.assembled_ok = False
-        c._make_report_lines()
-        expected = [
-            [
-                'gene',
-                64,
-                2,
-                'cluster_name',
-                39,
-            ] + ['.'] * 16
-        ]
-        self.assertEqual(expected, c.report_lines)
-        clean_cluster_dir(cluster_dir)
-
+        shutil.rmtree(tmpdir)
 
