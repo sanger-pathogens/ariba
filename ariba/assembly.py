@@ -278,7 +278,7 @@ class Assembly:
         self.sequences = {}
 
         # double-check we got some contigs
-        number_of_contigs = pyfastaq.tasks.count_sequences(self.assembly_contigs)
+        number_of_contigs = pyfastaq.tasks.count_sequences(self.assembly_contigs) if os.path.exists(self.assembly_contigs) else 0
         if number_of_contigs == 0:
             self.assembled_ok = False
             return
