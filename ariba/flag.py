@@ -12,6 +12,7 @@ flags_in_order = [
     'variants_suggest_collapsed_repeat',
     'hit_both_strands',
     'has_nonsynonymous_variants',
+    'ref_seq_choose_fail',
 ]
 
 
