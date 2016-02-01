@@ -124,3 +124,6 @@ class TestSamtoolsVariants(unittest.TestCase):
             got = samtools_vars.get_depths_at_position(ref, pos)
             self.assertEqual(expected, got)
 
+        os.unlink(samtools_vars.vcf_file)
+        os.unlink(samtools_vars.read_depths_file)
+        os.unlink(samtools_vars.read_depths_file + '.tbi')
