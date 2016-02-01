@@ -39,6 +39,7 @@ class Assembly:
         self.ref_fasta = os.path.abspath(ref_fasta)
         self.working_dir = os.path.abspath(working_dir)
         self.final_assembly_fa = os.path.abspath(final_assembly_fa)
+        self.final_assembly_bam = os.path.abspath(final_assembly_bam)
         self.log_fh = log_fh
         self.scaff_name_prefix = scaff_name_prefix
 
@@ -288,7 +289,7 @@ class Assembly:
         if self.assembled_ok:
             self._scaffold_with_sspace()
             self._gap_fill_with_gapfiller()
-            contigs_both_strands = self._fix_contig_orientation(self.gapfilled_scaffolds, self.final_assembly_fa)
+            contigs_both_strands = self._fix_contig_orientation(self.gapfilled_scaffolds, self.ref_fasta, self.final_assembly_fa)
             self.has_contigs_on_both_strands = len(contigs_both_strands) > 0
             pyfastaq.tasks.file_to_dict(self.final_assembly_fa, self.sequences)
 
