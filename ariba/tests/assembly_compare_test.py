@@ -84,6 +84,7 @@ class TestAssemblyCompare(unittest.TestCase):
         '''test nucmer_hits_to_ref_coords'''
         hits = [
             ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'ref', 'contig1'],
+            ['31', '52', '1', '22', '22', '22', '100.00', '1000', '1000', '1', '1', 'ref', 'contig1'],
             ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'ref', 'contig1'],
             ['100', '110', '200', '210', '11', '11', '99.42', '1000', '1000', '1', '1', 'ref', 'contig2'],
         ]
@@ -91,23 +92,22 @@ class TestAssemblyCompare(unittest.TestCase):
             'contig1': [
                 pymummer.alignment.Alignment('\t'.join(hits[0])),
                 pymummer.alignment.Alignment('\t'.join(hits[1])),
+                pymummer.alignment.Alignment('\t'.join(hits[2])),
             ],
             'contig2': [
-                pymummer.alignment.Alignment('\t'.join(hits[2])),
+                pymummer.alignment.Alignment('\t'.join(hits[3])),
             ]
         }
         got = assembly_compare.AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits)
-        expected = [
-            pyfastaq.intervals.Interval(0,41),
-            pyfastaq.intervals.Interval(99, 109),
-            pyfastaq.intervals.Interval(99, 141),
-        ]
+        expected = {
+            'contig1': [pyfastaq.intervals.Interval(0,51), pyfastaq.intervals.Interval(99, 141)],
+            'contig2': [pyfastaq.intervals.Interval(99, 109)]
+        }
+
         self.assertEqual(expected, got)
 
         got = assembly_compare.AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits, contig='contig2')
-        expected = [
-            pyfastaq.intervals.Interval(99, 109),
-        ]
+        del expected['contig1']
         self.assertEqual(expected, got)
 
 
@@ -184,9 +184,9 @@ class TestAssemblyCompare(unittest.TestCase):
         hit1 = ['1', '10', '1', '10', '10', '10', '100.00', '10', '10', '1', '1', 'gene', 'contig1']
         hit2 = ['1', '5', '1', '5', '5', '5', '100.00', '10', '10', '1', '1', 'gene', 'contig2']
         nucmer_hits = { 'contig1': [pymummer.alignment.Alignment('\t'.join(hit1))] }
-        self.assertTrue(assembly_compare.AssemblyCompare._ref_has_region_assembled_twice(nucmer_hits, ref_seq, 0.03))
-        nucmer_hits['contig2'] = [pymummer.alignment.Alignment('\t'.join(hit2))]
         self.assertFalse(assembly_compare.AssemblyCompare._ref_has_region_assembled_twice(nucmer_hits, ref_seq, 0.03))
+        nucmer_hits['contig2'] = [pymummer.alignment.Alignment('\t'.join(hit2))]
+        self.assertTrue(assembly_compare.AssemblyCompare._ref_has_region_assembled_twice(nucmer_hits, ref_seq, 0.03))
 
 
     def test_ref_covered_by_complete_contig_with_orf(self):

@@ -17,10 +17,10 @@ class AssemblyCompare:
       nucmer_min_len=50,
       nucmer_breaklen=50,
       assembled_threshold=0.95,
-      unique_threhsold=0.03,
+      unique_threshold=0.03,
     ):
         self.assembly_fa = os.path.abspath(assembly_fa)
-        self.assembly_sequences = self.assembly_sequences
+        self.assembly_sequences = assembly_sequences
         self.ref_fa = os.path.abspath(ref_fa)
         self.ref_sequence = ref_sequence
         self.outprefix = os.path.abspath(outprefix)
@@ -30,7 +30,7 @@ class AssemblyCompare:
         self.nucmer_min_len = nucmer_min_len
         self.nucmer_breaklen = nucmer_breaklen
         self.assembled_threshold = assembled_threshold
-        self.unique_threhsold = unique_threhsold
+        self.unique_threshold = unique_threshold
 
         self.nucmer_coords_file = self.outprefix + '.nucmer.coords'
         self.nucmer_snps_file = self.nucmer_coords_file + '.snps'
@@ -114,11 +114,14 @@ class AssemblyCompare:
            if contig=contig_name, then just gets the ref coords from that contig,
            instead of using all the contigs'''
         coords = []
-        keys = list(nucmer_hits.keys()) if contig is None else [contig]
+        if contig is None:
+            coords = {key: [] for key in nucmer_hits.keys()}
+        else:
+            coords = {contig: []}
 
-        for key in keys:
-            coords += [hit.ref_coords() for hit in nucmer_hits[key]]
-        coords.sort()
+        for key in coords:
+            coords[key] = [hit.ref_coords() for hit in nucmer_hits[key]]
+            pyfastaq.intervals.merge_overlapping_in_list(coords[key])
 
         return coords
 
@@ -129,13 +132,8 @@ class AssemblyCompare:
            Returns dictionary. key = contig name. Value = number of bases that
            match to the reference sequence.'''
         cov = {}
-
-        for contig in nucmer_hits:
-            coords = AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits, contig=contig)
-            pyfastaq.intervals.merge_overlapping_in_list(coords)
-            cov[contig] = pyfastaq.intervals.length_sum_from_list(coords)
-
-        return cov
+        coords = AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits)
+        return {x: pyfastaq.intervals.length_sum_from_list(coords[x]) for x in coords}
 
 
     @staticmethod
@@ -180,7 +178,10 @@ class AssemblyCompare:
         '''Returns true iff the reference sequence is covered by nucmer hits.
            nucmer_hits = hits made by self._parse_nucmer_coords_file.
            Counts as covered if (total ref bases covered) / len(ref_seq) >= threshold'''
-        covered = AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits)
+        coords = AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits)
+        covered = []
+        for coords_list in coords.values():
+            covered.extend(coords_list)
         pyfastaq.intervals.merge_overlapping_in_list(covered)
         return pyfastaq.intervals.length_sum_from_list(covered) / len(ref_seq) >= threshold
 
@@ -192,10 +193,14 @@ class AssemblyCompare:
            Needs a minimum proportin of the ref to be assembled more than once,
            determined by threshold.
            nucmer_hits = hits made by self._parse_nucmer_coords_file.'''
-        covered = AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits)
+        coords = AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits)
+        covered = []
+        for coords_list in coords.values():
+            covered.extend(coords_list)
         covered.sort()
+
         if len(covered) <= 1:
-            return True
+            return False
 
         coverage = {}
         for i in covered:
@@ -203,7 +208,7 @@ class AssemblyCompare:
                 coverage[j] = coverage.get(j, 0) + 1
 
         bases_depth_at_least_two = len([1 for x in coverage.values() if x > 1])
-        return bases_depth_at_least_two / len(ref_seq) <= threshold
+        return bases_depth_at_least_two / len(ref_seq) >= threshold
 
 
     @staticmethod
@@ -250,13 +255,13 @@ class AssemblyCompare:
         if self._whole_gene_covered_by_nucmer_hits(self.nucmer_hits, self.ref_sequence, self.assembled_threshold):
             flag.add('gene_assembled')
 
-        if self._ref_covered_by_at_least_one_full_length_contig(self.nucmer_hits, self.ref_sequence):
+        if self._ref_covered_by_at_least_one_full_length_contig(self.nucmer_hits):
             flag.add('gene_assembled_into_one_contig')
 
         if self._ref_has_region_assembled_twice(self.nucmer_hits, self.ref_sequence, self.unique_threshold):
             flag.add('gene_region_assembled_twice')
 
-        if self._ref_covered_by_complete_contig_with_orf(self.nucmer_hits, self.ref_sequence, self.assembly_sequences):
+        if self._ref_covered_by_complete_contig_with_orf(self.nucmer_hits, self.assembly_sequences):
             flag.add('complete_orf')
 
         if len(self.nucmer_hits) == 1:
@@ -267,6 +272,6 @@ class AssemblyCompare:
 
     def run(self):
         self._run_nucmer()
-        self.nucmer_hits = _parse_nucmer_coords_file(self.nucmer_coords_file, self.ref_sequence.id)
+        self.nucmer_hits = self._parse_nucmer_coords_file(self.nucmer_coords_file, self.ref_sequence.id)
         self.percent_identities = self._nucmer_hits_to_percent_identity(self.nucmer_hits)
         self._write_assembled_reference_sequences(self.nucmer_hits, self.ref_sequence, self.assembly_sequences, self.assembled_ref_seqs_file)
