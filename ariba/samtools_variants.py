@@ -131,7 +131,7 @@ class SamtoolsVariants:
             name, pos = t[0], t[1]
             depths = SamtoolsVariants._get_read_depths(read_depths_file, name, pos)
             if depths is None:
-                raise Error('Error getting read depths for sequence ' + name + ' at position ' + t[1])
+                continue
             if name not in variants:
                 variants[name] = {}
             variants[name][t[1]] = depths
@@ -160,6 +160,14 @@ class SamtoolsVariants:
 
         pyfastaq.utils.close(f)
         return sum(list(vcf_variant_counts.values()))
+
+
+    def get_depths_at_position(self, seq_name, position):
+        d = self._get_variants(self.vcf_file, self.read_depths_file, [(seq_name, position)])
+        if seq_name in d and position in d[seq_name]:
+            return d[seq_name][position]
+        else:
+            return None
 
 
     def run(self):

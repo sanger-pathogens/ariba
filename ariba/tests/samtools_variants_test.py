@@ -108,3 +108,19 @@ class TestSamtoolsVariants(unittest.TestCase):
         self.assertEqual(1, got)
 
 
+    def test_get_depths_at_position(self):
+        '''test get_depths_at_position'''
+        bam = os.path.join(data_dir, 'samtools_variants_test_get_depths_at_position.bam')
+        ref_fa = os.path.join(data_dir, 'samtools_variants_test_get_depths_at_position.ref.fa')
+        tmp_prefix = 'tmp.test_get_depths_at_position'
+        samtools_vars = samtools_variants.SamtoolsVariants(ref_fa, bam, tmp_prefix)
+        samtools_vars.run()
+        tests = [
+            (('ref', 425), ('C', 'T', 31, '18,13')),
+            (('not_a_ref', 10), None),
+            (('ref', 1000000000), None)
+        ]
+        for (ref, pos), expected in tests:
+            got = samtools_vars.get_depths_at_position(ref, pos)
+            self.assertEqual(expected, got)
+
