@@ -39,6 +39,10 @@ class SequenceMetadata:
 
 
     def __str__(self):
+        return self.to_string()
+
+
+    def to_string(self, separator='\t'):
         fields = [self.name, self.variant_type]
         if self.variant is None:
             fields.append('.')
@@ -46,9 +50,9 @@ class SequenceMetadata:
             fields.append(str(self.variant))
 
         if self.free_text:
-            return '\t'.join(fields + [self.free_text])
+            return separator.join(fields + [self.free_text])
         else:
-            return '\t'.join(fields)
+            return separator.join(fields)
 
 
     def has_variant(self, seq):
