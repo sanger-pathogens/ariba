@@ -34,6 +34,7 @@ def header_line():
 
 
 def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig):
+    print('_report_lines_for_one_contig start', contig_name)
     if cluster.ref_sequence_type == 'variants_only' and len(cluster.assembly_variants) == 0:
         return []
 
@@ -69,16 +70,12 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig):
                 known_var = 'F'
                 known_var_type = '.'
 
-            var_columns = [
-                known_var,      # 10
-                known_var_type, # 11
-                var_type,       # 12
-                var_effect,     # 13
-                var_change,     # 14
-            ]
+            var_columns = ['.' if x is None else str(x) for x in [known_var, known_var_type, var_type, var_effect, var_change]]
+
+
 
             if len(matching_vars_set) > 0:
-                matching_vars_column = ';;;'.join([x for x in matching_vars_set])
+                matching_vars_column = ';;;'.join([x.to_string(separator='_') for x in matching_vars_set])
             else:
                 matching_vars_column = '.'
 
@@ -86,7 +83,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig):
                 lines.append('\t'.join(
                     common_first_columns + more_common_columns + var_columns + \
                     ['.'] * (len(columns) - len(common_first_columns) - len(more_common_columns) - len(var_columns) - 2) + \
-                    matching_vars_column + free_text_columns
+                    [matching_vars_column] + free_text_columns
                 ))
             else:
                 for var in contributing_vars:
@@ -94,7 +91,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig):
                     lines.append('\t'.join(
                         common_first_columns + more_common_columns + var_columns + \
                         [str(x) for x in (var.qry_start, var.qry_end, ref, alt, total_depth, alt_depths)] + \
-                        matching_vars_column + free_text_columns
+                        [matching_vars_column] + free_text_columns
                     ))
     else:
         lines.append('\t'.join(common_first_columns + ['.'] * (len(columns) - len(common_first_columns) - 1) + free_text_columns))
