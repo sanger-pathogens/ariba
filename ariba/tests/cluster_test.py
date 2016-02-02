@@ -112,11 +112,14 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t97.5\tnoncoding1.scaffold.1\t234\tT\tSNP\tn\tSNP\tA14T\t73\t73\tT\t.\t19\t19\tnoncoding1_n_A14T_ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
-            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t97.5\tnoncoding1.scaffold.1\t234\tF\t.\tn\tSNP\tG61T\t120\t120\tT\t.\t24\t24\t.\tgeneric description of noncoding1',
-            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t97.5\tnoncoding1.scaffold.1\t234\tT\tSNP\tn\t.\t.\t.\t.\t.\t.\t.\t.\tnoncoding1_n_A6G_variant in ref and reads so should report\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tT\tSNP\tn\tSNP\tA14T\t73\t73\tT\t.\t19\t19\tnoncoding1_n_A14T_ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tF\t.\tn\tSNP\tG61T\t120\t120\tT\t.\t24\t24\t.\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tF\t.\tn\tINS\t.82C\t142\t142\tC\t.\t23\t23\t.\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tF\t.\tn\tDEL\tT108.\t167\t167\tC\t.\t17\t17\t.\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tT\tSNP\tn\t.\t.\t.\t.\t.\t.\t.\t.\tnoncoding1_n_A6G_variant in ref and reads so should report\tgeneric description of noncoding1',
         ]
 
+        self.maxDiff=None
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
 
