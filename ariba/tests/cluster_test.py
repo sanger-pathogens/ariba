@@ -101,7 +101,8 @@ class TestCluster(unittest.TestCase):
     def test_full_run_ok_non_coding(self):
         '''test complete run of cluster on a noncoding sequence'''
         refdata = reference_data.ReferenceData(
-            non_coding_fa=os.path.join(data_dir, 'cluster_test_full_run_ok_non_coding.fa')
+            non_coding_fa=os.path.join(data_dir, 'cluster_test_full_run_ok_non_coding.fa'),
+            metadata_tsv=os.path.join(data_dir, 'cluster_test_full_run_ok_non_coding.metadata.tsv')
         )
 
         tmpdir = 'tmp.test_full_run_ok_non_coding'
@@ -110,8 +111,12 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
         c.run()
 
-        expected = ['noncoding_ref1\tnon_coding\t19\t154\tcluster_name\t400\t' +  '\t'.join(['.'] * 17)]
+        expected = [
+            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t97.5\tnoncoding1.scaffold.1\t234\tT\tSNP\tn\tSNP\tA14T\t73\t73\tT\t.\t19\t19\tnoncoding1_n_A14T_ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t97.5\tnoncoding1.scaffold.1\t234\tF\t.\tn\tSNP\tG61T\t120\t120\tT\t.\t24\t24\t.\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t97.5\tnoncoding1.scaffold.1\t234\tT\tSNP\tn\t.\t.\t.\t.\t.\t.\t.\t.\tnoncoding1_n_A6G_variant in ref and reads so should report\tgeneric description of noncoding1',
+        ]
+
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
 
-    #FIXME more tests with full runs and variants!
