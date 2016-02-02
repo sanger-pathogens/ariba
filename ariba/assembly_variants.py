@@ -164,7 +164,7 @@ class AssemblyVariants:
                 var_tuple = (
                     mummer_variant.ref_start,
                     'n',
-                    None,
+                    mummer_variant.ref_base + str(mummer_variant.ref_start + 1) + mummer_variant.qry_base,
                     None,
                     [mummer_variant],
                     matching_variants,
@@ -176,7 +176,7 @@ class AssemblyVariants:
             var_tuple = (
                 mummer_variant.ref_start,
                 'n',
-                None,
+                mummer_variant.ref_base + str(mummer_variant.ref_start + 1) + mummer_variant.qry_base,
                 None,
                 [mummer_variant],
                 set(),
