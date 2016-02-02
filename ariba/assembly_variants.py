@@ -165,7 +165,7 @@ class AssemblyVariants:
                     mummer_variant.ref_start,
                     'n',
                     mummer_variant.ref_base + str(mummer_variant.ref_start + 1) + mummer_variant.qry_base,
-                    None,
+                    pymummer.variant.var_types[mummer_variant.var_type],
                     [mummer_variant],
                     matching_variants,
                     variants_at_this_position
@@ -177,7 +177,7 @@ class AssemblyVariants:
                 mummer_variant.ref_start,
                 'n',
                 mummer_variant.ref_base + str(mummer_variant.ref_start + 1) + mummer_variant.qry_base,
-                None,
+                pymummer.variant.var_types[mummer_variant.var_type],
                 [mummer_variant],
                 set(),
                 set()

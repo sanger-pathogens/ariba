@@ -126,9 +126,9 @@ class TestAssemblyVariants(unittest.TestCase):
         mummer_variants = [v0, v1, v2]
 
         expected_tuples = [
-            (1, 'n', 'T2A', None, [v0], set(), set()),   #0
+            (1, 'n', 'T2A', 'SNP', [v0], set(), set()),   #0
             None,                                     #1
-            (4, 'n', 'T5A', None, [v2], {meta2}, set()), #2
+            (4, 'n', 'T5A', 'SNP', [v2], {meta2}, set()), #2
         ]
 
         expected_used_variants = [
