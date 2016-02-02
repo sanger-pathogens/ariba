@@ -261,7 +261,8 @@ class AssemblyCompare:
         if self._ref_has_region_assembled_twice(self.nucmer_hits, self.ref_sequence, self.unique_threshold):
             flag.add('region_assembled_twice')
 
-        if self._ref_covered_by_complete_contig_with_orf(self.nucmer_hits, self.assembly_sequences):
+        ref_seq_type = self.refdata.sequence_type(self.ref_sequence.id)
+        if ref_seq_type != 'non_coding' and self._ref_covered_by_complete_contig_with_orf(self.nucmer_hits, self.assembly_sequences):
             flag.add('complete_orf')
 
         if len(self.nucmer_hits) == 1:
