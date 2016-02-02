@@ -41,9 +41,9 @@ class TestFlag(unittest.TestCase):
         '''Test to_long_str'''
         f = flag.Flag(13)
         expected = '\n'.join([
-            '[X] gene_assembled',
-            '[ ] gene_assembled_into_one_contig',
-            '[X] gene_region_assembled_twice',
+            '[X] assembled',
+            '[ ] assembled_into_one_contig',
+            '[X] region_assembled_twice',
             '[X] complete_orf',
             '[ ] unique_contig',
             '[ ] scaffold_graph_bad',

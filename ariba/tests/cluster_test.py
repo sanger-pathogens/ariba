@@ -114,3 +114,4 @@ class TestCluster(unittest.TestCase):
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
 
+    #FIXME more tests with full runs and variants!

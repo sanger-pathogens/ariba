@@ -2,9 +2,9 @@ class Error (Exception): pass
 
 
 flags_in_order = [
-    'gene_assembled',
-    'gene_assembled_into_one_contig',
-    'gene_region_assembled_twice',
+    'assembled',
+    'assembled_into_one_contig',
+    'region_assembled_twice',
     'complete_orf',
     'unique_contig',
     'scaffold_graph_bad',

@@ -253,13 +253,13 @@ class AssemblyCompare:
 
     def update_flag(self, flag):
         if self._whole_gene_covered_by_nucmer_hits(self.nucmer_hits, self.ref_sequence, self.assembled_threshold):
-            flag.add('gene_assembled')
+            flag.add('assembled')
 
         if self._ref_covered_by_at_least_one_full_length_contig(self.nucmer_hits):
-            flag.add('gene_assembled_into_one_contig')
+            flag.add('assembled_into_one_contig')
 
         if self._ref_has_region_assembled_twice(self.nucmer_hits, self.ref_sequence, self.unique_threshold):
-            flag.add('gene_region_assembled_twice')
+            flag.add('region_assembled_twice')
 
         if self._ref_covered_by_complete_contig_with_orf(self.nucmer_hits, self.assembly_sequences):
             flag.add('complete_orf')

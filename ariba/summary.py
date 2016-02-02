@@ -120,13 +120,13 @@ class Summary:
 
     def _to_summary_number(self, l):
         f = l[0]['flag']
-        if f.has('assembly_fail') or not f.has('gene_assembled') or self._pc_id_of_longest(l) <= self.min_id:
+        if f.has('assembly_fail') or not f.has('assembled') or self._pc_id_of_longest(l) <= self.min_id:
             return 0
 
         if f.has('hit_both_strands') or (not f.has('complete_orf')):
             return 1
 
-        if f.has('unique_contig') and f.has('gene_assembled_into_one_contig') and f.has('complete_orf'):
+        if f.has('unique_contig') and f.has('assembled_into_one_contig') and f.has('complete_orf'):
             if f.has('has_nonsynonymous_variants'):
                 return 3
             else:
