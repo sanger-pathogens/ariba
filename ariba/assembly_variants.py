@@ -166,7 +166,7 @@ class AssemblyVariants:
                     'n',
                     None,
                     None,
-                    mummer_variant,
+                    [mummer_variant],
                     matching_variants,
                     variants_at_this_position
                 )
@@ -178,7 +178,7 @@ class AssemblyVariants:
                 'n',
                 None,
                 None,
-                mummer_variant,
+                [mummer_variant],
                 set(),
                 set()
             )
