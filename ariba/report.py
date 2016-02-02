@@ -34,7 +34,6 @@ def header_line():
 
 
 def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig):
-    print('_report_lines_for_one_contig start', contig_name)
     if cluster.ref_sequence_type == 'variants_only' and len(cluster.assembly_variants) == 0:
         return []
 
@@ -56,7 +55,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig):
 
     if cluster.assembled_ok and contig_name in cluster.assembly_variants and len(cluster.assembly_variants[contig_name]) > 0:
         more_common_columns = [
-            str(ref_cov_per_contig[cluster.ref_sequence.id]) if cluster.ref_sequence.id in ref_cov_per_contig else '0', # 6 ref bases assembled
+            str(ref_cov_per_contig[contig_name]) if contig_name in ref_cov_per_contig else '0', # 6 ref bases assembled
             str(cluster.assembly_compare.percent_identities[contig_name]) if contig_name in cluster.assembly_compare.percent_identities else '0',
             contig_name,
             str(len(cluster.assembly.sequences[contig_name])),  # 9 length of scaffold matching reference
