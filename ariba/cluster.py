@@ -1,12 +1,6 @@
 import os
-import copy
-from operator import itemgetter
 import sys
-import shutil
-import pysam
-import operator
 import pyfastaq
-import pymummer
 from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, flag, mapping, report, samtools_variants
 
 class Error (Exception): pass
