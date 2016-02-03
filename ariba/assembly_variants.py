@@ -320,6 +320,8 @@ class AssemblyVariants:
                     new_variants = [x for x in new_variants if len(x[5]) > 0]
 
             variants[contig].extend(new_variants)
+            if len(variants[contig]) == 0:
+                del variants[contig]
 
         return variants
 
