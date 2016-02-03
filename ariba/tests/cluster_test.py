@@ -145,3 +145,39 @@ class TestCluster(unittest.TestCase):
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
 
+
+    def test_full_run_ok_variants_only_gene_not_present(self):
+        '''test complete run of cluster on a variants only gene when variant not present'''
+        refdata = reference_data.ReferenceData(
+            variants_only_fa=os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.fa'),
+            metadata_tsv=os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.not_present.metadata.tsv'),
+        )
+
+        tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.not_present'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
+
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
+        c.run()
+        self.assertIsNone(c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_variants_only_gene_is_present(self):
+        '''test complete run of cluster on a variants only gene when variant is present'''
+        refdata = reference_data.ReferenceData(
+            variants_only_fa=os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.fa'),
+            metadata_tsv=os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.present.metadata.tsv'),
+        )
+
+        tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.present'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
+
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
+        c.run()
+
+        expected = [
+            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\tT\tSNP\tp\t.\t.\t.\t.\t.\t.\t.\t.\tvariants_only1_p_I5A_Ref and reads have variant so report\tGeneric description of variants_only1'
+        ]
+
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
