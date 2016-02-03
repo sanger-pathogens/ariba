@@ -285,3 +285,42 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual({'n': {5: {m3}}, 'p': {3: {m4}}}, refdata.all_non_wild_type_variants('presence_absence_gene'))
         self.assertEqual({'n': {3: {m5}}, 'p': {}}, refdata.all_non_wild_type_variants('non_coding'))
         self.assertEqual({'n': {}, 'p': {}}, refdata.all_non_wild_type_variants('not_a_known_sequence'))
+
+
+    def test_cluster_with_cdhit(self):
+        '''Test cluster_with_cd_hit'''
+        inprefix = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit')
+        presence_absence_fa = inprefix + '.presence_absence.fa'
+        non_coding_fa = inprefix + '.non_coding.fa'
+
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=presence_absence_fa,
+            non_coding_fa=non_coding_fa,
+        )
+
+        outprefix = 'tmp.test_cluster_with_cdhit'
+
+        expected = {
+            'non_coding': {
+                'noncoding1': {'noncoding1'}
+            },
+            'presence_absence': {
+                'presence_absence1': {'presence_absence1', 'presence_absence2'},
+                'presence_absence3': {'presence_absence4', 'presence_absence3'}
+            },
+            'variants_only': None,
+        }
+
+        got = refdata.cluster_with_cdhit(inprefix, outprefix)
+        self.assertEqual(expected, got)
+        all_seqs = {}
+        pyfastaq.tasks.file_to_dict(presence_absence_fa, all_seqs)
+        pyfastaq.tasks.file_to_dict(non_coding_fa, all_seqs)
+        expected_seqs = {x: all_seqs[x] for x in ['presence_absence1', 'presence_absence3', 'noncoding1']}
+        got_seqs = {}
+        pyfastaq.tasks.file_to_dict(outprefix + '.cluster_representatives.fa', got_seqs)
+        self.assertEqual(expected_seqs, got_seqs)
+        os.unlink(outprefix + '.cluster_representatives.fa')
+        os.unlink(outprefix + '.non_coding.cdhit')
+        os.unlink(outprefix + '.presence_absence.cdhit')
+

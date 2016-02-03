@@ -2,7 +2,7 @@ import os
 import sys
 import copy
 import pyfastaq
-from ariba import sequence_metadata
+from ariba import sequence_metadata, cdhit
 
 
 class Error (Exception): pass
@@ -333,4 +333,40 @@ class ReferenceData:
                         variants[variant_type][position].add(metadata)
 
         return variants
+
+
+    def cluster_with_cdhit(self, inprefix, outprefix, seq_identity_threshold=0.9, threads=1, length_diff_cutoff=0.9, nocluster=False):
+        files_to_cat = []
+        clusters = {}
+
+        for seqs_type in ['presence_absence', 'variants_only', 'non_coding']:
+            if len(self.seq_dicts[seqs_type]) > 0:
+                outfile = outprefix + '.' + seqs_type + '.cdhit'
+                files_to_cat.append(outfile)
+                cdhit_runner = cdhit.Runner(
+                  inprefix + '.' + seqs_type + '.fa',
+                  outfile,
+                  seq_identity_threshold=seq_identity_threshold,
+                  threads=threads,
+                  length_diff_cutoff=length_diff_cutoff
+                )
+
+                if nocluster:
+                    new_clusters = cdhit_runner.fake_run()
+                else:
+                    new_clusters = cdhit_runner.run()
+
+                clusters[seqs_type] = new_clusters
+            else:
+                clusters[seqs_type] = None
+
+        assert len(files_to_cat) > 0
+        f_out = pyfastaq.utils.open_file_write(outprefix + '.cluster_representatives.fa')
+
+        for filename in files_to_cat:
+            for seq in pyfastaq.sequences.file_reader(filename):
+                print(seq, file=f_out)
+
+        pyfastaq.utils.close(f_out)
+        return clusters
 
