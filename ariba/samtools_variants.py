@@ -154,7 +154,7 @@ class SamtoolsVariants:
             if scaff in nucmer_matches:
                 position = int(data[1]) - 1
                 i = pyfastaq.intervals.Interval(position, position)
-                intersects = len([x for x in nucmer_matches[scaff] if x.qry_coords().intersects(i)]) > 0
+                intersects = len([x for x in nucmer_matches[scaff] if x.intersects(i)]) > 0
                 if intersects:
                     vcf_variant_counts[scaff] = vcf_variant_counts.get(scaff, 0) + 1
 

@@ -101,7 +101,7 @@ class TestSamtoolsVariants(unittest.TestCase):
 
         hit = ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'scaff1']
         nucmer_hits = {
-            'scaff1': [pymummer.alignment.Alignment('\t'.join(hit))]
+            'scaff1': [pyfastaq.intervals.Interval(0, 41)]
         }
 
         got = samtools_variants.SamtoolsVariants.variants_in_coords(nucmer_hits, vcf_file)
