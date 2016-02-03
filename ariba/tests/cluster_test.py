@@ -119,7 +119,29 @@ class TestCluster(unittest.TestCase):
             'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tT\tSNP\tn\t.\t.\t.\t.\t.\t.\t.\t.\tnoncoding1_n_A6G_variant in ref and reads so should report\tgeneric description of noncoding1',
         ]
 
-        self.maxDiff=None
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_presence_absence(self):
+        '''test complete run of cluster on a presence absence gene'''
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence.fa'),
+            metadata_tsv=os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence.metadata.tsv'),
+        )
+
+        tmpdir = 'tmp.cluster_test_full_run_ok_presence_absence'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence'), tmpdir)
+
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
+        c.run()
+
+        expected = [
+            'presence_absence1\tpresence_absence\t27\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\tT\tSNP\tp\tNONSYN\tA10V\t83\t83\tT\t.\t22\t22\tpresence_absence1_p_A10V_Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence\t27\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\tF\t.\tp\tSYN\t.\t108\t108\tC\t.\t32\t32\t.\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence\t27\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\tT\tSNP\tp\t.\t.\t.\t.\t.\t.\t.\t.\tpresence_absence1_p_I5A_Ref and reads have variant so report\tGeneric description of presence_absence1'
+        ]
+
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
 
