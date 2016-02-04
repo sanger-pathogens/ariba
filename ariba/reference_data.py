@@ -335,6 +335,25 @@ class ReferenceData:
         return variants
 
 
+    @staticmethod
+    def write_cluster_allocation_file(clusters, outfile):
+        f_out = pyfastaq.utils.open_file_write(outfile)
+
+        for seq_type in ['presence_absence', 'variants_only', 'non_coding']:
+            if clusters[seq_type] is None:
+                continue
+
+            for seq_name in sorted(clusters[seq_type]):
+                other_seqs = clusters[seq_type][seq_name].difference({seq_name})
+                if len(other_seqs) > 0:
+                    other_seq_string = '\t'.join(sorted(list(other_seqs)))
+                    print(seq_name, other_seq_string, sep='\t', file=f_out)
+                else:
+                    print(seq_name, file=f_out)
+
+        pyfastaq.utils.close(f_out)
+
+
     def cluster_with_cdhit(self, inprefix, outprefix, seq_identity_threshold=0.9, threads=1, length_diff_cutoff=0.9, nocluster=False):
         files_to_cat = []
         clusters = {}
@@ -368,5 +387,6 @@ class ReferenceData:
                 print(seq, file=f_out)
 
         pyfastaq.utils.close(f_out)
+        self.write_cluster_allocation_file(clusters, outprefix + '.clusters.tsv')
         return clusters
 

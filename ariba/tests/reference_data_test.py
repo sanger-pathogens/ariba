@@ -287,6 +287,26 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual({'n': {}, 'p': {}}, refdata.all_non_wild_type_variants('not_a_known_sequence'))
 
 
+    def test_write_cluster_allocation_file(self):
+        '''Test write_cluster_allocation_file'''
+        clusters = {
+            'presence_absence': {
+                'seq1': {'seq1', 'seq2'},
+                'seq3': {'seq3', 'seq4', 'seq5'},
+                'seq6': {'seq6'}
+            },
+            'non_coding' : {
+                'seq10': {'seq42'}
+            },
+            'variants_only': None
+        }
+        tmpfile = 'tmp.test_write_cluster_allocation_file.out'
+        reference_data.ReferenceData.write_cluster_allocation_file(clusters, tmpfile)
+        expected_file = os.path.join(data_dir, 'reference_data_test_write_cluster_allocation_file.expected')
+        self.assertTrue(filecmp.cmp(expected_file, tmpfile, shallow=False))
+        os.unlink(tmpfile)
+
+
     def test_cluster_with_cdhit(self):
         '''Test cluster_with_cd_hit'''
         inprefix = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit')
@@ -320,6 +340,12 @@ class TestReferenceData(unittest.TestCase):
         got_seqs = {}
         pyfastaq.tasks.file_to_dict(outprefix + '.cluster_representatives.fa', got_seqs)
         self.assertEqual(expected_seqs, got_seqs)
+
+        expected_clusters_file = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit.clusters.tsv')
+        got_clusters_file = outprefix + '.clusters.tsv'
+        self.assertTrue(filecmp.cmp(expected_clusters_file, got_clusters_file, shallow=False))
+
+        os.unlink(got_clusters_file)
         os.unlink(outprefix + '.cluster_representatives.fa')
         os.unlink(outprefix + '.non_coding.cdhit')
         os.unlink(outprefix + '.presence_absence.cdhit')
