@@ -1,4 +1,5 @@
 import os
+import copy
 import itertools
 import sys
 import shutil
@@ -6,7 +7,7 @@ import openpyxl
 import multiprocessing
 import pysam
 import pyfastaq
-from ariba import cdhit, cluster, common, mapping, histogram, faidx
+from ariba import cdhit, cluster, common, mapping, histogram, faidx, report
 
 class Error (Exception): pass
 
@@ -30,9 +31,6 @@ class Clusters:
       threads=1,
       verbose=False,
       assembler='velvet',
-      smalt_k=13,
-      smalt_s=2,
-      smalt_min_id=0.9,
       spades_other=None,
       max_insert=1000,
       min_scaff_depth=10,
@@ -44,7 +42,6 @@ class Clusters:
       bcftools_exe='bcftools',
       gapfiller_exe='GapFiller.pl',
       samtools_exe='samtools',
-      smalt_exe='smalt',
       bowtie2_exe='bowtie2',
       bowtie2_preset='very-sensitive-local',
       spades_exe='spades.py',
@@ -55,6 +52,7 @@ class Clusters:
       run_cd_hit=True,
       clean=1,
     ):
+        self.refdata = refdata
         self.reads_1 = os.path.abspath(reads_1)
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
@@ -67,9 +65,11 @@ class Clusters:
         self.assembly_kmer = assembly_kmer
         self.spades_other = spades_other
 
-        self.db_fasta_clustered = os.path.join(self.outdir, 'input_genes.clustered.fa')
+        self.refdata_files_prefix = os.path.join(self.outdir, 'refdata')
+        self.cdhit_files_prefix = os.path.join(self.outdir, 'cdhit')
+        self.cdhit_cluster_representatives_fa = self.cdhit_files_prefix + '.cluster_representatives.fa'
         self.cluster_ids = {}
-        self.bam_prefix = os.path.join(self.outdir, 'map_all_reads')
+        self.bam_prefix = self.cdhit_cluster_representatives_fa + '.map_reads'
         self.bam = self.bam_prefix + '.bam'
         self.report_file_tsv = os.path.join(self.outdir, 'report.tsv')
         self.report_file_xls = os.path.join(self.outdir, 'report.xls')
@@ -77,11 +77,7 @@ class Clusters:
         self.threads = threads
         self.verbose = verbose
 
-        self.smalt_k = smalt_k
-        self.smalt_s = smalt_s
-        self.smalt_min_id = smalt_min_id
         self.max_insert = max_insert
-        self.smalt_exe = smalt_exe
         self.bowtie2_exe = bowtie2_exe
         self.bowtie2_preset = bowtie2_preset
 
@@ -131,43 +127,27 @@ class Clusters:
             except:
                 raise Error('Error mkdir ' + d)
 
-        self.refdata = refdata
         self.db_fasta = os.path.join(self.outdir, 'input_genes.not_clustered.fa')
         self.refdata.make_catted_fasta(self.db_fasta)
         common.syscall(self.samtools_exe + ' faidx ' + self.db_fasta)
 
 
     def _run_cdhit(self):
-        r = cdhit.Runner(
-            self.db_fasta,
-            self.db_fasta_clustered,
+        self.cluster_ids = self.refdata.cluster_with_cdhit(
+            self.refdata_files_prefix,
+            self.cdhit_files_prefix,
             seq_identity_threshold=self.cdhit_seq_identity_threshold,
             threads=self.threads,
             length_diff_cutoff=self.cdhit_length_diff_cutoff,
-            verbose=self.verbose,
+            nocluster=not self.run_cd_hit
         )
-        if self.run_cd_hit:
-            self.cluster_ids = r.run()
-        else:
-            if self.verbose:
-                print('Skipping cd-hit because --no_cdhit option used')
-            self.cluster_ids = r.fake_run()
-
-
-    def _write_clusters_info_file(self):
-        f = pyfastaq.utils.open_file_write(self.clusters_info_file)
-        print('#Cluster\tGene', file=f)
-        for c in sorted([int(x) for x in self.cluster_ids]):
-            for seqname in sorted(list(self.cluster_ids[str(c)])):
-                print(c, seqname, sep='\t', file=f)
-        pyfastaq.utils.close(f)
 
 
     def _map_reads_to_clustered_genes(self):
         mapping.run_bowtie2(
             self.reads_1,
             self.reads_2,
-            self.db_fasta_clustered,
+            self.cdhit_cluster_representatives_fa,
             self.bam_prefix,
             threads=self.threads,
             samtools=self.samtools_exe,
@@ -336,59 +316,43 @@ class Clusters:
         self.clusters = {c.name: c for c in cluster_list}
 
 
-    def _write_reports(self):
-        columns = [
-            '#gene',
-            'flag',
-            'reads',
-            'cluster',
-            'gene_len',
-            'assembled',
-            'pc_ident',
-            'var_type',
-            'var_effect',
-            'new_aa',
-            'gene_start',
-            'gene_end',
-            'gene_nt',
-            'scaffold',
-            'scaff_len',
-            'scaff_start',
-            'scaff_end',
-            'scaff_nt',
-            'read_depth',
-            'alt_bases',
-            'ref_alt_depth'
-        ]
+    @staticmethod
+    def _write_reports(clusters_in, tsv_out, xls_out):
+        columns = copy.copy(report.columns)
+        columns[0] = '#' + columns[0]
 
-        f = pyfastaq.utils.open_file_write(self.report_file_tsv)
+        f = pyfastaq.utils.open_file_write(tsv_out)
         print('\t'.join(columns), file=f)
 
-        columns[0] = 'gene'
+        columns[0] = columns[0][1:]
         workbook = openpyxl.Workbook()
         worksheet = workbook.worksheets[0]
         worksheet.title = 'ARIBA_report'
         worksheet.append(columns)
 
-        for gene in sorted(self.clusters):
-            for line in self.clusters[gene].report_lines:
+        for seq_name in sorted(clusters_in):
+            if clusters_in[seq_name].report_lines is None:
+                continue
+
+            for line in clusters_in[seq_name].report_lines:
                 print('\t'.join([str(x) for x in line]), file=f)
                 worksheet.append(line)
-        pyfastaq.utils.close(f)
-        workbook.save(self.report_file_xls)
-
-
-    def _write_catted_assembled_genes_fasta(self):
-        f = pyfastaq.utils.open_file_write(self.catted_assembled_genes_fasta)
-
-        for gene in sorted(self.clusters):
-            cluster_fasta = self.clusters[gene].final_assembled_genes_fa
-            if os.path.exists(cluster_fasta):
-                file_reader = pyfastaq.sequences.file_reader(cluster_fasta)
-                for seq in file_reader:
-                    print(seq, file=f)
 
         pyfastaq.utils.close(f)
+        workbook.save(xls_out)
+
+
+    #def _write_catted_assembled_genes_fasta(self):
+    #    f = pyfastaq.utils.open_file_write(self.catted_assembled_genes_fasta)
+
+    #    for gene in sorted(self.clusters):
+    #        cluster_fasta = self.clusters[gene].assembly_compare.assembled_ref_seqs_file
+    #        if os.path.exists(cluster_fasta):
+    #            file_reader = pyfastaq.sequences.file_reader(cluster_fasta)
+    #            for seq in file_reader:
+    #                print(seq, file=f)
+
+    #    pyfastaq.utils.close(f)
 
 
     def _clean(self):
@@ -427,15 +391,17 @@ class Clusters:
         if self.verbose:
             print('{:_^79}'.format(' Running cd-hit '), flush=True)
         self._run_cdhit()
-        self._write_clusters_info_file()
+
         if self.verbose:
             print('Finished cd-hit\n')
             print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
         self._map_reads_to_clustered_genes()
+
         if self.verbose:
             print('Finished mapping\n')
             print('{:_^79}'.format(' Generating clusters '), flush=True)
         self._bam_to_clusters_reads()
+
         if len(self.cluster_to_dir) > 0:
             self._set_insert_size_data()
             if self.verbose:
@@ -451,10 +417,12 @@ class Clusters:
         if self.verbose:
             print('{:_^79}'.format(' Writing report files '), flush=True)
         self._write_reports()
-        self._write_catted_assembled_genes_fasta()
+        #self._write_catted_assembled_genes_fasta()
+
         if self.verbose:
             print('Finished writing report files. Cleaning files', flush=True)
-        self._clean()
+        #self._clean()
+
         if self.verbose:
             print('\nAll done!\n')
 

@@ -122,28 +122,33 @@ class TestClusters(unittest.TestCase):
             def __init__(self, lines):
                 self.report_lines = lines
 
-        self.clusters.clusters = {
+        clusters_dict = {
             'gene1': FakeCluster([['gene1 line1']]),
             'gene2': FakeCluster([['gene2 line2']])
         }
 
-        self.clusters._write_reports()
+        tmp_tsv = 'tmp.test_write_reports.tsv'
+        tmp_xls = 'tmp.test_write_reports.xls'
+        clusters.Clusters._write_reports(clusters_dict, tmp_tsv, tmp_xls)
+
         expected = os.path.join(data_dir, 'clusters_test_write_report.tsv')
-        self.assertTrue(filecmp.cmp(expected, self.clusters.report_file_tsv, shallow=False))
-        self.assertTrue(os.path.exists(self.clusters.report_file_xls))
+        self.assertTrue(filecmp.cmp(expected, tmp_tsv, shallow=False))
+        self.assertTrue(os.path.exists(tmp_xls))
+        os.unlink(tmp_tsv)
+        os.unlink(tmp_xls)
 
 
-    def test_write_catted_assembled_genes_fasta(self):
-        '''test _write_catted_assembled_genes_fasta'''
-        class FakeCluster:
-            def __init__(self, filename):
-                self.final_assembled_genes_fa = filename
+    #def test_write_catted_assembled_genes_fasta(self):
+    #    '''test _write_catted_assembled_genes_fasta'''
+    #    class FakeCluster:
+    #        def __init__(self, filename):
+    #            self.final_assembled_genes_fa = filename
 
-        self.clusters.clusters = {
-            'gene1': FakeCluster(os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.in.gene1.fa')),
-            'gene2': FakeCluster(os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.in.gene2.fa')),
-        }
+    #    self.clusters.clusters = {
+    #        'gene1': FakeCluster(os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.in.gene1.fa')),
+    #        'gene2': FakeCluster(os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.in.gene2.fa')),
+    #    }
 
-        self.clusters._write_catted_assembled_genes_fasta()
-        expected = os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.expected.out.fa')
-        self.assertTrue(filecmp.cmp(expected, self.clusters.catted_assembled_genes_fasta, shallow=False))
+    #    self.clusters._write_catted_assembled_genes_fasta()
+    #    expected = os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.expected.out.fa')
+    #    self.assertTrue(filecmp.cmp(expected, self.clusters.catted_assembled_genes_fasta, shallow=False))
