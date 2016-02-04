@@ -108,26 +108,51 @@ class RefGenesGetter:
         return variants
 
 
-    def _get_card_variant_data(self, outfilehandle):
+    def _get_card_variant_data(self, tsv_outfile, got_genes_set, got_genes_file):
+        if got_genes_set is None:
+            got_genes_set = set()
+            try:
+                tsv_out_fh = open(tsv_outfile, 'w')
+            except:
+                raise Error('Error opening file for writing: "' + tsv_outfile + '"')
+        else:
+            try:
+                tsv_out_fh = open(tsv_outfile, 'a')
+            except:
+                raise Error('Error opening file for appending: "' + tsv_outfile + '"')
+
+        got_genes_fh = pyfastaq.utils.open_file_write(got_genes_file)
         soup = self._get_souped_request('http://arpcard.mcmaster.ca/?q=CARD/search/mqt.35950.mqt.806')
         table = soup.find(id='searchresultsTable')
         links = {x.text : x['href'] for x in table.find_all('a')}
+        print('Found', len(links), 'genes to get variants for')
+        genes_done = 0
 
         for gene, url in sorted(links.items()):
-            print('\nGetting info for gene', gene, 'from', url)
-            variants = self._get_card_gene_variant_info(gene, links[gene])
-            if len(variants) == 0:
-                print('WARNING: No valid variants found for gene', gene)
-            for variant, description in variants:
-                print(gene, 'p', variant, description, sep='\t', file=outfilehandle)
+            if gene in got_genes_set:
+                print('Info for gene', gene, 'already found. Skipping')
+            else:
+                print('\nGetting info for gene', gene, 'from', url)
+                variants = self._get_card_gene_variant_info(gene, links[gene])
+                if len(variants) == 0:
+                    print('WARNING: No valid variants found for gene', gene)
+                for variant, description in variants:
+                    print(gene, 'p', variant, description, sep='\t', file=tsv_out_fh, flush=True)
+
+            print(gene, file=got_genes_fh, flush=True)
+            genes_done += 1
+            print('Done', genes_done, 'genes of', len(links))
+
+        tsv_out_fh.close()
+        pyfastaq.utils.close(got_genes_fh)
 
 
     @staticmethod
-    def _card_parse_presence_absence(infile, outfile, metadata_fh):
+    def _card_parse_presence_absence(infile, fa_outfile, metadata_fh):
         presence_absence_ids = set()
 
         file_reader = pyfastaq.sequences.file_reader(infile)
-        f_out = pyfastaq.utils.open_file_write(outfile)
+        fa_out = pyfastaq.utils.open_file_write(fa_outfile)
 
         for seq in file_reader:
             try:
@@ -136,12 +161,12 @@ class RefGenesGetter:
                 description = None
 
             presence_absence_ids.add(seq.id)
-            print(seq, file=f_out)
+            print(seq, file=fa_out)
 
             if description is not None:
                 print(seq.id, '.', '.', description, sep='\t', file=metadata_fh)
 
-        pyfastaq.utils.close(f_out)
+        pyfastaq.utils.close(fa_out)
         return presence_absence_ids
 
 
@@ -167,9 +192,31 @@ class RefGenesGetter:
 
 
     def _get_from_card(self, outprefix):
-        tsv_filename = outprefix + '.metadata.tsv'
-        tsv_fh = pyfastaq.utils.open_file_write(tsv_filename)
-        self._get_card_variant_data(tsv_fh)
+        variant_metadata_tsv = outprefix + '.variant_metadata.tsv'
+        got_genes_file = outprefix + '.gene_variants.progress'
+        genes_done_file = outprefix + '.gene_variants.done'
+
+        if os.path.exists(genes_done_file):
+            if not os.path.exists(variant_metadata_tsv):
+                raise Error('Error from previous run. Found file ' + genes_done_file + ' but not ' + variant_metadata_tsv + '. Cannot continue. Delete all previous files and start again')
+            print('Found files', genes_done_file, 'and', variant_metadata_tsv, 'from previous run, so no need to get genes variants info.')
+        else:
+            if os.path.exists(got_genes_file) and os.path.exists(variant_metadata_tsv):
+                print('Existing files found. Try to continue getting gene variants')
+                with open(got_genes_file) as f:
+                    got_genes_set = {x.rstrip() for x in f}
+            else:
+                print('Found none or one (but not both) of', got_genes_file, 'and', variant_metadata_tsv, 'so starting downloading from scratch.')
+                for filename in (got_genes_file, variant_metadata_tsv):
+                    try:
+                        os.unlink(filename)
+                    except:
+                        pass
+                got_genes_set = None
+
+            self._get_card_variant_data(variant_metadata_tsv, got_genes_set, got_genes_file)
+            with open(genes_done_file, 'w') as f:
+                pass
 
         print('Finished getting variant data. Getting FASTA files', flush=True)
         all_ref_genes_fa_gz = outprefix + '.tmp.downloaded.all_genes.fa.gz'
@@ -179,26 +226,37 @@ class RefGenesGetter:
         self._download_file('http://arpcard.mcmaster.ca/blast/db/nucleotide/AR-genes.fa.gz', all_ref_genes_fa_gz)
         self._download_file('http://arpcard.mcmaster.ca/blast/db/nucleotide/ARmeta-genes.fa.gz', presence_absence_fa_gz)
 
-        print('Making presence_absence and variants_only fasta files, and udating metadata', flush=True)
-        presence_absence_ids = self._card_parse_presence_absence(presence_absence_fa_gz, presence_absence_fa, tsv_fh)
-        self._card_parse_all_genes(all_ref_genes_fa_gz, variants_only_fa, tsv_fh, presence_absence_ids)
-        pyfastaq.utils.close(tsv_fh)
+        print('Making presence_absence and variants_only fasta files, and getting their metadata', flush=True)
+
+        general_metadata_tsv = outprefix + '.general_metadata.tsv'
+        general_metadata_fh = pyfastaq.utils.open_file_write(general_metadata_tsv)
+        presence_absence_ids = self._card_parse_presence_absence(presence_absence_fa_gz, presence_absence_fa, general_metadata_fh)
+        self._card_parse_all_genes(all_ref_genes_fa_gz, variants_only_fa, general_metadata_fh, presence_absence_ids)
+        pyfastaq.utils.close(general_metadata_fh)
 
         print('Deleting temporary downloaded files', all_ref_genes_fa_gz, presence_absence_fa_gz)
         os.unlink(all_ref_genes_fa_gz)
         os.unlink(presence_absence_fa_gz)
 
+        print('Catting', variant_metadata_tsv, 'and', general_metadata_tsv)
+        final_tsv = outprefix + '.metadata.tsv'
+        with open(final_tsv, 'w') as f_out:
+            for filename in [variant_metadata_tsv, general_metadata_tsv]:
+                print('   ', filename)
+                with open(filename) as f_in:
+                    for line in f_in:
+                        print(line, end='', file=f_out)
+
         print('Finished making files. Final genes files and metadata file:')
         print('   ', presence_absence_fa)
         print('   ', variants_only_fa)
-        print('   ', tsv_filename)
+        print('   ', final_tsv)
 
         print('\nYou can use them with ARIBA like this:')
-        print('ariba run --presabs', presence_absence_fa, '--varonly', variants_only_fa, '--metadata', tsv_filename, ' reads_1.fq reads_2.fq output_directory\n')
+        print('ariba run --presabs', presence_absence_fa, '--varonly', variants_only_fa, '--metadata', final_tsv, ' reads_1.fq reads_2.fq output_directory\n')
 
         print('If you use this downloaded data, please cite:')
-        print('"The Comprehensive Antibiotic Resistance Database. Antimicrobial Agents and Chemotherapy",')
-        print('McArthur et al 2013, PMID: 23650175')
+        print('"The Comprehensive Antibiotic Resistance Database", McArthur et al 2013, PMID: 23650175')
 
 
     def _get_from_resfinder(self, outprefix):
