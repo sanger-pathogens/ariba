@@ -191,6 +191,7 @@ class RefGenesGetter:
 
     def _get_from_resfinder(self, outprefix):
         outprefix = os.path.abspath(outprefix)
+        final_fasta = outprefix + '.genes.fa'
         tmpdir = outprefix + '.tmp.download'
         current_dir = os.getcwd()
 
@@ -206,28 +207,26 @@ class RefGenesGetter:
         common.syscall(cmd)
         common.syscall('unzip ' + zipfile)
 
-        print('Combining downloaded fasta files')
-        all_genes_fasta = outprefix + '.original_downloaded_genes.fa'
-        f = pyfastaq.utils.open_file_write(all_genes_fasta)
+        print('Combining downloaded fasta files...')
+        f = pyfastaq.utils.open_file_write(final_fasta)
 
-        for filename in os.listdir():
+        for filename in os.listdir('database'):
             if filename.endswith('.fsa'):
                 print('   ', filename)
-                file_reader = pyfastaq.sequences.file_reader(filename)
+                file_reader = pyfastaq.sequences.file_reader(os.path.join('database', filename))
                 for seq in file_reader:
                     print(seq, file=f)
 
         pyfastaq.utils.close(f)
 
-        print('Combined files. Running refcheck on genes file')
-        refcheck_prefix = outprefix + '.tmp.refcheck'
-        refchecker = refcheck.Checker(all_genes_fasta, outprefix=refcheck_prefix, genetic_code=self.genetic_code)
-        refchecker.run()
+        print('\nCombined files. Final genes file is callled', final_fasta, end='\n\n')
         os.chdir(current_dir)
         shutil.rmtree(tmpdir)
-        final_fasta = outprefix + '.genes.fa'
-        os.rename(refcheck_prefix + '.fa', final_fasta)
-        print('Finished. Final genes file is called', final_fasta)
+
+        print('You can use it with ARIBA like this:')
+        print('ariba run --presabs', os.path.relpath(final_fasta), 'reads_1.fq reads_2.fq output_directory\n')
+        print('If you use this downloaded data, please cite:')
+        print('"Identification of acquired antimicrobial resistance genes", Zankari et al 2012, PMID: 22782487\n')
 
 
     def _get_from_argannot(self, outprefix):
