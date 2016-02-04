@@ -231,7 +231,7 @@ class RefGenesGetter:
 
 
     def _get_from_argannot(self, outprefix):
-        refcheck_prefix = os.path.abspath(outprefix) + '.tmp.refcheck'
+        outprefix = os.path.abspath(outprefix)
         tmpdir = outprefix + '.tmp.download'
         current_dir = os.getcwd()
 
@@ -244,18 +244,19 @@ class RefGenesGetter:
         zipfile = 'arg-annot-database_doc.zip'
         self._download_file('http://www.mediterranee-infection.com/arkotheque/client/ihumed/_depot_arko/articles/304/arg-annot-database_doc.zip', zipfile)
         common.syscall('unzip ' + zipfile)
-        genes_file = 'Database Nt Sequences File.txt'
-
-        print('Extracted files. Running refcheck on genes file')
-        refchecker = refcheck.Checker(genes_file, outprefix=refcheck_prefix, genetic_code=self.genetic_code)
-        refchecker.run()
         os.chdir(current_dir)
-        os.rename(os.path.join(tmpdir, genes_file), outprefix + '.original_downloaded_genes.fa')
-        shutil.rmtree(tmpdir)
-        final_fasta = outprefix + '.genes.fa'
-        os.rename(refcheck_prefix + '.fa', final_fasta)
-        print('Finished. Final genes file is called', final_fasta)
+        print('Extracted files.')
 
+        genes_file = os.path.join(tmpdir, 'Database Nt Sequences File.txt')
+        final_fasta = outprefix + '.fa'
+        pyfastaq.tasks.to_fasta(genes_file, final_fasta)
+        shutil.rmtree(tmpdir)
+
+        print('Finished. Final genes file is called', final_fasta, end='\n\n')
+        print('You can use it with ARIBA like this:')
+        print('ariba run --presabs', os.path.relpath(final_fasta), 'reads_1.fq reads_2.fq output_directory\n')
+        print('If you use this downloaded data, please cite:')
+        print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes", PMID: 24145532\n')
 
     def run(self, outprefix):
         exec('self._get_from_' + self.ref_db + '(outprefix)')
