@@ -255,7 +255,7 @@ class RefGenesGetter:
         print('You can use it with ARIBA like this:')
         print('ariba run --presabs', os.path.relpath(final_fasta), 'reads_1.fq reads_2.fq output_directory\n')
         print('If you use this downloaded data, please cite:')
-        print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes", PMID: 24145532\n')
+        print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n')
 
     def run(self, outprefix):
         exec('self._get_from_' + self.ref_db + '(outprefix)')
