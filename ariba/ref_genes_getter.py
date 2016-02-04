@@ -78,7 +78,7 @@ class RefGenesGetter:
             if ontology_def is None:
                 description = None
             else:
-                # there are sometimew newline characters in the description.
+                # there are sometimes newline characters in the description.
                 # replace all whitepace characters with a space
                 description = re.sub('\s', ' ', ontology_def.text)
 
@@ -167,7 +167,8 @@ class RefGenesGetter:
 
 
     def _get_from_card(self, outprefix):
-        tsv_fh = pyfastaq.utils.open_file_write(outprefix + '.metadata.tsv')
+        tsv_filename = outprefix + '.metadata.tsv'
+        tsv_fh = pyfastaq.utils.open_file_write(tsv_filename)
         self._get_card_variant_data(tsv_fh)
 
         print('Finished getting variant data. Getting FASTA files', flush=True)
@@ -183,10 +184,21 @@ class RefGenesGetter:
         self._card_parse_all_genes(all_ref_genes_fa_gz, variants_only_fa, tsv_fh, presence_absence_ids)
         pyfastaq.utils.close(tsv_fh)
 
-        print('Deleting temporary downloaded files')
+        print('Deleting temporary downloaded files', all_ref_genes_fa_gz, presence_absence_fa_gz)
         os.unlink(all_ref_genes_fa_gz)
         os.unlink(presence_absence_fa_gz)
-        print('All done')
+
+        print('Finished making files. Final genes files and metadata file:')
+        print('   ', presence_absence_fa)
+        print('   ', variants_only_fa)
+        print('   ', tsv_filename)
+
+        print('\nYou can use them with ARIBA like this:')
+        print('ariba run --presabs', presence_absence_fa, '--varonly', variants_only_fa, '--metadata', tsv_filename, ' reads_1.fq reads_2.fq output_directory\n')
+
+        print('If you use this downloaded data, please cite:')
+        print('"The Comprehensive Antibiotic Resistance Database. Antimicrobial Agents and Chemotherapy",')
+        print('McArthur et al 2013, PMID: 23650175')
 
 
     def _get_from_resfinder(self, outprefix):
@@ -256,6 +268,7 @@ class RefGenesGetter:
         print('ariba run --presabs', os.path.relpath(final_fasta), 'reads_1.fq reads_2.fq output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n')
+
 
     def run(self, outprefix):
         exec('self._get_from_' + self.ref_db + '(outprefix)')
