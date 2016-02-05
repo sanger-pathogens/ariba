@@ -172,4 +172,5 @@ class SamtoolsVariants:
 
     def run(self):
         self._make_vcf_and_read_depths_files()
-
+        # This is to make this object picklable, to keep multithreading happy
+        self.log_fh = None
