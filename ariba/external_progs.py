@@ -31,7 +31,7 @@ prog_to_default = {
 prog_to_env_var = {
     'bcftools': 'ARIBA_BCFTOOLS',
     'samtools': 'ARIBA_SAMTOOLS',
-    'spades': 'ARIBA_SPADES', 
+    'spades': 'ARIBA_SPADES',
 }
 
 
@@ -120,17 +120,10 @@ def check_versions(opts, verbose=False, not_required=None):
         'cdhit',
         'nucmer',
         'samtools',
+        'spades',
         'sspace',
         'gapfiller',
     ]
-    
-    if opts.assembler == 'spades':
-        to_check.append('spades')
-    elif opts.assembler == 'velvet':
-        to_check.append('velvetg')
-        to_check.append('velveth')
-    else:
-        raise Error('Assembler ' + opts.assembler + ' not recognised. Cannot continue')
 
     errors = []
     failed_to_find = set()
