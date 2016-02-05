@@ -55,7 +55,16 @@ def run_bowtie2(
     if sort:
         threads = min(4, threads)
         thread_mem = int(500 / threads)
-        sort_cmd = samtools + ' sort -@' + str(threads) + ' -m ' + str(thread_mem) + 'M ' + intermediate_bam + ' ' + out_prefix
+        sort_cmd = ' '.join([
+            samtools,
+            'sort',
+            '-@' + str(threads),
+            '-m' + str(thread_mem) + 'M',
+            '-o', final_bam,
+            '-O bam',
+            '-T', out_prefix + '.tmp.samtool_sort',
+            intermediate_bam,
+        ])
         index_cmd = samtools + ' index ' + final_bam
         common.syscall(sort_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
         common.syscall(index_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
