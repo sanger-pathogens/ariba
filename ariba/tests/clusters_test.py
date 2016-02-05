@@ -123,8 +123,8 @@ class TestClusters(unittest.TestCase):
                 self.report_lines = lines
 
         clusters_dict = {
-            'gene1': FakeCluster([['gene1 line1']]),
-            'gene2': FakeCluster([['gene2 line2']])
+            'gene1': FakeCluster(['gene1\tline1']),
+            'gene2': FakeCluster(['gene2\tline2'])
         }
 
         tmp_tsv = 'tmp.test_write_reports.tsv'
