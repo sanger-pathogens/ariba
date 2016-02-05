@@ -34,7 +34,6 @@ class Cluster:
       samtools_exe='samtools',
       bowtie2_exe='bowtie2',
       bowtie2_preset='very-sensitive-local',
-      smalt_exe='smalt',
       spades_exe='spades.py',
       sspace_exe='SSPACE_Basic_v2.0.pl',
       spades_other_options=None,
@@ -84,7 +83,6 @@ class Cluster:
 
         self.bcftools_exe = bcftools_exe
         self.samtools_exe = samtools_exe
-        self.smalt_exe = smalt_exe
         self.bowtie2_exe = bowtie2_exe
         self.bowtie2_preset = bowtie2_preset
 
