@@ -390,3 +390,11 @@ class ReferenceData:
         self.write_cluster_allocation_file(clusters, outprefix + '.clusters.tsv')
         return clusters
 
+
+    def write_seqs_to_fasta(self, outfile, names):
+        f_out = pyfastaq.utils.open_file_write(outfile)
+
+        for name in sorted(names):
+            print(self.sequence(name), file=f_out)
+
+        pyfastaq.utils.close(f_out)
