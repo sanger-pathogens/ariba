@@ -282,6 +282,8 @@ class Assembly:
         number_of_contigs = pyfastaq.tasks.count_sequences(self.assembly_contigs) if os.path.exists(self.assembly_contigs) else 0
         if number_of_contigs == 0:
             self.assembled_ok = False
+            # This is to make this object picklable, to keep multithreading happy
+            self.log_fh = None
             return
         else:
             self.assembled_ok = True
@@ -309,3 +311,5 @@ class Assembly:
 
             self.scaff_graph_ok = self._parse_bam(self.sequences, self.final_assembly_bam, self.min_scaff_depth, self.max_insert)
 
+        # This is to make this object picklable, to keep multithreading happy
+        self.log_fh = None
