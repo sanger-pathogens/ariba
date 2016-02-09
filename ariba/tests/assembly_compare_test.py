@@ -228,3 +228,33 @@ class TestAssemblyCompare(unittest.TestCase):
         for i in range(len(expected)):
             self.assertEqual(expected[i], assembly_compare.AssemblyCompare._ref_covered_by_at_least_one_full_length_contig(nucmer_hits[i]))
 
+    def test_nucmer_hit_containing_reference_position(self):
+        '''test nucmer_hit_containing_reference_position'''
+        listhit1 = ['100', '200', '300', '400', '100', '100', '100.00', '600', '500', '1', '1', 'ref', 'contig1']
+        listhit2 = ['400', '500', '500', '600', '100', '100', '100.00', '600', '600', '1', '1', 'ref', 'contig2']
+        hit1 = pymummer.alignment.Alignment('\t'.join(listhit1))
+        hit2 = pymummer.alignment.Alignment('\t'.join(listhit2))
+        nucmer_hits = {
+            'contig1': [hit1],
+            'contig2': [hit2],
+        }
+
+        tests = [
+            ('ref2', 150, None),
+            ('ref', 42, None),
+            ('ref', 98, None),
+            ('ref', 200, None),
+            ('ref', 99, hit1),
+            ('ref', 142, hit1),
+            ('ref', 199, hit1),
+            ('ref', 200, None),
+            ('ref', 398, None),
+            ('ref', 399, hit2),
+            ('ref', 442, hit2),
+            ('ref', 499, hit2),
+            ('ref', 500, None),
+        ]
+
+        for ref_name, ref_pos, expected in tests:
+            got = assembly_compare.AssemblyCompare.nucmer_hit_containing_reference_position(nucmer_hits, ref_name, ref_pos)
+            self.assertEqual(expected, got)
