@@ -86,3 +86,11 @@ class TestSequenceVariant(unittest.TestCase):
 
         for var, expected in tests:
             self.assertEqual(expected, var.has_variant(seq))
+
+
+    def test_nucleotide_range(self):
+        '''test nucleotide_range'''
+        sv = sequence_variant.Variant('n', 'A2T')
+        self.assertEqual((1, 1), sv.nucleotide_range())
+        sv = sequence_variant.Variant('p', 'I42L')
+        self.assertEqual((123, 125), sv.nucleotide_range())

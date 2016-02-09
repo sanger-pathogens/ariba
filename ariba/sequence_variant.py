@@ -58,3 +58,12 @@ class Variant:
         assert self.position < len(test_seq)
         return test_seq[self.position] == self.variant_value
 
+
+    def nucleotide_range(self):
+        '''Returns the nucleotide (start, end) positions inclusive of this variant.
+           start==end if it's an amino acid variant, otherwise start+2==end'''
+        if self.variant_type == 'p':
+            return 3 * self.position, 3 * self.position + 2
+        else:
+            return self.position, self.position
+
