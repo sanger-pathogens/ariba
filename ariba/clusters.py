@@ -139,7 +139,8 @@ class Clusters:
             seq_identity_threshold=self.cdhit_seq_identity_threshold,
             threads=self.threads,
             length_diff_cutoff=self.cdhit_length_diff_cutoff,
-            nocluster=not self.run_cd_hit
+            nocluster=not self.run_cd_hit,
+            verbose=self.verbose,
         )
 
 
@@ -421,7 +422,8 @@ class Clusters:
         if len(self.cluster_to_dir) > 0:
             self._set_insert_size_data()
             if self.verbose:
-                print('{:_^79}'.format(' Assembling each cluster '), flush=True)
+                print('{:_^79}'.format(' Assembling each cluster '))
+                print('Will run', self.threads, 'cluster(s) in parallel', flush=True)
             self._init_and_run_clusters()
             if self.verbose:
                 print('Finished assembling clusters\n')
