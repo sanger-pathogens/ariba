@@ -20,6 +20,11 @@ class TestReferenceData(unittest.TestCase):
         with self.assertRaises(reference_data.Error):
             ref_data = reference_data.ReferenceData(presence_absence_fa=presence_absence_bad)
 
+        empty_fasta = os.path.join(data_dir, 'reference_data_init_empty.fa')
+
+        with self.assertRaises(reference_data.Error):
+            ref_data = reference_data.ReferenceData(presence_absence_fa=empty_fasta)
+
 
     def test_init_ok(self):
         '''Test init with good input'''

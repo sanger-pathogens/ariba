@@ -23,13 +23,18 @@ class ReferenceData:
         self.min_gene_length = min_gene_length
         self.max_gene_length = max_gene_length
 
+        total_ref_seqs_loaded = 0
 
         for x in ['presence_absence', 'variants_only', 'non_coding']:
             exec('self.seq_filenames[x] = self._get_filename(' + x + '_fa)')
             self.seq_dicts[x] = self._load_fasta_file(self.seq_filenames[x])
+            total_ref_seqs_loaded += len(self.seq_dicts[x])
 
         if {None} == set(self.seq_filenames.values()):
             raise Error('Error! Must supply at least one of presence_absence_fa, variants_only_fa, non_coding_fa. Cannot continue')
+
+        if total_ref_seqs_loaded == 0:
+            raise Error('Error! No sequences found in input file(s). Maybe they were empty? Cannot continue.')
 
         self.metadata = self._load_metadata_tsv(metadata_tsv)
         self.genetic_code = genetic_code
