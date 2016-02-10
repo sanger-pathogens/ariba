@@ -273,7 +273,8 @@ class Clusters:
                 continue
 
             for seq_name in sorted(self.cluster_ids[seq_type]):
-                assert seq_name in self.cluster_to_dir
+                if seq_name not in self.cluster_to_dir:
+                    continue
                 counter += 1
                 if self.verbose:
                     print('Constructing cluster', seq_name + '.', counter, 'of', str(len(self.cluster_to_dir)))
