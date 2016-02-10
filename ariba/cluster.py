@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 import pyfastaq
 from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, flag, mapping, report, samtools_variants
@@ -74,7 +75,7 @@ class Cluster:
         self.nucmer_min_id = nucmer_min_id
         self.nucmer_min_len = nucmer_min_len
         self.nucmer_breaklen = nucmer_breaklen
-        self.assembly_vs_gene_coords = os.path.join(self.root_dir, 'assembly_vs_gene.coords')
+        #self.assembly_vs_gene_coords = os.path.join(self.root_dir, 'assembly_vs_gene.coords')
 
         self.bcf_min_dp = bcf_min_dp
         self.bcf_min_dv = bcf_min_dv
@@ -90,7 +91,7 @@ class Cluster:
         self.assembled_threshold = assembled_threshold
         self.unique_threshold = unique_threshold
         self.status_flag = flag.Flag()
-        self.flag_file = os.path.join(self.root_dir, 'flag')
+        #self.flag_file = os.path.join(self.root_dir, 'flag')
         self.clean = clean
 
         self.assembly_dir = os.path.join(self.root_dir, 'Assembly')
@@ -126,8 +127,38 @@ class Cluster:
 
 
     def _clean(self):
-        # FIXME
-        pass
+        if self.clean == 0:
+            print('   ... not deleting anything because --clean 0 used', file=self.log_fh)
+            return
+        elif self.clean == 2:
+            print('    rm -r ', self.root_dir)
+            shutil.rmtree(self.root_dir)
+            return
+
+        print('    rm -r', self.assembly_dir, file=self.log_fh)
+        shutil.rmtree(self.assembly_dir)
+
+        to_delete = [
+            self.reads1,
+            self.reads2,
+            self.references_fa,
+            self.references_fa + '.fai',
+            self.final_assembly_bam + '.read_depths.gz',
+            self.final_assembly_bam + '.read_depths.gz.tbi',
+            self.final_assembly_bam + '.scaff',
+            self.final_assembly_bam + '.soft_clipped',
+            self.final_assembly_bam + '.unmapped_mates',
+            self.final_assembly_bam + '.unsorted.bam',
+        ]
+
+        for filename in to_delete:
+            if os.path.exists(filename):
+                print('    rm', filename, file=self.log_fh)
+                try:
+                    os.unlink(filename)
+                except:
+                    raise Error('Error deleting file', filename)
+
 
     def run(self):
         self.logfile = os.path.join(self.root_dir, 'log.txt')
@@ -245,7 +276,7 @@ class Cluster:
 
         print('\nMaking report lines', file=self.log_fh)
         self.report_lines = report.report_lines(self)
-        print('Cleaning with clean option', self.clean, file=self.log_fh)
+        print('\nCleaning with clean option ', self.clean, ':', sep='', file=self.log_fh)
         self._clean()
         print('Finished', file=self.log_fh)
         pyfastaq.utils.close(self.log_fh)

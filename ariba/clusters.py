@@ -57,7 +57,6 @@ class Clusters:
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
         self.clusters_outdir = os.path.join(self.outdir, 'Clusters')
-        self.clusters_info_file = os.path.join(self.outdir, 'clusters.tsv')
         self.clean = clean
 
         self.assembler = assembler
@@ -127,9 +126,9 @@ class Clusters:
             except:
                 raise Error('Error mkdir ' + d)
 
-        self.db_fasta = os.path.join(self.outdir, 'input_genes.not_clustered.fa')
-        self.refdata.make_catted_fasta(self.db_fasta)
-        common.syscall(self.samtools_exe + ' faidx ' + self.db_fasta)
+        #self.db_fasta = os.path.join(self.outdir, 'input_genes.not_clustered.fa')
+        #self.refdata.make_catted_fasta(self.db_fasta)
+        #common.syscall(self.samtools_exe + ' faidx ' + self.db_fasta)
 
 
     def _run_cdhit(self):
@@ -368,32 +367,44 @@ class Clusters:
 
 
     def _clean(self):
-        to_clean = [
-            [
-            ],
-            [
-                self.bam,
-                self.db_fasta,
-                self.db_fasta + '.fai',
-            ],
-            [
-                self.db_fasta_clustered,
-                self.db_fasta_clustered + '.fai',
-                self.clusters_info_file,
-            ]
+        if self.clean == 0:
+            if self.verbose:
+                print('   ... not deleting anything because --clean 0 used')
+            return
+
+        to_delete= [
+            self.bam,
+            self.cdhit_cluster_representatives_fa,
+            self.cdhit_cluster_representatives_fa + '.fai',
+            self.cdhit_files_prefix + '.non_coding.cdhit',
+            self.cdhit_files_prefix + '.presence_absence.cdhit',
+            self.cdhit_files_prefix + '.variants_only.cdhit',
         ]
 
-        for i in range(self.clean + 1):
-            for fname in to_clean[i]:
-                if os.path.exists(fname):
-                    if self.verbose:
-                        print('  rm', fname)
-                    os.unlink(fname)
-
-        if self.clean >= 2:
+        if self.clean == 2:
             if self.verbose:
-                print('  rm -r', self.clusters_outdir)
+                print('    rm -r', self.clusters_outdir)
                 shutil.rmtree(self.clusters_outdir)
+
+            to_delete.extend([
+                self.cdhit_files_prefix + '.clusters.tsv',
+                self.refdata_files_prefix + '.00.check_fasta_presence_absence.log',
+                self.refdata_files_prefix + '.00.check_fasta_variants_only.log',
+                self.refdata_files_prefix + '.01.check_variants.log',
+                self.refdata_files_prefix + '.01.check_variants.non_coding.fa',
+                self.refdata_files_prefix + '.01.check_variants.presence_absence.fa',
+                self.refdata_files_prefix + '.01.check_variants.tsv',
+                self.refdata_files_prefix + '.01.check_variants.variants_only.fa',
+            ])
+
+        for filename in to_delete:
+            if os.path.exists(filename):
+                if self.verbose:
+                    print('    rm', filename)
+                try:
+                    os.unlink(filename)
+                except:
+                    raise Error('Error deleting file', filename)
 
 
     def run(self):
@@ -438,8 +449,8 @@ class Clusters:
         #self._write_catted_assembled_genes_fasta()
 
         if self.verbose:
-            print('Finished writing report files. Cleaning files', flush=True)
-        #self._clean()
+            print('Finished writing report files.\n\nCleaning files:', flush=True)
+        self._clean()
 
         if self.verbose:
             print('\nAll done!\n')
