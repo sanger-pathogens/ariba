@@ -13,7 +13,7 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 class TestClusters(unittest.TestCase):
     def setUp(self):
         self.cluster_dir = 'tmp.Cluster'
-        refdata = reference_data.ReferenceData(presence_absence_fa = os.path.join(data_dir, 'clusters_test_dummy_db.fa'))
+        refdata = reference_data.ReferenceData(non_coding_fa = os.path.join(data_dir, 'clusters_test_dummy_db.fa'))
         reads1 = os.path.join(data_dir, 'clusters_test_dummy_reads_1.fq')
         reads2 = os.path.join(data_dir, 'clusters_test_dummy_reads_2.fq')
         self.clusters = clusters.Clusters(refdata, reads1, reads2, self.cluster_dir)
