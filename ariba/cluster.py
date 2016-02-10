@@ -162,6 +162,7 @@ class Cluster:
               sspace_k=self.sspace_k,
               sspace_sd=self.sspace_sd,
               reads_insert=self.reads_insert,
+              samtools_exe=self.samtools_exe,
               spades_exe=self.spades_exe,
               sspace_exe=self.sspace_exe,
               gapfiller_exe=self.gapfiller_exe,
