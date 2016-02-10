@@ -68,6 +68,8 @@ def run_bowtie2(
         index_cmd = samtools + ' index ' + final_bam
         common.syscall(sort_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
         common.syscall(index_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
+        clean_files.append(intermediate_bam)
+
     for fname in clean_files:
         os.unlink(fname)
 
