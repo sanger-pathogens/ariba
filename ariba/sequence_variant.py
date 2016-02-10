@@ -35,7 +35,7 @@ class Variant:
         return self.position < other.position or \
             (self.position == other.position and self.variant_type < other.variant_type) or \
             (self.position == other.position and self.variant_type == other.variant_type and self.wild_value < other.wild_value) or \
-            (self.position == other.position and self.variant_type == other.variant_type and self.wild_value == other.wild_value and self,variant_value < other.variant_value)
+            (self.position == other.position and self.variant_type == other.variant_type and self.wild_value == other.wild_value and self.variant_value < other.variant_value)
 
 
     def __str__(self):
