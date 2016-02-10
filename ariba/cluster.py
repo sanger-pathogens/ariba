@@ -125,10 +125,15 @@ class Cluster:
         return count1 + count2
 
 
+    def _clean(self):
+        # FIXME
+        pass
+
     def run(self):
         self.logfile = os.path.join(self.root_dir, 'log.txt')
         self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
 
+        print('Choosing best reference sequence:', file=self.log_fh)
         seq_chooser = best_seq_chooser.BestSeqChooser(
             self.reads1,
             self.reads2,
@@ -145,6 +150,7 @@ class Cluster:
             self.status_flag.add('ref_seq_choose_fail')
             self.assembled_ok = False
         else:
+            print('\nAssembling reads:', file=self.log_fh)
             self.ref_sequence_type = self.refdata.sequence_type(self.ref_sequence.id)
             assert self.ref_sequence_type is not None
             self.assembly = assembly.Assembly(
@@ -172,7 +178,7 @@ class Cluster:
             self.assembled_ok = self.assembly.assembled_ok
 
         if self.assembled_ok:
-            print('\nAssembly was successful\n', file=self.log_fh)
+            print('\nAssembly was successful\n\nMapping reads to assembly:', file=self.log_fh)
 
             mapping.run_bowtie2(
                 self.reads1,
@@ -187,11 +193,15 @@ class Cluster:
                 verbose=True,
                 verbose_filehandle=self.log_fh
             )
+
+            print('\nMaking and checking scaffold graph', file=self.log_fh)
+
             bam_parser = bam_parse.Parser(self.final_assembly_bam, self.assembly.sequences)
             bam_parser.parse()
             if not bam_parser.scaff_graph_is_consistent(self.min_scaff_depth, self.max_insert):
                 self.status_flag.add('scaffold_graph_bad')
 
+            print('Comparing assembly against reference sequence', file=self.log_fh)
             self.assembly_compare = assembly_compare.AssemblyCompare(
               self.final_assembly_fa,
               self.assembly.sequences,
@@ -212,6 +222,8 @@ class Cluster:
             assembly_variants_obj = assembly_variants.AssemblyVariants(self.refdata, self.assembly_compare.nucmer_snps_file)
             self.assembly_variants = assembly_variants_obj.get_variants(self.ref_sequence.id, nucmer_hits_to_ref)
 
+            print('\nCalling variants with samtools:', file=self.log_fh)
+
             self.samtools_vars = samtools_variants.SamtoolsVariants(
                 self.final_assembly_fa,
                 self.final_assembly_bam,
@@ -231,8 +243,11 @@ class Cluster:
             print('\nAssembly failed\n', file=self.log_fh)
             self.status_flag.add('assembly_fail')
 
+        print('\nMaking report lines', file=self.log_fh)
         self.report_lines = report.report_lines(self)
-        #self._clean()
+        print('Cleaning with clean option', self.clean, file=self.log_fh)
+        self._clean()
+        print('Finished', file=self.log_fh)
         pyfastaq.utils.close(self.log_fh)
 
         # This stops multiprocessing complaining with the error:
