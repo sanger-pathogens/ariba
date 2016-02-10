@@ -10,6 +10,7 @@ setup(
     version='0.6.0',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
+    package_data={'ariba': ['test_run_data/*']},
     author='Martin Hunt',
     author_email='path-help@sanger.ac.uk',
     url='https://github.com/sanger-pathogens/ariba',

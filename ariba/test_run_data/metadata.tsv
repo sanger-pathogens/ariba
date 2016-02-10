@@ -1,0 +1,13 @@
+presence_absence1	.	.	Generic description of presence_absence1
+presence_absence1	p	R3S	Ref and assembly have wild type, so do not report
+presence_absence1	p	A10V	Ref has wild, reads have variant so report
+presence_absence1	p	I5A	Ref and reads have variant so report
+variants_only1	.	.	Generic description of variants_only1
+variants_only1	p	I3L	Ref and assembly have wild type, so do not report
+variants_only1	p	S5T	Ref and reads have variant so report
+variants_only2	p	P3I	Ref and reads have wild so do not report
+noncoding1	.	.	generic description of noncoding1
+noncoding1	n	A6G	variant in ref and reads so should report
+noncoding1	n	G9T	wild type in ref and reads so should not report
+noncoding1	n	A14T	ref has wild type, reads have variant so should report
+noncoding1	n	A40C	ref has variant, reads have wild type so should not report

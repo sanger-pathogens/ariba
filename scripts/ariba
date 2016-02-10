@@ -10,6 +10,7 @@ tasks = {
     'run': 'Run the ARIBA local assembly pipeline',
     'summary': 'Summarise multiple reports made by "run"',
     'flag': 'Translate the meaning of a flag output by the pipeline',
+    'test': 'Run on small test dataset',
     'version': 'Print version and exit',
 }
 
@@ -20,6 +21,7 @@ ordered_tasks = [
     'run',
     'summary',
     'flag',
+    'test',
     'version',
 ]
 
