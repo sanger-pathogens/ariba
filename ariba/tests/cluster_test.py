@@ -116,7 +116,7 @@ class TestCluster(unittest.TestCase):
             'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tF\t.\tn\tSNP\tG61T\t120\t120\tT\t.\t24\t24\t.\tgeneric description of noncoding1',
             'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tF\t.\tn\tINS\t.82C\t142\t142\tC\t.\t23\t23\t.\tgeneric description of noncoding1',
             'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tF\t.\tn\tDEL\tT108.\t167\t167\tC\t.\t17\t17\t.\tgeneric description of noncoding1',
-            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tT\tSNP\tn\t.\t.\t.\t.\t.\t.\t.\t.\tnoncoding1_n_A6G_variant in ref and reads so should report\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t19\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\tT\tSNP\tn\t.\t.\t66\t66\tG\t.\t19\t19\tnoncoding1_n_A6G_variant in ref and reads so should report\tgeneric description of noncoding1',
         ]
 
         self.assertEqual(expected, c.report_lines)
@@ -139,7 +139,9 @@ class TestCluster(unittest.TestCase):
         expected = [
             'presence_absence1\tpresence_absence\t27\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\tT\tSNP\tp\tNONSYN\tA10V\t83\t83\tT\t.\t22\t22\tpresence_absence1_p_A10V_Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
             'presence_absence1\tpresence_absence\t27\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\tF\t.\tp\tSYN\t.\t108\t108\tC\t.\t32\t32\t.\tGeneric description of presence_absence1',
-            'presence_absence1\tpresence_absence\t27\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\tT\tSNP\tp\t.\t.\t.\t.\t.\t.\t.\t.\tpresence_absence1_p_I5A_Ref and reads have variant so report\tGeneric description of presence_absence1'
+            'presence_absence1\tpresence_absence\t27\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\tT\tSNP\tp\t.\t.\t68\t68\tG\t.\t18\t18\tpresence_absence1_p_I5A_Ref and reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence\t27\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\tT\tSNP\tp\t.\t.\t69\t69\tC\t.\t20\t20\tpresence_absence1_p_I5A_Ref and reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence\t27\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\tT\tSNP\tp\t.\t.\t70\t70\tG\t.\t20\t20\tpresence_absence1_p_I5A_Ref and reads have variant so report\tGeneric description of presence_absence1',
         ]
 
         self.assertEqual(expected, c.report_lines)
@@ -176,7 +178,9 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\tT\tSNP\tp\t.\t.\t.\t.\t.\t.\t.\t.\tvariants_only1_p_I5A_Ref and reads have variant so report\tGeneric description of variants_only1'
+            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\tT\tSNP\tp\t.\t.\t71\t71\tG\t.\t17\t17\tvariants_only1_p_I5A_Ref and reads have variant so report\tGeneric description of variants_only1',
+            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\tT\tSNP\tp\t.\t.\t72\t72\tC\t.\t17\t17\tvariants_only1_p_I5A_Ref and reads have variant so report\tGeneric description of variants_only1',
+            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\tT\tSNP\tp\t.\t.\t73\t73\tG\t.\t17\t17\tvariants_only1_p_I5A_Ref and reads have variant so report\tGeneric description of variants_only1',
         ]
 
         self.assertEqual(expected, c.report_lines)

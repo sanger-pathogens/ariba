@@ -1,3 +1,5 @@
+import pymummer
+
 columns = [
     'ref_name',              # 0 name of reference sequence
     'ref_type',              # 1 type of reference sequence (presence/absence, variants only, noncoding)
@@ -33,7 +35,32 @@ def header_line():
     return '\t'.join(columns)
 
 
-def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig):
+def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster, variant_list):
+    '''Input is a known variants, as sequence_metadata object. The
+       assumption is that both the reference and the assembly have the
+       variant type, not wild type. The list variant_list should be a list
+       of pymummer.variant.Variant objects, only contaning variants to the
+       relevant query contig'''
+    nuc_range = sequence_meta.variant.nucleotide_range()
+
+    if nuc_range is None:
+        return None
+
+    depths = []
+
+    for ref_position in range(nuc_range[0], nuc_range[1]+1, 1):
+        nucmer_match = cluster.assembly_compare.nucmer_hit_containing_reference_position(cluster.assembly_compare.nucmer_hits, cluster.ref_sequence.id, ref_position)
+
+        if nucmer_match is not None:
+            # work out contig position. Needs indels variants to correct the position
+            contig_position, in_indel = nucmer_match.qry_coords_from_ref_coord(ref_position, variant_list)
+            ref, alt, total_depth, alt_depths = cluster.samtools_vars.get_depths_at_position(contig_name, contig_position)
+            depths.append([str(x) for x in (contig_position + 1, contig_position + 1, ref, alt, total_depth, alt_depths)])
+
+    return depths
+
+
+def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymummer_variants):
     if cluster.ref_sequence_type == 'variants_only' and len(cluster.assembly_variants) == 0:
         return []
 
@@ -79,11 +106,20 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig):
                 matching_vars_column = '.'
 
             if contributing_vars is None:
-                lines.append('\t'.join(
-                    common_first_columns + more_common_columns + var_columns + \
-                    ['.'] * (len(columns) - len(common_first_columns) - len(more_common_columns) - len(var_columns) - 2) + \
-                    [matching_vars_column] + free_text_columns
-                ))
+                if len(matching_vars_set) > 0:
+                    for matching_var in matching_vars_set:
+                        depths_list = _samtools_depths_at_known_snps_all_wild(matching_var, contig_name, cluster, pymummer_variants)
+                        if depths_list is None:
+                            depths_list = [['.'] * 6]
+
+                        for depths in depths_list:
+                            lines.append('\t'.join(common_first_columns + more_common_columns + var_columns + depths + [matching_vars_column] + free_text_columns))
+                else:
+                    lines.append('\t'.join(
+                        common_first_columns + more_common_columns + var_columns + \
+                        ['.'] * (len(columns) - len(common_first_columns) - len(more_common_columns) - len(var_columns) - 2) + \
+                        [matching_vars_column] + free_text_columns
+                    ))
             else:
                 for var in contributing_vars:
                     ref, alt, total_depth, alt_depths = cluster.samtools_vars.get_depths_at_position(contig_name, var.qry_start)
@@ -107,9 +143,11 @@ def report_lines(cluster):
 
     ref_cov_per_contig = cluster.assembly_compare.ref_cov_per_contig(cluster.assembly_compare.nucmer_hits)
     lines = []
+    pymummer_variants = pymummer.snp_file.get_all_variants(cluster.assembly_compare.nucmer_snps_file)
 
     for contig_name in sorted(cluster.assembly.sequences):
-        lines.extend(_report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig))
+        contig_pymummer_variants = [x for x in pymummer_variants if x.qry_name == contig_name]
+        lines.extend(_report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, contig_pymummer_variants))
 
     return lines if len(lines) > 0 else None
 
