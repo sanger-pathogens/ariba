@@ -59,7 +59,6 @@ class TestMapping(unittest.TestCase):
         self.assertListEqual(expected, got)
         os.unlink(out_prefix + '.bam')
         os.unlink(out_prefix + '.bam.bai')
-        os.unlink(out_prefix + '.unsorted.bam')
 
 
     #def test_run_smalt(self):
