@@ -1,5 +1,7 @@
 var_only_gene	n	A8T	N	ref has wild type A should get ignored
 var_only_gene	n	G9C	N	ref has variant C instead of G
+var_only_gene	p	G4I	N	ref has wild type F
+var_only_gene	p	F6I	Y	ref has wild type F
 var_only_gene	p	P3Q	N	ref has wild type P should get ignored
 var_only_gene	p	I5V	N	ref has variant V instead of I
 presence_absence_gene	n	A4G	N	ref has wild type A should get ignored
