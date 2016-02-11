@@ -15,6 +15,7 @@ class Runner:
       threads=1,
       length_diff_cutoff=0.9,
       verbose=False,
+      cd_hit_est='cd-hit-est',
     ):
 
         if not os.path.exists(infile):
@@ -26,6 +27,7 @@ class Runner:
         self.threads = threads
         self.length_diff_cutoff = length_diff_cutoff
         self.verbose = verbose
+        self.cd_hit_est = cd_hit_est
 
 
     def fake_run(self):
@@ -88,7 +90,7 @@ class Runner:
         cluster_info_outfile = cdhit_fasta + '.bak.clstr'
 
         cmd = ' '.join([
-            'cd-hit-est',
+            self.cd_hit_est,
             '-i', self.infile,
             '-o', cdhit_fasta,
             '-c', str(self.seq_identity_threshold),

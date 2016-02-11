@@ -45,22 +45,12 @@ def run():
     other_group.add_argument('--clean', type=int, choices=[0,1,2], help='Specify how much cleaning to do. 0=none, 1=some, 2=only keep the report [%(default)s]', default=1, metavar='INT')
     other_group.add_argument('--verbose', action='store_true', help='Be verbose')
 
-    executables_group = parser.add_argument_group('executables locations')
-    executables_group.add_argument('--bcftools', help='bcftools executable [bcftools]', metavar='PATH')
-    executables_group.add_argument('--bowtie2', help='bowtie2 executable [bowtie2]', metavar='PATH')
-    executables_group.add_argument('--cdhit', help=argparse.SUPPRESS)
-    executables_group.add_argument('--gapfiller', help='GapFiller executable [GapFiller.pl]', metavar='PATH')
-    executables_group.add_argument('--nucmer', help=argparse.SUPPRESS, default='nucmer')
-    executables_group.add_argument('--samtools', help='samtools executable [samtools]', metavar='PATH')
-    executables_group.add_argument('--spades', help='SPAdes executable [spades.py]',  metavar='PATH')
-    executables_group.add_argument('--sspace', help='SSPACE executable [SSPACE_Basic_v2.0.pl]', metavar='PATH')
-
     options = parser.parse_args()
 
     if {None} == {options.presabs, options.varonly, options.noncoding}:
         print('Error! Must use at least one of the options: --presabs --varonly --noncoding. Cannot continue', file=sys.stderr)
 
-    ariba.external_progs.check_versions(options, verbose=options.verbose, not_required=set(['sspace', 'gapfiller']))
+    extern_progs = ariba.external_progs.ExternalProgs(verbose=options.verbose)
     pyfastaq.sequences.genetic_code = options.genetic_code
 
     if options.verbose:
@@ -80,6 +70,7 @@ def run():
           options.reads_1,
           options.reads_2,
           options.outdir,
+          extern_progs,
           assembly_kmer=options.assembler_k,
           assembler='spades',
           threads=options.threads,
@@ -91,13 +82,7 @@ def run():
           spades_other=options.spades_other,
           assembled_threshold=options.assembled_threshold,
           unique_threshold=options.unique_threshold,
-          bcftools_exe=options.bcftools,
-          gapfiller_exe=options.gapfiller,
-          samtools_exe=options.samtools,
-          bowtie2_exe=options.bowtie2,
           bowtie2_preset=options.bowtie2_preset,
-          spades_exe=options.spades,
-          sspace_exe=options.sspace,
           cdhit_seq_identity_threshold=options.cdhit_seq_identity_threshold,
           cdhit_length_diff_cutoff=options.cdhit_length_diff_cutoff,
           clean=options.clean,

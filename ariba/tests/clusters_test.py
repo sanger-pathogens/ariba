@@ -4,10 +4,11 @@ import os
 import pysam
 import pyfastaq
 import filecmp
-from ariba import clusters, reference_data
+from ariba import clusters, external_progs, reference_data
 
 modules_dir = os.path.dirname(os.path.abspath(clusters.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
+extern_progs = external_progs.ExternalProgs()
 
 
 class TestClusters(unittest.TestCase):
@@ -16,7 +17,7 @@ class TestClusters(unittest.TestCase):
         refdata = reference_data.ReferenceData(non_coding_fa = os.path.join(data_dir, 'clusters_test_dummy_db.fa'))
         reads1 = os.path.join(data_dir, 'clusters_test_dummy_reads_1.fq')
         reads2 = os.path.join(data_dir, 'clusters_test_dummy_reads_2.fq')
-        self.clusters = clusters.Clusters(refdata, reads1, reads2, self.cluster_dir)
+        self.clusters = clusters.Clusters(refdata, reads1, reads2, self.cluster_dir, extern_progs)
 
 
     def tearDown(self):
@@ -69,7 +70,7 @@ class TestClusters(unittest.TestCase):
         reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_2.fq')
         ref = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.db.fa')
         refdata = reference_data.ReferenceData(presence_absence_fa = ref)
-        c = clusters.Clusters(refdata, reads1, reads2, clusters_dir)
+        c = clusters.Clusters(refdata, reads1, reads2, clusters_dir, extern_progs)
         shutil.copyfile(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.bam'), c.bam)
         c._bam_to_clusters_reads()
         expected = [

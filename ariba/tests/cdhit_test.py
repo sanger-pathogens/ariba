@@ -1,10 +1,11 @@
 import unittest
 import os
 import filecmp
-from ariba import cdhit
+from ariba import cdhit, external_progs
 
 modules_dir = os.path.dirname(os.path.abspath(cdhit.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
+extern_progs = external_progs.ExternalProgs()
 
 class TestCdhit(unittest.TestCase):
     def test_init_fail_infile_missing(self):
@@ -17,7 +18,7 @@ class TestCdhit(unittest.TestCase):
         '''test _get_ids'''
         infile = os.path.join(data_dir, 'cdhit_test_get_ids.fa')
         expected = {'id1', 'id2', 'id3'}
-        r = cdhit.Runner(infile, 'out')
+        r = cdhit.Runner(infile, 'out', cd_hit_est=extern_progs.exe('cdhit'))
         got = r._get_ids(infile)
         self.assertEqual(expected, got)
 
@@ -39,7 +40,7 @@ class TestCdhit(unittest.TestCase):
         infile = os.path.join(data_dir, 'cdhit_test_run.in.fa')
         expected_outfile = os.path.join(data_dir, 'cdhit_test_run.out.fa')
         tmpfile = 'tmp.cdhit_test_run.out.fa'
-        r = cdhit.Runner(infile, tmpfile)
+        r = cdhit.Runner(infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
         clusters = r.run()
         expected_clusters = {
             'seq1': {'seq1', 'seq2', 'seq3'},
@@ -55,7 +56,7 @@ class TestCdhit(unittest.TestCase):
         infile = os.path.join(data_dir, 'cdhit_test_fake_run.in.fa')
         expected_outfile = os.path.join(data_dir, 'cdhit_test_fake_run.out.fa')
         tmpfile = 'tmp.cdhit_test_fake_run.out.fa'
-        r = cdhit.Runner(infile, tmpfile)
+        r = cdhit.Runner(infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
         clusters = r.fake_run()
         expected_clusters = {
             'seq1': {'seq1'},
@@ -72,7 +73,7 @@ class TestCdhit(unittest.TestCase):
         '''test fake_run with non-unique names'''
         infile = os.path.join(data_dir, 'cdhit_test_fake_run.non-unique.in.fa')
         tmpfile = 'tmp.cdhit_test_fake_run.out.non-unique.fa'
-        r = cdhit.Runner(infile, tmpfile)
+        r = cdhit.Runner(infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
         with self.assertRaises(cdhit.Error):
             clusters = r.fake_run()
         os.unlink(tmpfile)

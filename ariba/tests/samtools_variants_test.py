@@ -2,10 +2,11 @@ import unittest
 import os
 import pyfastaq
 import pymummer
-from ariba import samtools_variants
+from ariba import samtools_variants, external_progs
 
 modules_dir = os.path.dirname(os.path.abspath(samtools_variants.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
+extern_progs = external_progs.ExternalProgs()
 
 
 def file2lines(filename):
@@ -23,7 +24,13 @@ class TestSamtoolsVariants(unittest.TestCase):
         expected_vcf = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.expected.vcf')
         expected_depths = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.expected.read_depths.gz')
         tmp_prefix = 'tmp.test_make_vcf_and_read_depths_files'
-        sv = samtools_variants.SamtoolsVariants(ref, bam, tmp_prefix)
+        sv = samtools_variants.SamtoolsVariants(
+            ref,
+            bam,
+            tmp_prefix,
+            samtools_exe=extern_progs.exe('samtools'),
+            bcftools_exe=extern_progs.exe('bcftools')
+        )
         sv._make_vcf_and_read_depths_files()
 
         def get_vcf_call_lines(fname):
@@ -113,7 +120,13 @@ class TestSamtoolsVariants(unittest.TestCase):
         bam = os.path.join(data_dir, 'samtools_variants_test_get_depths_at_position.bam')
         ref_fa = os.path.join(data_dir, 'samtools_variants_test_get_depths_at_position.ref.fa')
         tmp_prefix = 'tmp.test_get_depths_at_position'
-        samtools_vars = samtools_variants.SamtoolsVariants(ref_fa, bam, tmp_prefix)
+        samtools_vars = samtools_variants.SamtoolsVariants(
+            ref_fa,
+            bam,
+            tmp_prefix,
+            samtools_exe=extern_progs.exe('samtools'),
+            bcftools_exe=extern_progs.exe('bcftools')
+        )
         samtools_vars.run()
         tests = [
             (('ref', 425), ('C', 'T', 31, '18,13')),

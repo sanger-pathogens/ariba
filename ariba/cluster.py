@@ -2,7 +2,7 @@ import os
 import shutil
 import sys
 import pyfastaq
-from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, flag, mapping, report, samtools_variants
+from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, external_progs, flag, mapping, report, samtools_variants
 
 class Error (Exception): pass
 
@@ -30,15 +30,10 @@ class Cluster:
       bcf_min_qual=20,
       assembled_threshold=0.95,
       unique_threshold=0.03,
-      bcftools_exe='bcftools',
-      gapfiller_exe='GapFiller.pl',
-      samtools_exe='samtools',
-      bowtie2_exe='bowtie2',
       bowtie2_preset='very-sensitive-local',
-      spades_exe='spades.py',
-      sspace_exe='SSPACE_Basic_v2.0.pl',
       spades_other_options=None,
       clean=1,
+      extern_progs=None,
     ):
 
         self.root_dir = os.path.abspath(root_dir)
@@ -52,10 +47,7 @@ class Cluster:
         self.sspace_k = sspace_k
         self.sspace_sd = sspace_sd
         self.reads_insert = reads_insert
-        self.spades_exe = spades_exe
-        self.sspace_exe = sspace_exe
         self.spades_other_options = spades_other_options
-        self.gapfiller_exe = gapfiller_exe
 
         self.reads1 = os.path.join(self.root_dir, 'reads_1.fq')
         self.reads2 = os.path.join(self.root_dir, 'reads_2.fq')
@@ -82,9 +74,6 @@ class Cluster:
         self.bcf_min_dv_over_dp = bcf_min_dv_over_dp
         self.bcf_min_qual = bcf_min_qual
 
-        self.bcftools_exe = bcftools_exe
-        self.samtools_exe = samtools_exe
-        self.bowtie2_exe = bowtie2_exe
         self.bowtie2_preset = bowtie2_preset
 
         self.threads = threads
@@ -116,6 +105,11 @@ class Cluster:
         # Hence the following two lines...
         if unittest:
             self.log_fh = sys.stdout
+
+        if extern_progs is None:
+            self.extern_progs = external_progs.ExternalProgs()
+        else:
+            self.extern_progs = extern_progs
 
 
     @staticmethod
@@ -171,8 +165,8 @@ class Cluster:
             self.reads2,
             self.references_fa,
             self.log_fh,
-            samtools_exe=self.samtools_exe,
-            bowtie2_exe=self.bowtie2_exe,
+            samtools_exe=self.extern_progs.exe('samtools'),
+            bowtie2_exe=self.extern_progs.exe('bowtie2'),
             bowtie2_preset=self.bowtie2_preset,
             threads=1,
         )
@@ -200,10 +194,7 @@ class Cluster:
               sspace_k=self.sspace_k,
               sspace_sd=self.sspace_sd,
               reads_insert=self.reads_insert,
-              samtools_exe=self.samtools_exe,
-              spades_exe=self.spades_exe,
-              sspace_exe=self.sspace_exe,
-              gapfiller_exe=self.gapfiller_exe,
+              extern_progs=self.extern_progs
             )
 
             self.assembly.run()
@@ -219,8 +210,8 @@ class Cluster:
                 self.final_assembly_bam[:-4],
                 threads=1,
                 sort=True,
-                samtools=self.samtools_exe,
-                bowtie2=self.bowtie2_exe,
+                samtools=self.extern_progs.exe('samtools'),
+                bowtie2=self.extern_progs.exe('bowtie2'),
                 bowtie2_preset=self.bowtie2_preset,
                 verbose=True,
                 verbose_filehandle=self.log_fh
@@ -261,8 +252,8 @@ class Cluster:
                 self.final_assembly_bam,
                 self.samtools_vars_prefix,
                 log_fh=self.log_fh,
-                samtools_exe=self.samtools_exe,
-                bcftools_exe=self.bcftools_exe,
+                samtools_exe=self.extern_progs.exe('samtools'),
+                bcftools_exe=self.extern_progs.exe('bcftools'),
                 bcf_min_dp=self.bcf_min_dp,
                 bcf_min_dv=self.bcf_min_dv,
                 bcf_min_dv_over_dp=self.bcf_min_dv_over_dp,

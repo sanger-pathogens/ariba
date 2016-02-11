@@ -27,6 +27,7 @@ class Clusters:
       reads_1,
       reads_2,
       outdir,
+      extern_progs,
       assembly_kmer=21,
       threads=1,
       verbose=False,
@@ -39,14 +40,7 @@ class Clusters:
       nucmer_breaklen=50,
       assembled_threshold=0.95,
       unique_threshold=0.03,
-      bcftools_exe='bcftools',
-      gapfiller_exe='GapFiller.pl',
-      samtools_exe='samtools',
-      bowtie2_exe='bowtie2',
       bowtie2_preset='very-sensitive-local',
-      spades_exe='spades.py',
-      sspace_exe='SSPACE_Basic_v2.0.pl',
-      velvet_exe='velvet', # prefix of velvet{g,h}
       cdhit_seq_identity_threshold=0.9,
       cdhit_length_diff_cutoff=0.9,
       run_cd_hit=True,
@@ -56,6 +50,7 @@ class Clusters:
         self.reads_1 = os.path.abspath(reads_1)
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
+        self.extern_progs = extern_progs
         self.clusters_outdir = os.path.join(self.outdir, 'Clusters')
         self.clean = clean
 
@@ -77,7 +72,6 @@ class Clusters:
         self.verbose = verbose
 
         self.max_insert = max_insert
-        self.bowtie2_exe = bowtie2_exe
         self.bowtie2_preset = bowtie2_preset
 
         self.insert_hist_bin = 10
@@ -96,25 +90,6 @@ class Clusters:
 
         self.cluster_to_dir = {}  # gene name -> abs path of cluster directory
         self.clusters = {}        # gene name -> Cluster object
-
-        self.bcftools_exe = bcftools_exe
-
-        self.sspace_exe = shutil.which(sspace_exe)
-        if self.sspace_exe is None:
-            print('WARNING: SSPACE not found. Scaffolding and gap filling will be skipped!', file=sys.stderr)
-            self.gapfiller_exe = None
-        else:
-            self.sspace_exe = os.path.realpath(self.sspace_exe) # otherwise sspace dies loading packages
-            self.gapfiller_exe = shutil.which(gapfiller_exe)
-            if self.gapfiller_exe is None:
-                print('WARNING: GapFiller not found. No gap filling will be run after scaffolding!', file=sys.stderr)
-            else:
-                self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
-
-        self.samtools_exe = samtools_exe
-        self.spades_exe = spades_exe
-
-        self.velvet = velvet_exe
 
         self.cdhit_seq_identity_threshold = cdhit_seq_identity_threshold
         self.cdhit_length_diff_cutoff = cdhit_length_diff_cutoff
@@ -150,8 +125,8 @@ class Clusters:
             self.cdhit_cluster_representatives_fa,
             self.bam_prefix,
             threads=self.threads,
-            samtools=self.samtools_exe,
-            bowtie2=self.bowtie2_exe,
+            samtools=self.extern_progs.exe('samtools'),
+            bowtie2=self.extern_progs.exe('bowtie2'),
             bowtie2_preset=self.bowtie2_preset,
             verbose=self.verbose,
         )
@@ -310,15 +285,10 @@ class Clusters:
                     bcf_min_qual=20,          # let the user change this in a future version?
                     assembled_threshold=self.assembled_threshold,
                     unique_threshold=self.unique_threshold,
-                    bcftools_exe=self.bcftools_exe,
-                    gapfiller_exe=self.gapfiller_exe,
-                    samtools_exe=self.samtools_exe,
-                    bowtie2_exe=self.bowtie2_exe,
                     bowtie2_preset=self.bowtie2_preset,
-                    spades_exe=self.spades_exe,
-                    sspace_exe=self.sspace_exe,
                     spades_other_options=self.spades_other,
                     clean=self.clean,
+                    extern_progs=self.extern_progs,
                 ))
 
 

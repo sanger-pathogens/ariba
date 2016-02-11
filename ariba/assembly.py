@@ -2,7 +2,7 @@ import os
 import shutil
 import pyfastaq
 import pymummer
-from ariba import common, mapping, bam_parse
+from ariba import common, mapping, bam_parse, external_progs
 
 class Error (Exception): pass
 
@@ -18,7 +18,6 @@ class Assembly:
       scaff_name_prefix='scaffold',
       kmer=0,
       assembler='spades',
-      bowtie2_exe='bowtie2',
       bowtie2_preset='very-sensitive-local',
       max_insert=1000,
       min_scaff_depth=10,
@@ -29,10 +28,7 @@ class Assembly:
       sspace_k=20,
       sspace_sd=0.4,
       reads_insert=500,
-      samtools_exe='samtools',
-      spades_exe='spades.py',
-      sspace_exe='SSPACE_Basic_v2.0.pl',
-      gapfiller_exe='GapFiller.pl',
+      extern_progs=None,
     ):
         self.reads1 = os.path.abspath(reads1)
         self.reads2 = os.path.abspath(reads2)
@@ -45,7 +41,6 @@ class Assembly:
 
         self.assembly_kmer = self._get_assembly_kmer(kmer, reads1, reads2)
         self.assembler = assembler
-        self.bowtie2_exe = bowtie2_exe
         self.bowtie2_preset = bowtie2_preset
         self.max_insert = max_insert
         self.min_scaff_depth = min_scaff_depth
@@ -56,31 +51,23 @@ class Assembly:
         self.sspace_k = sspace_k
         self.sspace_sd = sspace_sd
         self.reads_insert = reads_insert
-        self.samtools_exe = samtools_exe
-        self.spades_exe = spades_exe
+
+        if extern_progs is None:
+            self.extern_progs = external_progs.ExternalProgs()
+        else:
+            self.extern_progs = extern_progs
 
         try:
             os.mkdir(self.working_dir)
         except:
             raise Error('Error mkdir ' + self.working_dir)
 
-        self.sspace_exe = shutil.which(sspace_exe)
-        if self.sspace_exe is None:
-            self.gapfiller_exe = None
-        else:
-            self.sspace_exe = os.path.realpath(self.sspace_exe) # otherwise sspace dies loading packages
-            self.gapfiller_exe = shutil.which(gapfiller_exe)
-            if self.gapfiller_exe is not None:
-                self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
-
-        #self.assembly_dir = os.path.join(self.working_dir, 'Assembly')
         self.assembler_dir = os.path.join(self.working_dir, 'Assemble')
         self.assembly_contigs = os.path.join(self.working_dir, 'contigs.fa')
         self.scaffold_dir = os.path.join(self.working_dir, 'Scaffold')
         self.scaffolder_scaffolds = os.path.join(self.working_dir, 'scaffolds.fa')
         self.gapfill_dir = os.path.join(self.working_dir, 'Gapfill')
         self.gapfilled_scaffolds = os.path.join(self.working_dir, 'scaffolds.gapfilled.fa')
-        #self.final_assembly_fa = os.path.join(self.assembly_dir,
 
 
     @staticmethod
@@ -100,7 +87,7 @@ class Assembly:
 
     def _assemble_with_spades(self, unittest=False):
         cmd = ' '.join([
-            self.spades_exe,
+            self.extern_progs.exe('spades'),
             '-1', self.reads1,
             '-2', self.reads2,
             '-o', self.assembler_dir,
@@ -145,7 +132,7 @@ class Assembly:
 
         cwd = os.getcwd()
 
-        if self.sspace_exe is None:
+        if self.extern_progs.exe('sspace') is None:
             os.chdir(self.assembly_dir)
             os.symlink(os.path.basename(self.assembly_contigs), os.path.basename(self.scaffolder_scaffolds))
             os.chdir(cwd)
@@ -157,7 +144,7 @@ class Assembly:
             print('LIB', self.reads1, self.reads2, int(self.reads_insert), self.sspace_sd, 'FR', file=f)
 
         cmd = ' '.join([
-            'perl', self.sspace_exe,
+            'perl', self.extern_progs.exe('sspace'),
             '-k', str(self.sspace_k),
             '-l', lib_file,
             '-s', self.assembly_contigs
@@ -197,7 +184,7 @@ class Assembly:
 
         cwd = os.getcwd()
 
-        if self.gapfiller_exe is None or not self._has_gaps_to_fill(self.scaffolder_scaffolds):
+        if self.extern_progs.exe('gapfiller') is None or not self._has_gaps_to_fill(self.scaffolder_scaffolds):
             self._rename_scaffolds(self.scaffolder_scaffolds, self.gapfilled_scaffolds, self.scaff_name_prefix)
             return
 
@@ -212,7 +199,7 @@ class Assembly:
             print('LIB', 'bwa', self.reads1, self.reads2, self.reads_insert, self.sspace_sd, 'FR', file=f)
 
         cmd = ' '.join([
-            'perl', self.gapfiller_exe,
+            'perl', self.extern_progs.exe('gapfiller'),
             '-l', lib_file,
             '-s', self.scaffolder_scaffolds
         ])
@@ -302,8 +289,8 @@ class Assembly:
                 self.final_assembly_bam[:-4],
                 threads=1,
                 sort=True,
-                samtools=self.samtools_exe,
-                bowtie2=self.bowtie2_exe,
+                samtools=self.extern_progs.exe('samtools'),
+                bowtie2=self.extern_progs.exe('bowtie2'),
                 bowtie2_preset=self.bowtie2_preset,
                 verbose=True,
                 verbose_filehandle=self.log_fh
