@@ -30,10 +30,10 @@ class TestReferenceData(unittest.TestCase):
         '''Test init with good input'''
         tsv_file = os.path.join(data_dir, 'reference_data_init.tsv')
         presence_absence_fa = os.path.join(data_dir, 'reference_data_init_presence_absence.fa')
-        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\tfree text')
-        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tA42T\tfree text2')
-        meta3 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\tconfers killer rabbit resistance')
-        meta4 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\tremoves tardigrade's space-living capability")
+        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\tN\tfree text')
+        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tA42T\tN\tfree text2')
+        meta3 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\tN\tconfers killer rabbit resistance')
+        meta4 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\tY\tremoves tardigrade's space-living capability")
 
         expected_metadata = {
             'gene1': {
@@ -83,9 +83,9 @@ class TestReferenceData(unittest.TestCase):
 
     def test_load_metadata_tsv(self):
         '''Test _load_metadata_tsv'''
-        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\tfree text')
-        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\tconfers killer rabbit resistance')
-        meta3 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\tremoves tardigrade's space-living capability")
+        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\tN\tfree text')
+        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\tN\tconfers killer rabbit resistance')
+        meta3 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\tY\tremoves tardigrade's space-living capability")
         expected = {
             'gene1': {
                 'n': {12: {meta2}, 41: {meta1}},
@@ -280,11 +280,11 @@ class TestReferenceData(unittest.TestCase):
             metadata_tsv=tsv_file
         )
 
-        m1 = sequence_metadata.SequenceMetadata('var_only_gene\tn\tG9C\tref has variant C instead of G')
-        m2 = sequence_metadata.SequenceMetadata('var_only_gene\tp\tI5V\tref has variant V instead of I')
-        m3 = sequence_metadata.SequenceMetadata('presence_absence_gene\tn\tA6C\tref has variant C instead of A')
-        m4 = sequence_metadata.SequenceMetadata('presence_absence_gene\tp\tA4G\tref has variant G instead of A')
-        m5 = sequence_metadata.SequenceMetadata('non_coding\tn\tC4T\tref has variant T instead of C')
+        m1 = sequence_metadata.SequenceMetadata('var_only_gene\tn\tG9C\tN\tref has variant C instead of G')
+        m2 = sequence_metadata.SequenceMetadata('var_only_gene\tp\tI5V\tN\tref has variant V instead of I')
+        m3 = sequence_metadata.SequenceMetadata('presence_absence_gene\tn\tA6C\tN\tref has variant C instead of A')
+        m4 = sequence_metadata.SequenceMetadata('presence_absence_gene\tp\tA4G\tN\tref has variant G instead of A')
+        m5 = sequence_metadata.SequenceMetadata('non_coding\tn\tC4T\tN\tref has variant T instead of C')
 
         self.assertEqual({'n': {8: {m1}}, 'p': {4: {m2}}}, refdata.all_non_wild_type_variants('var_only_gene'))
         self.assertEqual({'n': {5: {m3}}, 'p': {3: {m4}}}, refdata.all_non_wild_type_variants('presence_absence_gene'))

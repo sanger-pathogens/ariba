@@ -1,10 +1,10 @@
-var_only_gene	n	A8T	ref has wild type A should get ignored
-var_only_gene	n	G9C	ref has variant C instead of G
-var_only_gene	p	P3Q	ref has wild type P should get ignored
-var_only_gene	p	I5V	ref has variant V instead of I
-presence_absence_gene	n	A4G	ref has wild type A should get ignored
-presence_absence_gene	n	A6C	ref has variant C instead of A
-presence_absence_gene	p	N2I	ref has wild tpye N should get ignored
-presence_absence_gene	p	A4G	ref has variant G instead of A
-non_coding	n	A2C	ref has wild type A should get ignored
-non_coding	n	C4T	ref has variant T instead of C
+var_only_gene	n	A8T	N	ref has wild type A should get ignored
+var_only_gene	n	G9C	N	ref has variant C instead of G
+var_only_gene	p	P3Q	N	ref has wild type P should get ignored
+var_only_gene	p	I5V	N	ref has variant V instead of I
+presence_absence_gene	n	A4G	N	ref has wild type A should get ignored
+presence_absence_gene	n	A6C	N	ref has variant C instead of A
+presence_absence_gene	p	N2I	N	ref has wild tpye N should get ignored
+presence_absence_gene	p	A4G	N	ref has variant G instead of A
+non_coding	n	A2C	N	ref has wild type A should get ignored
+non_coding	n	C4T	N	ref has variant T instead of C

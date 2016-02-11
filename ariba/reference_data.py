@@ -81,6 +81,7 @@ class ReferenceData:
                 metadata = sequence_metadata.SequenceMetadata(line)
             except:
                 print('Problem with this line of metadata, which will be ignored:', line.rstrip(), file=sys.stderr)
+                continue
 
             if metadata.name not in metadata_dict:
                 metadata_dict[metadata.name] = {'n': {}, 'p': {}, '.': set()}

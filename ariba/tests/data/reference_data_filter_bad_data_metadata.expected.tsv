@@ -1,7 +1,7 @@
-non_coding_1	.	.	should be in output because this field is here
-non_coding_1	n	C5A	dna variant ok
-presence_absence_1	.	.	should be in output because this field is here
-presence_absence_2	n	T4G	dna variant ok
-presence_absence_3	p	R3S	amino acid variant ok
-variants_only_1	p	S2T	amino acid variant ok
-variants_only_1	n	T4A	dna variant ok
+non_coding_1	.	.	N	should be in output because this field is here
+non_coding_1	n	C5A	N	dna variant ok
+presence_absence_1	.	.	N	should be in output because this field is here
+presence_absence_2	n	T4G	N	dna variant ok
+presence_absence_3	p	R3S	N	amino acid variant ok
+variants_only_1	p	S2T	N	amino acid variant ok
+variants_only_1	n	T4A	N	dna variant ok
