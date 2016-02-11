@@ -137,7 +137,7 @@ class RefGenesGetter:
                 if len(variants) == 0:
                     print('WARNING: No valid variants found for gene', gene)
                 for variant, description in variants:
-                    print(gene, 'p', variant, description, sep='\t', file=tsv_out_fh, flush=True)
+                    print(gene, 'p', variant, 'N', description, sep='\t', file=tsv_out_fh, flush=True)
 
             print(gene, file=got_genes_fh, flush=True)
             genes_done += 1
