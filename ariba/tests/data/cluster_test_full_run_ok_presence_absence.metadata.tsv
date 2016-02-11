@@ -1,4 +1,4 @@
-presence_absence1	.	.	Generic description of presence_absence1
-presence_absence1	p	R3S	Ref and assembly have wild type, so do not report
-presence_absence1	p	A10V	Ref has wild, reads have variant so report
-presence_absence1	p	I5A	Ref and reads have variant so report
+presence_absence1	.	.	N	Generic description of presence_absence1
+presence_absence1	p	R3S	N	Ref and assembly have wild type, so do not report
+presence_absence1	p	A10V	N	Ref has wild, reads have variant so report
+presence_absence1	p	I5A	N	Ref and reads have variant so report

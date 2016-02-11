@@ -1,5 +1,5 @@
-noncoding1	.	.	generic description of noncoding1
-noncoding1	n	A6G	variant in ref and reads so should report
-noncoding1	n	G9T	wild type in ref and reads so should not report
-noncoding1	n	A14T	ref has wild type, reads has variant so should report
-noncoding1	n	A40C	ref has variant, reads has wild type so should not report
+noncoding1	.	.	N	generic description of noncoding1
+noncoding1	n	A6G	N	variant in ref and reads so should report
+noncoding1	n	G9T	N	wild type in ref and reads so should not report
+noncoding1	n	A14T	N	ref has wild type, reads has variant so should report
+noncoding1	n	A40C	N	ref has variant, reads has wild type so should not report
