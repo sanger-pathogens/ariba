@@ -135,8 +135,9 @@ class Cluster:
             shutil.rmtree(self.root_dir)
             return
 
-        print('    rm -r', self.assembly_dir, file=self.log_fh)
-        shutil.rmtree(self.assembly_dir)
+        if os.path.exists(self.assembly_dir):
+            print('    rm -r', self.assembly_dir, file=self.log_fh)
+            shutil.rmtree(self.assembly_dir)
 
         to_delete = [
             self.reads1,
