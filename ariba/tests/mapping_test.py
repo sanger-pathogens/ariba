@@ -61,34 +61,6 @@ class TestMapping(unittest.TestCase):
         os.unlink(out_prefix + '.bam.bai')
 
 
-    #def test_run_smalt(self):
-    #    '''Test run_smalt unsorted'''
-    #    ref = os.path.join(data_dir, 'mapping_test_smalt_ref.fa')
-    #    reads1 = os.path.join(data_dir, 'mapping_test_smalt_reads_1.fq')
-    #    reads2 = os.path.join(data_dir, 'mapping_test_smalt_reads_2.fq')
-    #    out_prefix = 'tmp.out.smalt'
-    #    mapping.run_smalt(reads1, reads2, ref, out_prefix)
-    #    expected = get_sam_columns(os.path.join(data_dir, 'mapping_test_smalt_unsorted.bam'))
-    #    got = get_sam_columns(out_prefix + '.bam')
-    #    self.assertListEqual(expected, got)
-    #    os.unlink(out_prefix + '.bam')
-
-
-    #def test_run_smalt_and_sort(self):
-    #    '''Test run_smalt sorted'''
-    #    ref = os.path.join(data_dir, 'mapping_test_smalt_ref.fa')
-    #    reads1 = os.path.join(data_dir, 'mapping_test_smalt_reads_1.fq')
-    #    reads2 = os.path.join(data_dir, 'mapping_test_smalt_reads_2.fq')
-    #    out_prefix = 'tmp.out.smalt'
-    #    mapping.run_smalt(reads1, reads2, ref, out_prefix, sort=True)
-    #    expected = get_sam_columns(os.path.join(data_dir, 'mapping_test_smalt_sorted.bam'))
-    #    got = get_sam_columns(out_prefix + '.bam')
-    #    self.assertListEqual(expected, got)
-    #    os.unlink(out_prefix + '.bam')
-    #    os.unlink(out_prefix + '.bam.bai')
-    #    os.unlink(out_prefix + '.unsorted.bam')
-
-
     def test_get_total_alignment_score(self):
         '''Test get_total_alignment_score'''
         bam = os.path.join(data_dir, 'mapping_test_get_total_alignment_score.bam')
