@@ -5,7 +5,7 @@ presence_absence1	p	I5A	N	Ref and reads have variant so report
 variants_only1	.	.	N	Generic description of variants_only1
 variants_only1	p	I3L	N	Ref and assembly have wild type, so do not report
 variants_only1	p	S5T	N	Ref and reads have variant so report
-variants_only2	p	P3I	N	Ref and reads have wild so do not report
+variants_only2	p	R3I	N	Ref and reads have wild so do not report
 variants_only2	.	.	N	Generic description of variants_only2
 noncoding1	.	.	N	generic description of noncoding1
 noncoding1	n	A6G	N	variant in ref and reads so should report
