@@ -1,33 +1,29 @@
 import pymummer
 
 columns = [
-    'ref_name',              # 0 name of reference sequence
-    'ref_type',              # 1 type of reference sequence (presence/absence, variants only, noncoding)
-    'flag',                  # 2 cluster flag
-    'reads',                 # 3 number of reads in this cluster
-    'cluster',               # 4 cluster number
-    'ref_len',               # 5 length of reference sequence
-    'ref_base_assembled',    # 6 number of reference nucleotides assembled by this scaffold
-    'pc_ident',              # 7 %identity between ref sequence and scaffold
-    'scaffold',              # 8 name of scaffold matching reference
-    'scaff_len',             # 9 length of scaffold matching reference
+    'ref_name',              # 0  name of reference sequence
+    'ref_type',              # 1  type of reference sequence (presence/absence, variants only, noncoding)
+    'flag',                  # 2  cluster flag
+    'reads',                 # 3  number of reads in this cluster
+    'cluster',               # 4  cluster number
+    'ref_len',               # 5  length of reference sequence
+    'ref_base_assembled',    # 6  number of reference nucleotides assembled by this scaffold
+    'pc_ident',              # 7  %identity between ref sequence and scaffold
+    'scaffold',              # 8  name of scaffold matching reference
+    'scaff_len',             # 9  length of scaffold matching reference
     'known_var',             # 10 is this a known SNP from reference metadata? T|F
     'known_var_type',        # 11 if known_var=T, the type of variant. Currently only SNP supported
     'var_type',              # 12 n|p for nucleotide or protein
     'var_effect',            # 13 Effect of variant (SYN, NONSYN, FSHIFT... etc)
     'var_change',            # 14 amino acid or nucleotide change, eg I42L
-    #'assembled_aa',          # 15 amino acid in the assembly
-    #'var_start_ref',         # 16 start position of variant in reference
-    #'var_end_ref',           # 17 end position of variant in reference
-    #'var_ref',               # 18 nucletide or amin acid in reference at variant position
-    'var_start_scaff',       # 15,19 start position of variant in scaffold
-    'var_end_scaff',         # 16,20 end position of variant in scaffold
-    'var_scaff',             # 17,21 nucleotide in scaffold at variant position
-    'var_scaff_read_depth',  # 18,22 total read depth at variant start position in scaffold, reported by mpileup
-    'alt_scaff_bases',       # 19,23 alt bases on scaffold, reported by mpileup
-    'alt_scaff_depth',       # 20,24 alt depth on scaffold, reported by mpileup
-    'var_description',       # 21,25 description of variant from reference metdata
-    'free_text',             # 22,26 other free text about reference sequence, from reference metadata
+    'var_start_scaff',       # 15 start position of variant in scaffold
+    'var_end_scaff',         # 16 end position of variant in scaffold
+    'var_scaff',             # 17 nucleotide in scaffold at variant position
+    'var_scaff_read_depth',  # 18 total read depth at variant start position in scaffold, reported by mpileup
+    'alt_scaff_bases',       # 19 alt bases on scaffold, reported by mpileup
+    'alt_scaff_depth',       # 20 alt depth on scaffold, reported by mpileup
+    'var_description',       # 21 description of variant from reference metdata
+    'free_text',             # 22 other free text about reference sequence, from reference metadata
 ]
 
 

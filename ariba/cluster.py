@@ -67,7 +67,6 @@ class Cluster:
         self.nucmer_min_id = nucmer_min_id
         self.nucmer_min_len = nucmer_min_len
         self.nucmer_breaklen = nucmer_breaklen
-        #self.assembly_vs_gene_coords = os.path.join(self.root_dir, 'assembly_vs_gene.coords')
 
         self.bcf_min_dp = bcf_min_dp
         self.bcf_min_dv = bcf_min_dv
@@ -80,7 +79,6 @@ class Cluster:
         self.assembled_threshold = assembled_threshold
         self.unique_threshold = unique_threshold
         self.status_flag = flag.Flag()
-        #self.flag_file = os.path.join(self.root_dir, 'flag')
         self.clean = clean
 
         self.assembly_dir = os.path.join(self.root_dir, 'Assembly')

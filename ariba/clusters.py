@@ -101,10 +101,6 @@ class Clusters:
             except:
                 raise Error('Error mkdir ' + d)
 
-        #self.db_fasta = os.path.join(self.outdir, 'input_genes.not_clustered.fa')
-        #self.refdata.make_catted_fasta(self.db_fasta)
-        #common.syscall(self.samtools_exe + ' faidx ' + self.db_fasta)
-
 
     def _run_cdhit(self):
         self.cluster_ids = self.refdata.cluster_with_cdhit(
@@ -255,14 +251,6 @@ class Clusters:
                     print('Constructing cluster', seq_name + '.', counter, 'of', str(len(self.cluster_to_dir)))
                 new_dir = self.cluster_to_dir[seq_name]
                 self.refdata.write_seqs_to_fasta(os.path.join(new_dir, 'references.fa'), self.cluster_ids[seq_type][seq_name])
-
-                #faidx.write_fa_subset(
-                #    self.cluster_ids[gene],
-                #    self.db_fasta,
-                #    os.path.join(new_dir, 'genes.fa'),
-                #    samtools_exe=self.samtools_exe,
-                #    verbose=self.verbose
-                #)
 
                 cluster_list.append(cluster.Cluster(
                     new_dir,
