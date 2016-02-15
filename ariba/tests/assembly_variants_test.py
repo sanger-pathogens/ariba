@@ -296,6 +296,7 @@ class TestAssemblyVariants(unittest.TestCase):
         meta2 = sequence_metadata.SequenceMetadata('presence_absence\tp\tS3R\tN\tref has variant type R (AGA=R, AGT=S)')
         meta3 = sequence_metadata.SequenceMetadata('presence_absence\tp\tD4E\tN\tref has variant type E (GAA=E, GAC=D)')
         meta4 = sequence_metadata.SequenceMetadata('presence_absence\tp\tA5D\tN\tref has wild type A (GCG=A, GAC=D)')
+        meta5 = sequence_metadata.SequenceMetadata('presence_absence\tp\tR13S\tY\tref and qry have wild type, but Y in column 4')
 
         metadata_tsv = 'tmp.test_get_variants_presence_absence.metadata.tsv'
         with open(metadata_tsv, 'w') as f:
@@ -303,6 +304,7 @@ class TestAssemblyVariants(unittest.TestCase):
             print(meta2, file=f)
             print(meta3, file=f)
             print(meta4, file=f)
+            print(meta5, file=f)
 
         refdata = reference_data.ReferenceData(
             presence_absence_fa=os.path.join(data_dir, 'assembly_variants_test_get_variants_presence_absence.fa'),
@@ -317,7 +319,7 @@ class TestAssemblyVariants(unittest.TestCase):
         v3 = pymummer.variant.Variant(pymummer.snp.Snp('15\tG\tC\t15\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig1'))
 
         nucmer_coords = {
-            'contig1': [pyfastaq.intervals.Interval(0, 41)],
+            'contig1': [pyfastaq.intervals.Interval(0, 30)],
             'contig2': [pyfastaq.intervals.Interval(10, 41)],
         }
 
@@ -326,7 +328,10 @@ class TestAssemblyVariants(unittest.TestCase):
                (4, 'p', 'A5D', 'NONSYN', [v2, v3], {meta4}, set()),
                (None, 'p', None, None, None, {meta3}, set()),
             ],
-            'contig2': [(None, 'p', None, None, None, {meta3}, set())],
+            'contig2': [
+               (None, 'p', None, None, None, {meta3}, set()),
+               (None, 'p', None, None, None, {meta5}, set()),
+            ],
         }
 
         a_variants = assembly_variants.AssemblyVariants(refdata, nucmer_snp_file)
