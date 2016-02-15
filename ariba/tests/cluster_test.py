@@ -160,7 +160,10 @@ class TestCluster(unittest.TestCase):
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
         c.run()
-        self.assertIsNone(c.report_lines)
+        expected = [
+            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of variants_only1',
+        ]
+        self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
 
 

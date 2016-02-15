@@ -61,9 +61,6 @@ def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster,
 
 
 def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymummer_variants):
-    if cluster.ref_sequence_type == 'variants_only' and len(cluster.assembly_variants) == 0:
-        return []
-
     lines = []
 
     common_first_columns = [
