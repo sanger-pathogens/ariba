@@ -14,7 +14,6 @@ __all__ = [
     'histogram',
     'link',
     'mapping',
-    'refcheck',
     'reference_data',
     'ref_genes_getter',
     'report',
