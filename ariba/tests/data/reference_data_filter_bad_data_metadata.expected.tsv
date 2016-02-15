@@ -3,5 +3,6 @@ non_coding_1	n	C5A	N	dna variant ok
 presence_absence_1	.	.	N	should be in output because this field is here
 presence_absence_2	n	T4G	N	dna variant ok
 presence_absence_3	p	R3S	N	amino acid variant ok
+variants_only_1	.	.	N	should be kept as a generic description of variants_only_1
 variants_only_1	p	S2T	N	amino acid variant ok
 variants_only_1	n	T4A	N	dna variant ok

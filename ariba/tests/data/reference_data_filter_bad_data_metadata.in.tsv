@@ -14,7 +14,7 @@ variants_only_1	n	T4A	N	dna variant ok
 variants_only_1	n	C4G	N	dna variant not ok
 variants_only_1	p	S2T	N	amino acid variant ok
 variants_only_1	p	I2L	N	amin acid variant not ok
-variants_only_1	.	.	N	should be removed from tsv
+variants_only_1	.	.	N	should be kept as a generic description of variants_only_1
 variants_only_1	.	.	N
 variants_only_not_in_fasta	.	.	N	should be removed from tsv because not in fasta
 variants_only_no_good_variants	n	A4G	N	dna variant not ok

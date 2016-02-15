@@ -188,7 +188,7 @@ class ReferenceData:
             to_remove = []
 
             for metadata in metadata_dict['.']:
-                if metadata.free_text is None or gene_in_seq_dict == 'variants_only':
+                if metadata.free_text is None:
                     print(gene_name, 'metadata has no info. Just gene name given. Removing. Line of file was:', metadata, file=log_fh)
                     to_remove.append(metadata)
 
