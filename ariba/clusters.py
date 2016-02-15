@@ -67,7 +67,7 @@ class Clusters:
         self.bam = self.bam_prefix + '.bam'
         self.report_file_tsv = os.path.join(self.outdir, 'report.tsv')
         self.report_file_xls = os.path.join(self.outdir, 'report.xls')
-        self.catted_assembled_genes_fasta = os.path.join(self.outdir, 'assembled_genes.fa')
+        self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa')
         self.threads = threads
         self.verbose = verbose
 
@@ -323,17 +323,17 @@ class Clusters:
         workbook.save(xls_out)
 
 
-    #def _write_catted_assembled_genes_fasta(self):
-    #    f = pyfastaq.utils.open_file_write(self.catted_assembled_genes_fasta)
+    def _write_catted_assembled_seqs_fasta(self):
+        f = pyfastaq.utils.open_file_write(self.catted_assembled_seqs_fasta)
 
-    #    for gene in sorted(self.clusters):
-    #        cluster_fasta = self.clusters[gene].assembly_compare.assembled_ref_seqs_file
-    #        if os.path.exists(cluster_fasta):
-    #            file_reader = pyfastaq.sequences.file_reader(cluster_fasta)
-    #            for seq in file_reader:
-    #                print(seq, file=f)
+        for gene in sorted(self.clusters):
+            cluster_fasta = self.clusters[gene].assembly_compare.assembled_ref_seqs_file
+            if os.path.exists(cluster_fasta):
+                file_reader = pyfastaq.sequences.file_reader(cluster_fasta)
+                for seq in file_reader:
+                    print(seq, file=f)
 
-    #    pyfastaq.utils.close(f)
+        pyfastaq.utils.close(f)
 
 
     def _clean(self):
@@ -415,11 +415,17 @@ class Clusters:
 
         if self.verbose:
             print('{:_^79}'.format(' Writing report files '), flush=True)
+            print(self.report_file_tsv)
+            print(self.report_file_xls)
         self._write_reports(self.clusters, self.report_file_tsv, self.report_file_xls)
-        #self._write_catted_assembled_genes_fasta()
 
         if self.verbose:
-            print('Finished writing report files.\n\nCleaning files:', flush=True)
+            print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
+            print(self.catted_assembled_seqs_fasta)
+        self._write_catted_assembled_seqs_fasta()
+
+        if self.verbose:
+            print('\n\nCleaning files:', flush=True)
         self._clean()
 
         if self.verbose:
