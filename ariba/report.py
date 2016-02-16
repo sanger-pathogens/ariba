@@ -7,23 +7,27 @@ columns = [
     'reads',                 # 3  number of reads in this cluster
     'cluster',               # 4  cluster number
     'ref_len',               # 5  length of reference sequence
-    'ref_base_assembled',    # 6  number of reference nucleotides assembled by this scaffold
-    'pc_ident',              # 7  %identity between ref sequence and scaffold
-    'scaffold',              # 8  name of scaffold matching reference
-    'scaff_len',             # 9  length of scaffold matching reference
+    'ref_base_assembled',    # 6  number of reference nucleotides assembled by this contig
+    'pc_ident',              # 7  %identity between ref sequence and contig
+    'ctg',                   # 8  name of contig matching reference
+    'ctg_len',               # 9  length of contig matching reference
     'known_var',             # 10 is this a known SNP from reference metadata? T|F
-    'known_var_type',        # 11 if known_var=T, the type of variant. Currently only SNP supported
-    'var_type',              # 12 n|p for nucleotide or protein
-    'var_effect',            # 13 Effect of variant (SYN, NONSYN, FSHIFT... etc)
-    'var_change',            # 14 amino acid or nucleotide change, eg I42L
-    'var_start_scaff',       # 15 start position of variant in scaffold
-    'var_end_scaff',         # 16 end position of variant in scaffold
-    'var_scaff',             # 17 nucleotide in scaffold at variant position
-    'var_scaff_read_depth',  # 18 total read depth at variant start position in scaffold, reported by mpileup
-    'alt_scaff_bases',       # 19 alt bases on scaffold, reported by mpileup
-    'alt_scaff_depth',       # 20 alt depth on scaffold, reported by mpileup
-    'var_description',       # 21 description of variant from reference metdata
-    'free_text',             # 22 other free text about reference sequence, from reference metadata
+    'var_type',              # 11 The type of variant. Currently only SNP supported
+    'var_seq_type',          # 12 if known_var=T, n|p for nucleotide or protein
+    'has_known_var',         # 13 if known_var=T, T|F for whether or not the assembly has the variant
+    'ref_ctg_change',        # 14 amino acid or nucleotide change between reference and contig, eg I42L
+    'ref_ctg_effect',        # 15 effect of change between reference and contig, eg SYS, NONSYN (amino acid changes only)
+    'ref_start',             # 16 start position of variant in contig
+    'ref_end',               # 17 end position of variant in contig
+    'ref_nt',                # 18 nucleotide(s) in contig at variant position
+    'ctg_start',             # 19 start position of variant in contig
+    'ctg_end',               # 20 end position of variant in contig
+    'ctg_nt',                # 21 nucleotide(s) in contig at variant position
+    'smtls_total_depth',     # 22 total read depth at variant start position in contig, reported by mpileup
+    'smtls_alt_nt',          # 23 alt nucleotides on contig, reported by mpileup
+    'smtls_alt_depth',       # 24 alt depth on contig, reported by mpileup
+    'var_description',       # 25 description of variant from reference metdata
+    'free_text',             # 26 other free text about reference sequence, from reference metadata
 ]
 
 
@@ -37,23 +41,52 @@ def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster,
        variant type, not wild type. The list variant_list should be a list
        of pymummer.variant.Variant objects, only contaning variants to the
        relevant query contig'''
-    nuc_range = sequence_meta.variant.nucleotide_range()
+    ref_nuc_range = sequence_meta.variant.nucleotide_range()
 
-    if nuc_range is None:
+    if ref_nuc_range is None:
         return None
 
     depths = []
+    ctg_nts = []
+    ref_nts = []
+    smtls_total_depths = []
+    smtls_alt_nts = []
+    smtls_alt_depths = []
+    contig_positions = []
 
-    for ref_position in range(nuc_range[0], nuc_range[1]+1, 1):
+    for ref_position in range(ref_nuc_range[0], ref_nuc_range[1]+1, 1):
         nucmer_match = cluster.assembly_compare.nucmer_hit_containing_reference_position(cluster.assembly_compare.nucmer_hits, cluster.ref_sequence.id, ref_position)
 
         if nucmer_match is not None:
             # work out contig position. Needs indels variants to correct the position
+            ref_nts.append(cluster.ref_sequence[ref_position])
             contig_position, in_indel = nucmer_match.qry_coords_from_ref_coord(ref_position, variant_list)
+            contig_positions.append(contig_position)
             ref, alt, total_depth, alt_depths = cluster.samtools_vars.get_depths_at_position(contig_name, contig_position)
-            depths.append([str(x) for x in (contig_position + 1, contig_position + 1, ref, alt, total_depth, alt_depths)])
+            ctg_nts.append(ref)
+            smtls_alt_nts.append(alt)
+            smtls_total_depths.append(total_depth)
+            smtls_alt_depths.append(alt_depths)
 
-    return depths
+    ctg_nts = ';'.join(ctg_nts) if len(ctg_nts) else '.'
+    ref_nts = ';'.join(ref_nts) if len(ref_nts) else '.'
+    smtls_alt_nts = ';'.join(smtls_alt_nts) if len(smtls_alt_nts) else '.'
+    smtls_total_depths = ';'.join([str(x)for x in smtls_total_depths]) if len(smtls_total_depths) else '.'
+    smtls_alt_depths = ';'.join([str(x)for x in smtls_alt_depths]) if len(smtls_alt_depths) else '.'
+    ctg_start = str(min(contig_positions) + 1) if contig_positions is not None else '.'
+    ctg_end = str(max(contig_positions) + 1) if contig_positions is not None else '.'
+
+    return [str(x) for x in [
+        ref_nuc_range[0] + 1,
+        ref_nuc_range[1] + 1,
+        ref_nts,
+        ctg_start,
+        ctg_end,
+        ctg_nts,
+        smtls_total_depths,
+        smtls_alt_nts,
+        smtls_alt_depths
+    ]]
 
 
 def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymummer_variants):
@@ -66,6 +99,10 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
         str(cluster.total_reads),
         cluster.name,
         str(len(cluster.ref_sequence)),
+        str(ref_cov_per_contig[contig_name]) if contig_name in ref_cov_per_contig else '0', # 6 ref bases assembled
+        str(cluster.assembly_compare.percent_identities[contig_name]) if contig_name in cluster.assembly_compare.percent_identities else '0',
+        contig_name,
+        str(len(cluster.assembly.sequences[contig_name])),  # 9 length of scaffold matching reference
     ]
 
     if cluster.ref_sequence.id in cluster.refdata.metadata and  len(cluster.refdata.metadata[cluster.ref_sequence.id]['.']) > 0:
@@ -74,24 +111,15 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
         free_text_columns = ['.']
 
     if cluster.assembled_ok and contig_name in cluster.assembly_variants and len(cluster.assembly_variants[contig_name]) > 0:
-        more_common_columns = [
-            str(ref_cov_per_contig[contig_name]) if contig_name in ref_cov_per_contig else '0', # 6 ref bases assembled
-            str(cluster.assembly_compare.percent_identities[contig_name]) if contig_name in cluster.assembly_compare.percent_identities else '0',
-            contig_name,
-            str(len(cluster.assembly.sequences[contig_name])),  # 9 length of scaffold matching reference
-        ]
-
-        for (position, var_type, var_change, var_effect, contributing_vars, matching_vars_set, metainfo_set) in cluster.assembly_variants[contig_name]:
+        for (position, var_seq_type, ref_ctg_change, var_effect, contributing_vars, matching_vars_set, metainfo_set) in cluster.assembly_variants[contig_name]:
             if len(matching_vars_set) > 0:
-                known_var = 'T'
-                known_var_type = 'SNP'
+                has_known_var = 'T'
+                var_type = 'SNP'
             else:
-                known_var = 'F'
-                known_var_type = '.'
+                has_known_var = 'F'
+                var_type = '.'
 
-            var_columns = ['.' if x is None else str(x) for x in [known_var, known_var_type, var_type, var_effect, var_change]]
-
-
+            var_columns = ['.' if x is None else str(x) for x in [has_known_var, var_type, var_seq_type, has_known_var, ref_ctg_change, var_effect]]
 
             if len(matching_vars_set) > 0:
                 matching_vars_column = ';;;'.join([x.to_string(separator='_') for x in matching_vars_set])
@@ -101,26 +129,47 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
             if contributing_vars is None:
                 if len(matching_vars_set) > 0:
                     for matching_var in matching_vars_set:
-                        depths_list = _samtools_depths_at_known_snps_all_wild(matching_var, contig_name, cluster, pymummer_variants)
-                        if depths_list is None:
-                            depths_list = [['.'] * 6]
+                        report_list = _samtools_depths_at_known_snps_all_wild(matching_var, contig_name, cluster, pymummer_variants)
+                        if report_list is None:
+                            report_list = [['.'] * 9]
 
-                        for depths in depths_list:
-                            lines.append('\t'.join(common_first_columns + more_common_columns + var_columns + depths + [matching_vars_column] + free_text_columns))
+                        lines.append('\t'.join(common_first_columns + var_columns + report_list + [matching_vars_column] + free_text_columns))
                 else:
                     lines.append('\t'.join(
-                        common_first_columns + more_common_columns + var_columns + \
-                        ['.'] * (len(columns) - len(common_first_columns) - len(more_common_columns) - len(var_columns) - 2) + \
+                        common_first_columns + var_columns + \
+                        ['.'] * (len(columns) - len(common_first_columns) - len(var_columns) - 2) + \
                         [matching_vars_column] + free_text_columns
                     ))
             else:
+                contributing_vars.sort(key = lambda x: x.qry_start)
+
+                smtls_total_depth = []
+                smtls_alt_nt = []
+                smtls_alt_depth = []
+
                 for var in contributing_vars:
-                    ref, alt, total_depth, alt_depths = cluster.samtools_vars.get_depths_at_position(contig_name, var.qry_start)
-                    lines.append('\t'.join(
-                        common_first_columns + more_common_columns + var_columns + \
-                        [str(x) for x in (var.qry_start, var.qry_end, ref, alt, total_depth, alt_depths)] + \
-                        [matching_vars_column] + free_text_columns
-                    ))
+                    depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, var.qry_start)
+                    if depths_tuple is not None:
+                        smtls_alt_nt.append(depths_tuple[1])
+                        smtls_total_depth.append(str(depths_tuple[2]))
+                        smtls_alt_depth.append(str(depths_tuple[3]))
+
+                smtls_total_depth = ';'.join(smtls_total_depth) if len(smtls_total_depth) else '.'
+                smtls_alt_nt = ';'.join(smtls_alt_nt) if len(smtls_alt_nt) else '.'
+                smtls_alt_depth = ';'.join(smtls_alt_depth) if len(smtls_alt_depth) else '.'
+                lines.append('\t'.join(
+                    common_first_columns + var_columns + [
+                        str(contributing_vars[0].ref_start), #ref_start
+                        str(contributing_vars[0].ref_end), # ref_end
+                        ';'.join([x.ref_base for x in contributing_vars]), # ref_nt
+                        str(contributing_vars[0].qry_start),  # ctg_start
+                        str(contributing_vars[0].qry_end),  #ctg_end
+                        ';'.join([x.qry_base for x in contributing_vars]), #ctg_nt
+                        smtls_total_depth,
+                        smtls_alt_nt,
+                        smtls_alt_depth,
+                        matching_vars_column
+                   ] + free_text_columns))
     else:
         lines.append('\t'.join(common_first_columns + ['.'] * (len(columns) - len(common_first_columns) - 1) + free_text_columns))
 
