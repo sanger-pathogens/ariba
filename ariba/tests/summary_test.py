@@ -7,7 +7,7 @@ from ariba import summary, flag
 modules_dir = os.path.dirname(os.path.abspath(summary.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
 
-class TestSummry(unittest.TestCase):
+class TestSummary(unittest.TestCase):
     def test_init(self):
         '''Test init'''
         fofn = os.path.join(data_dir, 'summary_test_init.fofn')
@@ -22,31 +22,40 @@ class TestSummry(unittest.TestCase):
 
     def test_line2dict(self):
         '''Test _line2dict'''
-        line = '\t'.join(['gene1', '187', '42', '3', '750', '750', '98.93', 'SNP', 'SYN', '.', '66', '66', 'A', 'gene1.scaffold.1', '1047', '67', '67', 'C', '42', 'A', '22,20'])
+        line = 'refname\treftype\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
+
         s = summary.Summary('out', filenames=['spam', 'eggs'])
         expected = {
-            'gene': 'gene1',
-            'flag':  flag.Flag(187),
-            'reads': 42,
-            'cluster': '3',
-            'gene_len': 750,
-            'assembled': 750,
-            'pc_ident': 98.93,
+            'ref_name': 'refname',
+            'ref_type': 'reftype',
+            'flag': flag.Flag(19),
+            'reads': 78,
+            'cluster_rep': 'cluster',
+            'ref_len': 120,
+            'ref_base_assembled': 120,
+            'pc_ident': 98.33,
+            'ctg': 'ctg_name',
+            'ctg_len': 279,
+            'known_var': '1',
             'var_type': 'SNP',
-            'var_effect': 'SYN',
-            'new_aa': '.',
-            'gene_start': 66,
-            'gene_end': 66,
-            'gene_nt': 'A',
-            'scaffold': 'gene1.scaffold.1',
-            'scaff_len': 1047,
-            'scaff_start': 67,
-            'scaff_end': 67,
-            'scaff_nt': 'C',
-            'read_depth': 42,
-            'alt_bases': 'A',
-            'ref_alt_depth': '22,20'
+            'var_seq_type': 'n',
+            'known_var_change': 'A14T',
+            'has_known_var': '1',
+            'ref_ctg_change': 'A14T',
+            'ref_ctg_effect': 'SNP',
+            'ref_start': 13,
+            'ref_end': 13,
+            'ref_nt': 'A',
+            'ctg_start': 84,
+            'ctg_end': 84,
+            'ctg_nt': 'T',
+            'smtls_total_depth': 17,
+            'smtls_alt_nt': '.',
+            'smtls_alt_depth': '17',
+            'var_description': 'noncoding1_n_A14T_N_ref has wild type, foo bar',
+            'free_text': 'some free text'
         }
+
         self.assertEqual(s._line2dict(line), expected)
 
 

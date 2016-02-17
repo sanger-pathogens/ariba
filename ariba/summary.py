@@ -1,45 +1,25 @@
 import os
 import openpyxl
 import pyfastaq
-from ariba import flag, common
+from ariba import flag, common, reference_data, report
 
 class Error (Exception): pass
 
-columns = [
-    'gene',
-    'flag',
-    'reads',
-    'cluster',
-    'gene_len',
-    'assembled',
-    'pc_ident',
-    'var_type',
-    'var_effect',
-    'new_aa',
-    'gene_start',
-    'gene_end',
-    'gene_nt',
-    'scaffold',
-    'scaff_len',
-    'scaff_start',
-    'scaff_end',
-    'scaff_nt',
-    'read_depth',
-    'alt_bases',
-    'ref_alt_depth'
-]
 
 int_columns = [
     'reads',
-    'gene_len',
-    'assembled',
-    'gene_start',
-    'gene_end',
-    'scaff_len',
-    'scaff_start',
-    'scaff_end',
-    'read_depth',
+    'ref_len',
+    'ref_base_assembled',
+    'ctg_len',
+    'ref_start',
+    'ref_end',
+    'ctg_start',
+    'ctg_end',
+    'smtls_total_depth',
 ]
+
+
+float_columns = ['pc_ident']
 
 
 class Summary:
@@ -84,17 +64,20 @@ class Summary:
 
     def _line2dict(self, line):
         data = line.rstrip().split('\t')
-        d = {columns[i]: data[i] for i in range(len(data))}
+        d = {report.columns[i]: data[i] for i in range(len(data))}
         d['flag'] = flag.Flag(int(d['flag']) )
         for key in int_columns:
             try:
                 d[key] = int(d[key])
             except:
                 assert d[key] == '.'
-        try:
-            d['pc_ident'] = float(d['pc_ident'])
-        except:
-            assert d['pc_ident'] == '.'
+
+        for key in float_columns:
+            try:
+                d[key] = float(d[key])
+            except:
+                assert d[key] == '.'
+
         return d
 
 
@@ -104,7 +87,7 @@ class Summary:
 
         for line in f:
             if line.startswith('#'):
-                if line.rstrip()[1:].split('\t') != columns:
+                if line.rstrip()[1:].split('\t') != report.columns:
                     raise Error('Error parsing the following line.\n' + line)
                 continue
             data = self._line2dict(line)
