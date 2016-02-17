@@ -273,8 +273,8 @@ class Summary:
                 print(self.rows_out[i][0], *scores, sep='\t', file=f)
 
 
-    @staticmethod
-    def _newick_from_dist_matrix(distance_file, outfile):
+    @classmethod
+    def _newick_from_dist_matrix(cls, distance_file, outfile):
         r_script = outfile + '.tmp.R'
 
         with open(r_script, 'w') as f:
