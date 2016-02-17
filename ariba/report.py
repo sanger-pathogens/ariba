@@ -14,7 +14,7 @@ columns = [
     'known_var',             # 10 is this a known SNP from reference metadata? 1|0
     'var_type',              # 11 The type of variant. Currently only SNP supported
     'var_seq_type',          # 12 if known_var=1, n|p for nucleotide or protein
-    'known_var_change'       # 13 if known_var=1, the wild/variant change, eg I42L
+    'known_var_change',      # 13 if known_var=1, the wild/variant change, eg I42L
     'has_known_var',         # 13 if known_var=1, 1|0 for whether or not the assembly has the variant
     'ref_ctg_change',        # 14 amino acid or nucleotide change between reference and contig, eg I42L
     'ref_ctg_effect',        # 15 effect of change between reference and contig, eg SYS, NONSYN (amino acid changes only)
