@@ -218,12 +218,13 @@ class Summary:
         pyfastaq.utils.close(f)
 
 
-    def _write_js_candy_csv(self, outfile):
+    @classmethod
+    def _write_js_candy_csv(cls, rows, outfile):
         f = pyfastaq.utils.open_file_write(outfile)
         # js candy needs the "name" column.
         # Names must match those used in the tree file
-        print('name', *self.rows_out[0][1:], sep=',', file=f)
-        for row in self.rows_out[1:]:
+        print('name', *rows[0][1:], sep=',', file=f)
+        for row in rows[1:]:
             print(*row, sep=',', file=f)
         pyfastaq.utils.close(f)
 
