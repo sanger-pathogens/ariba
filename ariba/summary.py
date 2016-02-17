@@ -150,6 +150,14 @@ class Summary:
             return 1
 
 
+    @classmethod
+    def _to_summary_number_for_variant(cls, data_dict):
+        if data_dict['has_known_var'] == '1' or (data_dict['known_var'] != '1' and data_dict['ref_ctg_change'] != '.'):
+            return 1
+        else:
+            return 0
+
+
     def _gather_output_rows(self):
         self.data = {filename: self._load_file(filename) for filename in self.filenames}
 
