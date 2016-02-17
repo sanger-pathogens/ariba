@@ -121,7 +121,21 @@ class Summary:
         return d
 
 
-    def _to_summary_number(self, l):
+    @classmethod
+    def _pc_id_of_longest(self, data_dict, seq_name):
+        longest = 0
+        identity = 0
+        assert seq_name in data_dict
+
+        for d in data_dict[seq_name].values():
+            if d['ref_base_assembled'] > longest:
+                longest = d['ref_base_assembled']
+                identity = d['pc_ident']
+
+        return identity
+
+
+    def _to_summary_number_for_seq(self, l):
         f = l[0]['flag']
         if f.has('assembly_fail') or not f.has('assembled') or self._pc_id_of_longest(l) <= self.min_id:
             return 0
@@ -138,16 +152,6 @@ class Summary:
             return 2
 
 
-    def _pc_id_of_longest(self, l):
-        longest = 0
-        identity = None
-        for data in l:
-            if data['assembled'] > longest:
-                longest = data['assembled']
-                identity = data['pc_ident']
-
-        assert identity is not None
-        return identity
 
 
 

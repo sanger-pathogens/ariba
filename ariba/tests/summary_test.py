@@ -110,6 +110,20 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_pc_id_of_longest(self):
+        '''Test _pc_id_of_longest'''
+        d = {
+            'seqname': {
+                'key1': {'ref_base_assembled': 10, 'pc_ident': 90.0},
+                'key2': {'ref_base_assembled': 20, 'pc_ident': 89.0},
+                'key3': {'ref_base_assembled': 50, 'pc_ident': 95.1},
+                'key4': {'ref_base_assembled': 42, 'pc_ident': 91.0},
+            }
+        }
+
+        self.assertEqual(95.1, summary.Summary._pc_id_of_longest(d, 'seqname'))
+
+
     def test_to_summary_number(self):
         '''Test _to_summary_number'''
         s = summary.Summary('out', filenames=['spam', 'eggs'])
