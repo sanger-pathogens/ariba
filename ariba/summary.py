@@ -253,24 +253,25 @@ class Summary:
         return sum([cls._distance_score_between_values(scores1[i], scores2[i]) for i in range(1, len(scores1))])
 
 
-    def _write_distance_matrix(self, outfile):
-        if len(self.rows_out) < 3:
+    @classmethod
+    def _write_distance_matrix(cls, rows, outfile):
+        if len(rows) < 3:
             raise Error('Cannot calculate distance matrix to make tree for js_candy.\n' +
                         'Only one sample present.')
 
-        if len(self.rows_out[0]) < 2:
+        if len(rows[0]) < 2:
             raise Error('Cannot calculate distance matrix to make tree for js_candy.\n' +
                         'No genes present in output')
 
         with open(outfile, 'w') as f:
-            sample_names = [x[0] for x in self.rows_out]
+            sample_names = [x[0] for x in rows]
             print(*sample_names[1:], sep='\t', file=f)
 
-            for i in range(1,len(self.rows_out)):
+            for i in range(1,len(rows)):
                 scores = []
-                for j in range(2, len(self.rows_out)):
-                    scores.append(self._distance_score_between_lists(self.rows_out[i], self.rows_out[j]))
-                print(self.rows_out[i][0], *scores, sep='\t', file=f)
+                for j in range(2, len(rows)):
+                    scores.append(Summary._distance_score_between_lists(rows[i], rows[j]))
+                print(rows[i][0], *scores, sep='\t', file=f)
 
 
     @classmethod
@@ -288,14 +289,15 @@ class Summary:
         os.unlink(r_script)
 
 
-    def _write_js_candy_files(self, outprefix):
+    @classmethod
+    def _write_js_candy_files(cls, rows, outprefix):
         distance_file = outprefix + '.distance_matrix'
         tree_file = outprefix + '.tre'
         csv_file = outprefix + '.csv'
-        self._write_distance_matrix(distance_file)
-        self._newick_from_dist_matrix(distance_file, tree_file)
+        Summary._write_distance_matrix(rows, distance_file)
+        Summary._newick_from_dist_matrix(distance_file, tree_file)
         os.unlink(distance_file)
-        self._write_js_candy_csv(csv_file)
+        Summary._write_js_candy_csv(rows, csv_file)
 
 
     def run(self):

@@ -254,8 +254,7 @@ class TestSummary(unittest.TestCase):
 
     def test_write_distance_matrix(self):
         '''Test _write_distance_matrix'''
-        s = summary.Summary('out', filenames=['spam', 'eggs'])
-        s.rows_out = [
+        rows = [
             ['filename', 'gene1', 'gene2', 'gene3'],
             ['file1', 0, 1, 0],
             ['file2', 1, 0, 3],
@@ -263,7 +262,7 @@ class TestSummary(unittest.TestCase):
         ]
 
         tmp_distances = 'tmp.test.write_distance_matrix.distances'
-        s._write_distance_matrix(tmp_distances)
+        summary.Summary._write_distance_matrix(rows, tmp_distances)
         expected = os.path.join(data_dir, 'summary_test_write_distance_matrix.distances')
         self.assertTrue(filecmp.cmp(expected, tmp_distances, shallow=False))
         os.unlink(tmp_distances)
@@ -282,14 +281,13 @@ class TestSummary(unittest.TestCase):
     def test_write_js_candy_files(self):
         '''Test _write_js_candy_files'''
         tmp_prefix = 'tmp.test.write_js_candy_files'
-        s = summary.Summary('out', filenames=['spam', 'eggs'])
-        s.rows_out = [
+        rows = [
             ['filename', 'gene1', 'gene2', 'gene3'],
             ['file1', 0, 1, 0],
             ['file2', 1, 0, 3],
             ['file3', 0, 0, 4],
         ]
-        s._write_js_candy_files(tmp_prefix)
+        summary.Summary._write_js_candy_files(rows, tmp_prefix)
         expected_csv = os.path.join(data_dir, 'summary_test_write_js_candy_files.csv')
         expected_tre = os.path.join(data_dir, 'summary_test_write_js_candy_files.tre')
         self.assertTrue(filecmp.cmp(expected_csv, tmp_prefix + '.csv', shallow=False))
