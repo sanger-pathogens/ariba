@@ -302,12 +302,15 @@ class Summary:
 
     def run(self):
         self._check_files_exist()
-        self._gather_output_rows()
-        self._filter_output_rows()
+        rows = Summary._gather_output_rows(self.filenames, self.min_id)
+
+        if self.filter_rows:
+            rows = Summary._filter_output_rows(rows)
+
         if self.outfile.endswith('.xls'):
-            self._write_xls()
+            Summary._write_xls(rows, self.outfile)
         else:
-            self._write_tsv()
+            Summary._write_tsv(rows, self.outfile)
 
         if self.js_candy_prefix is not None:
-            self._write_js_candy_files(self.js_candy_prefix)
+            Summary._write_js_candy_files(rows, self.js_candy_prefix)
