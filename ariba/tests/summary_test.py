@@ -165,14 +165,13 @@ class TestSummary(unittest.TestCase):
             os.path.join(data_dir, 'summary_test_gather_output_rows.in.1.tsv'),
             os.path.join(data_dir, 'summary_test_gather_output_rows.in.2.tsv')
         ]
-        s = summary.Summary('out', filenames=infiles)
-        s._gather_output_rows()
+        got = summary.Summary._gather_output_rows(infiles, 90)
         expected = [
-            ['filename', 'gene1', 'gene2', 'gene3'],
-            [infiles[0], 4, 2, 0],
-            [infiles[1], 4, 0, 4],
+            ['filename', 'noncoding1', 'noncoding1.n.A14T', 'noncoding1.n.A6G', 'presence_absence1', 'presence_absence1.p.A10V', 'variants_only1'],
+            [infiles[0], 1, 1, 0, 3, 1, 0],
+            [infiles[1], 1, 1, 1, 3, 1, 0],
         ]
-        self.assertEqual(expected, s.rows_out)
+        self.assertEqual(expected, got)
 
 
     def test_filter_output_rows_filter_true(self):

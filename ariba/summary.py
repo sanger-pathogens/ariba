@@ -158,27 +158,38 @@ class Summary:
             return 0
 
 
-    def _gather_output_rows(self):
-        self.data = {filename: self._load_file(filename) for filename in self.filenames}
+    @classmethod
+    def _gather_output_rows(cls, filenames, min_id):
+        data = {filename: Summary._load_file(filename) for filename in filenames}
 
-        all_genes = set()
-        for l in self.data.values():
-            all_genes.update(set(l.keys()))
-        all_genes = list(all_genes)
-        all_genes.sort()
+        all_column_tuples = set()
 
-        self.rows_out = []
-        self.rows_out.append(['filename'] + all_genes)
+        for filename, data_dict in data.items():
+            for seq_name, seq_data_dict in data_dict.items():
+                all_column_tuples.update(set(seq_data_dict.keys()))
+                all_column_tuples.add((seq_name, '', ''))
 
-        for filename in self.filenames:
+
+
+        all_column_tuples = list(all_column_tuples)
+        all_column_tuples.sort()
+        rows = [['filename'] + ['.'.join(x).rstrip('.') for x in all_column_tuples]]
+
+        for filename in filenames:
             new_row = [filename]
-            for gene in all_genes:
-                if gene not in self.data[filename]:
+            for column_tuple in all_column_tuples:
+                if column_tuple[0] not in data[filename]:
                     new_row.append(0)
+                elif column_tuple[1] == '':
+                    new_row.append(Summary._to_summary_number_for_seq(data[filename], column_tuple[0], min_id))
+                elif column_tuple in data[filename][column_tuple[0]]:
+                    new_row.append(Summary._to_summary_number_for_variant(data[filename][column_tuple[0]][column_tuple]))
                 else:
-                    new_row.append(self._to_summary_number(self.data[filename][gene]))
+                    new_row.append(0)
 
-            self.rows_out.append(new_row)
+            rows.append(new_row)
+
+        return rows
 
 
     def _filter_output_rows(self):

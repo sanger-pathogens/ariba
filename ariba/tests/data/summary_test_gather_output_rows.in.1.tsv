@@ -1,4 +1,3 @@
-#gene	flag	reads	cluster	gene_len	assembled	pc_ident	var_type	var_effect	new_aa	gene_start	gene_end	gene_nt	scaffold	scaff_len	scaff_start	scaff_end	scaff_nt	read_depth	alt_bases	ref_alt_depth
-gene1	27	42	1	822	822	100.0	.	.	.	.	.	.	gene1.scaffold.1	1490	.	.	.	.	.	.
-gene2	15	44	2	780	780	100.0	.	.	.	.	.	.	gene2.scaffold.2	1124	.	.	.	.	.	.
-gene2	15	46	2	780	770	99.0	.	.	.	.	.	.	gene2.scaffold.3	1097	.	.	.	.	.	.
+#ref_name	ref_type	flag	reads	cluster_rep	ref_len	ref_base_assembled	pc_ident	ctg	ctg_len	known_var	var_type	var_seq_type	known_var_change	has_known_var	ref_ctg_change	ref_ctg_effect	ref_start	ref_end	ref_nt	ctg_start	ctg_end	ctg_nt	smtls_total_depth	smtls_alt_nt	smtls_alt_depth	var_description	free_text
+noncoding1	non_coding	19	78	noncoding1	120	120	98.33	noncoding1.scaffold.1	279	1	SNP	n	A14T	1	A14T	SNP	13	13	A	84	84	T	17	.	17	noncoding1_n_A14T_N_ref has wild type, reads have variant so should report	generic description of noncoding1
+presence_absence1	presence_absence	27	88	presence_absence1	96	96	98.96	presence_absence1.scaffold.1	267	1	SNP	p	A10V	1	A10V	NONSYN	28	28	C	113	113	T	29	.	29	presence_absence1_p_A10V_N_Ref has wild, reads have variant so report	Generic description of presence_absence1
