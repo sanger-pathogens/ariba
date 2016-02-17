@@ -174,10 +174,9 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_filter_output_rows_filter_true(self):
+    def test_filter_output_rows(self):
         '''Test _filter_output_rows'''
-        s = summary.Summary('out', filenames=['spam', 'eggs'])
-        s.rows_out = [
+        rows = [
             ['filename', 'gene1', 'gene2', 'gene3'],
             ['file1', 0, 0, 0],
             ['file2', 1, 0, 3],
@@ -190,24 +189,8 @@ class TestSummary(unittest.TestCase):
             ['file3', 2, 4],
         ]
 
-        s._filter_output_rows()
-        self.assertEqual(s.rows_out, expected)
-
-
-    def test_filter_output_rows_filter_false(self):
-        '''Test _filter_output_rows'''
-        s = summary.Summary('out', filenames=['spam', 'eggs'], filter_output=False)
-        rows_out = [
-            ['filename', 'gene1', 'gene2', 'gene3'],
-            ['file1', 0, 0, 0],
-            ['file2', 1, 0, 3],
-            ['file3', 2, 0, 4],
-        ]
-
-        s.rows_out = copy.copy(rows_out)
-
-        s._filter_output_rows()
-        self.assertEqual(s.rows_out, rows_out)
+        got = summary.Summary._filter_output_rows(rows)
+        self.assertEqual(expected, got)
 
 
     def test_write_tsv(self):

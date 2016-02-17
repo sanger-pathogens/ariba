@@ -192,22 +192,21 @@ class Summary:
         return rows
 
 
-    def _filter_output_rows(self):
-        if not self.filter_output:
-            return
-
+    @classmethod
+    def _filter_output_rows(cls, rows):
         # remove rows that are all zeros
-        self.rows_out = [x for x in self.rows_out if x[1:] != [0]*(len(x)-1)]
+        rows = [x for x in rows if x[1:] != [0]*(len(x)-1)]
 
         # remove columns that are all zeros
         to_remove = []
-        for i in range(1, len(self.rows_out[0])):
-            if sum([x[i] for x in self.rows_out[1:]]) == 0:
+        for i in range(1, len(rows[0])):
+            if sum([x[i] for x in rows[1:]]) == 0:
                 to_remove.append(i)
 
-        for i in range(len(self.rows_out)):
-            self.rows_out[i] = [self.rows_out[i][j] for j in range(len(self.rows_out[i])) if j not in to_remove]
+        for i in range(len(rows)):
+            rows[i] = [rows[i][j] for j in range(len(rows[i])) if j not in to_remove]
 
+        return rows
 
 
     def _write_tsv(self):
