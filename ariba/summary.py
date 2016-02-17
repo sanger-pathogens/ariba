@@ -229,13 +229,14 @@ class Summary:
         pyfastaq.utils.close(f)
 
 
-    def _write_xls(self):
+    @classmethod
+    def _write_xls(cls, rows, outfile):
         workbook = openpyxl.Workbook()
         worksheet = workbook.worksheets[0]
         worksheet.title = 'ARIBA_summary'
-        for row in self.rows_out:
+        for row in rows:
             worksheet.append(row)
-        workbook.save(self.outfile)
+        workbook.save(outfile)
 
 
     @staticmethod
