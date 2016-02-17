@@ -58,20 +58,53 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(summary.Summary._line2dict(line), expected)
 
 
+    def test_dict2key(self):
+        '''Test _dict2key'''
+        d = {
+            'ref_name': 'ref',
+            'var_type': '.',
+            'known_var_change': '.',
+            'ref_ctg_change': '.',
+            'var_seq_type': '.'
+        }
+
+        self.assertEqual(('ref', '', ''), summary.Summary._dict2key(d))
+
+        d['var_type'] = 'p'
+        with self.assertRaises(summary.Error):
+            summary.Summary._dict2key(d)
+
+        d['known_var_change'] = 'I42L'
+        d['var_seq_type'] = 'p'
+        self.assertEqual(('ref', 'p', 'I42L'), summary.Summary._dict2key(d))
+
+        d['ref_ctg_change'] = 'P43Q'
+        with self.assertRaises(summary.Error):
+            summary.Summary._dict2key(d)
+
+        d['known_var_change'] = '.'
+        self.assertEqual(('ref', 'p', 'P43Q'), summary.Summary._dict2key(d))
+
+
     def test_load_file(self):
         '''Test _load_file'''
-        s = summary.Summary('out', filenames=['spam', 'eggs'])
-        infile = os.path.join(data_dir, 'summary_test_load_file.in.tsv')
-
         lines = [
-            ['gene1', '27', '42', '1', '822', '822', '100.0', '.', '.', '.', '.', '.', '.', 'gene1.scaffold.1', '1490', '.', '.', '.', '.', '.', '.'],
-            ['gene2', '15', '44', '2', '780', '780', '100.0', '.', '.', '.', '.', '.', '.', 'gene2.scaffold.2', '1124', '.', '.', '.', '.', '.', '.'],
-            ['gene2', '15', '46', '2', '780', '770', '99.0', '.', '.', '.', '.', '.', '.', 'gene2.scaffold.3', '1097', '.', '.', '.', '.', '.', '.'],
-            ['gene3', '187', '48', '3', '750', '750', '98.93', 'SNP', 'SYN', '.', '318', '318', 'C', 'gene3.scaffold.1', '1047', '319', '319', 'G', '.', '.', '.']
-]
-        dicts = [s._line2dict('\t'.join(x)) for x in lines]
-        expected = {'gene1': [dicts[0]], 'gene2': dicts[1:3], 'gene3': [dicts[3]]}
-        got = s._load_file(infile)
+            'noncoding1\tnon_coding\t19\t78\tnoncoding1\t120\t120\t98.33\tnoncoding1.scaffold.1\t279\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, reads have variant so should report\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t19\t78\tnoncoding1\t120\t120\t98.33\tnoncoding1.scaffold.1\t279\t1\tSNP\tn\tA6G\t1\t.\t.\t6\t6\tG\t77\t77\tG\t18\t.\t18\tnoncoding1_n_A6G_N_variant in ref and reads so should report\tgeneric description of noncoding1',
+            'presence_absence1\tpresence_absence\t27\t88\tpresence_absence1\t96\t96\t98.96\tpresence_absence1.scaffold.1\t267\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t28\tC\t113\t113\tT\t29\t.\t29\tpresence_absence1_p_A10V_N_Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
+            'variants_only1\tvariants_only\t27\t64\tvariants_only1\t90\t90\t100.0\tvariants_only1.scaffold.1\t260\t1\tSNP\tp\tS5T\t1\t.\t.\t13\t15\tA;C;C\t96\t98\tA;C;C\t12;13;13\t.;.;.\t12;13;13\tvariants_only1_p_S5T_N_Ref and reads have variant so report\tGeneric description of variants_only1',
+        ]
+
+        dicts = [summary.Summary._line2dict(x) for x in lines]
+        expected = {
+            ('noncoding1', 'n', 'A14T'): dicts[0],
+            ('noncoding1', 'n', 'A6G'): dicts[1],
+            ('presence_absence1', 'p', 'A10V'): dicts[2],
+            ('variants_only1', 'p', 'S5T'): dicts[3]
+        }
+
+        infile = os.path.join(data_dir, 'summary_test_load_file.in.tsv')
+        got = summary.Summary._load_file(infile)
         self.assertEqual(expected, got)
 
 

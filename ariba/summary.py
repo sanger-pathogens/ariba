@@ -15,7 +15,6 @@ int_columns = [
     'ref_end',
     'ctg_start',
     'ctg_end',
-    'smtls_total_depth',
 ]
 
 
@@ -65,6 +64,8 @@ class Summary:
     @classmethod
     def _line2dict(cls, line):
         data = line.rstrip().split('\t')
+        if len(data) != len(report.columns):
+            raise Error('Wrong number of columns in the following line. Expected ' + str(len(report.columns)) + ' but got ' + str(len(data)) + '\n' + line)
         d = {report.columns[i]: data[i] for i in range(len(data))}
         d['flag'] = flag.Flag(int(d['flag']) )
         for key in int_columns:
@@ -82,21 +83,37 @@ class Summary:
         return d
 
 
-    def _load_file(self, filename):
+    @classmethod
+    def _dict2key(cls, d):
+        if d['var_type'] == '.':
+            return d['ref_name'], '', ''
+        elif d['known_var_change'] == d['ref_ctg_change'] == '.':
+            raise Error('Unexpected data in ariba summary... \n' + d + '\n... known_var_change and ref_ctg_change both equal to ".", but var_type was not a ".". Cannot continue')
+        else:
+            if '.' not in [d['known_var_change'], d['ref_ctg_change']] and d['known_var_change'] != d['ref_ctg_change']:
+                raise Error('Unexpected data in ariba summary... \n' + d + '\n... known_var_change != ref_ctg_change. Cannot continue')
+            if d['known_var_change'] != '.':
+                change = d['known_var_change']
+            else:
+                change = d['ref_ctg_change']
+
+            return d['ref_name'], d['var_seq_type'], change
+
+
+    @classmethod
+    def _load_file(cls, filename):
         f = pyfastaq.utils.open_file_read(filename)
         d = {}
 
         for line in f:
             if line.startswith('#'):
                 if line.rstrip()[1:].split('\t') != report.columns:
+                    pyfastaq.utils.close(f)
                     raise Error('Error parsing the following line.\n' + line)
                 continue
-            data = self._line2dict(line)
-
-            if data['gene'] not in d:
-                d[data['gene']] = []
-
-            d[data['gene']].append(data)
+            data = Summary._line2dict(line)
+            key = Summary._dict2key(data)
+            d[key] = data
 
         pyfastaq.utils.close(f)
         return d
