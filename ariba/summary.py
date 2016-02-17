@@ -62,7 +62,8 @@ class Summary:
                 raise Error('File not found: "' + fname + '". Cannot continue')
 
 
-    def _line2dict(self, line):
+    @classmethod
+    def _line2dict(cls, line):
         data = line.rstrip().split('\t')
         d = {report.columns[i]: data[i] for i in range(len(data))}
         d['flag'] = flag.Flag(int(d['flag']) )

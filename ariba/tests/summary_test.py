@@ -24,7 +24,6 @@ class TestSummary(unittest.TestCase):
         '''Test _line2dict'''
         line = 'refname\treftype\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
 
-        s = summary.Summary('out', filenames=['spam', 'eggs'])
         expected = {
             'ref_name': 'refname',
             'ref_type': 'reftype',
@@ -56,7 +55,7 @@ class TestSummary(unittest.TestCase):
             'free_text': 'some free text'
         }
 
-        self.assertEqual(s._line2dict(line), expected)
+        self.assertEqual(summary.Summary._line2dict(line), expected)
 
 
     def test_load_file(self):
