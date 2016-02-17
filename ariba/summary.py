@@ -122,7 +122,7 @@ class Summary:
 
 
     @classmethod
-    def _pc_id_of_longest(self, data_dict, seq_name):
+    def _pc_id_of_longest(cls, data_dict, seq_name):
         longest = 0
         identity = 0
         assert seq_name in data_dict
@@ -135,24 +135,19 @@ class Summary:
         return identity
 
 
-    def _to_summary_number_for_seq(self, l):
-        f = l[0]['flag']
-        if f.has('assembly_fail') or not f.has('assembled') or self._pc_id_of_longest(l) <= self.min_id:
+    @classmethod
+    def _to_summary_number_for_seq(cls, data_dict, seq_name, min_id):
+        f = list(data_dict[seq_name].values())[0]['flag']
+
+        if f.has('assembly_fail') or (not f.has('assembled')) or f.has('ref_seq_choose_fail') or Summary._pc_id_of_longest(data_dict, seq_name) <= min_id:
             return 0
-
-        if f.has('hit_both_strands') or (not f.has('complete_orf')):
-            return 1
-
-        if f.has('unique_contig') and f.has('assembled_into_one_contig') and f.has('complete_orf'):
+        elif f.has('assembled_into_one_contig') and f.has('complete_orf') and f.has('unique_contig') and (not f.has('scaffold_graph_bad')) and (not f.has('variants_suggest_collapsed_repeat')) and (not f.has('hit_both_strands')) and (not f.has('region_assembled_twice')):
             if f.has('has_nonsynonymous_variants'):
-                return 3
+                return 2
             else:
-                return 4
+                return 3
         else:
-            return 2
-
-
-
+            return 1
 
 
     def _gather_output_rows(self):
