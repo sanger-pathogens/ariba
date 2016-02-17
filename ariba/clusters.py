@@ -311,8 +311,8 @@ class Clusters:
         workbook.save(xls_out)
 
 
-    def _write_catted_assembled_seqs_fasta(self):
-        f = pyfastaq.utils.open_file_write(self.catted_assembled_seqs_fasta)
+    def _write_catted_assembled_seqs_fasta(self, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
 
         for gene in sorted(self.clusters):
             cluster_fasta = self.clusters[gene].assembly_compare.assembled_ref_seqs_file
@@ -410,7 +410,7 @@ class Clusters:
         if self.verbose:
             print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
             print(self.catted_assembled_seqs_fasta)
-        self._write_catted_assembled_seqs_fasta()
+        self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
 
         if self.verbose:
             print('\n\nCleaning files:', flush=True)
