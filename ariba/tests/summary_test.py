@@ -196,13 +196,12 @@ class TestSummary(unittest.TestCase):
     def test_write_tsv(self):
         '''Test _write_tsv'''
         tmp_out = 'tmp.out.tsv'
-        s = summary.Summary(tmp_out, filenames=['spam', 'eggs'])
-        s.rows_out = [
+        rows = [
             ['filename', 'gene1', 'gene3'],
             ['file2', 1, 3],
             ['file3', 2, 4],
         ]
-        s._write_tsv()
+        summary.Summary._write_tsv(rows, tmp_out)
         expected = os.path.join(data_dir, 'summary_test_write_tsv.out.tsv')
         self.assertTrue(filecmp.cmp(tmp_out, expected, shallow=False))
         os.unlink(tmp_out)

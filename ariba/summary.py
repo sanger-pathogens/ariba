@@ -209,10 +209,11 @@ class Summary:
         return rows
 
 
-    def _write_tsv(self):
-        f = pyfastaq.utils.open_file_write(self.outfile)
+    @classmethod
+    def _write_tsv(cls, rows, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
         print('#', end='', file=f)
-        for row in self.rows_out:
+        for row in rows:
             print('\t'.join([str(x) for x in row]), file=f)
         pyfastaq.utils.close(f)
 
