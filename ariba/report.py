@@ -11,10 +11,11 @@ columns = [
     'pc_ident',              # 7  %identity between ref sequence and contig
     'ctg',                   # 8  name of contig matching reference
     'ctg_len',               # 9  length of contig matching reference
-    'known_var',             # 10 is this a known SNP from reference metadata? T|F
+    'known_var',             # 10 is this a known SNP from reference metadata? 1|0
     'var_type',              # 11 The type of variant. Currently only SNP supported
-    'var_seq_type',          # 12 if known_var=T, n|p for nucleotide or protein
-    'has_known_var',         # 13 if known_var=T, T|F for whether or not the assembly has the variant
+    'var_seq_type',          # 12 if known_var=1, n|p for nucleotide or protein
+    'known_var_change'       # 13 if known_var=1, the wild/variant change, eg I42L
+    'has_known_var',         # 13 if known_var=1, 1|0 for whether or not the assembly has the variant
     'ref_ctg_change',        # 14 amino acid or nucleotide change between reference and contig, eg I42L
     'ref_ctg_effect',        # 15 effect of change between reference and contig, eg SYS, NONSYN (amino acid changes only)
     'ref_start',             # 16 start position of variant in contig
@@ -113,33 +114,23 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
     if cluster.assembled_ok and contig_name in cluster.assembly_variants and len(cluster.assembly_variants[contig_name]) > 0:
         for (position, var_seq_type, ref_ctg_change, var_effect, contributing_vars, matching_vars_set, metainfo_set) in cluster.assembly_variants[contig_name]:
             if len(matching_vars_set) > 0:
-                has_known_var = 'T'
+                is_known_var = '1'
+                known_var_change = 'unknown'
                 var_type = 'SNP'
-            else:
-                has_known_var = 'F'
-                var_type = '.'
-
-            var_columns = ['.' if x is None else str(x) for x in [has_known_var, var_type, var_seq_type, has_known_var, ref_ctg_change, var_effect]]
-
-            if len(matching_vars_set) > 0:
+                has_known_var = '1'
                 matching_vars_column = ';;;'.join([x.to_string(separator='_') for x in matching_vars_set])
             else:
+                is_known_var = '0'
+                known_var_change = '.'
+                has_known_var = '0'
+                var_type = '.'
                 matching_vars_column = '.'
 
-            if contributing_vars is None:
-                if len(matching_vars_set) > 0:
-                    for matching_var in matching_vars_set:
-                        report_list = _samtools_depths_at_known_snps_all_wild(matching_var, contig_name, cluster, pymummer_variants)
-                        if report_list is None:
-                            report_list = [['.'] * 9]
+            var_columns = ['.' if x is None else str(x) for x in [is_known_var, var_type, var_seq_type, known_var_change, has_known_var, ref_ctg_change, var_effect]]
 
-                        lines.append('\t'.join(common_first_columns + var_columns + report_list + [matching_vars_column] + free_text_columns))
-                else:
-                    lines.append('\t'.join(
-                        common_first_columns + var_columns + \
-                        ['.'] * (len(columns) - len(common_first_columns) - len(var_columns) - 2) + \
-                        [matching_vars_column] + free_text_columns
-                    ))
+
+            if contributing_vars is None:
+                samtools_columns = [['.'] * 9]
             else:
                 contributing_vars.sort(key = lambda x: x.qry_start)
 
@@ -157,8 +148,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 smtls_total_depth = ';'.join(smtls_total_depth) if len(smtls_total_depth) else '.'
                 smtls_alt_nt = ';'.join(smtls_alt_nt) if len(smtls_alt_nt) else '.'
                 smtls_alt_depth = ';'.join(smtls_alt_depth) if len(smtls_alt_depth) else '.'
-                lines.append('\t'.join(
-                    common_first_columns + var_columns + [
+                samtools_columns = [
                         str(contributing_vars[0].ref_start), #ref_start
                         str(contributing_vars[0].ref_end), # ref_end
                         ';'.join([x.ref_base for x in contributing_vars]), # ref_nt
@@ -168,8 +158,30 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                         smtls_total_depth,
                         smtls_alt_nt,
                         smtls_alt_depth,
-                        matching_vars_column
-                   ] + free_text_columns))
+                ]
+
+
+            if len(matching_vars_set) > 0:
+                for matching_var in matching_vars_set:
+                    if contributing_vars is None:
+                        samtools_columns = _samtools_depths_at_known_snps_all_wild(matching_var, contig_name, cluster, pymummer_variants)
+                    var_columns[3] = str(matching_var.variant)
+
+                    if matching_var.has_variant(cluster.ref_sequence) == (ref_ctg_change is not None):
+                        var_columns[4] = '0'
+                    else:
+                        var_columns[4] = '1'
+
+                    if samtools_columns is None:
+                        samtools_columns = [['.'] * 9]
+
+                    lines.append('\t'.join(common_first_columns + var_columns + samtools_columns + [matching_vars_column] + free_text_columns))
+            else:
+                lines.append('\t'.join(
+                    common_first_columns + var_columns + \
+                    samtools_columns + \
+                    [matching_vars_column] + free_text_columns
+                ))
     else:
         lines.append('\t'.join(common_first_columns + ['.'] * (len(columns) - len(common_first_columns) - 1) + free_text_columns))
 
