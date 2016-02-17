@@ -97,10 +97,12 @@ class TestSummary(unittest.TestCase):
 
         dicts = [summary.Summary._line2dict(x) for x in lines]
         expected = {
-            ('noncoding1', 'n', 'A14T'): dicts[0],
-            ('noncoding1', 'n', 'A6G'): dicts[1],
-            ('presence_absence1', 'p', 'A10V'): dicts[2],
-            ('variants_only1', 'p', 'S5T'): dicts[3]
+            'noncoding1': {
+                ('noncoding1', 'n', 'A14T'): dicts[0],
+                ('noncoding1', 'n', 'A6G'): dicts[1],
+            },
+            'presence_absence1': {('presence_absence1', 'p', 'A10V'): dicts[2]},
+            'variants_only1': {('variants_only1', 'p', 'S5T'): dicts[3]}
         }
 
         infile = os.path.join(data_dir, 'summary_test_load_file.in.tsv')

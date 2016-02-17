@@ -113,7 +113,9 @@ class Summary:
                 continue
             data = Summary._line2dict(line)
             key = Summary._dict2key(data)
-            d[key] = data
+            if key[0] not in d:
+                d[key[0]] = {}
+            d[key[0]][key] = data
 
         pyfastaq.utils.close(f)
         return d
