@@ -203,5 +203,8 @@ def report_lines(cluster):
         contig_pymummer_variants = [x for x in pymummer_variants if x.qry_name == contig_name]
         lines.extend(_report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, contig_pymummer_variants))
 
+    for line in lines:
+        assert len(line.split('\t')) == len(columns)
+
     return lines if len(lines) > 0 else None
 

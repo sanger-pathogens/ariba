@@ -73,7 +73,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata)
         c.run()
 
-        expected = '\t'.join(['.', '.', '1088', '2', 'cluster_name'] + ['.'] * 22)
+        expected = '\t'.join(['.', '.', '1088', '2', 'cluster_name'] + ['.'] * 23)
         self.assertEqual([expected], c.report_lines)
         self.assertTrue(c.status_flag.has('ref_seq_choose_fail'))
         self.assertTrue(c.status_flag.has('assembly_fail'))
@@ -91,7 +91,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata)
         c.run()
 
-        expected = '\t'.join(['noncoding_ref_seq', 'non_coding', '64', '4', 'cluster_name'] + ['.'] * 22)
+        expected = '\t'.join(['noncoding_ref_seq', 'non_coding', '64', '4', 'cluster_name'] + ['.'] * 23)
         self.assertEqual([expected], c.report_lines)
         self.assertFalse(c.status_flag.has('ref_seq_choose_fail'))
         self.assertTrue(c.status_flag.has('assembly_fail'))
@@ -159,7 +159,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
         c.run()
         expected = [
-            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of variants_only1'
+            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of variants_only1'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
