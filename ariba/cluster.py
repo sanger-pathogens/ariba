@@ -215,6 +215,9 @@ class Cluster:
                 verbose_filehandle=self.log_fh
             )
 
+            if self.assembly.has_contigs_on_both_strands:
+                self.status_flag.add('hit_both_strands')
+
             print('\nMaking and checking scaffold graph', file=self.log_fh)
 
             bam_parser = bam_parse.Parser(self.final_assembly_bam, self.assembly.sequences)
