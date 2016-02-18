@@ -1,4 +1,5 @@
 import os
+import copy
 import itertools
 import sys
 import shutil
@@ -6,7 +7,7 @@ import openpyxl
 import multiprocessing
 import pysam
 import pyfastaq
-from ariba import cdhit, cluster, common, mapping, histogram, faidx
+from ariba import cdhit, cluster, common, mapping, histogram, faidx, report
 
 class Error (Exception): pass
 
@@ -22,17 +23,15 @@ def _run_cluster(obj, verbose):
 
 class Clusters:
     def __init__(self,
-      db_fasta,
+      refdata,
       reads_1,
       reads_2,
       outdir,
+      extern_progs,
       assembly_kmer=21,
       threads=1,
       verbose=False,
-      assembler='velvet',
-      smalt_k=13,
-      smalt_s=2,
-      smalt_min_id=0.9,
+      assembler='spades',
       spades_other=None,
       max_insert=1000,
       min_scaff_depth=10,
@@ -41,48 +40,38 @@ class Clusters:
       nucmer_breaklen=50,
       assembled_threshold=0.95,
       unique_threshold=0.03,
-      bcftools_exe='bcftools',
-      gapfiller_exe='GapFiller.pl',
-      samtools_exe='samtools',
-      smalt_exe='smalt',
-      bowtie2_exe='bowtie2',
       bowtie2_preset='very-sensitive-local',
-      spades_exe='spades.py',
-      sspace_exe='SSPACE_Basic_v2.0.pl',
-      velvet_exe='velvet', # prefix of velvet{g,h}
       cdhit_seq_identity_threshold=0.9,
       cdhit_length_diff_cutoff=0.9,
       run_cd_hit=True,
       clean=1,
     ):
+        self.refdata = refdata
         self.reads_1 = os.path.abspath(reads_1)
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
+        self.extern_progs = extern_progs
         self.clusters_outdir = os.path.join(self.outdir, 'Clusters')
-        self.clusters_info_file = os.path.join(self.outdir, 'clusters.tsv')
         self.clean = clean
 
         self.assembler = assembler
-        assert self.assembler in ['velvet', 'spades']
+        assert self.assembler in ['spades']
         self.assembly_kmer = assembly_kmer
         self.spades_other = spades_other
 
-        self.db_fasta_clustered = os.path.join(self.outdir, 'input_genes.clustered.fa')
+        self.refdata_files_prefix = os.path.join(self.outdir, 'refdata')
+        self.cdhit_files_prefix = os.path.join(self.outdir, 'cdhit')
+        self.cdhit_cluster_representatives_fa = self.cdhit_files_prefix + '.cluster_representatives.fa'
         self.cluster_ids = {}
-        self.bam_prefix = os.path.join(self.outdir, 'map_all_reads')
+        self.bam_prefix = self.cdhit_cluster_representatives_fa + '.map_reads'
         self.bam = self.bam_prefix + '.bam'
         self.report_file_tsv = os.path.join(self.outdir, 'report.tsv')
         self.report_file_xls = os.path.join(self.outdir, 'report.xls')
-        self.catted_assembled_genes_fasta = os.path.join(self.outdir, 'assembled_genes.fa')
+        self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa')
         self.threads = threads
         self.verbose = verbose
 
-        self.smalt_k = smalt_k
-        self.smalt_s = smalt_s
-        self.smalt_min_id = smalt_min_id
         self.max_insert = max_insert
-        self.smalt_exe = smalt_exe
-        self.bowtie2_exe = bowtie2_exe
         self.bowtie2_preset = bowtie2_preset
 
         self.insert_hist_bin = 10
@@ -102,25 +91,6 @@ class Clusters:
         self.cluster_to_dir = {}  # gene name -> abs path of cluster directory
         self.clusters = {}        # gene name -> Cluster object
 
-        self.bcftools_exe = bcftools_exe
-
-        self.sspace_exe = shutil.which(sspace_exe)
-        if self.sspace_exe is None:
-            print('WARNING: SSPACE not found. Scaffolding and gap filling will be skipped!', file=sys.stderr)
-            self.gapfiller_exe = None
-        else:
-            self.sspace_exe = os.path.realpath(self.sspace_exe) # otherwise sspace dies loading packages
-            self.gapfiller_exe = shutil.which(gapfiller_exe)
-            if self.gapfiller_exe is None:
-                print('WARNING: GapFiller not found. No gap filling will be run after scaffolding!', file=sys.stderr)
-            else:
-                self.gapfiller_exe = os.path.realpath(self.gapfiller_exe) # otherwise gapfiller dies loading packages
-
-        self.samtools_exe = samtools_exe
-        self.spades_exe = spades_exe
-
-        self.velvet = velvet_exe
-
         self.cdhit_seq_identity_threshold = cdhit_seq_identity_threshold
         self.cdhit_length_diff_cutoff = cdhit_length_diff_cutoff
         self.run_cd_hit = run_cd_hit
@@ -131,48 +101,31 @@ class Clusters:
             except:
                 raise Error('Error mkdir ' + d)
 
-        self.db_fasta = os.path.join(self.outdir, 'input_genes.not_clustered.fa')
-        pyfastaq.tasks.to_fasta(db_fasta, self.db_fasta, check_unique=True)
-        common.syscall(self.samtools_exe + ' faidx ' + self.db_fasta)
-
 
     def _run_cdhit(self):
-        r = cdhit.Runner(
-            self.db_fasta,
-            self.db_fasta_clustered,
+        self.cluster_ids = self.refdata.cluster_with_cdhit(
+            self.refdata_files_prefix + '.01.check_variants',
+            self.cdhit_files_prefix,
             seq_identity_threshold=self.cdhit_seq_identity_threshold,
             threads=self.threads,
             length_diff_cutoff=self.cdhit_length_diff_cutoff,
+            nocluster=not self.run_cd_hit,
             verbose=self.verbose,
         )
-        if self.run_cd_hit:
-            self.cluster_ids = r.run()
-        else:
-            if self.verbose:
-                print('Skipping cd-hit because --no_cdhit option used')
-            self.cluster_ids = r.fake_run()
-
-
-    def _write_clusters_info_file(self):
-        f = pyfastaq.utils.open_file_write(self.clusters_info_file)
-        print('#Cluster\tGene', file=f)
-        for c in sorted([int(x) for x in self.cluster_ids]):
-            for seqname in sorted(list(self.cluster_ids[str(c)])):
-                print(c, seqname, sep='\t', file=f)
-        pyfastaq.utils.close(f)
 
 
     def _map_reads_to_clustered_genes(self):
         mapping.run_bowtie2(
             self.reads_1,
             self.reads_2,
-            self.db_fasta_clustered,
+            self.cdhit_cluster_representatives_fa,
             self.bam_prefix,
             threads=self.threads,
-            samtools=self.samtools_exe,
-            bowtie2=self.bowtie2_exe,
+            samtools=self.extern_progs.exe('samtools'),
+            bowtie2=self.extern_progs.exe('bowtie2'),
             bowtie2_preset=self.bowtie2_preset,
             verbose=self.verbose,
+            remove_both_unmapped=True,
         )
 
 
@@ -287,100 +240,86 @@ class Clusters:
         counter = 0
         cluster_list = []
 
-        for gene in sorted(self.cluster_to_dir):
-            counter += 1
-            if self.verbose:
-                print('Constructing cluster', counter, 'of', str(len(self.cluster_to_dir)))
-            new_dir = self.cluster_to_dir[gene]
+        for seq_type in sorted(self.cluster_ids):
+            if self.cluster_ids[seq_type] is None:
+                continue
 
-            faidx.write_fa_subset(
-                self.cluster_ids[gene],
-                self.db_fasta,
-                os.path.join(new_dir, 'genes.fa'),
-                samtools_exe=self.samtools_exe,
-                verbose=self.verbose
-            )
+            for seq_name in sorted(self.cluster_ids[seq_type]):
+                if seq_name not in self.cluster_to_dir:
+                    continue
+                counter += 1
+                if self.verbose:
+                    print('Constructing cluster', seq_name + '.', counter, 'of', str(len(self.cluster_to_dir)))
+                new_dir = self.cluster_to_dir[seq_name]
+                self.refdata.write_seqs_to_fasta(os.path.join(new_dir, 'references.fa'), self.cluster_ids[seq_type][seq_name])
 
-            cluster_list.append(cluster.Cluster(
-                new_dir,
-                gene,
-                assembly_kmer=self.assembly_kmer,
-                assembler=self.assembler,
-                max_insert=self.insert_proper_pair_max,
-                min_scaff_depth=self.min_scaff_depth,
-                nucmer_min_id=self.nucmer_min_id,
-                nucmer_min_len=self.nucmer_min_len,
-                nucmer_breaklen=self.nucmer_breaklen,
-                sspace_k=self.min_scaff_depth,
-                reads_insert=self.insert_size,
-                sspace_sd=self.insert_sspace_sd,
-                threads=1, # clusters now run in parallel, so this should always be 1!
-                assembled_threshold=self.assembled_threshold,
-                unique_threshold=self.unique_threshold,
-                bcftools_exe=self.bcftools_exe,
-                gapfiller_exe=self.gapfiller_exe,
-                samtools_exe=self.samtools_exe,
-                bowtie2_exe=self.bowtie2_exe,
-                bowtie2_preset=self.bowtie2_preset,
-                spades_exe=self.spades_exe,
-                sspace_exe=self.sspace_exe,
-                velvet_exe=self.velvet,
-                spades_other=self.spades_other,
-                clean=self.clean,
-            ))
+                cluster_list.append(cluster.Cluster(
+                    new_dir,
+                    seq_name,
+                    refdata=self.refdata,
+                    assembly_kmer=self.assembly_kmer,
+                    assembler=self.assembler,
+                    max_insert=self.insert_proper_pair_max,
+                    min_scaff_depth=self.min_scaff_depth,
+                    nucmer_min_id=self.nucmer_min_id,
+                    nucmer_min_len=self.nucmer_min_len,
+                    nucmer_breaklen=self.nucmer_breaklen,
+                    reads_insert=self.insert_size,
+                    sspace_k=self.min_scaff_depth,
+                    sspace_sd=self.insert_sspace_sd,
+                    threads=1, # clusters now run in parallel, so this should always be 1!
+                    bcf_min_dp=10,            # let the user change this in a future version?
+                    bcf_min_dv=5,             # let the user change this in a future version?
+                    bcf_min_dv_over_dp=0.3,   # let the user change this in a future version?
+                    bcf_min_qual=20,          # let the user change this in a future version?
+                    assembled_threshold=self.assembled_threshold,
+                    unique_threshold=self.unique_threshold,
+                    bowtie2_preset=self.bowtie2_preset,
+                    spades_other_options=self.spades_other,
+                    clean=self.clean,
+                    extern_progs=self.extern_progs,
+                ))
+
 
         pool = multiprocessing.Pool(self.threads)
         cluster_list = pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose)))
         self.clusters = {c.name: c for c in cluster_list}
 
 
-    def _write_reports(self):
-        columns = [
-            '#gene',
-            'flag',
-            'reads',
-            'cluster',
-            'gene_len',
-            'assembled',
-            'pc_ident',
-            'var_type',
-            'var_effect',
-            'new_aa',
-            'gene_start',
-            'gene_end',
-            'gene_nt',
-            'scaffold',
-            'scaff_len',
-            'scaff_start',
-            'scaff_end',
-            'scaff_nt',
-            'read_depth',
-            'alt_bases',
-            'ref_alt_depth'
-        ]
+    @staticmethod
+    def _write_reports(clusters_in, tsv_out, xls_out):
+        columns = copy.copy(report.columns)
+        columns[0] = '#' + columns[0]
 
-        f = pyfastaq.utils.open_file_write(self.report_file_tsv)
+        f = pyfastaq.utils.open_file_write(tsv_out)
         print('\t'.join(columns), file=f)
 
-        columns[0] = 'gene'
+        columns[0] = columns[0][1:]
         workbook = openpyxl.Workbook()
         worksheet = workbook.worksheets[0]
         worksheet.title = 'ARIBA_report'
         worksheet.append(columns)
 
-        for gene in sorted(self.clusters):
-            for line in self.clusters[gene].report_lines:
-                print('\t'.join([str(x) for x in line]), file=f)
-                worksheet.append(line)
+        for seq_name in sorted(clusters_in):
+            if clusters_in[seq_name].report_lines is None:
+                continue
+
+            for line in clusters_in[seq_name].report_lines:
+                print(line, file=f)
+                worksheet.append(line.split('\t'))
+
         pyfastaq.utils.close(f)
-        workbook.save(self.report_file_xls)
+        workbook.save(xls_out)
 
 
-    def _write_catted_assembled_genes_fasta(self):
-        f = pyfastaq.utils.open_file_write(self.catted_assembled_genes_fasta)
+    def _write_catted_assembled_seqs_fasta(self, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
 
         for gene in sorted(self.clusters):
-            cluster_fasta = self.clusters[gene].final_assembled_genes_fa
+            try:
+                cluster_fasta = self.clusters[gene].assembly_compare.assembled_ref_seqs_file
+            except:
+                continue
             if os.path.exists(cluster_fasta):
                 file_reader = pyfastaq.sequences.file_reader(cluster_fasta)
                 for seq in file_reader:
@@ -390,32 +329,44 @@ class Clusters:
 
 
     def _clean(self):
-        to_clean = [
-            [
-            ],
-            [
-                self.bam,
-                self.db_fasta,
-                self.db_fasta + '.fai',
-            ],
-            [
-                self.db_fasta_clustered,
-                self.db_fasta_clustered + '.fai',
-                self.clusters_info_file,
-            ]
+        if self.clean == 0:
+            if self.verbose:
+                print('   ... not deleting anything because --clean 0 used')
+            return
+
+        to_delete= [
+            self.bam,
+            self.cdhit_cluster_representatives_fa,
+            self.cdhit_cluster_representatives_fa + '.fai',
+            self.cdhit_files_prefix + '.non_coding.cdhit',
+            self.cdhit_files_prefix + '.presence_absence.cdhit',
+            self.cdhit_files_prefix + '.variants_only.cdhit',
         ]
 
-        for i in range(self.clean + 1):
-            for fname in to_clean[i]:
-                if os.path.exists(fname):
-                    if self.verbose:
-                        print('  rm', fname)
-                    os.unlink(fname)
-
-        if self.clean >= 2:
+        if self.clean == 2:
             if self.verbose:
-                print('  rm -r', self.clusters_outdir)
+                print('    rm -r', self.clusters_outdir)
                 shutil.rmtree(self.clusters_outdir)
+
+            to_delete.extend([
+                self.cdhit_files_prefix + '.clusters.tsv',
+                self.refdata_files_prefix + '.00.check_fasta_presence_absence.log',
+                self.refdata_files_prefix + '.00.check_fasta_variants_only.log',
+                self.refdata_files_prefix + '.01.check_variants.log',
+                self.refdata_files_prefix + '.01.check_variants.non_coding.fa',
+                self.refdata_files_prefix + '.01.check_variants.presence_absence.fa',
+                self.refdata_files_prefix + '.01.check_variants.tsv',
+                self.refdata_files_prefix + '.01.check_variants.variants_only.fa',
+            ])
+
+        for filename in to_delete:
+            if os.path.exists(filename):
+                if self.verbose:
+                    print('    rm', filename)
+                try:
+                    os.unlink(filename)
+                except:
+                    raise Error('Error deleting file', filename)
 
 
     def run(self):
@@ -423,21 +374,29 @@ class Clusters:
         os.chdir(self.outdir)
 
         if self.verbose:
+            print('{:_^79}'.format(' Checking reference data '), flush=True)
+        self.refdata.sanity_check(self.refdata_files_prefix)
+
+        if self.verbose:
+            print()
             print('{:_^79}'.format(' Running cd-hit '), flush=True)
         self._run_cdhit()
-        self._write_clusters_info_file()
+
         if self.verbose:
             print('Finished cd-hit\n')
             print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
         self._map_reads_to_clustered_genes()
+
         if self.verbose:
             print('Finished mapping\n')
             print('{:_^79}'.format(' Generating clusters '), flush=True)
         self._bam_to_clusters_reads()
+
         if len(self.cluster_to_dir) > 0:
             self._set_insert_size_data()
             if self.verbose:
-                print('{:_^79}'.format(' Assembling each cluster '), flush=True)
+                print('{:_^79}'.format(' Assembling each cluster '))
+                print('Will run', self.threads, 'cluster(s) in parallel', flush=True)
             self._init_and_run_clusters()
             if self.verbose:
                 print('Finished assembling clusters\n')
@@ -448,11 +407,19 @@ class Clusters:
 
         if self.verbose:
             print('{:_^79}'.format(' Writing report files '), flush=True)
-        self._write_reports()
-        self._write_catted_assembled_genes_fasta()
+            print(self.report_file_tsv)
+            print(self.report_file_xls)
+        self._write_reports(self.clusters, self.report_file_tsv, self.report_file_xls)
+
         if self.verbose:
-            print('Finished writing report files. Cleaning files', flush=True)
+            print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
+            print(self.catted_assembled_seqs_fasta)
+        self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
+
+        if self.verbose:
+            print('\n\nCleaning files:', flush=True)
         self._clean()
+
         if self.verbose:
             print('\nAll done!\n')
 

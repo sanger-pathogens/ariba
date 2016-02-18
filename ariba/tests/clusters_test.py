@@ -4,19 +4,20 @@ import os
 import pysam
 import pyfastaq
 import filecmp
-from ariba import clusters
+from ariba import clusters, external_progs, reference_data
 
 modules_dir = os.path.dirname(os.path.abspath(clusters.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
+extern_progs = external_progs.ExternalProgs()
 
 
 class TestClusters(unittest.TestCase):
     def setUp(self):
         self.cluster_dir = 'tmp.Cluster'
+        refdata = reference_data.ReferenceData(non_coding_fa = os.path.join(data_dir, 'clusters_test_dummy_db.fa'))
         reads1 = os.path.join(data_dir, 'clusters_test_dummy_reads_1.fq')
         reads2 = os.path.join(data_dir, 'clusters_test_dummy_reads_2.fq')
-        db = os.path.join(data_dir, 'clusters_test_dummy_db.fa')
-        self.clusters = clusters.Clusters(db, reads1, reads2, self.cluster_dir)
+        self.clusters = clusters.Clusters(refdata, reads1, reads2, self.cluster_dir, extern_progs)
 
 
     def tearDown(self):
@@ -68,7 +69,8 @@ class TestClusters(unittest.TestCase):
         reads1 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_1.fq')
         reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_2.fq')
         ref = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.db.fa')
-        c = clusters.Clusters(ref, reads1, reads2, clusters_dir)
+        refdata = reference_data.ReferenceData(presence_absence_fa = ref)
+        c = clusters.Clusters(refdata, reads1, reads2, clusters_dir, extern_progs)
         shutil.copyfile(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.bam'), c.bam)
         c._bam_to_clusters_reads()
         expected = [
@@ -121,28 +123,40 @@ class TestClusters(unittest.TestCase):
             def __init__(self, lines):
                 self.report_lines = lines
 
-        self.clusters.clusters = {
-            'gene1': FakeCluster([['gene1 line1']]),
-            'gene2': FakeCluster([['gene2 line2']])
+        clusters_dict = {
+            'gene1': FakeCluster(['gene1\tline1']),
+            'gene2': FakeCluster(['gene2\tline2'])
         }
 
-        self.clusters._write_reports()
+        tmp_tsv = 'tmp.test_write_reports.tsv'
+        tmp_xls = 'tmp.test_write_reports.xls'
+        clusters.Clusters._write_reports(clusters_dict, tmp_tsv, tmp_xls)
+
         expected = os.path.join(data_dir, 'clusters_test_write_report.tsv')
-        self.assertTrue(filecmp.cmp(expected, self.clusters.report_file_tsv, shallow=False))
-        self.assertTrue(os.path.exists(self.clusters.report_file_xls))
+        self.assertTrue(filecmp.cmp(expected, tmp_tsv, shallow=False))
+        self.assertTrue(os.path.exists(tmp_xls))
+        os.unlink(tmp_tsv)
+        os.unlink(tmp_xls)
 
 
-    def test_write_catted_assembled_genes_fasta(self):
-        '''test _write_catted_assembled_genes_fasta'''
+    def test_write_catted_assembled_seqs_fasta(self):
+        '''test _write_catted_assembled_seqs_fasta'''
+        class FakeAssemblyCompare:
+            def __init__(self, filename):
+                self.assembled_ref_seqs_file = filename
+
         class FakeCluster:
             def __init__(self, filename):
-                self.final_assembled_genes_fa = filename
+                #self.final_assembled_genes_fa = filename
+                self.assembly_compare = FakeAssemblyCompare(filename)
 
         self.clusters.clusters = {
             'gene1': FakeCluster(os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.in.gene1.fa')),
             'gene2': FakeCluster(os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.in.gene2.fa')),
         }
 
-        self.clusters._write_catted_assembled_genes_fasta()
+        tmp_file = 'tmp.test_write_catted_assembled_seqs_fasta.fa'
+        self.clusters._write_catted_assembled_seqs_fasta(tmp_file)
         expected = os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.expected.out.fa')
-        self.assertTrue(filecmp.cmp(expected, self.clusters.catted_assembled_genes_fasta, shallow=False))
+        self.assertTrue(filecmp.cmp(expected, tmp_file, shallow=False))
+        os.unlink(tmp_file)

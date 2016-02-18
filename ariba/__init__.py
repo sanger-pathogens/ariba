@@ -1,5 +1,9 @@
 __all__ = [
+    'assembly',
+    'assembly_compare',
+    'assembly_variants',
     'bam_parse',
+    'best_seq_chooser',
     'cdhit',
     'cluster',
     'clusters',
@@ -10,8 +14,12 @@ __all__ = [
     'histogram',
     'link',
     'mapping',
-    'refcheck',
+    'reference_data',
+    'ref_genes_getter',
+    'report',
     'scaffold_graph',
+    'sequence_metadata',
+    'sequence_variant',
     'summary',
     'tasks',
 ]

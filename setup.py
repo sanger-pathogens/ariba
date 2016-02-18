@@ -10,6 +10,7 @@ setup(
     version='0.6.0',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
+    package_data={'ariba': ['test_run_data/*']},
     author='Martin Hunt',
     author_email='path-help@sanger.ac.uk',
     url='https://github.com/sanger-pathogens/ariba',
@@ -18,9 +19,10 @@ setup(
     tests_require=['nose >= 1.3'],
     install_requires=[
         'openpyxl',
-        'pyfastaq >= 3.10.0',
+        'pyfastaq >= 3.11.1',
         'pysam >= 0.8.1',
-        'pymummer>=0.6.1'
+        'pymummer>=0.6.1',
+        'beautifulsoup4'
     ],
     license='GPLv3',
     classifiers=[

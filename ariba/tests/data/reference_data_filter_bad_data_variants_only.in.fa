@@ -1,0 +1,6 @@
+>variants_only_1
+ATGTCCTGTTAG
+>variants_only_should_be_removed
+ATGTCCTGTTAG
+>variants_only_no_good_variants
+ATGTTTTAG

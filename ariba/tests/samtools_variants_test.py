@@ -1,0 +1,142 @@
+import unittest
+import os
+import pyfastaq
+import pymummer
+from ariba import samtools_variants, external_progs
+
+modules_dir = os.path.dirname(os.path.abspath(samtools_variants.__file__))
+data_dir = os.path.join(modules_dir, 'tests', 'data')
+extern_progs = external_progs.ExternalProgs()
+
+
+def file2lines(filename):
+    f = pyfastaq.utils.open_file_read(filename)
+    lines = f.readlines()
+    pyfastaq.utils.close(f)
+    return lines
+
+
+class TestSamtoolsVariants(unittest.TestCase):
+    def test_make_vcf_and_read_depths_files(self):
+        '''test _make_vcf_and_read_depths_files'''
+        ref = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.assembly.fa')
+        bam = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.bam')
+        expected_vcf = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.expected.vcf')
+        expected_depths = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.expected.read_depths.gz')
+        tmp_prefix = 'tmp.test_make_vcf_and_read_depths_files'
+        sv = samtools_variants.SamtoolsVariants(
+            ref,
+            bam,
+            tmp_prefix,
+            samtools_exe=extern_progs.exe('samtools'),
+            bcftools_exe=extern_progs.exe('bcftools')
+        )
+        sv._make_vcf_and_read_depths_files()
+
+        def get_vcf_call_lines(fname):
+            with open(fname) as f:
+                lines = [x for x in f.readlines() if not x.startswith('#')]
+            return lines
+
+        expected_lines = get_vcf_call_lines(expected_vcf)
+        got_lines = get_vcf_call_lines(sv.vcf_file)
+        self.assertEqual(expected_lines, got_lines)
+        self.assertEqual(file2lines(expected_depths), file2lines(sv.read_depths_file))
+        os.unlink(sv.vcf_file)
+        os.unlink(sv.read_depths_file)
+        os.unlink(sv.read_depths_file + '.tbi')
+
+
+    def test_get_read_depths(self):
+        '''test _get_read_depths'''
+        read_depths_file = os.path.join(data_dir, 'samtools_variants_test_get_read_depths.gz')
+
+        tests = [
+            ( ('ref1', 42), None ),
+            ( ('ref2', 1), None ),
+            ( ('ref1', 0), ('G', '.', 1, '1') ),
+            ( ('ref1', 2), ('T', 'A', 3, '2,1') ),
+            ( ('ref1', 3), ('C', 'A,G', 42, '21,11,10') ),
+            ( ('ref1', 4), ('C', 'AC', 41, '0,42') )
+        ]
+
+        for (name, position), expected in tests:
+            self.assertEqual(expected, samtools_variants.SamtoolsVariants._get_read_depths(read_depths_file, name, position))
+
+
+    def test_get_variant_positions_from_vcf(self):
+        '''test _get_variant_positions_from_vcf'''
+        vcf_file = os.path.join(data_dir, 'samtools_variants_test_get_variant_positions_from_vcf.vcf')
+
+        expected = [
+            ('16__cat_2_M35190.scaffold.1', 92),
+            ('16__cat_2_M35190.scaffold.1', 179),
+            ('16__cat_2_M35190.scaffold.1', 263),
+            ('16__cat_2_M35190.scaffold.6', 93)
+        ]
+        self.assertEqual(expected, samtools_variants.SamtoolsVariants._get_variant_positions_from_vcf(vcf_file))
+
+
+    def test_get_variants(self):
+        '''test _get_variants'''
+        vcf_file = os.path.join(data_dir, 'samtools_variants_test_get_variants.vcf')
+        read_depths_file = os.path.join(data_dir, 'samtools_variants_test_get_variants.read_depths.gz')
+        positions = [
+            ('16__cat_2_M35190.scaffold.1', 92),
+            ('16__cat_2_M35190.scaffold.1', 179),
+            ('16__cat_2_M35190.scaffold.1', 263),
+            ('16__cat_2_M35190.scaffold.6', 93)
+        ]
+        expected = {
+            '16__cat_2_M35190.scaffold.1': {
+                92: ('T', 'A', 123, '65,58'),
+                179: ('A', 'T', 86, '41,45'),
+                263: ('G', 'C', 97, '53,44'),
+            },
+            '16__cat_2_M35190.scaffold.6': {
+                93: ('T', 'G', 99, '56,43')
+            }
+        }
+
+        got = samtools_variants.SamtoolsVariants._get_variants(vcf_file, read_depths_file, positions=positions)
+        self.assertEqual(expected, got)
+
+
+    def test_variants_in_coords(self):
+        '''test variants_in_coords'''
+        vcf_file = os.path.join(data_dir, 'samtools_variants_test_variants_in_coords.vcf')
+
+        hit = ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'scaff1']
+        nucmer_hits = {
+            'scaff1': [pyfastaq.intervals.Interval(0, 41)]
+        }
+
+        got = samtools_variants.SamtoolsVariants.variants_in_coords(nucmer_hits, vcf_file)
+        self.assertEqual(1, got)
+
+
+    def test_get_depths_at_position(self):
+        '''test get_depths_at_position'''
+        bam = os.path.join(data_dir, 'samtools_variants_test_get_depths_at_position.bam')
+        ref_fa = os.path.join(data_dir, 'samtools_variants_test_get_depths_at_position.ref.fa')
+        tmp_prefix = 'tmp.test_get_depths_at_position'
+        samtools_vars = samtools_variants.SamtoolsVariants(
+            ref_fa,
+            bam,
+            tmp_prefix,
+            samtools_exe=extern_progs.exe('samtools'),
+            bcftools_exe=extern_progs.exe('bcftools')
+        )
+        samtools_vars.run()
+        tests = [
+            (('ref', 425), ('C', 'T', 31, '18,13')),
+            (('not_a_ref', 10), None),
+            (('ref', 1000000000), None)
+        ]
+        for (ref, pos), expected in tests:
+            got = samtools_vars.get_depths_at_position(ref, pos)
+            self.assertEqual(expected, got)
+
+        os.unlink(samtools_vars.vcf_file)
+        os.unlink(samtools_vars.read_depths_file)
+        os.unlink(samtools_vars.read_depths_file + '.tbi')
