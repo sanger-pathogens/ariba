@@ -1,4 +1,5 @@
 import os
+import re
 import openpyxl
 import pyfastaq
 from ariba import flag, common, reference_data, report
@@ -225,10 +226,22 @@ class Summary:
 
     @classmethod
     def _write_phandango_csv(cls, rows, outfile):
+        # phandango needs the "name" column.
+        # Names must match those used in the tree file.
+        # we also need to add suffixes like :z1 to make phandango colour
+        # the columns consistently. We want to colour just sequence
+        # columns the same, and then all variant columns the same
+        header_line = ['name']
+        var_regex = re.compile('^.*;var\.[np.]\.\S+$')
+
+        for heading in rows[0][1:]:
+            if var_regex.search(heading) is None:
+                header_line.append(heading + ':z1')
+            else:
+                header_line.append(heading + ':z2')
+
         f = pyfastaq.utils.open_file_write(outfile)
-        # js candy needs the "name" column.
-        # Names must match those used in the tree file
-        print('name', *rows[0][1:], sep=',', file=f)
+        print(*header_line, sep=',', file=f)
         for row in rows[1:]:
             print(*row, sep=',', file=f)
         pyfastaq.utils.close(f)
