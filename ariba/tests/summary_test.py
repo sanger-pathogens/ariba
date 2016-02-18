@@ -166,10 +166,11 @@ class TestSummary(unittest.TestCase):
         ]
         got = summary.Summary._gather_output_rows(infiles, 90)
         expected = [
-            ['filename', 'noncoding1', 'noncoding1.n.A14T', 'noncoding1.n.A6G', 'presence_absence1', 'presence_absence1.p.A10V', 'variants_only1'],
+            ['filename', 'noncoding1', 'noncoding1;var.n.A14T', 'noncoding1;var.n.A6G', 'presence_absence1', 'presence_absence1;var.p.A10V', 'variants_only1'],
             [infiles[0], 1, 1, 0, 3, 1, 0],
             [infiles[1], 1, 1, 1, 3, 1, 0],
         ]
+
         self.assertEqual(expected, got)
 
 

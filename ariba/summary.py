@@ -173,7 +173,12 @@ class Summary:
 
         all_column_tuples = list(all_column_tuples)
         all_column_tuples.sort()
-        rows = [['filename'] + ['.'.join(x).rstrip('.') for x in all_column_tuples]]
+        rows = [['filename']]
+        for t in all_column_tuples:
+            if t[1] == t[2] == '':
+                rows[0].append(t[0])
+            else:
+                rows[0].append(t[0] + ';' + 'var.' + t[1] + '.' + t[2])
 
         for filename in filenames:
             new_row = [filename]
