@@ -18,7 +18,8 @@ def run_bowtie2(
       bowtie2='bowtie2',
       bowtie2_preset='very-sensitive-local',
       verbose=False,
-      verbose_filehandle=sys.stdout
+      verbose_filehandle=sys.stdout,
+      remove_both_unmapped=False,
     ):
 
     map_index = out_prefix + '.map_index'
@@ -36,18 +37,28 @@ def run_bowtie2(
     else:
         intermediate_bam = final_bam
 
-    map_cmd = ' '.join([
+    map_cmd = [
         bowtie2,
         '--threads', str(threads),
+        '--reorder',
         '--' + bowtie2_preset,
         '-X', str(max_insert),
         '-x', map_index,
         '-1', reads_fwd,
         '-2', reads_rev,
+    ]
+
+    if remove_both_unmapped:
+        map_cmd.append(r''' | awk ' !(and($2,4)) || !(and($2,8)) ' ''')
+
+
+    map_cmd.extend([
         '|', samtools, 'view',
         '-bS -T', ref_fa,
         '- >', intermediate_bam
     ])
+
+    map_cmd = ' '.join(map_cmd)
 
     common.syscall(index_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
     common.syscall(map_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)

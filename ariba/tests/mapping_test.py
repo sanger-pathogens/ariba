@@ -45,6 +45,28 @@ class TestMapping(unittest.TestCase):
         os.unlink(out_prefix + '.bam')
 
 
+    def test_run_bowtie2_remove_both_unmapped(self):
+        '''Test run_bowtie2 unsorted remove both unmapped'''
+        self.maxDiff = None
+        ref = os.path.join(data_dir, 'mapping_test_bowtie2_ref.fa')
+        reads1 = os.path.join(data_dir, 'mapping_test_bowtie2_remove_both_unmapped_reads_1.fq')
+        reads2 = os.path.join(data_dir, 'mapping_test_bowtie2_remove_both_unmapped_reads_2.fq')
+        out_prefix = 'tmp.out.bowtie2_remove_both_unmapped'
+        mapping.run_bowtie2(
+            reads1,
+            reads2,
+            ref,
+            out_prefix,
+            samtools=extern_progs.exe('samtools'),
+            bowtie2=extern_progs.exe('bowtie2'),
+            remove_both_unmapped=True,
+        )
+        expected = get_sam_columns(os.path.join(data_dir, 'mapping_test_bowtie2_remove_both_unmapped_reads.bam'))
+        got = get_sam_columns(out_prefix + '.bam')
+        self.assertListEqual(expected, got)
+        os.unlink(out_prefix + '.bam')
+
+
     def test_run_bowtie2_and_sort(self):
         '''Test run_bowtie2 sorted'''
         ref = os.path.join(data_dir, 'mapping_test_bowtie2_ref.fa')

@@ -125,6 +125,7 @@ class Clusters:
             bowtie2=self.extern_progs.exe('bowtie2'),
             bowtie2_preset=self.bowtie2_preset,
             verbose=self.verbose,
+            remove_both_unmapped=True,
         )
 
 
