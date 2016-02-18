@@ -21,6 +21,7 @@ class Assembly:
       bowtie2_preset='very-sensitive-local',
       max_insert=1000,
       min_scaff_depth=10,
+      min_scaff_length=50,
       nucmer_min_id=90,
       nucmer_min_len=50,
       nucmer_breaklen=50,
@@ -44,6 +45,7 @@ class Assembly:
         self.bowtie2_preset = bowtie2_preset
         self.max_insert = max_insert
         self.min_scaff_depth = min_scaff_depth
+        self.min_scaff_length = min_scaff_length
         self.nucmer_min_id = nucmer_min_id
         self.nucmer_min_len = nucmer_min_len
         self.nucmer_breaklen = nucmer_breaklen
@@ -68,6 +70,7 @@ class Assembly:
         self.scaffolder_scaffolds = os.path.join(self.working_dir, 'scaffolds.fa')
         self.gapfill_dir = os.path.join(self.working_dir, 'Gapfill')
         self.gapfilled_scaffolds = os.path.join(self.working_dir, 'scaffolds.gapfilled.fa')
+        self.gapfilled_length_filtered = os.path.join(self.working_dir, 'scaffolds.gapfilled.length_filtered.fa')
 
 
     @staticmethod
@@ -278,7 +281,15 @@ class Assembly:
         if self.assembled_ok:
             self._scaffold_with_sspace()
             self._gap_fill_with_gapfiller()
-            contigs_both_strands = self._fix_contig_orientation(self.gapfilled_scaffolds, self.ref_fasta, self.final_assembly_fa)
+
+            pyfastaq.tasks.filter(self.gapfilled_scaffolds, self.gapfilled_length_filtered, minlength=self.min_scaff_length)
+            if pyfastaq.tasks.count_sequences(self.gapfilled_length_filtered) == 0:
+                self.assembled_ok = False
+                # This is to make this object picklable, to keep multithreading happy
+                self.log_fh = None
+                return
+
+            contigs_both_strands = self._fix_contig_orientation(self.gapfilled_length_filtered, self.ref_fasta, self.final_assembly_fa)
             self.has_contigs_on_both_strands = len(contigs_both_strands) > 0
             pyfastaq.tasks.file_to_dict(self.final_assembly_fa, self.sequences)
 
