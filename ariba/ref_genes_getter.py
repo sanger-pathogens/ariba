@@ -164,7 +164,7 @@ class RefGenesGetter:
             print(seq, file=fa_out)
 
             if description is not None:
-                print(seq.id, '.', '.', description, sep='\t', file=metadata_fh)
+                print(seq.id, '.', '.', 'N', description, sep='\t', file=metadata_fh)
 
         pyfastaq.utils.close(fa_out)
         return presence_absence_ids
@@ -186,7 +186,7 @@ class RefGenesGetter:
 
             print(seq, file=f_out)
             if description is not None:
-                print(seq.id, '.', '.', description, sep='\t', file=metadata_fh)
+                print(seq.id, '.', '.', 'N', description, sep='\t', file=metadata_fh)
 
         pyfastaq.utils.close(f_out)
 
