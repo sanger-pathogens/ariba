@@ -315,7 +315,10 @@ class Clusters:
         f = pyfastaq.utils.open_file_write(outfile)
 
         for gene in sorted(self.clusters):
-            cluster_fasta = self.clusters[gene].assembly_compare.assembled_ref_seqs_file
+            try:
+                cluster_fasta = self.clusters[gene].assembly_compare.assembled_ref_seqs_file
+            except:
+                continue
             if os.path.exists(cluster_fasta):
                 file_reader = pyfastaq.sequences.file_reader(cluster_fasta)
                 for seq in file_reader:
