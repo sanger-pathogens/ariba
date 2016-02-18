@@ -246,6 +246,16 @@ class Cluster:
             assembly_variants_obj = assembly_variants.AssemblyVariants(self.refdata, self.assembly_compare.nucmer_snps_file)
             self.assembly_variants = assembly_variants_obj.get_variants(self.ref_sequence.id, nucmer_hits_to_ref)
 
+            for var_list in self.assembly_variants.values():
+                for var in var_list:
+                    if var[3] not in ['.', 'SYN', None]:
+                        self.status_flag.add('has_nonsynonymous_variants')
+                        break
+
+                if self.status_flag.has('has_nonsynonymous_variants'):
+                    break
+
+
             print('\nCalling variants with samtools:', file=self.log_fh)
 
             self.samtools_vars = samtools_variants.SamtoolsVariants(
