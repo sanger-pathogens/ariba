@@ -28,7 +28,7 @@ class Summary:
       filenames=None,
       fofn=None,
       filter_output=True,
-      js_candy_prefix=None,
+      phandango_prefix=None,
       min_id=90.0
     ):
         if filenames is None and fofn is None:
@@ -45,7 +45,7 @@ class Summary:
         self.filter_output = filter_output
         self.min_id = min_id
         self.outfile = outfile
-        self.js_candy_prefix = js_candy_prefix
+        self.phandango_prefix = phandango_prefix
 
 
     def _load_fofn(self, fofn):
@@ -224,7 +224,7 @@ class Summary:
 
 
     @classmethod
-    def _write_js_candy_csv(cls, rows, outfile):
+    def _write_phandango_csv(cls, rows, outfile):
         f = pyfastaq.utils.open_file_write(outfile)
         # js candy needs the "name" column.
         # Names must match those used in the tree file
@@ -261,11 +261,11 @@ class Summary:
     @classmethod
     def _write_distance_matrix(cls, rows, outfile):
         if len(rows) < 3:
-            raise Error('Cannot calculate distance matrix to make tree for js_candy.\n' +
+            raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
                         'Only one sample present.')
 
         if len(rows[0]) < 2:
-            raise Error('Cannot calculate distance matrix to make tree for js_candy.\n' +
+            raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
                         'No genes present in output')
 
         with open(outfile, 'w') as f:
@@ -295,14 +295,14 @@ class Summary:
 
 
     @classmethod
-    def _write_js_candy_files(cls, rows, outprefix):
+    def _write_phandango_files(cls, rows, outprefix):
         distance_file = outprefix + '.distance_matrix'
         tree_file = outprefix + '.tre'
         csv_file = outprefix + '.csv'
         Summary._write_distance_matrix(rows, distance_file)
         Summary._newick_from_dist_matrix(distance_file, tree_file)
         os.unlink(distance_file)
-        Summary._write_js_candy_csv(rows, csv_file)
+        Summary._write_phandango_csv(rows, csv_file)
 
 
     def run(self):
@@ -317,5 +317,5 @@ class Summary:
         else:
             Summary._write_tsv(rows, self.outfile)
 
-        if self.js_candy_prefix is not None:
-            Summary._write_js_candy_files(rows, self.js_candy_prefix)
+        if self.phandango_prefix is not None:
+            Summary._write_phandango_files(rows, self.phandango_prefix)

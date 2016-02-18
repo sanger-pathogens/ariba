@@ -207,16 +207,16 @@ class TestSummary(unittest.TestCase):
         os.unlink(tmp_out)
 
 
-    def test_write_js_candy_csv(self):
-        '''Test _write_js_candy_csv'''
-        tmp_out = 'tmp.test_write_js_candy.csv'
+    def test_write_phandango_csv(self):
+        '''Test _write_phandango_csv'''
+        tmp_out = 'tmp.test_write_phandango.csv'
         rows = [
             ['filename', 'gene1', 'gene3'],
             ['file1', 1, 3],
             ['file2', 2, 4],
         ]
-        summary.Summary._write_js_candy_csv(rows, tmp_out)
-        expected = os.path.join(data_dir, 'summary_test_write_js_candy_csv.csv')
+        summary.Summary._write_phandango_csv(rows, tmp_out)
+        expected = os.path.join(data_dir, 'summary_test_write_phandango_csv.csv')
         self.assertTrue(filecmp.cmp(expected, tmp_out, shallow=False))
         os.unlink(tmp_out)
 
@@ -279,18 +279,18 @@ class TestSummary(unittest.TestCase):
         os.unlink(tmp_tree)
 
 
-    def test_write_js_candy_files(self):
-        '''Test _write_js_candy_files'''
-        tmp_prefix = 'tmp.test.write_js_candy_files'
+    def test_write_phandango_files(self):
+        '''Test _write_phandango_files'''
+        tmp_prefix = 'tmp.test.write_phandango_files'
         rows = [
             ['filename', 'gene1', 'gene2', 'gene3'],
             ['file1', 0, 1, 0],
             ['file2', 1, 0, 3],
             ['file3', 0, 0, 4],
         ]
-        summary.Summary._write_js_candy_files(rows, tmp_prefix)
-        expected_csv = os.path.join(data_dir, 'summary_test_write_js_candy_files.csv')
-        expected_tre = os.path.join(data_dir, 'summary_test_write_js_candy_files.tre')
+        summary.Summary._write_phandango_files(rows, tmp_prefix)
+        expected_csv = os.path.join(data_dir, 'summary_test_write_phandango_files.csv')
+        expected_tre = os.path.join(data_dir, 'summary_test_write_phandango_files.tre')
         self.assertTrue(filecmp.cmp(expected_csv, tmp_prefix + '.csv', shallow=False))
         self.assertTrue(filecmp.cmp(expected_tre, tmp_prefix + '.tre', shallow=False))
         os.unlink(tmp_prefix + '.csv')
