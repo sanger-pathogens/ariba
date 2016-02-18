@@ -128,6 +128,8 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
 
             var_columns = ['.' if x is None else str(x) for x in [is_known_var, var_type, var_seq_type, known_var_change, has_known_var, ref_ctg_change, var_effect]]
 
+            if var_effect not in ['.', 'SYN']:
+                cluster.status_flag.add('has_nonsynonymous_variants')
 
             if contributing_vars is None:
                 samtools_columns = [['.'] * 9]
