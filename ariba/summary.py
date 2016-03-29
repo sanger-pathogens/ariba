@@ -322,7 +322,7 @@ class Summary:
         self._check_files_exist()
         rows = Summary._gather_output_rows(self.filenames, self.min_id)
 
-        if self.filter_rows:
+        if self.filter_output:
             rows = Summary._filter_output_rows(rows)
 
         if self.outfile.endswith('.xls'):
