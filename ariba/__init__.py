@@ -17,6 +17,7 @@ __all__ = [
     'reference_data',
     'ref_genes_getter',
     'report',
+    'report_filter',
     'scaffold_graph',
     'sequence_metadata',
     'sequence_variant',
