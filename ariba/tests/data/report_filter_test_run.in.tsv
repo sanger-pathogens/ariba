@@ -1,0 +1,5 @@
+#ref_name	ref_type	flag	reads	cluster_rep	ref_len	ref_base_assembled	pc_ident	ctg	ctg_len	known_var	var_type	var_seq_type	known_var_change	has_known_var	ref_ctg_change	ref_ctg_effect	ref_start	ref_end	ref_nt	ctg_start	ctg_end	ctg_nt	smtls_total_depth	smtls_alt_nt	smtls_alt_depth	var_description	free_text
+cluster1	non_coding	27	10000	cluster1	1000	0	99.42	cluster1.scaffold.1	1300	1	SNP	n	C42T	0	.	.	42	42	C	142	142	C	500	.	500	Description_of_variant.C42T	free_text
+cluster1	non_coding	27	10000	cluster1	1000	999	99.42	cluster1.scaffold.1	1300	1	SNP	n	A51G	1	.	.	51	51	C	151	151	C	542	.	542	Description_of_variant.A51G	free_text2
+cluster2	variants_only	179	20000	cluster2	1042	1042	99.0	cluster2.scaffold.1	1442	1	SNP	p	I42L	1	I42L	NONSYN	112	112	C	442	442	T	300	.	290	Description_of_variant.I42L	free_text3
+cluster3	variants_only	179	20000	cluster3	1042	1042	89.0	cluster2.scaffold.1	1442	1	SNP	p	I42L	1	I42L	NONSYN	112	112	C	442	442	T	300	.	290	Description_of_variant.I42L	free_text3

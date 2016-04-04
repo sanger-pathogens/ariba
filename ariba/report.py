@@ -32,6 +32,21 @@ columns = [
 ]
 
 
+int_columns = [
+    'reads',
+    'ref_len',
+    'ref_base_assembled',
+    'ctg_len',
+    'ref_start',
+    'ref_end',
+    'ctg_start',
+    'ctg_end',
+]
+
+
+float_columns = ['pc_ident']
+
+
 def header_line():
     return '\t'.join(columns)
 
