@@ -177,3 +177,33 @@ class TestReportFilter(unittest.TestCase):
             rf = report_filter.ReportFilter(min_ref_base_assembled=cutoff)
             self.assertEqual(expected, rf._report_dict_passes_filters(test_dict))
 
+
+    def test_filter_dicts(self):
+        '''Test _filter_dicts'''
+        rf = report_filter.ReportFilter(min_ref_base_assembled=10)
+
+        rf.report = {
+            'ref1': [
+                {'pc_ident': 91.0, 'ref_base_assembled': 9, 'has_known_var': '1'},
+                {'pc_ident': 89.0, 'ref_base_assembled': 10, 'has_known_var': '1'},
+                {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '0'},
+                {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
+            ],
+            'ref2': [
+                {'pc_ident': 91.0, 'ref_base_assembled': 10, 'has_known_var': '.'},
+            ],
+            'ref3': [
+                {'pc_ident': 91.0, 'ref_base_assembled': 10, 'has_known_var': '0'},
+            ]
+        }
+
+
+        expected = {
+            'ref1': [
+                {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
+            ],
+        }
+
+        rf._filter_dicts()
+        self.assertEqual(expected, rf.report)
+

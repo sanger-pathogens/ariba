@@ -84,3 +84,18 @@ class ReportFilter:
                    and report_dict['ref_base_assembled'] >= self.min_ref_base_assembled \
                    and self._report_dict_passes_known_variant_filter(self.ignore_not_has_known_variant, report_dict)
 
+
+    def _filter_dicts(self):
+        '''Filters out all the report_dicts that do not pass the cutoffs. If any ref sequence
+           loses all of its report_dicts, then it is completely removed.'''
+        keys_to_remove = set()
+
+        for ref_name in self.report:
+            self.report[ref_name] = [x for x in self.report[ref_name] if self._report_dict_passes_filters(x)]
+            if len(self.report[ref_name]) == 0:
+                keys_to_remove.add(ref_name)
+
+        for key in keys_to_remove:
+            del self.report[key]
+
+
