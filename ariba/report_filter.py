@@ -104,3 +104,13 @@ class ReportFilter:
         for key in keys_to_remove:
             del self.report[key]
 
+
+    def _write_report(self, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
+        print('#' + '\t'.join(report.columns), file=f)
+
+        for key, report_dicts in sorted(self.report.items()):
+            for d in report_dicts:
+                print(ReportFilter._dict_to_report_line(d), file=f)
+
+        pyfastaq.utils.close(f)

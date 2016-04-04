@@ -245,6 +245,16 @@ class TestReportFilter(unittest.TestCase):
         self.assertEqual(expected, rf.report)
 
 
+    def test_write_report(self):
+        '''Test write report'''
+        infile = os.path.join(data_dir, 'report_filter_test_write_report.tsv')
+        tmpfile = 'tmp.test.report_filter.write_report.tsv'
+        rf = report_filter.ReportFilter(infile=infile)
+        rf._write_report(tmpfile)
+        self.assertTrue(filecmp.cmp(tmpfile, infile, shallow=False))
+        os.unlink(tmpfile)
+
+
     def test_run(self):
         '''Test run'''
 
