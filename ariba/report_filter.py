@@ -1,12 +1,25 @@
 import os
 import pyfastaq
-from ariba import report
+from ariba import report, flag
 
 class Error (Exception): pass
 
 class ReportFilter:
-    def __init__(self, infile):
-        self.report = self._load_report(infile)
+    def __init__(self,
+            infile=None,
+            min_pc_ident=90,
+            min_ref_base_assembled=1,
+            ignore_not_has_known_variant=True,
+        ):
+
+        if infile is not None:
+            self.report = self._load_report(infile)
+        else:
+            self.report = {}
+
+        self.min_pc_ident = min_pc_ident
+        self.min_ref_base_assembled = min_ref_base_assembled
+        self.ignore_not_has_known_variant = ignore_not_has_known_variant
 
 
     @classmethod
@@ -16,7 +29,15 @@ class ReportFilter:
         if len(data) != len(report.columns):
             return None
 
-        return dict(zip(report.columns, data))
+        d = dict(zip(report.columns, data))
+        for key in report.int_columns:
+            d[key] = int(d[key])
+
+        for key in report.float_columns:
+            d[key] = float(d[key])
+
+        d['flag'] = flag.Flag(int(d['flag']))
+        return d
 
 
     @staticmethod
@@ -48,4 +69,18 @@ class ReportFilter:
 
         pyfastaq.utils.close(f)
         return report_dict
+
+
+    @staticmethod
+    def _report_dict_passes_known_variant_filter(ignore_not_has_known_variant, report_dict):
+        if ignore_not_has_known_variant:
+            return report_dict['has_known_var'] == '1'
+        else:
+            return True
+
+
+    def _report_dict_passes_filters(self, report_dict):
+        return report_dict['pc_ident'] >= self.min_pc_ident \
+                   and report_dict['ref_base_assembled'] >= self.min_ref_base_assembled \
+                   and self._report_dict_passes_known_variant_filter(self.ignore_not_has_known_variant, report_dict)
 
