@@ -114,3 +114,8 @@ class ReportFilter:
                 print(ReportFilter._dict_to_report_line(d), file=f)
 
         pyfastaq.utils.close(f)
+
+
+    def run(self, outfile):
+        self._filter_dicts()
+        self._write_report(outfile)
