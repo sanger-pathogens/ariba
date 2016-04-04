@@ -1,4 +1,5 @@
 import os
+import openpyxl
 import pyfastaq
 from ariba import report, flag
 
@@ -116,6 +117,21 @@ class ReportFilter:
         pyfastaq.utils.close(f)
 
 
-    def run(self, outfile):
+    def _write_report_xls(self, outfile):
+        workbook = openpyxl.Workbook()
+        worksheet = workbook.worksheets[0]
+        worksheet.title = 'ARIBA_report'
+        worksheet.append(report.columns)
+
+        for key, report_dicts in sorted(self.report.items()):
+            for d in report_dicts:
+                worksheet.append([str(d[x]) for x in report.columns])
+
+        workbook.save(outfile)
+
+
+    def run(self, outprefix):
         self._filter_dicts()
-        self._write_report_tsv(outfile)
+        self._write_report_xls(outprefix + '.xls')
+        self._write_report_tsv(outprefix + '.tsv')
+
