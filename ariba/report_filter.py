@@ -105,7 +105,7 @@ class ReportFilter:
             del self.report[key]
 
 
-    def _write_report(self, outfile):
+    def _write_report_tsv(self, outfile):
         f = pyfastaq.utils.open_file_write(outfile)
         print('#' + '\t'.join(report.columns), file=f)
 
@@ -118,4 +118,4 @@ class ReportFilter:
 
     def run(self, outfile):
         self._filter_dicts()
-        self._write_report(outfile)
+        self._write_report_tsv(outfile)
