@@ -38,7 +38,7 @@ class TestReportFilter(unittest.TestCase):
 
 
     def test_report_line_to_dict(self):
-        line = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t1300\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         expected = {
             'ref_name':           'cluster1',
             'ref_type':           'non_coding',
@@ -49,7 +49,7 @@ class TestReportFilter(unittest.TestCase):
             'ref_base_assembled': 999,
             'pc_ident':           99.42,
             'ctg':                'cluster1.scaffold.1',
-            'ctg_len':            1300,
+            'ctg_len':            '.',
             'known_var':          '1',
             'var_type':           'SNP',
             'var_seq_type':       'n',

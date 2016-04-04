@@ -32,10 +32,16 @@ class ReportFilter:
 
         d = dict(zip(report.columns, data))
         for key in report.int_columns:
-            d[key] = int(d[key])
+            try:
+                d[key] = int(d[key])
+            except:
+                assert d[key] == '.'
 
         for key in report.float_columns:
-            d[key] = float(d[key])
+            try:
+                d[key] = float(d[key])
+            except:
+                assert d[key] == '.'
 
         d['flag'] = flag.Flag(int(d['flag']))
         return d
