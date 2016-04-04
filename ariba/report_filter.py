@@ -40,6 +40,12 @@ class ReportFilter:
         return d
 
 
+    @classmethod
+    def _dict_to_report_line(cls, report_dict):
+        '''Takes a report_dict as input and returns a report line'''
+        return '\t'.join([str(report_dict[x]) for x in report.columns])
+
+
     @staticmethod
     def _load_report(infile):
         '''Loads report file into a dictionary. Key=refrence name.
@@ -97,5 +103,4 @@ class ReportFilter:
 
         for key in keys_to_remove:
             del self.report[key]
-
 

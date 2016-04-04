@@ -75,6 +75,43 @@ class TestReportFilter(unittest.TestCase):
         self.assertEqual(None, report_filter.ReportFilter._report_line_to_dict(bad_line))
 
 
+    def test_dict_to_report_line(self):
+        '''Test _dict_to_report_line'''
+        report_dict = {
+            'ref_name':           'cluster1',
+            'ref_type':           'non_coding',
+            'flag':               flag.Flag(27),
+            'reads':              10000,
+            'cluster_rep':        'cluster1',
+            'ref_len':            1000,
+            'ref_base_assembled': 999,
+            'pc_ident':           99.42,
+            'ctg':                'cluster1.scaffold.1',
+            'ctg_len':            1300,
+            'known_var':          '1',
+            'var_type':           'SNP',
+            'var_seq_type':       'n',
+            'known_var_change':   'C42T',
+            'has_known_var':      '0',
+            'ref_ctg_change':     '.',
+            'ref_ctg_effect':     '.',
+            'ref_start':          42,
+            'ref_end':            42,
+            'ref_nt':             'C',
+            'ctg_start':          142,
+            'ctg_end':            142,
+            'ctg_nt':             'C',
+            'smtls_total_depth':  '500',
+            'smtls_alt_nt':       '.',
+            'smtls_alt_depth':    '500',
+            'var_description':    'Description_of_variant C42T',
+            'free_text':          'free text',
+        }
+
+        expected = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t1300\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        self.assertEqual(expected, report_filter.ReportFilter._dict_to_report_line(report_dict))
+
+
     def test_load_report(self):
         good_infile = os.path.join(data_dir, 'report_filter_test_load_report_good.tsv')
         bad_infile = os.path.join(data_dir, 'report_filter_test_load_report_bad.tsv')
@@ -206,4 +243,8 @@ class TestReportFilter(unittest.TestCase):
 
         rf._filter_dicts()
         self.assertEqual(expected, rf.report)
+
+
+    def test_run(self):
+        '''Test run'''
 
