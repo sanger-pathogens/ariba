@@ -6,7 +6,7 @@ class Error (Exception): pass
 class SequenceMetadata:
     def __init__(self, line):
         try:
-            self.name, variant_type, variant_string, always_report, *extra_columns = line.rstrip().split('\t')
+            self.name, variant_type, variant_string, *extra_columns = line.rstrip().split('\t')
         except:
             raise Error('Error parsing line of file:\n' + line)
 
@@ -24,14 +24,7 @@ class SequenceMetadata:
         else:
             self.variant = sequence_variant.Variant(self.variant_type, variant_string)
 
-        if always_report == 'Y':
-            self.always_report = True
-        elif always_report == 'N':
-            self.always_report = False
-        else:
-            raise Error('Error getting always_report column. Expected "Y" or "N" but got ' + always_report)
-
-        self.hashed = hash((self.name, self.variant_type, self.always_report, variant_string))
+        self.hashed = hash((self.name, self.variant_type, variant_string))
 
     def __eq__(self, other):
        return type(other) is type(self) and self.__dict__ == other.__dict__
@@ -55,8 +48,6 @@ class SequenceMetadata:
             fields.append('.')
         else:
             fields.append(str(self.variant))
-
-        fields.append('Y' if self.always_report else 'N')
 
         if self.free_text:
             return separator.join(fields + [self.free_text])

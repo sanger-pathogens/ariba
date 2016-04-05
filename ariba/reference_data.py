@@ -332,11 +332,10 @@ class ReferenceData:
         for variant_type in ['n', 'p']:
             for position, metadata_set in self.metadata[ref_name][variant_type].items():
                 for metadata in metadata_set:
-                    if metadata.always_report or metadata.has_variant(ref_seq):
-                        if position not in variants[variant_type]:
-                            variants[variant_type][position] = set()
+                    if position not in variants[variant_type]:
+                        variants[variant_type][position] = set()
 
-                        variants[variant_type][position].add(metadata)
+                    variants[variant_type][position].add(metadata)
 
         return variants
 
