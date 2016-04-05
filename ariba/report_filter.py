@@ -95,14 +95,6 @@ class ReportFilter:
 
 
     @staticmethod
-    def _report_dict_passes_known_variant_filter(ignore_not_has_known_variant, report_dict):
-        if ignore_not_has_known_variant:
-            return report_dict['has_known_var'] == '1'
-        else:
-            return True
-
-
-    @staticmethod
     def _flag_passes_filter(flag, exclude_flags):
         for f in exclude_flags:
             if flag.has(f):
@@ -111,9 +103,49 @@ class ReportFilter:
 
 
     def _report_dict_passes_filters(self, report_dict):
-        return report_dict['pc_ident'] >= self.min_pc_ident \
+        return self._report_dict_passes_essential_filters(report_dict) and self._report_dict_passes_non_essential_filters(report_dict)
+
+
+    def _report_dict_passes_non_essential_filters(self, report_dict):
+
+        if self.ignore_not_has_known_variant:
+            return report_dict['has_known_var'] == '1'
+        else:
+            return True
+
+
+    def _report_dict_passes_essential_filters(self, report_dict):
+        return ReportFilter._flag_passes_filter(report_dict['flag'], self.exclude_flags) \
+                   and report_dict['pc_ident'] >= self.min_pc_ident \
                    and report_dict['ref_base_assembled'] >= self.min_ref_base_assembled \
-                   and self._report_dict_passes_known_variant_filter(self.ignore_not_has_known_variant, report_dict)
+
+
+    def _filter_list_of_dicts(self, dicts_list):
+        if len(dicts_list) == 0:
+            return []
+
+        pass_dicts = []
+        essential_dicts = []
+        fail_dicts = []
+
+        for d in dicts_list:
+            if self._report_dict_passes_essential_filters(d):
+                if self._report_dict_passes_non_essential_filters(d):
+                    pass_dicts.append(d)
+                else:
+                    essential_dicts.append(d)
+            else:
+                fail_dicts.append(d)
+
+        if len(pass_dicts) == 0:
+            assert len(fail_dicts) + len(essential_dicts) > 0
+            if len(essential_dicts) > 0:
+                new_d = essential_dicts[0]
+                for key in report.var_columns:
+                    new_d[key] = '.'
+                pass_dicts.append(new_d)
+
+        return pass_dicts
 
 
     def _filter_dicts(self):
@@ -123,7 +155,7 @@ class ReportFilter:
 
         for ref_name in self.report:
             for ctg_name in self.report[ref_name]:
-                self.report[ref_name][ctg_name] = [x for x in self.report[ref_name][ctg_name] if self._report_dict_passes_filters(x)]
+                self.report[ref_name][ctg_name] = self._filter_list_of_dicts(self.report[ref_name][ctg_name])
                 if len(self.report[ref_name][ctg_name]) == 0:
                     keys_to_remove.add((ref_name, ctg_name))
 

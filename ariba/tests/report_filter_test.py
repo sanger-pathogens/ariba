@@ -2,7 +2,7 @@ import unittest
 import os
 import filecmp
 import pyfastaq
-from ariba import flag, report_filter
+from ariba import flag, report_filter, report
 
 modules_dir = os.path.dirname(os.path.abspath(report_filter.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -139,7 +139,8 @@ class TestReportFilter(unittest.TestCase):
             report_filter.ReportFilter._load_report(bad_infile)
 
 
-    def test_report_dict_passes_known_variant_filter(self):
+    def test_report_dict_passes_non_essential_filters(self):
+        '''Test _report_dict_passes_non_essential_filters'''
         tests = [
             ('.', True, False),
             ('0', True, False),
@@ -151,7 +152,23 @@ class TestReportFilter(unittest.TestCase):
 
         for has_known_var, ignore_not_has_known_variant, expected in tests:
             d = {'has_known_var': has_known_var}
-            self.assertEqual(expected, report_filter.ReportFilter._report_dict_passes_known_variant_filter(ignore_not_has_known_variant, d))
+            rf = report_filter.ReportFilter(ignore_not_has_known_variant=ignore_not_has_known_variant)
+            self.assertEqual(expected, rf._report_dict_passes_non_essential_filters(d))
+
+    def test_report_dict_passes_essential_filters(self):
+        '''Test _report_dict_passes_essential_filters'''
+        line1 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t0\t98.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line3 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        tests = [
+            (report_filter.ReportFilter._report_line_to_dict(line1), True),
+            (report_filter.ReportFilter._report_line_to_dict(line2), False),
+            (report_filter.ReportFilter._report_line_to_dict(line3), False),
+        ]
+
+        for test_dict, expected in tests:
+            rf = report_filter.ReportFilter()
+            self.assertEqual(expected,  rf._report_dict_passes_essential_filters(test_dict))
 
 
     def test_flag_passes_filter(self):
@@ -177,7 +194,8 @@ class TestReportFilter(unittest.TestCase):
         test_dict = {
             'pc_ident': 95.0,
             'ref_base_assembled': 10,
-            'has_known_var': '1'
+            'has_known_var': '1',
+            'flag': flag.Flag(27)
         }
 
         self.assertTrue(rf._report_dict_passes_filters(test_dict))
@@ -201,7 +219,8 @@ class TestReportFilter(unittest.TestCase):
         test_dict = {
             'pc_ident': 95.0,
             'ref_base_assembled': 10,
-            'has_known_var': '1'
+            'has_known_var': '1',
+            'flag': flag.Flag(27),
         }
 
         tests = [
@@ -220,7 +239,8 @@ class TestReportFilter(unittest.TestCase):
         test_dict = {
             'pc_ident': 95.0,
             'ref_base_assembled': 10,
-            'has_known_var': '1'
+            'has_known_var': '1',
+            'flag': flag.Flag(27),
         }
 
         tests = [
@@ -234,38 +254,87 @@ class TestReportFilter(unittest.TestCase):
             self.assertEqual(expected, rf._report_dict_passes_filters(test_dict))
 
 
+    def test_filter_list_of_dicts_all_fail(self):
+        '''Test _filter_list_of_dicts where all fail'''
+        rf = report_filter.ReportFilter()
+        line1 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t88.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
+        dict2 = report_filter.ReportFilter._report_line_to_dict(line2)
+        got = rf._filter_list_of_dicts([dict1, dict2])
+        self.assertEqual([], got)
+
+
+    def test_filter_list_of_dicts_with_essential(self):
+        '''Test _filter_list_of_dicts with an essential line but all others fail'''
+        rf = report_filter.ReportFilter()
+        line1 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
+        dict2 = report_filter.ReportFilter._report_line_to_dict(line2)
+        expected_line = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t' + '\t'.join(['.'] * 18) + '\tfree text'
+        expected = [report_filter.ReportFilter._report_line_to_dict(expected_line)]
+        got = rf._filter_list_of_dicts([dict1, dict2])
+        self.assertEqual(expected, got)
+
+
+    def test_filter_list_of_dicts_with_pass(self):
+        '''Test _filter_list_of_dicts with a line that passes'''
+        rf = report_filter.ReportFilter()
+        line1 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC46T\t1\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C46T\tfree text'
+        line3 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t.\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
+        dict2 = report_filter.ReportFilter._report_line_to_dict(line2)
+        dict3 = report_filter.ReportFilter._report_line_to_dict(line3)
+        got = rf._filter_list_of_dicts([dict1, dict2, dict3])
+        self.assertEqual([dict2], got)
+
+
     def test_filter_dicts(self):
         '''Test _filter_dicts'''
         rf = report_filter.ReportFilter(min_ref_base_assembled=10)
+        ref_2_dict = {x: '.' for x in report.columns}
+        ref_2_dict['pc_ident'] = 91.0
+        ref_2_dict['ref_base_assembled'] = 10
+        ref_2_dict['has_known_var'] = '0'
+        ref_2_dict['flag'] = flag.Flag(27)
 
         rf.report = {
             'ref1': {
                 'ref1.scaff1': [
-                    {'pc_ident': 91.0, 'ref_base_assembled': 9, 'has_known_var': '1'},
-                    {'pc_ident': 89.0, 'ref_base_assembled': 10, 'has_known_var': '1'},
-                    {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '0'},
-                    {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
+                    {'flag': flag.Flag(27), 'pc_ident': 91.0, 'ref_base_assembled': 9, 'has_known_var': '1'},
+                    {'flag': flag.Flag(27), 'pc_ident': 89.0, 'ref_base_assembled': 10, 'has_known_var': '1'},
+                    {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '0'},
+                    {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
                 ]
             },
             'ref2': {
                 'ref2.scaff1': [
-                    {'pc_ident': 91.0, 'ref_base_assembled': 10, 'has_known_var': '.'}
+                    ref_2_dict
                 ]
             },
             'ref3': {
                 'ref3.scaff1': [
-                    {'pc_ident': 91.0, 'ref_base_assembled': 10, 'has_known_var': '0'},
+                    {'flag': flag.Flag(27), 'pc_ident': 84.0, 'ref_base_assembled': 10, 'has_known_var': '0'},
+                ]
+            },
+            'ref4': {
+                'ref4.scaff1': [
+                    {'flag': flag.Flag(64), 'pc_ident': '.', 'ref_base_assembled': '.', 'has_known_var': '.'},
                 ]
             }
         }
 
-
         expected = {
             'ref1': {
                 'ref1.scaff1': [
-                    {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
+                    {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
                 ]
             },
+            'ref2': {
+                'ref2.scaff1': [ref_2_dict]
+            }
         }
 
         rf._filter_dicts()
