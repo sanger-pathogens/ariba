@@ -370,9 +370,20 @@ class Clusters:
                     raise Error('Error deleting file', filename)
 
 
+    def write_versions_file(self, original_dir):
+        with open('version_info.txt', 'w') as f:
+            print('ARIBA version', common.version, 'run with this command:', file=f)
+            print(' '.join(sys.argv), file=f)
+            print('from this directory:', original_dir, file=f)
+            print(file=f)
+            print('Versions of dependencies:\n', file=f)
+            print(*self.extern_progs.version_report, sep='\n', file=f)
+
+
     def run(self):
         cwd = os.getcwd()
         os.chdir(self.outdir)
+        self.write_versions_file(cwd)
 
         if self.verbose:
             print('{:_^79}'.format(' Checking reference data '), flush=True)
