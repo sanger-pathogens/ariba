@@ -50,10 +50,11 @@ class ExternalProgs:
     def __init__(self, verbose=False):
         optional_progs = {'sspace', 'gapfiller'}
         self.progs = {}
+        self.version_report = ['\t'.join(['tool', 'version', 'path'])]
 
         if verbose:
             print('{:_^79}'.format(' Checking dependencies and their versions '))
-            print('tool', 'version', 'path', sep='\t')
+            print(self.version_report[-1])
 
         errors = []
         warnings = []
@@ -67,8 +68,10 @@ class ExternalProgs:
                     warnings.append(prog + ' not found in path. Looked for ' + prog_exe + '. But it is optional so will be skipped during assembly')
                 else:
                     errors.append(prog + ' not found in path. Looked for ' + prog_exe + '. Cannot continue')
+
+                self.version_report.append('\t'.join([prog, 'NA', 'NOT_FOUND']))
                 if verbose:
-                    print(prog, 'NA', 'NOT_FOUND', sep='\t')
+                    print(self.version_report[-1])
                 continue
             elif prog in {'sspace', 'gapfiller'}:
                 self.progs[prog] = os.path.realpath(self.progs[prog])
@@ -82,8 +85,9 @@ class ExternalProgs:
                 errors.append(version)
                 version = 'ERROR'
 
+            self.version_report.append('\t'.join([prog, version, self.progs[prog]]))
             if verbose:
-                print(prog, version, self.progs[prog], sep='\t')
+                print(self.version_report[-1])
 
 
         if verbose:

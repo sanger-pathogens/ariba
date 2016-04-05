@@ -32,6 +32,26 @@ columns = [
 ]
 
 
+var_columns = [
+    'known_var',
+    'var_type',
+    'var_seq_type',
+    'known_var_change',
+    'has_known_var',
+    'ref_ctg_change',
+    'ref_ctg_effect',
+    'ref_start',
+    'ref_end',
+    'ref_nt',
+    'ctg_start',
+    'ctg_end',
+    'ctg_nt',
+    'smtls_total_depth',
+    'smtls_alt_nt',
+    'smtls_alt_depth',
+    'var_description',
+]
+
 int_columns = [
     'reads',
     'ref_len',

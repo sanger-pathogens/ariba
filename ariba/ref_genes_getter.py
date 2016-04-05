@@ -137,7 +137,7 @@ class RefGenesGetter:
                 if len(variants) == 0:
                     print('WARNING: No valid variants found for gene', gene)
                 for variant, description in variants:
-                    print(gene, 'p', variant, 'N', description, sep='\t', file=tsv_out_fh, flush=True)
+                    print(gene, 'p', variant, description, sep='\t', file=tsv_out_fh, flush=True)
 
             print(gene, file=got_genes_fh, flush=True)
             genes_done += 1
@@ -164,7 +164,7 @@ class RefGenesGetter:
             print(seq, file=fa_out)
 
             if description is not None:
-                print(seq.id, '.', '.', 'N', description, sep='\t', file=metadata_fh)
+                print(seq.id, '.', '.', description, sep='\t', file=metadata_fh)
 
         pyfastaq.utils.close(fa_out)
         return presence_absence_ids
@@ -186,7 +186,7 @@ class RefGenesGetter:
 
             print(seq, file=f_out)
             if description is not None:
-                print(seq.id, '.', '.', 'N', description, sep='\t', file=metadata_fh)
+                print(seq.id, '.', '.', description, sep='\t', file=metadata_fh)
 
         pyfastaq.utils.close(f_out)
 

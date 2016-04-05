@@ -7,7 +7,7 @@ import openpyxl
 import multiprocessing
 import pysam
 import pyfastaq
-from ariba import cdhit, cluster, common, mapping, histogram, faidx, report
+from ariba import cdhit, cluster, common, mapping, histogram, faidx, report, report_filter
 
 class Error (Exception): pass
 
@@ -65,8 +65,9 @@ class Clusters:
         self.cluster_ids = {}
         self.bam_prefix = self.cdhit_cluster_representatives_fa + '.map_reads'
         self.bam = self.bam_prefix + '.bam'
-        self.report_file_tsv = os.path.join(self.outdir, 'report.tsv')
-        self.report_file_xls = os.path.join(self.outdir, 'report.xls')
+        self.report_file_all_tsv = os.path.join(self.outdir, 'report.all.tsv')
+        self.report_file_all_xls = os.path.join(self.outdir, 'report.all.xls')
+        self.report_file_filtered_prefix = os.path.join(self.outdir, 'report')
         self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa')
         self.threads = threads
         self.verbose = verbose
@@ -369,9 +370,20 @@ class Clusters:
                     raise Error('Error deleting file', filename)
 
 
+    def write_versions_file(self, original_dir):
+        with open('version_info.txt', 'w') as f:
+            print('ARIBA version', common.version, 'run with this command:', file=f)
+            print(' '.join(sys.argv), file=f)
+            print('from this directory:', original_dir, file=f)
+            print(file=f)
+            print('Versions of dependencies:\n', file=f)
+            print(*self.extern_progs.version_report, sep='\n', file=f)
+
+
     def run(self):
         cwd = os.getcwd()
         os.chdir(self.outdir)
+        self.write_versions_file(cwd)
 
         if self.verbose:
             print('{:_^79}'.format(' Checking reference data '), flush=True)
@@ -407,9 +419,15 @@ class Clusters:
 
         if self.verbose:
             print('{:_^79}'.format(' Writing report files '), flush=True)
-            print(self.report_file_tsv)
-            print(self.report_file_xls)
-        self._write_reports(self.clusters, self.report_file_tsv, self.report_file_xls)
+            print(self.report_file_all_tsv)
+            print(self.report_file_all_xls)
+        self._write_reports(self.clusters, self.report_file_all_tsv, self.report_file_all_xls)
+
+        if self.verbose:
+            print(self.report_file_filtered_prefix + '.tsv')
+            print(self.report_file_filtered_prefix + '.xls')
+        rf = report_filter.ReportFilter(infile=self.report_file_all_tsv)
+        rf.run(self.report_file_filtered_prefix)
 
         if self.verbose:
             print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
