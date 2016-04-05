@@ -11,6 +11,7 @@ class ReportFilter:
             min_pc_ident=90,
             min_ref_base_assembled=1,
             ignore_not_has_known_variant=True,
+            exclude_flags=None,
         ):
 
         if infile is not None:
@@ -21,6 +22,11 @@ class ReportFilter:
         self.min_pc_ident = min_pc_ident
         self.min_ref_base_assembled = min_ref_base_assembled
         self.ignore_not_has_known_variant = ignore_not_has_known_variant
+
+        if exclude_flags is None:
+            self.exclude_flags = ['assembly_fail', 'ref_seq_choose_fail']
+        else:
+            self.exclude_flags = exclude_flags
 
 
     @classmethod
@@ -90,6 +96,14 @@ class ReportFilter:
             return report_dict['has_known_var'] == '1'
         else:
             return True
+
+
+    @staticmethod
+    def _flag_passes_filter(flag, exclude_flags):
+        for f in exclude_flags:
+            if flag.has(f):
+                return False
+        return True
 
 
     def _report_dict_passes_filters(self, report_dict):

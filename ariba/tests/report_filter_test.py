@@ -151,6 +151,22 @@ class TestReportFilter(unittest.TestCase):
             self.assertEqual(expected, report_filter.ReportFilter._report_dict_passes_known_variant_filter(ignore_not_has_known_variant, d))
 
 
+    def test_flag_passes_filter(self):
+        '''Test _flag_passes_filter'''
+        rf = report_filter.ReportFilter()
+        exclude_flags = ['assembly_fail', 'ref_seq_choose_fail']
+        f = flag.Flag()
+        self.assertTrue(rf._flag_passes_filter(f, exclude_flags))
+        f.add('assembled')
+        self.assertTrue(rf._flag_passes_filter(f, exclude_flags))
+        f = flag.Flag()
+        f.add('assembly_fail')
+        self.assertFalse(rf._flag_passes_filter(f, exclude_flags))
+        f = flag.Flag()
+        f.add('ref_seq_choose_fail')
+        self.assertFalse(rf._flag_passes_filter(f, exclude_flags))
+
+
     def test_report_dict_passes_filters_known_variants(self):
         '''Test _report_dict_passes_filters with different known variants options'''
         rf = report_filter.ReportFilter()
