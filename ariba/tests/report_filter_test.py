@@ -142,16 +142,18 @@ class TestReportFilter(unittest.TestCase):
     def test_report_dict_passes_non_essential_filters_known_vars(self):
         '''Test _report_dict_passes_non_essential_filters with known vars'''
         tests = [
-            ('.', True, False),
-            ('0', True, False),
-            ('1', True, True),
-            ('.', False, True),
-            ('0', False, True),
-            ('1', False, True),
+            ('.', '.', True, True),
+            ('.', '.', False, True),
+            ('0', '0', True, True),
+            ('0', '0', False, True),
+            ('1', '0', True, False),
+            ('1', '1', True, True),
+            ('1', '0', False, True),
+            ('1', '1', False, True),
         ]
 
-        for has_known_var, ignore_not_has_known_variant, expected in tests:
-            d = {'has_known_var': has_known_var}
+        for known_var, has_known_var, ignore_not_has_known_variant, expected in tests:
+            d = {'known_var': known_var, 'has_known_var': has_known_var}
             rf = report_filter.ReportFilter(ignore_not_has_known_variant=ignore_not_has_known_variant)
             self.assertEqual(expected, rf._report_dict_passes_non_essential_filters(d))
 
@@ -168,7 +170,7 @@ class TestReportFilter(unittest.TestCase):
         ]
 
         for var, remove_synonymous_snps, expected in tests:
-            d = {'ref_ctg_effect': var, 'has_known_var': '1'}
+            d = {'known_var': '1', 'ref_ctg_effect': var, 'has_known_var': '1'}
             rf = report_filter.ReportFilter(remove_synonymous_snps=remove_synonymous_snps)
             self.assertEqual(expected, rf._report_dict_passes_non_essential_filters(d))
 
@@ -203,73 +205,6 @@ class TestReportFilter(unittest.TestCase):
         f = flag.Flag()
         f.add('ref_seq_choose_fail')
         self.assertFalse(rf._flag_passes_filter(f, exclude_flags))
-
-
-    def test_report_dict_passes_filters_known_variants(self):
-        '''Test _report_dict_passes_filters with different known variants options'''
-        rf = report_filter.ReportFilter()
-
-        test_dict = {
-            'pc_ident': 95.0,
-            'ref_base_assembled': 10,
-            'has_known_var': '1',
-            'flag': flag.Flag(27)
-        }
-
-        self.assertTrue(rf._report_dict_passes_filters(test_dict))
-        tests = [
-            ('.', True, False),
-            ('0', True, False),
-            ('1', True, True),
-            ('.', False, True),
-            ('0', False, True),
-            ('1', False, True),
-        ]
-
-        for has_known_var, ignore_not_has_known_variant, expected in tests:
-            test_dict['has_known_var'] = has_known_var
-            rf = report_filter.ReportFilter(ignore_not_has_known_variant=ignore_not_has_known_variant)
-            self.assertEqual(expected, rf._report_dict_passes_filters(test_dict))
-
-
-    def test_report_dict_passes_filters_pc_ident(self):
-        '''Test _report_dict_passes_filters with different percent identities'''
-        test_dict = {
-            'pc_ident': 95.0,
-            'ref_base_assembled': 10,
-            'has_known_var': '1',
-            'flag': flag.Flag(27),
-        }
-
-        tests = [
-            (94.9, True),
-            (95.0, True),
-            (95.1, False)
-        ]
-
-        for cutoff, expected in tests:
-            rf = report_filter.ReportFilter(min_pc_ident=cutoff)
-            self.assertEqual(expected, rf._report_dict_passes_filters(test_dict))
-
-
-    def test_report_dict_passes_filters_ref_base_assembled(self):
-        '''Test _report_dict_passes_filters with different ref bases assembled'''
-        test_dict = {
-            'pc_ident': 95.0,
-            'ref_base_assembled': 10,
-            'has_known_var': '1',
-            'flag': flag.Flag(27),
-        }
-
-        tests = [
-            (9, True),
-            (10, True),
-            (11, False)
-        ]
-
-        for cutoff, expected in tests:
-            rf = report_filter.ReportFilter(min_ref_base_assembled=cutoff)
-            self.assertEqual(expected, rf._report_dict_passes_filters(test_dict))
 
 
     def test_filter_list_of_dicts_all_fail(self):
@@ -321,10 +256,10 @@ class TestReportFilter(unittest.TestCase):
         rf.report = {
             'ref1': {
                 'ref1.scaff1': [
-                    {'flag': flag.Flag(27), 'pc_ident': 91.0, 'ref_base_assembled': 9, 'has_known_var': '1'},
-                    {'flag': flag.Flag(27), 'pc_ident': 89.0, 'ref_base_assembled': 10, 'has_known_var': '1'},
-                    {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '0'},
-                    {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
+                    {'flag': flag.Flag(27), 'pc_ident': 91.0, 'ref_base_assembled': 9, 'known_var': '1', 'has_known_var': '1'},
+                    {'flag': flag.Flag(27), 'pc_ident': 89.0, 'ref_base_assembled': 10, 'known_var': '1', 'has_known_var': '1'},
+                    {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'known_var': '1', 'has_known_var': '0'},
+                    {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'known_var': '1', 'has_known_var': '1'},
                 ]
             },
             'ref2': {
@@ -334,12 +269,12 @@ class TestReportFilter(unittest.TestCase):
             },
             'ref3': {
                 'ref3.scaff1': [
-                    {'flag': flag.Flag(27), 'pc_ident': 84.0, 'ref_base_assembled': 10, 'has_known_var': '0'},
+                    {'flag': flag.Flag(27), 'pc_ident': 84.0, 'ref_base_assembled': 10, 'known_var': '1', 'has_known_var': '0'},
                 ]
             },
             'ref4': {
                 'ref4.scaff1': [
-                    {'flag': flag.Flag(64), 'pc_ident': '.', 'ref_base_assembled': '.', 'has_known_var': '.'},
+                    {'flag': flag.Flag(64), 'pc_ident': '.', 'ref_base_assembled': '.', 'known_var': '.', 'has_known_var': '.'},
                 ]
             }
         }
@@ -347,7 +282,7 @@ class TestReportFilter(unittest.TestCase):
         expected = {
             'ref1': {
                 'ref1.scaff1': [
-                    {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
+                    {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'known_var': '1', 'has_known_var': '1'},
                 ]
             },
             'ref2': {

@@ -104,18 +104,18 @@ class ReportFilter:
         return True
 
 
-    def _report_dict_passes_filters(self, report_dict):
-        return self._report_dict_passes_essential_filters(report_dict) and self._report_dict_passes_non_essential_filters(report_dict)
-
-
     def _report_dict_passes_non_essential_filters(self, report_dict):
+        # known_var == '.' iff this line is not reporting a variant. Which means it passes all non-essential filters
+        if report_dict.get('known_var', '.') == '.':
+            return True
+
         if self.remove_synonymous_snps and report_dict.get('ref_ctg_effect', None) == 'SYN':
             return False
 
-        if self.ignore_not_has_known_variant:
-            return report_dict['has_known_var'] == '1'
-        else:
-            return True
+        if self.ignore_not_has_known_variant and report_dict['known_var'] == '1' and report_dict['has_known_var'] == '0':
+            return False
+
+        return True
 
 
     def _report_dict_passes_essential_filters(self, report_dict):
