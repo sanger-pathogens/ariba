@@ -15,16 +15,17 @@ class TestReportFilter(unittest.TestCase):
         rf = report_filter.ReportFilter(infile=infile)
         line1 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', '.', '500', 'Description_of_variant.C42T', 'free_text'])
         line2 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'Description_of_variant.A51G', 'free_text2'])
-        line3 = '\t'.join(['cluster2', 'variants_only', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', '.', '290', 'Description_of_variant.I42L', 'free_text3'])
+        line3 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'Description_of_variant.A51G', 'free_text3'])
+        line4 = '\t'.join(['cluster2', 'variants_only', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', '.', '290', 'Description_of_variant.I42L', 'free_text3'])
 
         expected = {
-            'cluster1': [
-                report_filter.ReportFilter._report_line_to_dict(line1),
-                report_filter.ReportFilter._report_line_to_dict(line2),
-            ],
-            'cluster2': [
-                report_filter.ReportFilter._report_line_to_dict(line3),
-            ]
+            'cluster1': {
+                'cluster1.scaffold.1': [report_filter.ReportFilter._report_line_to_dict(line1), report_filter.ReportFilter._report_line_to_dict(line2)],
+                'cluster1.scaffold.2': [report_filter.ReportFilter._report_line_to_dict(line3)],
+            },
+            'cluster2': {
+                'cluster2.scaffold.1': [report_filter.ReportFilter._report_line_to_dict(line4)]
+            }
         }
 
         self.assertEqual(expected, rf.report)
@@ -118,19 +119,21 @@ class TestReportFilter(unittest.TestCase):
 
         line1 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', '.', '500', 'Description_of_variant.C42T', 'free_text'])
         line2 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'Description_of_variant.A51G', 'free_text2'])
-        line3 = '\t'.join(['cluster2', 'variants_only', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', '.', '290', 'Description_of_variant.I42L', 'free_text3'])
+        line3 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'Description_of_variant.A51G', 'free_text3'])
+        line4 = '\t'.join(['cluster2', 'variants_only', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', '.', '290', 'Description_of_variant.I42L', 'free_text3'])
 
         expected = {
-            'cluster1': [
-                report_filter.ReportFilter._report_line_to_dict(line1),
-                report_filter.ReportFilter._report_line_to_dict(line2),
-            ],
-            'cluster2': [
-                report_filter.ReportFilter._report_line_to_dict(line3),
-            ]
+            'cluster1': {
+                'cluster1.scaffold.1': [report_filter.ReportFilter._report_line_to_dict(line1), report_filter.ReportFilter._report_line_to_dict(line2)],
+                'cluster1.scaffold.2': [report_filter.ReportFilter._report_line_to_dict(line3)],
+            },
+            'cluster2': {
+                'cluster2.scaffold.1': [report_filter.ReportFilter._report_line_to_dict(line4)]
+            }
         }
 
         got = report_filter.ReportFilter._load_report(good_infile)
+        self.maxDiff = None
         self.assertEqual(expected, got)
         with self.assertRaises(report_filter.Error):
             report_filter.ReportFilter._load_report(bad_infile)
@@ -236,25 +239,33 @@ class TestReportFilter(unittest.TestCase):
         rf = report_filter.ReportFilter(min_ref_base_assembled=10)
 
         rf.report = {
-            'ref1': [
-                {'pc_ident': 91.0, 'ref_base_assembled': 9, 'has_known_var': '1'},
-                {'pc_ident': 89.0, 'ref_base_assembled': 10, 'has_known_var': '1'},
-                {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '0'},
-                {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
-            ],
-            'ref2': [
-                {'pc_ident': 91.0, 'ref_base_assembled': 10, 'has_known_var': '.'},
-            ],
-            'ref3': [
-                {'pc_ident': 91.0, 'ref_base_assembled': 10, 'has_known_var': '0'},
-            ]
+            'ref1': {
+                'ref1.scaff1': [
+                    {'pc_ident': 91.0, 'ref_base_assembled': 9, 'has_known_var': '1'},
+                    {'pc_ident': 89.0, 'ref_base_assembled': 10, 'has_known_var': '1'},
+                    {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '0'},
+                    {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
+                ]
+            },
+            'ref2': {
+                'ref2.scaff1': [
+                    {'pc_ident': 91.0, 'ref_base_assembled': 10, 'has_known_var': '.'}
+                ]
+            },
+            'ref3': {
+                'ref3.scaff1': [
+                    {'pc_ident': 91.0, 'ref_base_assembled': 10, 'has_known_var': '0'},
+                ]
+            }
         }
 
 
         expected = {
-            'ref1': [
-                {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
-            ],
+            'ref1': {
+                'ref1.scaff1': [
+                    {'pc_ident': 90.0, 'ref_base_assembled': 11, 'has_known_var': '1'},
+                ]
+            },
         }
 
         rf._filter_dicts()

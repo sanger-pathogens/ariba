@@ -82,9 +82,13 @@ class ReportFilter:
                     pyfastaq.utils.close(f)
                     raise Error('Error reading report file. Expected ' + str(len(report.columns)) + ' columns but got ' + str(len(data)) + ' columns at this line:\n' + line)
                 ref_name = line_dict['ref_name']
+                ctg_name = line_dict['ctg']
                 if ref_name not in report_dict:
-                    report_dict[ref_name] = []
-                report_dict[ref_name].append(line_dict)
+                    report_dict[ref_name] = {}
+                if ctg_name not in report_dict[ref_name]:
+                    report_dict[ref_name][ctg_name] = []
+
+                report_dict[ref_name][ctg_name].append(line_dict)
 
         pyfastaq.utils.close(f)
         return report_dict
@@ -118,21 +122,30 @@ class ReportFilter:
         keys_to_remove = set()
 
         for ref_name in self.report:
-            self.report[ref_name] = [x for x in self.report[ref_name] if self._report_dict_passes_filters(x)]
-            if len(self.report[ref_name]) == 0:
-                keys_to_remove.add(ref_name)
+            for ctg_name in self.report[ref_name]:
+                self.report[ref_name][ctg_name] = [x for x in self.report[ref_name][ctg_name] if self._report_dict_passes_filters(x)]
+                if len(self.report[ref_name][ctg_name]) == 0:
+                    keys_to_remove.add((ref_name, ctg_name))
 
-        for key in keys_to_remove:
-            del self.report[key]
+        refs_to_remove = set()
+
+        for ref_name, ctg_name in keys_to_remove:
+            del self.report[ref_name][ctg_name]
+            if len(self.report[ref_name]) == 0:
+                refs_to_remove.add(ref_name)
+
+        for ref_name in refs_to_remove:
+            del self.report[ref_name]
 
 
     def _write_report_tsv(self, outfile):
         f = pyfastaq.utils.open_file_write(outfile)
         print('#' + '\t'.join(report.columns), file=f)
 
-        for key, report_dicts in sorted(self.report.items()):
-            for d in report_dicts:
-                print(ReportFilter._dict_to_report_line(d), file=f)
+        for ref_name in sorted(self.report):
+            for ctg_name, report_dicts in sorted(self.report[ref_name].items()):
+                for d in report_dicts:
+                    print(ReportFilter._dict_to_report_line(d), file=f)
 
         pyfastaq.utils.close(f)
 
@@ -143,9 +156,10 @@ class ReportFilter:
         worksheet.title = 'ARIBA_report'
         worksheet.append(report.columns)
 
-        for key, report_dicts in sorted(self.report.items()):
-            for d in report_dicts:
-                worksheet.append([str(d[x]) for x in report.columns])
+        for ref_name in sorted(self.report):
+            for ctg_name, report_dicts in sorted(self.report[ref_name].items()):
+                for d in report_dicts:
+                    worksheet.append([str(d[x]) for x in report.columns])
 
         workbook.save(outfile)
 
