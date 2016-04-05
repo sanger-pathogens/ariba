@@ -3,3 +3,4 @@ cluster1	non_coding	27	10000	cluster1	1000	0	99.42	cluster1.scaffold.1	1300	1	SN
 cluster1	non_coding	27	10000	cluster1	1000	999	99.42	cluster1.scaffold.1	1300	1	SNP	n	A51G	1	.	.	51	51	C	151	151	C	542	.	542	Description_of_variant.A51G	free_text2
 cluster2	variants_only	179	20000	cluster2	1042	1042	99.0	cluster2.scaffold.1	1442	1	SNP	p	I42L	1	I42L	NONSYN	112	112	C	442	442	T	300	.	290	Description_of_variant.I42L	free_text3
 cluster3	variants_only	179	20000	cluster3	1042	1042	89.0	cluster2.scaffold.1	1442	1	SNP	p	I42L	1	I42L	NONSYN	112	112	C	442	442	T	300	.	290	Description_of_variant.I42L	free_text3
+cluster4	variants_only	179	20000	cluster4	1042	1042	99.0	cluster4.scaffold.1	1442	1	SNP	p	I42L	1	I42L	SYN	112	112	C	442	442	T	300	.	290	Description_of_variant.I42L	free_text3

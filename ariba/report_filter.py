@@ -11,6 +11,7 @@ class ReportFilter:
             min_pc_ident=90,
             min_ref_base_assembled=1,
             ignore_not_has_known_variant=True,
+            remove_synonymous_snps=True,
             exclude_flags=None,
         ):
 
@@ -22,6 +23,7 @@ class ReportFilter:
         self.min_pc_ident = min_pc_ident
         self.min_ref_base_assembled = min_ref_base_assembled
         self.ignore_not_has_known_variant = ignore_not_has_known_variant
+        self.remove_synonymous_snps = remove_synonymous_snps
 
         if exclude_flags is None:
             self.exclude_flags = ['assembly_fail', 'ref_seq_choose_fail']
@@ -107,6 +109,8 @@ class ReportFilter:
 
 
     def _report_dict_passes_non_essential_filters(self, report_dict):
+        if self.remove_synonymous_snps and report_dict.get('ref_ctg_effect', None) == 'SYN':
+            return False
 
         if self.ignore_not_has_known_variant:
             return report_dict['has_known_var'] == '1'

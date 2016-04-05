@@ -139,8 +139,8 @@ class TestReportFilter(unittest.TestCase):
             report_filter.ReportFilter._load_report(bad_infile)
 
 
-    def test_report_dict_passes_non_essential_filters(self):
-        '''Test _report_dict_passes_non_essential_filters'''
+    def test_report_dict_passes_non_essential_filters_known_vars(self):
+        '''Test _report_dict_passes_non_essential_filters with known vars'''
         tests = [
             ('.', True, False),
             ('0', True, False),
@@ -154,6 +154,24 @@ class TestReportFilter(unittest.TestCase):
             d = {'has_known_var': has_known_var}
             rf = report_filter.ReportFilter(ignore_not_has_known_variant=ignore_not_has_known_variant)
             self.assertEqual(expected, rf._report_dict_passes_non_essential_filters(d))
+
+
+    def test_report_dict_passes_non_essential_filters_synonymous(self):
+        '''Test _report_dict_passes_non_essential_filters with synonymous AA changes'''
+        tests = [
+             ('.', True, True),
+             ('.', False, True),
+             ('SNP', True, True),
+             ('SNP', False, True),
+             ('SYN', True, False),
+             ('SYN', False, True),
+        ]
+
+        for var, remove_synonymous_snps, expected in tests:
+            d = {'ref_ctg_effect': var, 'has_known_var': '1'}
+            rf = report_filter.ReportFilter(remove_synonymous_snps=remove_synonymous_snps)
+            self.assertEqual(expected, rf._report_dict_passes_non_essential_filters(d))
+
 
     def test_report_dict_passes_essential_filters(self):
         '''Test _report_dict_passes_essential_filters'''
