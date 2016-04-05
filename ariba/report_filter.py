@@ -82,7 +82,7 @@ class ReportFilter:
                 line_dict = ReportFilter._report_line_to_dict(line)
                 if line_dict is None:
                     pyfastaq.utils.close(f)
-                    raise Error('Error reading report file. Expected ' + str(len(report.columns)) + ' columns but got ' + str(len(data)) + ' columns at this line:\n' + line)
+                    raise Error('Error reading report file at this line:\n' + line)
                 ref_name = line_dict['ref_name']
                 ctg_name = line_dict['ctg']
                 if ref_name not in report_dict:
@@ -149,7 +149,18 @@ class ReportFilter:
                     new_d[key] = '.'
                 pass_dicts.append(new_d)
 
-        return pass_dicts
+        return ReportFilter._remove_all_after_first_frameshift(pass_dicts)
+
+
+    @staticmethod
+    def _remove_all_after_first_frameshift(dicts_list):
+        fshift_starts = [int(d['ref_start']) for d in dicts_list if d.get('ref_ctg_effect', None) == 'FSHIFT']
+        if len(fshift_starts) == 0:
+            return dicts_list
+
+        first_start = min(fshift_starts)
+
+        return [d for d in dicts_list if d['ref_start'] == '.' or d['ref_start'] <= first_start]
 
 
     def _filter_dicts(self):

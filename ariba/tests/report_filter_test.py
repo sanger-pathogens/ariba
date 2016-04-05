@@ -244,6 +244,21 @@ class TestReportFilter(unittest.TestCase):
         self.assertEqual([dict2], got)
 
 
+    def test_remove_all_after_first_frameshift(self):
+        '''Test _remove_all_after_first_frameshift'''
+        self.assertEqual([], report_filter.ReportFilter._remove_all_after_first_frameshift([]))
+        line1 = 'cluster1\tpresence_absence\t528\t1874\tcluster1\t1188\t1097\t92.43\tcluster1.scaffold.1\t2218\t0\t.\tp\t.\t0\tE89G\tNONSYN\t65\t265\tA;A\t766\t766\tG;C\t88;90\t.;.\t87;90\t.\t.'
+        line2 = 'cluster1\tpresence_absence\t528\t1874\tcluster1\t1188\t1097\t92.43\tcluster1.scaffold.1\t2218\t0\t.\tp\t.\t0\tQ37fs\tFSHIFT\t109\t109\tA\t634\t634\t.\t67\t.\t67\t.\t.'
+        line3 = 'cluster1\tpresence_absence\t528\t1874\tcluster1\t1188\t1097\t92.43\tcluster1.scaffold.1\t2218\t0\t.\tp\t.\t0\tE89G\tNONSYN\t265\t265\tA;A\t766\t766\tG;C\t88;90\t.;.\t87;90\t.\t.'
+        dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
+        dict2 = report_filter.ReportFilter._report_line_to_dict(line2)
+        dict3 = report_filter.ReportFilter._report_line_to_dict(line3)
+        self.assertEqual([dict1], report_filter.ReportFilter._remove_all_after_first_frameshift([dict1]))
+        self.assertEqual([dict1, dict2], report_filter.ReportFilter._remove_all_after_first_frameshift([dict1, dict2]))
+        self.assertEqual([dict2], report_filter.ReportFilter._remove_all_after_first_frameshift([dict2, dict3]))
+        self.assertEqual([dict1, dict2], report_filter.ReportFilter._remove_all_after_first_frameshift([dict1, dict2, dict3]))
+
+
     def test_filter_dicts(self):
         '''Test _filter_dicts'''
         rf = report_filter.ReportFilter(min_ref_base_assembled=10)
