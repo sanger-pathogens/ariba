@@ -1,3 +1,4 @@
+import sys
 import operator
 import pyfastaq
 import pymummer
@@ -305,7 +306,7 @@ class AssemblyVariants:
 
                     # include new variant, except if the ref type is variants only and
                     # the new variant matches to a known variant
-                    if new_variant is not None and (ref_sequence_type != 'variants_only' or len(new_variant[5]) > 0):
+                    if new_variant is not None and (ref_sequence_type != 'variants_only' or len(new_variant[5]) > 0 or new_variant[3] == 'INDELS'):
                             variants[contig].append(new_variant)
                     used_known_variants.update(used_variants)
 

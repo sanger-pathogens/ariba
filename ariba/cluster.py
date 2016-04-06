@@ -120,7 +120,7 @@ class Cluster:
 
     def _clean(self):
         if self.clean == 0:
-            print('   ... not deleting anything because --clean 0 used', file=self.log_fh)
+            print('   ... not deleting anything because --clean 0 used', file=self.log_fh, flush=True)
             return
         elif self.clean == 2:
             print('    rm -r ', self.root_dir)
@@ -128,7 +128,7 @@ class Cluster:
             return
 
         if os.path.exists(self.assembly_dir):
-            print('    rm -r', self.assembly_dir, file=self.log_fh)
+            print('    rm -r', self.assembly_dir, file=self.log_fh, flush=True)
             shutil.rmtree(self.assembly_dir)
 
         to_delete = [
@@ -146,7 +146,7 @@ class Cluster:
 
         for filename in to_delete:
             if os.path.exists(filename):
-                print('    rm', filename, file=self.log_fh)
+                print('    rm', filename, file=self.log_fh, flush=True)
                 try:
                     os.unlink(filename)
                 except:
@@ -157,7 +157,7 @@ class Cluster:
         self.logfile = os.path.join(self.root_dir, 'log.txt')
         self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
 
-        print('Choosing best reference sequence:', file=self.log_fh)
+        print('Choosing best reference sequence:', file=self.log_fh, flush=True)
         seq_chooser = best_seq_chooser.BestSeqChooser(
             self.reads1,
             self.reads2,
@@ -174,7 +174,7 @@ class Cluster:
             self.status_flag.add('ref_seq_choose_fail')
             self.assembled_ok = False
         else:
-            print('\nAssembling reads:', file=self.log_fh)
+            print('\nAssembling reads:', file=self.log_fh, flush=True)
             self.ref_sequence_type = self.refdata.sequence_type(self.ref_sequence.id)
             assert self.ref_sequence_type is not None
             self.assembly = assembly.Assembly(
@@ -199,7 +199,7 @@ class Cluster:
             self.assembled_ok = self.assembly.assembled_ok
 
         if self.assembled_ok:
-            print('\nAssembly was successful\n\nMapping reads to assembly:', file=self.log_fh)
+            print('\nAssembly was successful\n\nMapping reads to assembly:', file=self.log_fh, flush=True)
 
             mapping.run_bowtie2(
                 self.reads1,
@@ -218,14 +218,14 @@ class Cluster:
             if self.assembly.has_contigs_on_both_strands:
                 self.status_flag.add('hit_both_strands')
 
-            print('\nMaking and checking scaffold graph', file=self.log_fh)
+            print('\nMaking and checking scaffold graph', file=self.log_fh, flush=True)
 
             bam_parser = bam_parse.Parser(self.final_assembly_bam, self.assembly.sequences)
             bam_parser.parse()
             if not bam_parser.scaff_graph_is_consistent(self.min_scaff_depth, self.max_insert):
                 self.status_flag.add('scaffold_graph_bad')
 
-            print('Comparing assembly against reference sequence', file=self.log_fh)
+            print('Comparing assembly against reference sequence', file=self.log_fh, flush=True)
             self.assembly_compare = assembly_compare.AssemblyCompare(
               self.final_assembly_fa,
               self.assembly.sequences,
@@ -256,7 +256,7 @@ class Cluster:
                     break
 
 
-            print('\nCalling variants with samtools:', file=self.log_fh)
+            print('\nCalling variants with samtools:', file=self.log_fh, flush=True)
 
             self.samtools_vars = samtools_variants.SamtoolsVariants(
                 self.final_assembly_fa,
@@ -274,14 +274,14 @@ class Cluster:
             if self.samtools_vars.variants_in_coords(self.assembly_compare.assembly_match_coords(), self.samtools_vars.vcf_file):
                 self.status_flag.add('variants_suggest_collapsed_repeat')
         else:
-            print('\nAssembly failed\n', file=self.log_fh)
+            print('\nAssembly failed\n', file=self.log_fh, flush=True)
             self.status_flag.add('assembly_fail')
 
-        print('\nMaking report lines', file=self.log_fh)
+        print('\nMaking report lines', file=self.log_fh, flush=True)
         self.report_lines = report.report_lines(self)
-        print('\nCleaning with clean option ', self.clean, ':', sep='', file=self.log_fh)
+        print('\nCleaning with clean option ', self.clean, ':', sep='', file=self.log_fh, flush=True)
         self._clean()
-        print('Finished', file=self.log_fh)
+        print('Finished', file=self.log_fh, flush=True)
         pyfastaq.utils.close(self.log_fh)
 
         # This stops multiprocessing complaining with the error:
