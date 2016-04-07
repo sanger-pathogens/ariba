@@ -93,6 +93,8 @@ class TestClusters(unittest.TestCase):
             self.assertTrue(filecmp.cmp(expected[i], got[i], shallow=False))
 
         self.assertEqual({780:1}, c.insert_hist.bins)
+        self.assertEqual({'ref1': 4, 'ref2': 2}, c.cluster_read_counts)
+        self.assertEqual({'ref1': 240, 'ref2': 120}, c.cluster_base_counts)
 
         shutil.rmtree(clusters_dir)
 

@@ -91,6 +91,8 @@ class Clusters:
 
         self.cluster_to_dir = {}  # gene name -> abs path of cluster directory
         self.clusters = {}        # gene name -> Cluster object
+        self.cluster_read_counts = {} # gene name -> number of reads
+        self.cluster_base_counts = {} # gene name -> number of bases
 
         self.cdhit_seq_identity_threshold = cdhit_seq_identity_threshold
         self.cdhit_length_diff_cutoff = cdhit_length_diff_cutoff
@@ -210,6 +212,8 @@ class Clusters:
 
                 print(read1, file=filehandles_1[ref])
                 print(read2, file=filehandles_2[ref])
+                self.cluster_read_counts[ref] = self.cluster_read_counts.get(ref, 0) + 2
+                self.cluster_base_counts[ref] = self.cluster_base_counts.get(ref, 0) + len(read1) + len(read2)
 
             sam1 = None
 
