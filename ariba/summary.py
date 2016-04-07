@@ -236,9 +236,9 @@ class Summary:
 
         for heading in rows[0][1:]:
             if var_regex.search(heading) is None:
-                header_line.append(heading + ':z1')
+                header_line.append(heading + ':o1')
             else:
-                header_line.append(heading + ':z2')
+                header_line.append(heading + ':o2')
 
         f = pyfastaq.utils.open_file_write(outfile)
         print(*header_line, sep=',', file=f)
