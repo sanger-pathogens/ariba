@@ -13,6 +13,8 @@ class Cluster:
       root_dir,
       name,
       refdata,
+      total_reads,
+      total_reads_bases,
       assembly_kmer=21,
       assembler='spades',
       max_insert=1000,
@@ -42,6 +44,8 @@ class Cluster:
 
         self.name = name
         self.refdata = refdata
+        self.total_reads = total_reads
+        self.total_reads_bases = total_reads_bases
         self.assembly_kmer = assembly_kmer
         self.assembler = assembler
         self.sspace_k = sspace_k
@@ -49,12 +53,12 @@ class Cluster:
         self.reads_insert = reads_insert
         self.spades_other_options = spades_other_options
 
-        self.reads1 = os.path.join(self.root_dir, 'reads_1.fq')
-        self.reads2 = os.path.join(self.root_dir, 'reads_2.fq')
+        self.all_reads1 = os.path.join(self.root_dir, 'reads_1.fq')
+        self.all_reads2 = os.path.join(self.root_dir, 'reads_2.fq')
         self.reference_fa = os.path.join(self.root_dir, 'reference.fa')
         self.references_fa = os.path.join(self.root_dir, 'references.fa')
 
-        for fname in [self.reads1, self.reads2, self.references_fa]:
+        for fname in [self.all_reads1, self.all_reads2, self.references_fa]:
             if not os.path.exists(fname):
                 raise Error('File ' + fname + ' not found. Cannot continue')
 
@@ -92,7 +96,6 @@ class Cluster:
         self.mummer_variants = {}
         self.variant_depths = {}
         self.percent_identities = {}
-        self.total_reads = self._count_reads(self.reads1, self.reads2)
 
         # The log filehandle self.log_fh is set at the start of the run() method.
         # Lots of other methods use self.log_fh. But for unit testing, run() isn't
@@ -110,14 +113,6 @@ class Cluster:
             self.extern_progs = extern_progs
 
 
-    @staticmethod
-    def _count_reads(reads1, reads2):
-        count1 = pyfastaq.tasks.count_sequences(reads1)
-        count2 = pyfastaq.tasks.count_sequences(reads2)
-        assert(count1 == count2)
-        return count1 + count2
-
-
     def _clean(self):
         if self.clean == 0:
             print('   ... not deleting anything because --clean 0 used', file=self.log_fh, flush=True)
@@ -132,8 +127,8 @@ class Cluster:
             shutil.rmtree(self.assembly_dir)
 
         to_delete = [
-            self.reads1,
-            self.reads2,
+            self.all_reads1,
+            self.all_reads2,
             self.references_fa,
             self.references_fa + '.fai',
             self.final_assembly_bam + '.read_depths.gz',
@@ -159,8 +154,8 @@ class Cluster:
 
         print('Choosing best reference sequence:', file=self.log_fh, flush=True)
         seq_chooser = best_seq_chooser.BestSeqChooser(
-            self.reads1,
-            self.reads2,
+            self.all_reads1,
+            self.all_reads2,
             self.references_fa,
             self.log_fh,
             samtools_exe=self.extern_progs.exe('samtools'),
@@ -178,8 +173,8 @@ class Cluster:
             self.ref_sequence_type = self.refdata.sequence_type(self.ref_sequence.id)
             assert self.ref_sequence_type is not None
             self.assembly = assembly.Assembly(
-              self.reads1,
-              self.reads2,
+              self.all_reads1,
+              self.all_reads2,
               self.reference_fa,
               self.assembly_dir,
               self.final_assembly_fa,
@@ -202,8 +197,8 @@ class Cluster:
             print('\nAssembly was successful\n\nMapping reads to assembly:', file=self.log_fh, flush=True)
 
             mapping.run_bowtie2(
-                self.reads1,
-                self.reads2,
+                self.all_reads1,
+                self.all_reads2,
                 self.final_assembly_fa,
                 self.final_assembly_bam[:-4],
                 threads=1,
