@@ -17,7 +17,7 @@ class Cluster:
       refdata,
       total_reads,
       total_reads_bases,
-      assembly_coverage=50,
+      assembly_coverage=100,
       assembly_kmer=21,
       assembler='spades',
       max_insert=1000,

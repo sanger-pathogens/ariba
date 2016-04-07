@@ -29,7 +29,7 @@ class Clusters:
       outdir,
       extern_progs,
       assembly_kmer=21,
-      assembly_coverage=50,
+      assembly_coverage=100,
       threads=1,
       verbose=False,
       assembler='spades',
