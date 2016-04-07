@@ -233,17 +233,22 @@ class Summary:
         # columns the same, and then all variant columns the same
         header_line = ['name']
         var_regex = re.compile('^.*;var\.[np.]\.\S+$')
+        var_columns = []
 
-        for heading in rows[0][1:]:
-            if var_regex.search(heading) is None:
-                header_line.append(heading + ':o1')
-            else:
-                header_line.append(heading + ':o2')
+        for i in range(1, len(rows[0]), 1):
+            heading = rows[0][i]
+            if var_regex.search(heading) is not None:
+                var_columns.append(i)
+
+            header_line.append(heading + ':o1')
 
         f = pyfastaq.utils.open_file_write(outfile)
         print(*header_line, sep=',', file=f)
         for row in rows[1:]:
-            print(*row, sep=',', file=f)
+            to_print = list(row)
+            for i in var_columns:
+                to_print[i] *= 3
+            print(*to_print, sep=',', file=f)
         pyfastaq.utils.close(f)
 
 
