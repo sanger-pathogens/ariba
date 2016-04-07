@@ -39,6 +39,7 @@ class Cluster:
       spades_other_options=None,
       clean=1,
       extern_progs=None,
+      random_seed=42,
     ):
 
         self.root_dir = os.path.abspath(root_dir)
@@ -117,6 +118,8 @@ class Cluster:
             self.extern_progs = external_progs.ExternalProgs()
         else:
             self.extern_progs = extern_progs
+
+        self.random_seed = random_seed
 
 
     def _clean(self):
@@ -199,8 +202,8 @@ class Cluster:
             pyfastaq.utils.close(out2)
             return reads_written
         else:
-            os.symlink(reads_in1, os.path.basename(reads_out1))
-            os.symlink(reads_in2, os.path.basename(reads_out2))
+            os.symlink(reads_in1, reads_out1)
+            os.symlink(reads_in2, reads_out2)
             return total_reads
 
 
@@ -225,7 +228,10 @@ class Cluster:
             self.status_flag.add('ref_seq_choose_fail')
             self.assembled_ok = False
         else:
-            print('\nAssembling reads:', file=self.log_fh, flush=True)
+            wanted_reads = self._number_of_reads_for_assembly(self.reference_fa, self.reads_insert, self.total_reads_bases, self.total_reads, self.assembly_coverage)
+            made_reads = self._make_reads_for_assembly(wanted_reads, self.total_reads, self.all_reads1, self.all_reads2, self.reads_for_assembly1, self.reads_for_assembly2, random_seed=self.random_seed)
+            print('\nUsing', made_reads, 'from a total of', self.total_reads, 'for assembly.', file=self.log_fh, flush=True)
+            print('Assembling reads:', file=self.log_fh, flush=True)
             self.ref_sequence_type = self.refdata.sequence_type(self.ref_sequence.id)
             assert self.ref_sequence_type is not None
             self.assembly = assembly.Assembly(
