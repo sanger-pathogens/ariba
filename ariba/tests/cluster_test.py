@@ -48,18 +48,60 @@ class TestCluster(unittest.TestCase):
             tmpdir = 'tmp.cluster_test_init_fail_files_missing'
             shutil.copytree(d, tmpdir)
             with self.assertRaises(cluster.Error):
-                c = cluster.Cluster(tmpdir, 'name', refdata=refdata)
+                c = cluster.Cluster(tmpdir, 'name', refdata=refdata, total_reads=42, total_reads_bases=4242)
             shutil.rmtree(tmpdir)
 
         with self.assertRaises(cluster.Error):
-            c = cluster.Cluster('directorydoesnotexistshouldthrowerror', 'name', refdata=refdata)
+            c = cluster.Cluster('directorydoesnotexistshouldthrowerror', 'name', refdata=refdata, total_reads=42, total_reads_bases=4242)
 
 
-    def test_count_reads(self):
-        '''test _count_reads pass'''
-        reads1 = os.path.join(data_dir, 'cluster_test_count_reads_1.fq')
-        reads2 = os.path.join(data_dir, 'cluster_test_count_reads_2.fq')
-        self.assertEqual(4, cluster.Cluster._count_reads(reads1, reads2))
+    def test_number_of_reads_for_assembly(self):
+        '''Test _number_of_reads_for_assembly'''
+        # ref is 100bp long
+        ref_fa = os.path.join(data_dir, 'cluster_test_number_of_reads_for_assembly.ref.fa')
+        tests = [
+            (50, 1000, 10, 20, 40),
+            (50, 999, 10, 20, 42),
+            (50, 1000, 10, 10, 20),
+            (50, 1000, 10, 5, 10),
+        ]
+
+        for insert, bases, reads, coverage, expected in tests:
+            self.assertEqual(expected, cluster.Cluster._number_of_reads_for_assembly(ref_fa, insert, bases, reads, coverage))
+
+
+    def test_make_reads_for_assembly_proper_sample(self):
+        '''Test _make_reads_for_assembly when sampling from reads'''
+        reads_in1 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.in1.fq')
+        reads_in2 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.in2.fq')
+        expected_out1 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.out1.fq')
+        expected_out2 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.out2.fq')
+        reads_out1 = 'tmp.test_make_reads_for_assembly.reads.out1.fq'
+        reads_out2 = 'tmp.test_make_reads_for_assembly.reads.out2.fq'
+        reads_written = cluster.Cluster._make_reads_for_assembly(10, 20, reads_in1, reads_in2, reads_out1, reads_out2, random_seed=42)
+        self.assertEqual(14, reads_written)
+        self.assertTrue(filecmp.cmp(expected_out1, reads_out1, shallow=False))
+        self.assertTrue(filecmp.cmp(expected_out2, reads_out2, shallow=False))
+        os.unlink(reads_out1)
+        os.unlink(reads_out2)
+
+
+    def test_make_reads_for_assembly_symlinks(self):
+        '''Test _make_reads_for_assembly when just makes symlinks'''
+        reads_in1 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.in1.fq')
+        reads_in2 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.in2.fq')
+        expected_out1 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.out1.fq')
+        expected_out2 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.out2.fq')
+        reads_out1 = 'tmp.test_make_reads_for_assembly.reads.out1.fq'
+        reads_out2 = 'tmp.test_make_reads_for_assembly.reads.out2.fq'
+        reads_written = cluster.Cluster._make_reads_for_assembly(20, 20, reads_in1, reads_in2, reads_out1, reads_out2, random_seed=42)
+        self.assertEqual(20, reads_written)
+        self.assertTrue(os.path.islink(reads_out1))
+        self.assertTrue(os.path.islink(reads_out2))
+        self.assertEqual(os.readlink(reads_out1), reads_in1)
+        self.assertEqual(os.readlink(reads_out2), reads_in2)
+        os.unlink(reads_out1)
+        os.unlink(reads_out2)
 
 
     def test_full_run_choose_ref_fail(self):
@@ -70,7 +112,7 @@ class TestCluster(unittest.TestCase):
         tmpdir = 'tmp.test_full_run_choose_ref_fail'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=2, total_reads_bases=108)
         c.run()
 
         expected = '\t'.join(['.', '.', '1088', '2', 'cluster_name'] + ['.'] * 23)
@@ -88,7 +130,7 @@ class TestCluster(unittest.TestCase):
         tmpdir = 'tmp.test_full_run_assembly_fail'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_assembly_fail'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=4, total_reads_bases=304)
         c.run()
 
         expected = '\t'.join(['noncoding_ref_seq', 'non_coding', '64', '4', 'cluster_name'] + ['.'] * 23)
@@ -108,7 +150,7 @@ class TestCluster(unittest.TestCase):
         tmpdir = 'tmp.test_full_run_ok_non_coding'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_non_coding'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=72, total_reads_bases=3600)
         c.run()
 
         expected = [
@@ -134,7 +176,7 @@ class TestCluster(unittest.TestCase):
         tmpdir = 'tmp.cluster_test_full_run_ok_presence_absence'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=64, total_reads_bases=3200)
         c.run()
 
         expected = [
@@ -160,7 +202,7 @@ class TestCluster(unittest.TestCase):
         tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.not_present'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
         c.run()
         expected = [
             'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t65\t67\tC;G;C\t18;18;19\t.;.;.\t18;18;19\tvariants_only1_p_R3S_Ref and assembly have wild type, so do not report\tGeneric description of variants_only1'
@@ -179,7 +221,7 @@ class TestCluster(unittest.TestCase):
         tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.not_present.always_report'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
         c.run()
         expected = [
             'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t65\t67\tC;G;C\t18;18;19\t.;.;.\t18;18;19\tvariants_only1_p_R3S_Ref and assembly have wild type, but always report anyway\tGeneric description of variants_only1'
@@ -198,7 +240,7 @@ class TestCluster(unittest.TestCase):
         tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.present'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler')
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
         c.run()
 
         expected = [

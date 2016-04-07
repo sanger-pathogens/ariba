@@ -29,6 +29,7 @@ class Clusters:
       outdir,
       extern_progs,
       assembly_kmer=21,
+      assembly_coverage=100,
       threads=1,
       verbose=False,
       assembler='spades',
@@ -57,6 +58,7 @@ class Clusters:
         self.assembler = assembler
         assert self.assembler in ['spades']
         self.assembly_kmer = assembly_kmer
+        self.assembly_coverage = assembly_coverage
         self.spades_other = spades_other
 
         self.refdata_files_prefix = os.path.join(self.outdir, 'refdata')
@@ -91,6 +93,8 @@ class Clusters:
 
         self.cluster_to_dir = {}  # gene name -> abs path of cluster directory
         self.clusters = {}        # gene name -> Cluster object
+        self.cluster_read_counts = {} # gene name -> number of reads
+        self.cluster_base_counts = {} # gene name -> number of bases
 
         self.cdhit_seq_identity_threshold = cdhit_seq_identity_threshold
         self.cdhit_length_diff_cutoff = cdhit_length_diff_cutoff
@@ -210,6 +214,8 @@ class Clusters:
 
                 print(read1, file=filehandles_1[ref])
                 print(read2, file=filehandles_2[ref])
+                self.cluster_read_counts[ref] = self.cluster_read_counts.get(ref, 0) + 2
+                self.cluster_base_counts[ref] = self.cluster_base_counts.get(ref, 0) + len(read1) + len(read2)
 
             sam1 = None
 
@@ -257,7 +263,10 @@ class Clusters:
                 cluster_list.append(cluster.Cluster(
                     new_dir,
                     seq_name,
-                    refdata=self.refdata,
+                    self.refdata,
+                    self.cluster_read_counts[seq_name],
+                    self.cluster_base_counts[seq_name],
+                    assembly_coverage=self.assembly_coverage,
                     assembly_kmer=self.assembly_kmer,
                     assembler=self.assembler,
                     max_insert=self.insert_proper_pair_max,

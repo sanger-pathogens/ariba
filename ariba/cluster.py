@@ -1,8 +1,10 @@
 import os
+import random
+import math
 import shutil
 import sys
 import pyfastaq
-from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, external_progs, flag, mapping, report, samtools_variants
+from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, common, external_progs, flag, mapping, report, samtools_variants
 
 class Error (Exception): pass
 
@@ -13,6 +15,9 @@ class Cluster:
       root_dir,
       name,
       refdata,
+      total_reads,
+      total_reads_bases,
+      assembly_coverage=100,
       assembly_kmer=21,
       assembler='spades',
       max_insert=1000,
@@ -34,6 +39,7 @@ class Cluster:
       spades_other_options=None,
       clean=1,
       extern_progs=None,
+      random_seed=42,
     ):
 
         self.root_dir = os.path.abspath(root_dir)
@@ -42,6 +48,9 @@ class Cluster:
 
         self.name = name
         self.refdata = refdata
+        self.total_reads = total_reads
+        self.total_reads_bases = total_reads_bases
+        self.assembly_coverage = assembly_coverage
         self.assembly_kmer = assembly_kmer
         self.assembler = assembler
         self.sspace_k = sspace_k
@@ -49,12 +58,14 @@ class Cluster:
         self.reads_insert = reads_insert
         self.spades_other_options = spades_other_options
 
-        self.reads1 = os.path.join(self.root_dir, 'reads_1.fq')
-        self.reads2 = os.path.join(self.root_dir, 'reads_2.fq')
+        self.all_reads1 = os.path.join(self.root_dir, 'reads_1.fq')
+        self.all_reads2 = os.path.join(self.root_dir, 'reads_2.fq')
+        self.reads_for_assembly1 = os.path.join(self.root_dir, 'reads_for_assembly_1.fq')
+        self.reads_for_assembly2 = os.path.join(self.root_dir, 'reads_for_assembly_2.fq')
         self.reference_fa = os.path.join(self.root_dir, 'reference.fa')
         self.references_fa = os.path.join(self.root_dir, 'references.fa')
 
-        for fname in [self.reads1, self.reads2, self.references_fa]:
+        for fname in [self.all_reads1, self.all_reads2, self.references_fa]:
             if not os.path.exists(fname):
                 raise Error('File ' + fname + ' not found. Cannot continue')
 
@@ -92,7 +103,6 @@ class Cluster:
         self.mummer_variants = {}
         self.variant_depths = {}
         self.percent_identities = {}
-        self.total_reads = self._count_reads(self.reads1, self.reads2)
 
         # The log filehandle self.log_fh is set at the start of the run() method.
         # Lots of other methods use self.log_fh. But for unit testing, run() isn't
@@ -109,13 +119,7 @@ class Cluster:
         else:
             self.extern_progs = extern_progs
 
-
-    @staticmethod
-    def _count_reads(reads1, reads2):
-        count1 = pyfastaq.tasks.count_sequences(reads1)
-        count2 = pyfastaq.tasks.count_sequences(reads2)
-        assert(count1 == count2)
-        return count1 + count2
+        self.random_seed = random_seed
 
 
     def _clean(self):
@@ -132,8 +136,8 @@ class Cluster:
             shutil.rmtree(self.assembly_dir)
 
         to_delete = [
-            self.reads1,
-            self.reads2,
+            self.all_reads1,
+            self.all_reads2,
             self.references_fa,
             self.references_fa + '.fai',
             self.final_assembly_bam + '.read_depths.gz',
@@ -153,14 +157,64 @@ class Cluster:
                     raise Error('Error deleting file', filename)
 
 
+    @staticmethod
+    def _number_of_reads_for_assembly(reference_fa, insert_size, total_bases, total_reads, coverage):
+        file_reader = pyfastaq.sequences.file_reader(reference_fa)
+        ref_length = sum([len(x) for x in file_reader])
+        assert ref_length > 0
+        ref_length += 2 * insert_size
+        mean_read_length = total_bases / total_reads
+        wanted_bases = coverage * ref_length
+        wanted_reads = int(math.ceil(wanted_bases / mean_read_length))
+        wanted_reads += wanted_reads % 2
+        return wanted_reads
+
+
+    @staticmethod
+    def _make_reads_for_assembly(number_of_wanted_reads, total_reads, reads_in1, reads_in2, reads_out1, reads_out2, random_seed=None):
+        '''Makes fastq files that are random subset of input files. Returns total number of reads in output files.
+           If the number of wanted reads is >= total reads, then just makes symlinks instead of making
+           new copies of the input files.'''
+        random.seed(random_seed)
+
+        if number_of_wanted_reads < total_reads:
+            reads_written = 0
+            percent_wanted = 100 * number_of_wanted_reads / total_reads
+            file_reader1 = pyfastaq.sequences.file_reader(reads_in1)
+            file_reader2 = pyfastaq.sequences.file_reader(reads_in2)
+            out1 = pyfastaq.utils.open_file_write(reads_out1)
+            out2 = pyfastaq.utils.open_file_write(reads_out2)
+
+            for read1 in file_reader1:
+                try:
+                    read2 = next(file_reader2)
+                except StopIteration:
+                    pyfastaq.utils.close(out1)
+                    pyfastaq.utils.close(out2)
+                    raise Error('Error subsetting reads. No mate found for read ' + read1.id)
+
+                if random.randint(0, 100) <= percent_wanted:
+                    print(read1, file=out1)
+                    print(read2, file=out2)
+                    reads_written += 2
+
+            pyfastaq.utils.close(out1)
+            pyfastaq.utils.close(out2)
+            return reads_written
+        else:
+            os.symlink(reads_in1, reads_out1)
+            os.symlink(reads_in2, reads_out2)
+            return total_reads
+
+
     def run(self):
         self.logfile = os.path.join(self.root_dir, 'log.txt')
         self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
 
         print('Choosing best reference sequence:', file=self.log_fh, flush=True)
         seq_chooser = best_seq_chooser.BestSeqChooser(
-            self.reads1,
-            self.reads2,
+            self.all_reads1,
+            self.all_reads2,
             self.references_fa,
             self.log_fh,
             samtools_exe=self.extern_progs.exe('samtools'),
@@ -174,12 +228,15 @@ class Cluster:
             self.status_flag.add('ref_seq_choose_fail')
             self.assembled_ok = False
         else:
-            print('\nAssembling reads:', file=self.log_fh, flush=True)
+            wanted_reads = self._number_of_reads_for_assembly(self.reference_fa, self.reads_insert, self.total_reads_bases, self.total_reads, self.assembly_coverage)
+            made_reads = self._make_reads_for_assembly(wanted_reads, self.total_reads, self.all_reads1, self.all_reads2, self.reads_for_assembly1, self.reads_for_assembly2, random_seed=self.random_seed)
+            print('\nUsing', made_reads, 'from a total of', self.total_reads, 'for assembly.', file=self.log_fh, flush=True)
+            print('Assembling reads:', file=self.log_fh, flush=True)
             self.ref_sequence_type = self.refdata.sequence_type(self.ref_sequence.id)
             assert self.ref_sequence_type is not None
             self.assembly = assembly.Assembly(
-              self.reads1,
-              self.reads2,
+              self.reads_for_assembly1,
+              self.reads_for_assembly2,
               self.reference_fa,
               self.assembly_dir,
               self.final_assembly_fa,
@@ -202,8 +259,8 @@ class Cluster:
             print('\nAssembly was successful\n\nMapping reads to assembly:', file=self.log_fh, flush=True)
 
             mapping.run_bowtie2(
-                self.reads1,
-                self.reads2,
+                self.all_reads1,
+                self.all_reads2,
                 self.final_assembly_fa,
                 self.final_assembly_bam[:-4],
                 threads=1,
