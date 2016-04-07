@@ -55,6 +55,21 @@ class TestCluster(unittest.TestCase):
             c = cluster.Cluster('directorydoesnotexistshouldthrowerror', 'name', refdata=refdata, total_reads=42, total_reads_bases=4242)
 
 
+    def test_number_of_reads_for_assembly(self):
+        '''Test _number_of_reads_for_assembly'''
+        # ref is 100bp long
+        ref_fa = os.path.join(data_dir, 'cluster_test_number_of_reads_for_assembly.ref.fa')
+        tests = [
+            (50, 1000, 10, 20, 40),
+            (50, 999, 10, 20, 42),
+            (50, 1000, 10, 10, 20),
+            (50, 1000, 10, 5, 10),
+        ]
+
+        for insert, bases, reads, coverage, expected in tests:
+            self.assertEqual(expected, cluster.Cluster._number_of_reads_for_assembly(ref_fa, insert, bases, reads, coverage))
+
+
     def test_full_run_choose_ref_fail(self):
         '''test complete run of cluster when choosing ref seq fails'''
         refdata = reference_data.ReferenceData(

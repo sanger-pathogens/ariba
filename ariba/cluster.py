@@ -1,8 +1,9 @@
 import os
+import math
 import shutil
 import sys
 import pyfastaq
-from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, external_progs, flag, mapping, report, samtools_variants
+from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, common, external_progs, flag, mapping, report, samtools_variants
 
 class Error (Exception): pass
 
@@ -15,6 +16,7 @@ class Cluster:
       refdata,
       total_reads,
       total_reads_bases,
+      assembly_coverage=50,
       assembly_kmer=21,
       assembler='spades',
       max_insert=1000,
@@ -46,6 +48,7 @@ class Cluster:
         self.refdata = refdata
         self.total_reads = total_reads
         self.total_reads_bases = total_reads_bases
+        self.assembly_coverage = assembly_coverage
         self.assembly_kmer = assembly_kmer
         self.assembler = assembler
         self.sspace_k = sspace_k
@@ -146,6 +149,19 @@ class Cluster:
                     os.unlink(filename)
                 except:
                     raise Error('Error deleting file', filename)
+
+
+    @staticmethod
+    def _number_of_reads_for_assembly(reference_fa, insert_size, total_bases, total_reads, coverage):
+        file_reader = pyfastaq.sequences.file_reader(reference_fa)
+        ref_length = sum([len(x) for x in file_reader])
+        assert ref_length > 0
+        ref_length += 2 * insert_size
+        mean_read_length = total_bases / total_reads
+        wanted_bases = coverage * ref_length
+        wanted_reads = int(math.ceil(wanted_bases / mean_read_length))
+        wanted_reads += wanted_reads % 2
+        return wanted_reads
 
 
     def run(self):
