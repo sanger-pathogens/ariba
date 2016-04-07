@@ -70,6 +70,40 @@ class TestCluster(unittest.TestCase):
             self.assertEqual(expected, cluster.Cluster._number_of_reads_for_assembly(ref_fa, insert, bases, reads, coverage))
 
 
+    def test_make_reads_for_assembly_proper_sample(self):
+        '''Test _make_reads_for_assembly when sampling from reads'''
+        reads_in1 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.in1.fq')
+        reads_in2 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.in2.fq')
+        expected_out1 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.out1.fq')
+        expected_out2 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.out2.fq')
+        reads_out1 = 'tmp.test_make_reads_for_assembly.reads.out1.fq'
+        reads_out2 = 'tmp.test_make_reads_for_assembly.reads.out2.fq'
+        reads_written = cluster.Cluster._make_reads_for_assembly(10, 20, reads_in1, reads_in2, reads_out1, reads_out2, random_seed=42)
+        self.assertEqual(14, reads_written)
+        self.assertTrue(filecmp.cmp(expected_out1, reads_out1, shallow=False))
+        self.assertTrue(filecmp.cmp(expected_out2, reads_out2, shallow=False))
+        os.unlink(reads_out1)
+        os.unlink(reads_out2)
+
+
+    def test_make_reads_for_assembly_symlinks(self):
+        '''Test _make_reads_for_assembly when just makes symlinks'''
+        reads_in1 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.in1.fq')
+        reads_in2 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.in2.fq')
+        expected_out1 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.out1.fq')
+        expected_out2 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.out2.fq')
+        reads_out1 = 'tmp.test_make_reads_for_assembly.reads.out1.fq'
+        reads_out2 = 'tmp.test_make_reads_for_assembly.reads.out2.fq'
+        reads_written = cluster.Cluster._make_reads_for_assembly(20, 20, reads_in1, reads_in2, reads_out1, reads_out2, random_seed=42)
+        self.assertEqual(20, reads_written)
+        self.assertTrue(os.path.islink(reads_out1))
+        self.assertTrue(os.path.islink(reads_out2))
+        self.assertEqual(os.readlink(reads_out1), reads_in1)
+        self.assertEqual(os.readlink(reads_out2), reads_in2)
+        os.unlink(reads_out1)
+        os.unlink(reads_out2)
+
+
     def test_full_run_choose_ref_fail(self):
         '''test complete run of cluster when choosing ref seq fails'''
         refdata = reference_data.ReferenceData(

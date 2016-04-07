@@ -1,4 +1,5 @@
 import os
+import random
 import math
 import shutil
 import sys
@@ -58,6 +59,8 @@ class Cluster:
 
         self.all_reads1 = os.path.join(self.root_dir, 'reads_1.fq')
         self.all_reads2 = os.path.join(self.root_dir, 'reads_2.fq')
+        self.reads_for_assembly1 = os.path.join(self.root_dir, 'reads_for_assembly_1.fq')
+        self.reads_for_assembly2 = os.path.join(self.root_dir, 'reads_for_assembly_2.fq')
         self.reference_fa = os.path.join(self.root_dir, 'reference.fa')
         self.references_fa = os.path.join(self.root_dir, 'references.fa')
 
@@ -162,6 +165,43 @@ class Cluster:
         wanted_reads = int(math.ceil(wanted_bases / mean_read_length))
         wanted_reads += wanted_reads % 2
         return wanted_reads
+
+
+    @staticmethod
+    def _make_reads_for_assembly(number_of_wanted_reads, total_reads, reads_in1, reads_in2, reads_out1, reads_out2, random_seed=None):
+        '''Makes fastq files that are random subset of input files. Returns total number of reads in output files.
+           If the number of wanted reads is >= total reads, then just makes symlinks instead of making
+           new copies of the input files.'''
+        random.seed(random_seed)
+
+        if number_of_wanted_reads < total_reads:
+            reads_written = 0
+            percent_wanted = 100 * number_of_wanted_reads / total_reads
+            file_reader1 = pyfastaq.sequences.file_reader(reads_in1)
+            file_reader2 = pyfastaq.sequences.file_reader(reads_in2)
+            out1 = pyfastaq.utils.open_file_write(reads_out1)
+            out2 = pyfastaq.utils.open_file_write(reads_out2)
+
+            for read1 in file_reader1:
+                try:
+                    read2 = next(file_reader2)
+                except StopIteration:
+                    pyfastaq.utils.close(out1)
+                    pyfastaq.utils.close(out2)
+                    raise Error('Error subsetting reads. No mate found for read ' + read1.id)
+
+                if random.randint(0, 100) <= percent_wanted:
+                    print(read1, file=out1)
+                    print(read2, file=out2)
+                    reads_written += 2
+
+            pyfastaq.utils.close(out1)
+            pyfastaq.utils.close(out2)
+            return reads_written
+        else:
+            os.symlink(reads_in1, os.path.basename(reads_out1))
+            os.symlink(reads_in2, os.path.basename(reads_out2))
+            return total_reads
 
 
     def run(self):
