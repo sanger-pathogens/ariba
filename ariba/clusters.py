@@ -29,6 +29,7 @@ class Clusters:
       outdir,
       extern_progs,
       assembly_kmer=21,
+      assembly_coverage=50,
       threads=1,
       verbose=False,
       assembler='spades',
@@ -57,6 +58,7 @@ class Clusters:
         self.assembler = assembler
         assert self.assembler in ['spades']
         self.assembly_kmer = assembly_kmer
+        self.assembly_coverage = assembly_coverage
         self.spades_other = spades_other
 
         self.refdata_files_prefix = os.path.join(self.outdir, 'refdata')
@@ -261,7 +263,10 @@ class Clusters:
                 cluster_list.append(cluster.Cluster(
                     new_dir,
                     seq_name,
-                    refdata=self.refdata,
+                    self.refdata,
+                    self.cluster_read_counts[seq_name],
+                    self.cluster_base_counts[seq_name],
+                    assembly_coverage=self.assembly_coverage,
                     assembly_kmer=self.assembly_kmer,
                     assembler=self.assembler,
                     max_insert=self.insert_proper_pair_max,
