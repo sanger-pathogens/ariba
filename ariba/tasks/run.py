@@ -1,7 +1,31 @@
 import argparse
+import os
 import sys
 import pyfastaq
 import ariba
+
+def get_ref_files(options):
+    if options.ref_prefix is not None:
+        if options.verbose:
+            print('--ref_prefix used. Looking for reference input files starting with', options.ref_prefix, '...')
+        d = {
+            'presabs': 'presence_absence.fa',
+            'varonly': 'variants_only.fa',
+            'noncoding': 'noncoding.fa',
+            'metadata': 'metadata.tsv',
+        }
+
+        for key in d:
+            filename = options.ref_prefix + '.' + d[key]
+
+            if os.path.exists(filename):
+                if options.verbose:
+                    print('Found: ', filename, '.\n    ...treating it as if this was used: --', key, ' ', filename, sep='')
+                exec('options.' + key + ' = filename')
+            else:
+                if options.verbose:
+                    print('Not found:', filename)
+                exec('options.' + key + ' = None')
 
 
 def run():
@@ -13,6 +37,7 @@ def run():
     parser.add_argument('outdir', help='Output directory (must not already exist)')
 
     refdata_group = parser.add_argument_group('Reference data options')
+    refdata_group.add_argument('--ref_prefix', help='Prefix of input files (same as was used with getref), to save listing --preseabs,--varonly ...etc. Will look for files called ref_prefix. followed by: metadata.tsv,presence_absence.fa,noncoding.fa,presence_absence.fa. Using this will cause these to be ignored if used: --presabs,--varonly,--noncoding,--metadata')
     refdata_group.add_argument('--presabs', help='FASTA file of presence absence genes', metavar='FILENAME')
     refdata_group.add_argument('--varonly', help='FASTA file of variants only genes', metavar='FILENAME')
     refdata_group.add_argument('--noncoding', help='FASTA file of noncoding sequences', metavar='FILENAME')
@@ -48,8 +73,22 @@ def run():
 
     options = parser.parse_args()
 
+
+    if options.verbose:
+        print('{:_^79}'.format(' Reference files '), flush=True)
+    get_ref_files(options)
+
     if {None} == {options.presabs, options.varonly, options.noncoding}:
-        print('Error! Must use at least one of the options: --presabs --varonly --noncoding. Cannot continue', file=sys.stderr)
+        print('Error! Must use at least one of the options: --presabs --varonly --noncoding. Alternatively, use the option --ref_prefix. Cannot continue', file=sys.stderr)
+        sys.exit(1)
+
+    if options.verbose:
+        print('\nUsing the following reference files:')
+        print('Presence/absence (--presabs):', options.presabs)
+        print('Variants only    (--varonly):', options.varonly)
+        print('Non coding     (--noncoding):', options.noncoding)
+        print('Metadata        (--metadata):', options.metadata)
+        print()
 
     extern_progs = ariba.external_progs.ExternalProgs(verbose=options.verbose)
     pyfastaq.sequences.genetic_code = options.genetic_code
