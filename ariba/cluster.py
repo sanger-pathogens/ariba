@@ -235,8 +235,8 @@ class Cluster:
             self.ref_sequence_type = self.refdata.sequence_type(self.ref_sequence.id)
             assert self.ref_sequence_type is not None
             self.assembly = assembly.Assembly(
-              self.all_reads1,
-              self.all_reads2,
+              self.reads_for_assembly1,
+              self.reads_for_assembly2,
               self.reference_fa,
               self.assembly_dir,
               self.final_assembly_fa,
