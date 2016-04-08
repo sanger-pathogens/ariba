@@ -130,8 +130,8 @@ class TestSamtoolsVariants(unittest.TestCase):
         samtools_vars.run()
         tests = [
             (('ref', 425), ('C', 'T', 31, '18,13')),
-            (('not_a_ref', 10), None),
-            (('ref', 1000000000), None)
+            (('not_a_ref', 10), ('ND', 'ND', 'ND', 'ND')),
+            (('ref', 1000000000), ('ND', 'ND', 'ND', 'ND'))
         ]
         for (ref, pos), expected in tests:
             got = samtools_vars.get_depths_at_position(ref, pos)
