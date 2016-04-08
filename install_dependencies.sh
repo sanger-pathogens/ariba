@@ -105,3 +105,10 @@ update_path ${mummer_dir}
 update_path ${samtools_dir}
 update_path ${spades_dir}
 
+
+# -------------- R packages ---------------
+mkdir -p ~/R/libs
+echo "R_LIBS=~/R/libs" > ~/.Renviron
+wget https://cran.r-project.org/src/contrib/ape_3.4.tar.gz
+R CMD INSTALL ape_3.4.tar.gz
+
