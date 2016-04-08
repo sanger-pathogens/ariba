@@ -75,7 +75,7 @@ def run():
 
 
     if options.verbose:
-        print('{:_^79}'.format(' Reference files '), flush=True)
+        print('{:_^79}'.format(' Check input files '), flush=True)
     get_ref_files(options)
 
     if {None} == {options.presabs, options.varonly, options.noncoding}:
@@ -90,10 +90,27 @@ def run():
         print('Metadata        (--metadata):', options.metadata)
         print()
 
+    reads_not_found = []
+
+    for filename in [options.reads_1, options.reads_2]:
+        if not os.path.exists(filename):
+            reads_not_found.append(filename)
+        elif options.verbose:
+            print('Found reads file:', filename)
+
+    if len(reads_not_found):
+        print('\nThe following reads file(s) were not found:', file=sys.stderr)
+        print(*reads_not_found, sep='\n')
+        print('Cannot continue', file=sys.stderr)
+        sys.exit(1)
+
+    print()
+
     extern_progs = ariba.external_progs.ExternalProgs(verbose=options.verbose)
     pyfastaq.sequences.genetic_code = options.genetic_code
 
     if options.verbose:
+        print()
         print('{:_^79}'.format(' Loading reference data '), flush=True)
     refdata = ariba.reference_data.ReferenceData(
         presence_absence_fa=options.presabs,
