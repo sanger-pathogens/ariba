@@ -100,7 +100,7 @@ def run():
 
     if len(reads_not_found):
         print('\nThe following reads file(s) were not found:', file=sys.stderr)
-        print(*reads_not_found, sep='\n')
+        print(*reads_not_found, sep='\n', file=sys.stderr)
         print('Cannot continue', file=sys.stderr)
         sys.exit(1)
 
