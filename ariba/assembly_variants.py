@@ -64,12 +64,12 @@ class AssemblyVariants:
     def _get_variant_effect(cls, variants, ref_sequence):
         '''variants = list of variants in the same codon.
            returns type of variant (cannot handle more than one indel in the same codon).'''
-        if len(variants) == 0:
-            return None
+        assert len(variants) != 0
 
         var_types = [x.var_type for x in variants]
         if len(set(var_types)) != 1:
-            return None
+            print('More than one type of variant in the same codon not yet implemented!', ref_sequence.id, file=sys.stderr)
+            return 'MULTIPLE', '.', '.'
 
         var_type = var_types[0]
 
@@ -306,7 +306,7 @@ class AssemblyVariants:
 
                     # include new variant, except if the ref type is variants only and
                     # the new variant matches to a known variant
-                    if new_variant is not None and (ref_sequence_type != 'variants_only' or len(new_variant[5]) > 0 or new_variant[3] == 'INDELS'):
+                    if new_variant is not None and (ref_sequence_type != 'variants_only' or len(new_variant[5]) > 0 or new_variant[3] in ['MULTIPLE', 'INDELS']):
                             variants[contig].append(new_variant)
                     used_known_variants.update(used_variants)
 
