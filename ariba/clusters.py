@@ -387,7 +387,7 @@ class Clusters:
     def write_versions_file(self, original_dir):
         with open('version_info.txt', 'w') as f:
             print('ARIBA version', common.version, 'run with this command:', file=f)
-            print(' '.join(sys.argv), file=f)
+            print(' '.join([sys.argv[0]] + ['run'] + sys.argv[1:]), file=f)
             print('from this directory:', original_dir, file=f)
             print(file=f)
             print('Versions of dependencies:\n', file=f)
