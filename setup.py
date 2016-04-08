@@ -22,6 +22,7 @@ setup(
         'pyfastaq >= 3.11.1',
         'pysam >= 0.8.1, <= 0.8.3',
         'pymummer>=0.6.1',
+        'requests >= 2.5.1',
         'beautifulsoup4'
     ],
     license='GPLv3',
