@@ -167,7 +167,7 @@ class SamtoolsVariants:
         if seq_name in d and position in d[seq_name]:
             return d[seq_name][position]
         else:
-            return None
+            return 'ND', 'ND', 'ND', 'ND'
 
 
     def run(self):
