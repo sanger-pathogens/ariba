@@ -4,7 +4,7 @@ addons:
     packages:
     - zlib1g-dev
     - libncurses5-dev
-    - r-base-core
+    - r-base
 cache:
   directories:
   - "build"
