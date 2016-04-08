@@ -308,7 +308,8 @@ class Summary:
             print('write.tree(as.phylo(h), file="', outfile, '")', sep='', file=f)
 
         common.syscall('R CMD BATCH --no-save ' + r_script)
-        os.unlink(r_script + 'out')
+        if os.path.exists(r_script + 'out'):
+            os.unlink(r_script + 'out')
         os.unlink(r_script)
 
 
