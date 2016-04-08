@@ -303,12 +303,13 @@ class Summary:
 
         with open(r_script, 'w') as f:
             print('library(ape)', file=f)
-            print('a=read.table("', distance_file, '", header=TRUE, row.names=1)', sep='', file=f)
+            print('a=read.table("', distance_file, '", header=TRUE, row.names=1, comment.char="")', sep='', file=f)
             print('h=hclust(dist(a))', file=f)
             print('write.tree(as.phylo(h), file="', outfile, '")', sep='', file=f)
 
         common.syscall('R CMD BATCH --no-save ' + r_script)
-        os.unlink(r_script + 'out')
+        if os.path.exists(r_script + 'out'):
+            os.unlink(r_script + 'out')
         os.unlink(r_script)
 
 
