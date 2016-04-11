@@ -136,8 +136,8 @@ class Assembly:
         cwd = os.getcwd()
 
         if self.extern_progs.exe('sspace') is None:
-            os.chdir(self.assembly_dir)
-            os.symlink(os.path.basename(self.assembly_contigs), os.path.basename(self.scaffolder_scaffolds))
+            os.chdir(self.working_dir)
+            os.symlink(self.assembly_contigs, os.path.basename(self.scaffolder_scaffolds))
             os.chdir(cwd)
             return
 
