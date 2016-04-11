@@ -3,6 +3,9 @@ addons:
   apt:
     packages:
     - zlib1g-dev
+    - libblas-dev
+    - liblapack-dev
+    - libgfortran-4.8-dev
     - libncurses5-dev
     - r-base
 cache:
