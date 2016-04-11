@@ -63,6 +63,12 @@ class ExternalProgs:
         for prog in sorted(prog_to_default):
             prog_exe = self._get_exe(prog)
             self.progs[prog] = shutil.which(prog_exe)
+            # Travis is using python3.4, and actually "python" in travis means
+            # python3.4, not python2. SPAdes throws an error about not being
+            # compatible with python3.4.
+            # This means we need to explicitly run SPAdes with python2.
+            if prog == 'spades':
+                self.progs[prog] = 'python2 ' + self.progs[prog]
             if self.progs[prog] is None:
                 if prog in optional_progs:
                     warnings.append(prog + ' not found in path. Looked for ' + prog_exe + '. But it is optional so will be skipped during assembly')
