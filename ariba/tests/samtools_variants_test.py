@@ -40,7 +40,21 @@ class TestSamtoolsVariants(unittest.TestCase):
 
         expected_lines = get_vcf_call_lines(expected_vcf)
         got_lines = get_vcf_call_lines(sv.vcf_file)
-        self.assertEqual(expected_lines, got_lines)
+
+        # need to check that the vcf lines look the same. Column 8 is ;-delimited
+        # and can be an any order.
+        self.assertEqual(len(expected_lines), len(got_lines))
+
+        for i in range(len(expected_lines)):
+            expected = expected_lines[i].split('\t')
+            got = got_lines[i].split('\t')
+            self.assertEqual(len(expected), len(got))
+            self.assertEqual(expected[:7], got[:7])
+            self.assertEqual(expected[:-2], got[:-2])
+            exp_set = set(expected[7].split(';'))
+            got_set = set(got[7].split(';'))
+            self.assertEqual(exp_set, got_set)
+
         self.assertEqual(file2lines(expected_depths), file2lines(sv.read_depths_file))
         os.unlink(sv.vcf_file)
         os.unlink(sv.read_depths_file)
