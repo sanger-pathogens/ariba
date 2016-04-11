@@ -8,6 +8,7 @@ addons:
     - libgfortran3
     - libncurses5-dev
     - r-base
+    - r-base-dev
 cache:
   directories:
   - "build"
