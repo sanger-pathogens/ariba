@@ -40,8 +40,31 @@ class TestSamtoolsVariants(unittest.TestCase):
 
         expected_lines = get_vcf_call_lines(expected_vcf)
         got_lines = get_vcf_call_lines(sv.vcf_file)
-        self.assertEqual(expected_lines, got_lines)
-        self.assertEqual(file2lines(expected_depths), file2lines(sv.read_depths_file))
+
+        # need to check that the vcf lines look the same. Column 8 is ;-delimited
+        # and can be an any order.
+        self.assertEqual(len(expected_lines), len(got_lines))
+
+        for i in range(len(expected_lines)):
+            expected = expected_lines[i].split('\t')
+            got = got_lines[i].split('\t')
+            self.assertEqual(len(expected), len(got))
+            self.assertEqual(expected[:7], got[:7])
+            self.assertEqual(expected[-2:], got[-2:])
+            exp_set = set(expected[7].split(';'))
+            got_set = set(got[7].split(';'))
+            self.assertEqual(exp_set, got_set)
+
+
+        # samtools-1.2 and 1.3 output not xonsistent in final column, so
+        # ignore those.
+        expected_lines = file2lines(expected_depths)
+        got_lines = file2lines(sv.read_depths_file)
+        self.assertEqual(len(expected_lines), len(got_lines))
+
+        for i in range(len(expected_lines)):
+            self.assertEqual(expected_lines[i].split('\t')[:-1], got_lines[i].split('\t')[:-1])
+
         os.unlink(sv.vcf_file)
         os.unlink(sv.read_depths_file)
         os.unlink(sv.read_depths_file + '.tbi')

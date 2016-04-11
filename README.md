@@ -44,6 +44,10 @@ Usage
 Please read the [ARIBA wiki page] [ARIBA wiki] for usage instructions.
 
 
+
+Build status: [![Build Status](https://travis-ci.org/sanger-pathogens/ariba.svg?branch=master)](https://travis-ci.org/sanger-pathogens/ariba)
+
+
   [bowtie2]: http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
   [cdhit]: http://weizhongli-lab.org/cd-hit/
   [ARIBA wiki]: https://github.com/sanger-pathogens/ariba/wiki
