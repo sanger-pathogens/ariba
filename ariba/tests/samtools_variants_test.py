@@ -55,7 +55,16 @@ class TestSamtoolsVariants(unittest.TestCase):
             got_set = set(got[7].split(';'))
             self.assertEqual(exp_set, got_set)
 
-        self.assertEqual(file2lines(expected_depths), file2lines(sv.read_depths_file))
+
+        # samtools-1.2 and 1.3 output not xonsistent in final column, so
+        # ignore those.
+        expected_lines = file2lines(expected_depths)
+        got_lines = file2lines(sv.read_depths_file)
+        self.assertEqual(len(expected_lines), len(got_lines))
+
+        for i in range(len(expected_lines)):
+            self.assertEqual(expected_lines[i].split('\t')[:-1], got_lines[i].split('\t')[:-1])
+
         os.unlink(sv.vcf_file)
         os.unlink(sv.read_depths_file)
         os.unlink(sv.read_depths_file + '.tbi')
