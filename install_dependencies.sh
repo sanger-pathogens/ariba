@@ -53,7 +53,7 @@ make
 cd $build_dir
 download $BOWTIE2_DOWNLOAD_URL "bowtie2-${BOWTIE2_VERSION}.zip"
 bowtie2_dir="$build_dir/bowtie2-${BOWTIE2_VERSION}"
-unzip bowtie2-${BOWTIE2_VERSION}.zip
+unzip -n bowtie2-${BOWTIE2_VERSION}.zip
 
 
 # --------------- cdhit --------------------
