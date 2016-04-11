@@ -26,7 +26,7 @@ prog_to_env_var = {x: 'ARIBA_' + x.upper() for x in prog_to_default if x not in 
 
 prog_to_version_cmd = {
     'bcftools': ('', re.compile('^Version: ([0-9\.]+)')),
-    'bowtie2': ('--version', re.compile('.*bowtie2-align version (.*)$')),
+    'bowtie2': ('--version', re.compile('.*bowtie2.*version (.*)$')),
     'cdhit': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
     'gapfiller': ('', re.compile('^Usage: .*pl \[GapFiller_(.*)\]')),
     'nucmer': ('--version', re.compile('^NUCmer \(NUCleotide MUMmer\) version ([0-9\.]+)')),
