@@ -3,9 +3,7 @@ class Error (Exception): pass
 import sys
 import os
 import shutil
-import pprint
 import re
-import requests
 import tarfile
 import pyfastaq
 import urllib.request
@@ -42,20 +40,22 @@ class RefGenesGetter:
 
 
     def _get_from_card(self, outprefix):
-        tmpdir = outprefix + '.tmp.download'
+        outprefix = os.path.abspath(outprefix)
+        tmpdir = outprefix + '.download'
         current_dir = os.getcwd()
 
         try:
-            #os.mkdir(tmpdir)
+            os.mkdir(tmpdir)
             os.chdir(tmpdir)
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
 
-        card_tarball_url = 'https://card.mcmaster.ca/download/0/broadsteet-v1.0.5.tar.gz'
+        card_version = '1.0.5'
+        card_tarball_url = 'https://card.mcmaster.ca/download/0/broadsteet-v' + card_version + '.tar.gz'
         card_tarball = 'card.tar.gz'
         print('Working in temporary directory', tmpdir)
         print('Downloading data from card:', card_tarball_url, flush=True)
-        #common.syscall('wget -O ' + card_tarball + ' ' + card_tarball_url, verbose=True)
+        common.syscall('wget -O ' + card_tarball + ' ' + card_tarball_url, verbose=True)
         print('...finished downloading', flush=True)
         if not tarfile.is_tarfile(card_tarball):
             raise Error('File ' + card_tarball + ' downloaded from ' + card_tarball_url + ' does not look like a valid tar archive. Cannot continue')
@@ -66,32 +66,52 @@ class RefGenesGetter:
 
         print('Extracted json data file ', json_file,'. Reading its contents...', sep='')
 
-        variant_metadata_tsv = outprefix + '.variant_metadata.tsv'
-        got_genes_file = outprefix + '.gene_variants.progress'
-        genes_done_file = outprefix + '.gene_variants.done'
+        variant_metadata_tsv = outprefix + '.metadata.tsv'
+        presence_absence_fa = outprefix + '.presence_absence.fa'
+        variants_only_fa = outprefix + '.variants_only.fa'
+        f_out_tsv = pyfastaq.utils.open_file_write(variant_metadata_tsv)
+        f_out_presabs = pyfastaq.utils.open_file_write(presence_absence_fa)
+        f_out_var_only = pyfastaq.utils.open_file_write(variants_only_fa)
 
         with open(json_file) as f:
             json_data = json.load(f)
 
         json_data = {int(x): json_data[x] for x in json_data if not x.startswith('_')}
-        print('Found', len(json_data), 'records in the json file. Analysing...')
+        print('Found', len(json_data), 'records in the json file. Analysing...', flush=True)
 
         for gene_key, gene_dict in sorted(json_data.items()):
             crecord = card_record.CardRecord(gene_dict)
             data = crecord.get_data()
-            print('________________________', gene_key, '_____________________________________________')
-            if len(data['snps']) > 0 and len(data['dna_seqs_and_ids']) > 1:
-                print('WTFFFS')
-            print('Hash from CARD:')
-            pprint.pprint(gene_dict)
-            print('----------------')
-            print('Hash of extracted info from the above hash:')
-            pprint.pprint(data, width=50)
-            print()
-            #print(gene_key)
-        #    data = self._card_gene_dict_to_wanted_data(gene_dict)
-        #    print('-'*79)
+            fasta_name_prefix = '.'.join([data[x] for x in ['ARO_id', 'ARO_accession']])
 
+            for card_key, gi, genbank_id, strand, dna_seq in data['dna_seqs_and_ids']:
+                fasta = pyfastaq.sequences.Fasta(fasta_name_prefix + '.' + gi + '.' + genbank_id + '.' + card_key, dna_seq)
+                print(fasta.id, '.', '.', data['ARO_name'], sep='\t', file=f_out_tsv)
+                if len(data['snps']) == 0:
+                    print(fasta, file=f_out_presabs)
+                    print(fasta.id, '.', '.', data['ARO_description'], sep='\t', file=f_out_tsv)
+                else:
+                    print(fasta, file=f_out_var_only)
+                    for snp in data['snps']:
+                        print(fasta.id, 'p', snp, data['ARO_description'], sep='\t', file=f_out_tsv)
+
+
+        pyfastaq.utils.close(f_out_tsv)
+        pyfastaq.utils.close(f_out_presabs)
+        pyfastaq.utils.close(f_out_var_only)
+        os.chdir(current_dir)
+        print('Extracted data and written ARIBA input files\n')
+        print('Final genes files and metadata file:')
+        print('   ', presence_absence_fa)
+        print('   ', variants_only_fa)
+        print('   ', variant_metadata_tsv)
+
+        print('\nYou can use those files with ARIBA like this:')
+        print('ariba run --ref_prefix', outprefix, 'reads_1.fq reads_2.fq output_directory\n')
+
+        print('If you use this downloaded data, please cite:')
+        print('"The Comprehensive Antibiotic Resistance Database", McArthur et al 2013, PMID: 23650175')
+        print('and in your methods say that version', card_version, 'of the database was used')
 
 
     def _get_from_card_old(self, outprefix):
