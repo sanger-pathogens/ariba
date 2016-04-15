@@ -61,7 +61,9 @@ class TestCardRecord(unittest.TestCase):
         self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
         d['model_sequences']['sequence']['foo']['protein_sequence'] = {}
         d['model_sequences']['sequence']['foo']['protein_sequence']['GI'] = '123456789'
-        expected = [('foo', '123456789', 'ABC123', '+', 'ACGT')]
+        self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
+        d['model_sequences']['sequence']['foo']['protein_sequence']['sequence'] = 'III'
+        expected = [('foo', '123456789', 'ABC123', '+', 'ACGT', 'III')]
         self.assertEqual(expected, card_record.CardRecord._dna_seqs_and_genbank_ids(d))
 
         d['model_sequences']['sequence']['bar'] = {
@@ -71,11 +73,12 @@ class TestCardRecord(unittest.TestCase):
                 'accession': 'BCD234',
             },
             'protein_sequence': {
-                'GI': '54321'
+                'GI': '',
+                'sequence': ''
             }
         }
 
-        expected = [('bar', '54321', 'BCD234', '-', 'TTTT')] + expected
+        expected = [('bar', 'NA', 'BCD234', '-', 'TTTT', '')] + expected
         self.assertEqual(expected, card_record.CardRecord._dna_seqs_and_genbank_ids(d))
 
 
@@ -158,7 +161,8 @@ class TestCardRecord(unittest.TestCase):
                 '229597524',
                 'XX0000001',
                 '+',
-                'ATGTGCGATGAATAA'
+                'ATGTGCGATGAATAA',
+                'MCDE*'
             )],
             'snps': set(),
         }

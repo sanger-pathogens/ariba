@@ -43,7 +43,7 @@ class RefGenesGetter:
         current_dir = os.getcwd()
 
         try:
-            os.mkdir(tmpdir)
+            #os.mkdir(tmpdir)
             os.chdir(tmpdir)
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
@@ -53,7 +53,7 @@ class RefGenesGetter:
         card_tarball = 'card.tar.gz'
         print('Working in temporary directory', tmpdir)
         print('Downloading data from card:', card_tarball_url, flush=True)
-        common.syscall('wget -O ' + card_tarball + ' ' + card_tarball_url, verbose=True)
+        #common.syscall('wget -O ' + card_tarball + ' ' + card_tarball_url, verbose=True)
         print('...finished downloading', flush=True)
         if not tarfile.is_tarfile(card_tarball):
             raise Error('File ' + card_tarball + ' downloaded from ' + card_tarball_url + ' does not look like a valid tar archive. Cannot continue')
@@ -67,9 +67,13 @@ class RefGenesGetter:
         variant_metadata_tsv = outprefix + '.metadata.tsv'
         presence_absence_fa = outprefix + '.presence_absence.fa'
         variants_only_fa = outprefix + '.variants_only.fa'
+        noncoding_fa = outprefix + '.noncoding.fa'
+        log_file = outprefix + '.log'
         f_out_tsv = pyfastaq.utils.open_file_write(variant_metadata_tsv)
         f_out_presabs = pyfastaq.utils.open_file_write(presence_absence_fa)
         f_out_var_only = pyfastaq.utils.open_file_write(variants_only_fa)
+        f_out_noncoding = pyfastaq.utils.open_file_write(noncoding_fa)
+        f_out_log = pyfastaq.utils.open_file_write(log_file)
 
         with open(json_file) as f:
             json_data = json.load(f)
@@ -82,21 +86,52 @@ class RefGenesGetter:
             data = crecord.get_data()
             fasta_name_prefix = '.'.join([data[x] for x in ['ARO_id', 'ARO_accession']])
 
-            for card_key, gi, genbank_id, strand, dna_seq in data['dna_seqs_and_ids']:
+            for card_key, gi, genbank_id, strand, dna_seq, protein_seq in data['dna_seqs_and_ids']:
+                if dna_seq == '':
+                    print('Empty dna sequence', gene_key, data['ARO_id'], data['ARO_accession'], sep='\t', file=f_out_log)
+                    continue
+
                 fasta = pyfastaq.sequences.Fasta(fasta_name_prefix + '.' + gi + '.' + genbank_id + '.' + card_key, dna_seq)
+                variant_type = 'p'
+
+                if gi != 'NA':
+                    gene_tuple = fasta.make_into_gene()
+                    if gene_tuple is None:
+                        print('Could not make gene from sequence', fasta.id, sep='\t', file=f_out_log)
+                        continue
+                    else:
+                        translated =  gene_tuple[0].translate()
+                        if gene_tuple[0][:3] in pyfastaq.genetic_codes.starts[self.genetic_code]:
+                            translated.seq = 'M' + translated.seq[1:]
+
+                        if translated.seq[:-1] != protein_seq:
+                            print('Translation of inferred gene dna sequence does not match protein sequence', fasta.id, sep='\t', file=f_out_log)
+                            continue
+
+                if gi == 'NA':
+                    fasta_filehandle = f_out_noncoding
+                    variant_type = 'n'
+                elif len(data['snps']) == 0:
+                    fasta_filehandle = f_out_presabs
+                else:
+                    fasta_filehandle = f_out_var_only
+
                 print(fasta.id, '.', '.', data['ARO_name'], sep='\t', file=f_out_tsv)
+
                 if len(data['snps']) == 0:
-                    print(fasta, file=f_out_presabs)
+                    print(fasta, file=fasta_filehandle)
                     print(fasta.id, '.', '.', data['ARO_description'], sep='\t', file=f_out_tsv)
                 else:
-                    print(fasta, file=f_out_var_only)
+                    print(fasta, file=fasta_filehandle)
                     for snp in data['snps']:
-                        print(fasta.id, 'p', snp, data['ARO_description'], sep='\t', file=f_out_tsv)
+                        print(fasta.id, variant_type, snp, data['ARO_description'], sep='\t', file=f_out_tsv)
 
 
         pyfastaq.utils.close(f_out_tsv)
         pyfastaq.utils.close(f_out_presabs)
         pyfastaq.utils.close(f_out_var_only)
+        pyfastaq.utils.close(f_out_noncoding)
+        pyfastaq.utils.close(f_out_log)
         os.chdir(current_dir)
         print('Extracted data and written ARIBA input files\n')
         print('Final genes files and metadata file:')

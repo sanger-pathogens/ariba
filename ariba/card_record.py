@@ -45,10 +45,18 @@ class CardRecord:
                 genbank_id = seq_dict['dna_sequence']['accession']
                 strand = seq_dict['dna_sequence']['strand']
                 gi = seq_dict['protein_sequence']['GI']
+                protein_seq = seq_dict['protein_sequence']['sequence']
             except:
+                print('Missing data from', key, file=sys.stderr)
                 continue
 
-            seqs_and_ids.append((key, gi, genbank_id, strand, dna_seq))
+            assert gi != 'NA'
+
+            if gi == '':
+                assert protein_seq == ''
+                gi = 'NA'
+
+            seqs_and_ids.append((key, gi, genbank_id, strand, dna_seq, protein_seq))
 
         return seqs_and_ids
 
