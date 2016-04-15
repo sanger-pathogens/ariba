@@ -73,7 +73,7 @@ class Runner:
             else:
                 assert current_cluster in clusters
                 if seqname in clusters[current_cluster]:
-                    raise Error('Duplicate name "' + seqname + '" found in cluster ' + cluster)
+                    raise Error('Duplicate name "' + seqname + '" found in cluster ' + current_cluster)
 
                 clusters[current_cluster].add(seqname)
 
