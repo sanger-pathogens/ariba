@@ -1,6 +1,5 @@
 import shutil
 import tempfile
-import sys
 import os
 import pyfastaq
 from ariba import mapping, faidx

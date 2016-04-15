@@ -4,7 +4,7 @@ import math
 import shutil
 import sys
 import pyfastaq
-from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, common, external_progs, flag, mapping, report, samtools_variants
+from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, external_progs, flag, mapping, report, samtools_variants
 
 class Error (Exception): pass
 

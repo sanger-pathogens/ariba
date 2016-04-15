@@ -1,4 +1,3 @@
-import pyfastaq
 import pprint
 
 class Error (Exception): pass
