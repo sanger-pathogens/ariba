@@ -1,9 +1,7 @@
 class Error (Exception): pass
 
-import sys
 import os
 import shutil
-import re
 import tarfile
 import pyfastaq
 import urllib.request
