@@ -1,4 +1,5 @@
 g1 Remove: too short. Length: 5
 g2 Remove: too long. Length: 100
-g3 Does not look like a gene (does not start with start codon, length (9) is not a multiple of 3 (length/3=3.0), or contains internal stop codons). Translation: EEP
-g4 Does not look like a gene (does not start with start codon, length (9) is not a multiple of 3 (length/3=3.0), or contains internal stop codons). Translation: M*P
+g3 Does not look like a gene (tried both strands and all reading frames) GAGGAGCCG
+g4 Does not look like a gene (tried both strands and all reading frames) ATGTAACCT
+g5 Made g5 into gene. strand=+, frame=0
