@@ -45,16 +45,11 @@ class CardRecord:
                 dna_seq = seq_dict['dna_sequence']['sequence']
                 genbank_id = seq_dict['dna_sequence']['accession']
                 strand = seq_dict['dna_sequence']['strand']
+                gi = seq_dict['protein_sequence']['GI']
             except:
                 continue
 
-            seqs_and_ids.append((genbank_id, strand, dna_seq))
-
-
-        #if strand == '-' and dna_sequence is not None:
-        #    fa = pyfastaq.sequences.Fasta('x', dna_sequence)
-        #    fa.revcomp()
-        #    dna_sequence = fa.seq
+            seqs_and_ids.append((key, gi, genbank_id, strand, dna_seq))
 
         return seqs_and_ids
 
@@ -75,12 +70,18 @@ class CardRecord:
 
 
     def get_data(self):
-        return {
+        data = {
             'ARO_id': self._ARO_id(self.data_dict),
             'ARO_accession': self._ARO_accession(self.data_dict),
             'ARO_name': self._ARO_name(self.data_dict),
             'ARO_description': self._ARO_description(self.data_dict),
             'dna_seqs_and_ids': self._dna_seqs_and_genbank_ids(self.data_dict),
-            'snps': self._snps(self.data_dict)
         }
+
+        if None in (data.values()) or data['dna_seqs_and_ids'] == 0:
+            pprint(self.data_dict)
+            raise Error('Error getting ARO_acccesion, ARO_id, ARO_name, dna_sequence(s) or genbank accession(s) from the above dictionary. Cannot continue.')
+
+        data['snps'] = self._snps(self.data_dict)
+        return data
 

@@ -6,7 +6,7 @@ modules_dir = os.path.dirname(os.path.abspath(card_record.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 
-class TestAssemblyCompare(unittest.TestCase):
+class TestCardRecord(unittest.TestCase):
     def test_ARO_id(self):
         '''test _ARO_id'''
         d = {'spam': 'eggs'}
@@ -39,24 +39,44 @@ class TestAssemblyCompare(unittest.TestCase):
         self.assertEqual('Technician, Third Class', card_record.CardRecord._ARO_description(d))
 
 
-    def test_dna_seq_and_genbank_id(self):
-        '''test _dna_seq_and_genbank_id'''
+    def test_dna_seqs_and_genbank_ids(self):
+        '''test _dna_seqs_and_genbank_ids'''
         d = {'spam': 'eggs'}
-        self.assertEqual((None, None), card_record.CardRecord._dna_seq_and_genbank_id(d))
+        self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
         d['model_sequences'] = {}
-        self.assertEqual((None, None), card_record.CardRecord._dna_seq_and_genbank_id(d))
+        self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
         d['model_sequences']['sequence'] = {}
-        self.assertEqual((None, None), card_record.CardRecord._dna_seq_and_genbank_id(d))
+        self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
         d['model_sequences']['sequence']['foo'] = {}
-        self.assertEqual((None, None), card_record.CardRecord._dna_seq_and_genbank_id(d))
+        self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
         d['model_sequences']['sequence']['foo']['dna_sequence'] = {}
-        self.assertEqual((None, None), card_record.CardRecord._dna_seq_and_genbank_id(d))
+        self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
         d['model_sequences']['sequence']['foo']['dna_sequence']['sequence'] = 'ACGT'
-        self.assertEqual((None, None), card_record.CardRecord._dna_seq_and_genbank_id(d))
+        self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
         d['model_sequences']['sequence']['foo']['dna_sequence']['strand'] = '+'
-        self.assertEqual(('ACGT', None), card_record.CardRecord._dna_seq_and_genbank_id(d))
+        self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
         d['model_sequences']['sequence']['foo']['dna_sequence']['accession'] = 'ABC123'
-        self.assertEqual(('ACGT', 'ABC123'), card_record.CardRecord._dna_seq_and_genbank_id(d))
+        self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
+        d['model_sequences']['sequence']['foo']['dna_sequence']['strand'] = '+'
+        self.assertEqual([], card_record.CardRecord._dna_seqs_and_genbank_ids(d))
+        d['model_sequences']['sequence']['foo']['protein_sequence'] = {}
+        d['model_sequences']['sequence']['foo']['protein_sequence']['GI'] = '123456789'
+        expected = [('foo', '123456789', 'ABC123', '+', 'ACGT')]
+        self.assertEqual(expected, card_record.CardRecord._dna_seqs_and_genbank_ids(d))
+
+        d['model_sequences']['sequence']['bar'] = {
+            'dna_sequence': {
+                'sequence': 'TTTT',
+                'strand': '-',
+                'accession': 'BCD234',
+            },
+            'protein_sequence': {
+                'GI': '54321'
+            }
+        }
+
+        expected = [('bar', '54321', 'BCD234', '-', 'TTTT')] + expected
+        self.assertEqual(expected, card_record.CardRecord._dna_seqs_and_genbank_ids(d))
 
 
     def test_snps(self):
@@ -133,8 +153,13 @@ class TestAssemblyCompare(unittest.TestCase):
             'ARO_accession': '1234567',
             'ARO_name': 'ARO_name1',
             'ARO_description': 'ARO description that we want.',
-            'dna_seq': 'ATGTGCGATGAATAA',
-            'genbank_id': 'XX0000001',
+            'dna_seqs_and_ids': [(
+                '1234',
+                '229597524',
+                'XX0000001',
+                '+',
+                'ATGTGCGATGAATAA'
+            )],
             'snps': set(),
         }
 
