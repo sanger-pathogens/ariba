@@ -121,7 +121,6 @@ class AssemblyVariants:
                     return ('DEL', ref_aa.seq + str(aa_start + 1) + 'del', aa_start)
                 else:
                     assert len(new_seq) % 3 == 0
-                    new_aa = new_seq.translate()
                     ref_codon_after_ins = pyfastaq.sequences.Fasta('codon', ref_sequence[codon_start+3:codon_start+6])
                     aa_after_ins = ref_codon_after_ins.translate()
                     return ('DEL', ref_aa.seq + str(aa_start + 1)+ '_' + aa_after_ins.seq + str(aa_start + 2) + 'del', aa_start)

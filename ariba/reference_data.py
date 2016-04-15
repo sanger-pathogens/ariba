@@ -165,7 +165,6 @@ class ReferenceData:
         variants_only_genes_not_found = set(self.seq_dicts['variants_only'].keys())
         log_file = out_prefix + '.log'
         tsv_file = out_prefix + '.tsv'
-        new_variants_fa_file = out_prefix + '.variants_only.fa'
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
         for gene_name, metadata_dict in sorted(self.metadata.items()):

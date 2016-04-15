@@ -58,7 +58,6 @@ class ExternalProgs:
 
         errors = []
         warnings = []
-        failed_to_find = set()
 
         for prog in sorted(prog_to_default):
             prog_exe = self._get_exe(prog)
