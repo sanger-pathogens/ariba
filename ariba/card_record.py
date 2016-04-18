@@ -1,3 +1,4 @@
+import sys
 import pprint
 
 class Error (Exception): pass
