@@ -43,7 +43,7 @@ class RefGenesGetter:
         current_dir = os.getcwd()
 
         try:
-            #os.mkdir(tmpdir)
+            os.mkdir(tmpdir)
             os.chdir(tmpdir)
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
@@ -53,7 +53,7 @@ class RefGenesGetter:
         card_tarball = 'card.tar.gz'
         print('Working in temporary directory', tmpdir)
         print('Downloading data from card:', card_tarball_url, flush=True)
-        #common.syscall('wget -O ' + card_tarball + ' ' + card_tarball_url, verbose=True)
+        common.syscall('wget -O ' + card_tarball + ' ' + card_tarball_url, verbose=True)
         print('...finished downloading', flush=True)
         if not tarfile.is_tarfile(card_tarball):
             raise Error('File ' + card_tarball + ' downloaded from ' + card_tarball_url + ' does not look like a valid tar archive. Cannot continue')
