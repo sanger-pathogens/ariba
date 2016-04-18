@@ -4,6 +4,7 @@ __all__ = [
     'assembly_variants',
     'bam_parse',
     'best_seq_chooser',
+    'card_record',
     'cdhit',
     'cluster',
     'clusters',

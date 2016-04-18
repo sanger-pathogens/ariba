@@ -179,18 +179,18 @@ class TestReferenceData(unittest.TestCase):
         os.unlink(outprefix + '.log')
 
 
-    def test_gene_seq_is_ok(self):
-        '''Test _gene_seq_is_ok'''
+    def test_try_to_get_gene_seq(self):
+        '''Test _try_to_get_gene_seq'''
         tests = [
-            (pyfastaq.sequences.Fasta('x', 'ACGTG'), False, 'Remove: too short. Length: 5'),
-            (pyfastaq.sequences.Fasta('x', 'A' * 100), False, 'Remove: too long. Length: 100'),
-            (pyfastaq.sequences.Fasta('x', 'GAGGAGCCG'), False, 'Does not look like a gene (does not start with start codon, length (9) is not a multiple of 3 (length/3=3.0), or contains internal stop codons). Translation: EEP'),
-            (pyfastaq.sequences.Fasta('x', 'ATGTAACCT'), False, 'Does not look like a gene (does not start with start codon, length (9) is not a multiple of 3 (length/3=3.0), or contains internal stop codons). Translation: M*P'),
-            (pyfastaq.sequences.Fasta('x', 'ATGCCTGAG'), True, None)
+            (pyfastaq.sequences.Fasta('x', 'ACGTG'), None, 'Remove: too short. Length: 5'),
+            (pyfastaq.sequences.Fasta('x', 'A' * 100), None, 'Remove: too long. Length: 100'),
+            (pyfastaq.sequences.Fasta('x', 'GAGGAGCCG'), None, 'Does not look like a gene (tried both strands and all reading frames) GAGGAGCCG'),
+            (pyfastaq.sequences.Fasta('x', 'ATGTAACCT'), None, 'Does not look like a gene (tried both strands and all reading frames) ATGTAACCT'),
+            (pyfastaq.sequences.Fasta('x', 'ATGCCTTAA'), pyfastaq.sequences.Fasta('x', 'ATGCCTTAA'), 'Made x into gene. strand=+, frame=0')
         ]
 
-        for seq, ok, message in tests:
-            self.assertEqual((ok, message), reference_data.ReferenceData._gene_seq_is_ok(seq, 6, 99))
+        for seq, got_seq, message in tests:
+            self.assertEqual((got_seq, message), reference_data.ReferenceData._try_to_get_gene_seq(seq, 6, 99))
 
 
     def test_remove_bad_genes(self):
@@ -204,7 +204,7 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual(expected_removed, got_removed)
 
         expected_dict = {
-            'g5': pyfastaq.sequences.Fasta('g5', 'ATGCCTGAG')
+            'g5': pyfastaq.sequences.Fasta('g5', 'ATGCCTTAA')
         }
         self.assertEqual(expected_dict, refdata.seq_dicts['presence_absence'])
         expected_log = os.path.join(data_dir, 'reference_data_test_remove_bad_genes.log')

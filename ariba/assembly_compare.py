@@ -131,7 +131,6 @@ class AssemblyCompare:
         '''Input is hits made by self._parse_nucmer_coords_file.
            Returns dictionary. key = contig name. Value = number of bases that
            match to the reference sequence.'''
-        cov = {}
         coords = AssemblyCompare.nucmer_hits_to_ref_coords(nucmer_hits)
         return {x: pyfastaq.intervals.length_sum_from_list(coords[x]) for x in coords}
 
@@ -224,7 +223,6 @@ class AssemblyCompare:
                     assembled_gene = pyfastaq.sequences.Fasta('x', contigs[hit.qry_name][start:end+1])
                     if (hit.ref_start < hit.ref_end) != (hit.qry_start < hit.qry_end):
                         assembled_gene.revcomp()
-                    assembled_gene_aa = assembled_gene.translate()
                     orfs = assembled_gene.orfs()
                     if len(orfs) == 0:
                         continue

@@ -165,7 +165,6 @@ class ReferenceData:
         variants_only_genes_not_found = set(self.seq_dicts['variants_only'].keys())
         log_file = out_prefix + '.log'
         tsv_file = out_prefix + '.tsv'
-        new_variants_fa_file = out_prefix + '.variants_only.fa'
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
         for gene_name, metadata_dict in sorted(self.metadata.items()):
@@ -249,17 +248,18 @@ class ReferenceData:
 
 
     @staticmethod
-    def _gene_seq_is_ok(seq, min_length, max_length):
+    def _try_to_get_gene_seq(seq, min_length, max_length):
         seq.seq = seq.seq.upper()
         if len(seq) < min_length:
-            return False, 'Remove: too short. Length: ' + str(len(seq))
+            return None, 'Remove: too short. Length: ' + str(len(seq))
         elif len(seq) > max_length:
-            return False, 'Remove: too long. Length: ' + str(len(seq))
-        elif not seq.looks_like_gene():
-            length_over_three = round(len(seq) / 3, 2)
-            return False, 'Does not look like a gene (does not start with start codon, length (' + str(len(seq)) + ') is not a multiple of 3 (length/3=' + str(length_over_three) + '), or contains internal stop codons). Translation: ' + seq.translate().seq
-
-        return True, None
+            return None, 'Remove: too long. Length: ' + str(len(seq))
+        else:
+            got = seq.make_into_gene()
+            if got is None:
+                return None, 'Does not look like a gene (tried both strands and all reading frames) ' + seq.seq
+            else:
+                return got[0], 'Made ' + seq.id + ' into gene. strand=' + got[1] + ', frame=' + str(got[2])
 
 
     def _remove_bad_genes(self, seqs_dict, log_file):
@@ -270,12 +270,15 @@ class ReferenceData:
 
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
-        for name, sequence in sorted(seqs_dict.items()):
-            ok, message = self._gene_seq_is_ok(sequence, self.min_gene_length, self.max_gene_length)
+        for name in sorted(seqs_dict):
+            new_seq, message = self._try_to_get_gene_seq(seqs_dict[name], self.min_gene_length, self.max_gene_length)
+            if new_seq is None:
+                to_remove.add(name)
+            else:
+                seqs_dict[name] = new_seq
+
             if message is not None:
                 print(name, message, file=log_fh)
-            if not ok:
-                to_remove.add(name)
 
         pyfastaq.utils.close(log_fh)
 

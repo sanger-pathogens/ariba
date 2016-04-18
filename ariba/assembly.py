@@ -1,5 +1,4 @@
 import os
-import shutil
 import pyfastaq
 import pymummer
 from ariba import common, mapping, bam_parse, external_progs

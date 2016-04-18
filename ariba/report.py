@@ -82,7 +82,6 @@ def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster,
     if ref_nuc_range is None:
         return None
 
-    depths = []
     ctg_nts = []
     ref_nts = []
     smtls_total_depths = []

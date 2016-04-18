@@ -7,7 +7,7 @@ import openpyxl
 import multiprocessing
 import pysam
 import pyfastaq
-from ariba import cdhit, cluster, common, mapping, histogram, faidx, report, report_filter
+from ariba import cluster, common, mapping, histogram, report, report_filter
 
 class Error (Exception): pass
 

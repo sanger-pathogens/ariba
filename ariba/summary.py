@@ -2,7 +2,7 @@ import os
 import re
 import openpyxl
 import pyfastaq
-from ariba import flag, common, reference_data, report
+from ariba import flag, common, report
 
 class Error (Exception): pass
 
