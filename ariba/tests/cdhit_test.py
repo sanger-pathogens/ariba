@@ -25,12 +25,13 @@ class TestCdhit(unittest.TestCase):
 
     def test_parse_cluster_info_file(self):
         '''test _parse_cluster_info_file'''
-        cluster_representatives = {'seq1', 'seq4'}
+        cluster_representatives = {'seq1', 'seq4', 'seq6'}
         infile = os.path.join(data_dir, 'cdhit_test_parse_cluster_info_file.infile')
         got_clusters = cdhit.Runner._parse_cluster_info_file(infile, cluster_representatives)
         expected_clusters = {
             'seq1': {'seq1', 'seq2', 'seq3'},
-            'seq4': {'seq4'}
+            'seq4': {'seq4'},
+            'seq6': {'seq5', 'seq6'},
         }
         self.assertEqual(expected_clusters, got_clusters)
 
