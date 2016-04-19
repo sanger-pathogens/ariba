@@ -26,8 +26,10 @@ class RefPreparer:
 
 
     @staticmethod
-    def _get_ref_files(ref_prefix, presabs, varonly, noncoding, metadata, verbose):
-        assert {None} != {ref_prefix, presabs, varonly, noncoding}
+    def _get_ref_files(ref_prefix, presabs, varonly, noncoding, metadata, verbose=False):
+        if {None} == {ref_prefix, presabs, varonly, noncoding}:
+            raise Error('Error in RefPreparer._get_ref_files. All input files and ref_prefix were None. Cannot continue')
+
         filenames = {
             'presabs': presabs,
             'varonly': varonly,
@@ -35,17 +37,18 @@ class RefPreparer:
             'metadata': metadata,
         }
 
-        if ref_prefix is not None:
-            if verbose:
-                print('Looking for reference input files starting with', ref_prefix, '...')
-            file_suffixes = {
-                'presabs': 'presence_absence.fa',
-                'varonly': 'variants_only.fa',
-                'noncoding': 'noncoding.fa',
-                'metadata': 'metadata.tsv',
-            }
+        file_suffixes = {
+            'presabs': 'presence_absence.fa',
+            'varonly': 'variants_only.fa',
+            'noncoding': 'noncoding.fa',
+            'metadata': 'metadata.tsv',
+        }
 
-            for key in file_suffixes:
+        if verbose:
+            print('Looking for input files ...')
+
+        for key in file_suffixes:
+            if ref_prefix is not None:
                 filename = os.path.abspath(ref_prefix + '.' + file_suffixes[key])
 
                 if os.path.exists(filename):
@@ -53,8 +56,16 @@ class RefPreparer:
                         print('Found: ', filename, '.\n    ...treating it as if this was used: --', key, ' ', filename, sep='')
                     filenames[key] = filename
                 else:
-                    if self.verbose:
+                    if verbose:
                         print('Not found:', filename)
                     filenames[key] = None
+            elif filenames[key] is not None:
+                if os.path.exists(filenames[key]):
+                    filenames[key] = os.path.abspath(filenames[key])
+                else:
+                    raise Error('File not found! Cannot continue. Looked for: ' + filenames[key])
+
+        if {None} == {filenames['presabs'], filenames['varonly'], filenames['noncoding']}:
+            raise Error('Error in RefPreparer._get_ref_files. No FASTA files given! Cannot continue')
 
         return filenames
