@@ -62,6 +62,8 @@ class RefPreparer:
             elif filenames[key] is not None:
                 if os.path.exists(filenames[key]):
                     filenames[key] = os.path.abspath(filenames[key])
+                    if verbose:
+                        print('Found: ', filename, 'from option --', key, sep='')
                 else:
                     raise Error('File not found! Cannot continue. Looked for: ' + filenames[key])
 
