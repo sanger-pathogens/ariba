@@ -1,9 +1,7 @@
 import unittest
 import sys
 import os
-import shutil
 import filecmp
-import pyfastaq
 from ariba import ref_preparer
 
 modules_dir = os.path.dirname(os.path.abspath(ref_preparer.__file__))
@@ -104,3 +102,19 @@ class TestRefPreparer(unittest.TestCase):
         os.unlink(varonly)
         os.unlink(noncoding)
         os.unlink(metadata)
+
+
+    def test_write_info_file(self):
+        '''test _write_info_file'''
+        refprep = ref_preparer.RefPreparer(genetic_code=1)
+        refprep.filenames = {
+            'presabs': 'presabs.fa',
+            'varonly': None,
+            'noncoding': None,
+            'metadata': 'metadata.tsv',
+        }
+        tmpfile = 'tmp.test_write_info_file.out'
+        refprep._write_info_file(tmpfile)
+        expected = os.path.join(data_dir, 'ref_preparer_test_write_info_file.out')
+        self.assertTrue(filecmp.cmp(expected, tmpfile, shallow=False))
+        os.unlink(tmpfile)

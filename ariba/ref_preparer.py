@@ -85,6 +85,14 @@ class RefPreparer:
         return filenames
 
 
+    def _write_info_file(self, outfile):
+        with open(outfile, 'w') as fout:
+            for key in ('presabs', 'varonly', 'noncoding', 'metadata'):
+                print('input_' + key, self.filenames[key], sep='\t', file=fout)
+
+            print('genetic_code', self.genetic_code, sep='\t', file=fout)
+
+
     def run(self, outdir):
         if os.path.exists(outdir):
             raise Error('Error! Output directory ' + outdir + ' already exists. Cannot continue')
@@ -95,13 +103,14 @@ class RefPreparer:
             raise Error('Error making output directory ' + outdir + '. Cannot continue')
 
 
-        filenames = self._get_ref_files(self.ref_prefix, self.presabs, self.varonly, self.metadata, self.verbose)
+        self.filenames = self._get_ref_files(self.ref_prefix, self.presabs, self.varonly, self.metadata, self.verbose)
+        self._write_info_file(os.path.join(outdir, 'info.txt'))
 
         self.refdata = reference_data.ReferenceData(
-            presence_absence_fa=filenames['presabs'],
-            variants_only_fa=filenames['varonly'],
-            non_coding_fa=filenames['noncoding'],
-            metadata_tsv=filenames['metadata'],
+            presence_absence_fa=self.filenames['presabs'],
+            variants_only_fa=self.filenames['varonly'],
+            non_coding_fa=self.filenames['noncoding'],
+            metadata_tsv=self.filenames['metadata'],
             min_gene_length=self.min_gene_length,
             max_gene_length=self.max_gene_length,
             genetic_code=self.genetic_code,
