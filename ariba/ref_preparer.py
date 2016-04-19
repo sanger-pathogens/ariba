@@ -114,7 +114,7 @@ class RefPreparer:
         self.refdata.sanity_check(refdata_outprefix)
         cdhit_outprefix = os.path.join(outdir, 'cdhit')
 
-        self.cluster_ids = self.refdata.cluster_with_cdhit(
+        self.refdata.cluster_with_cdhit(
             refdata_outprefix + '.01.check_variants',
             cdhit_outprefix,
             seq_identity_threshold=self.cdhit_min_id,
@@ -123,3 +123,4 @@ class RefPreparer:
             nocluster=not self.run_cdhit,
             verbose=self.verbose,
         )
+
