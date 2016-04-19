@@ -18,6 +18,11 @@ class RefPreparer:
         genetic_code=11,
         verbose=False,
     ):
+        self.ref_prefix = ref_prefix
+        self.presabs = presabs
+        self.varonly = varonly
+        self.noncoding = noncoding
+        self.metadata = metadata
         self.min_gene_length = min_gene_length
         self.max_gene_length = max_gene_length
         self.genetic_code = genetic_code
@@ -84,8 +89,8 @@ class RefPreparer:
 
         filenames = self._get_ref_files(self.ref_prefix, self.presabs, self.varonly, self.metadata, self.verbose)
 
-        refdata = ariba.reference_data.ReferenceData(
-            presence_absence_fa=filenames['presence_absence'],
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=filenames['presabs'],
             variants_only_fa=filenames['varonly'],
             non_coding_fa=filenames['noncoding'],
             metadata_tsv=filenames['metadata'],
@@ -96,5 +101,5 @@ class RefPreparer:
 
         if self.verbose:
             print('{:_^79}'.format(' Checking reference data '), flush=True)
-        refdata.sanity_check(os.path.join(outdir, 'refcheck')
+        refdata.sanity_check(os.path.join(outdir, 'refcheck'))
 

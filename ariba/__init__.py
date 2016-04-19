@@ -17,6 +17,7 @@ __all__ = [
     'mapping',
     'reference_data',
     'ref_genes_getter',
+    'ref_preparer',
     'report',
     'report_filter',
     'scaffold_graph',
