@@ -22,7 +22,6 @@ class RefPreparer:
         self.max_gene_length = max_gene_length
         self.genetic_code = genetic_code
         self.verbose = verbose
-        self._get_ref_files()
 
 
     @staticmethod
@@ -71,3 +70,31 @@ class RefPreparer:
             raise Error('Error in RefPreparer._get_ref_files. No FASTA files given! Cannot continue')
 
         return filenames
+
+
+    def run(self, outdir):
+        if os.path.exists(outdir):
+            raise Error('Error! Output directory ' + outdir + ' already exists. Cannot continue')
+
+        try:
+            os.mkdir(outdir)
+        except:
+            raise Error('Error making output directory ' + outdir + '. Cannot continue')
+
+
+        filenames = self._get_ref_files(self.ref_prefix, self.presabs, self.varonly, self.metadata, self.verbose)
+
+        refdata = ariba.reference_data.ReferenceData(
+            presence_absence_fa=filenames['presence_absence'],
+            variants_only_fa=filenames['varonly'],
+            non_coding_fa=filenames['noncoding'],
+            metadata_tsv=filenames['metadata'],
+            min_gene_length=self.min_gene_length,
+            max_gene_length=self.max_gene_length,
+            genetic_code=self.genetic_code,
+        )
+
+        if self.verbose:
+            print('{:_^79}'.format(' Checking reference data '), flush=True)
+        refdata.sanity_check(os.path.join(outdir, 'refcheck')
+
