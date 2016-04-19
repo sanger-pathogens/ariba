@@ -16,6 +16,10 @@ class RefPreparer:
         min_gene_length=6,
         max_gene_length=10000,
         genetic_code=11,
+        cdhit_min_id=0.9,
+        cdhit_min_length=0.9,
+        run_cdhit=True,
+        threads=1,
         verbose=False,
     ):
         self.ref_prefix = ref_prefix
@@ -26,6 +30,10 @@ class RefPreparer:
         self.min_gene_length = min_gene_length
         self.max_gene_length = max_gene_length
         self.genetic_code = genetic_code
+        self.cdhit_min_id = cdhit_min_id
+        self.cdhit_min_length = cdhit_min_length
+        self.run_cdhit = run_cdhit
+        self.threads = threads
         self.verbose = verbose
 
 
@@ -89,7 +97,7 @@ class RefPreparer:
 
         filenames = self._get_ref_files(self.ref_prefix, self.presabs, self.varonly, self.metadata, self.verbose)
 
-        refdata = reference_data.ReferenceData(
+        self.refdata = reference_data.ReferenceData(
             presence_absence_fa=filenames['presabs'],
             variants_only_fa=filenames['varonly'],
             non_coding_fa=filenames['noncoding'],
@@ -101,5 +109,17 @@ class RefPreparer:
 
         if self.verbose:
             print('{:_^79}'.format(' Checking reference data '), flush=True)
-        refdata.sanity_check(os.path.join(outdir, 'refcheck'))
 
+        refdata_outprefix = os.path.join(outdir, 'refcheck')
+        self.refdata.sanity_check(refdata_outprefix)
+        cdhit_outprefix = os.path.join(outdir, 'cdhit')
+
+        self.cluster_ids = self.refdata.cluster_with_cdhit(
+            refdata_outprefix + '.01.check_variants',
+            cdhit_outprefix,
+            seq_identity_threshold=self.cdhit_min_id,
+            threads=self.threads,
+            length_diff_cutoff=self.cdhit_min_length,
+            nocluster=not self.run_cdhit,
+            verbose=self.verbose,
+        )
