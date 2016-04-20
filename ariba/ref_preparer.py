@@ -2,7 +2,7 @@ import os
 import pickle
 import sys
 import pyfastaq
-from ariba import cdhit, external_progs, mapping, reference_data
+from ariba import cdhit, common, mapping, reference_data
 
 class Error (Exception): pass
 
@@ -142,11 +142,19 @@ class RefPreparer:
         with open(clusters_pickle_file, 'wb') as f:
             pickle.dump(clusters, f)
         
+        cluster_representatives_fa = cdhit_outprefix + '.cluster_representatives.fa'
 
         mapping.bowtie2_index(
-            cdhit_outprefix + '.cluster_representatives.fa',
-            cdhit_outprefix + '.cluster_representatives.fa',
+            cluster_representatives_fa,
+            cluster_representatives_fa,
             bowtie2=self.extern_progs.exe('bowtie2'),
             verbose=self.verbose,
         )
 
+        cmd = ' '.join([
+            self.extern_progs.exe('samtools'),
+            'faidx',
+            cluster_representatives_fa
+        ])
+
+        common.syscall(cmd, verbose=self.verbose)
