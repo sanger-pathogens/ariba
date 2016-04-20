@@ -1,13 +1,14 @@
 import os
 import sys
 import pyfastaq
-from ariba import cdhit, reference_data
+from ariba import cdhit, external_progs, mapping, reference_data
 
 class Error (Exception): pass
 
 
 class RefPreparer:
     def __init__(self,
+        extern_progs,
         ref_prefix=None,
         presabs=None,
         varonly=None,
@@ -22,6 +23,7 @@ class RefPreparer:
         threads=1,
         verbose=False,
     ):
+        self.extern_progs = extern_progs
         self.ref_prefix = ref_prefix
         self.presabs = presabs
         self.varonly = varonly
@@ -130,6 +132,14 @@ class RefPreparer:
             threads=self.threads,
             length_diff_cutoff=self.cdhit_min_length,
             nocluster=not self.run_cdhit,
+            verbose=self.verbose,
+            cd_hit_est=self.extern_progs.exe('cdhit')
+        )
+
+        mapping.bowtie2_index(
+            cdhit_outprefix + '.cluster_representatives.fa',
+            cdhit_outprefix + '.cluster_representatives.fa',
+            bowtie2=self.extern_progs.exe('bowtie2'),
             verbose=self.verbose,
         )
 

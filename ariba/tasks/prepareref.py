@@ -1,8 +1,7 @@
 import argparse
 import os
 import sys
-from ariba import ref_preparer
-
+from ariba import ref_preparer, external_progs
 
 def run():
     parser = argparse.ArgumentParser(
@@ -29,8 +28,10 @@ def run():
 
     parser.add_argument('outdir', help='Output directory (must not already exist)')
     options = parser.parse_args()
+    extern_progs = external_progs.ExternalProgs(verbose=options.verbose)
 
     preparer = ref_preparer.RefPreparer(
+        extern_progs,
         ref_prefix=options.ref_prefix,
         presabs=options.presabs,
         varonly=options.varonly,
