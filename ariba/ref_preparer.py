@@ -1,4 +1,5 @@
 import os
+import pickle
 import sys
 import pyfastaq
 from ariba import cdhit, external_progs, mapping, reference_data
@@ -125,7 +126,7 @@ class RefPreparer:
         self.refdata.sanity_check(refdata_outprefix)
         cdhit_outprefix = os.path.join(outdir, 'cdhit')
 
-        self.refdata.cluster_with_cdhit(
+        clusters = self.refdata.cluster_with_cdhit(
             refdata_outprefix + '.01.check_variants',
             cdhit_outprefix,
             seq_identity_threshold=self.cdhit_min_id,
@@ -135,6 +136,12 @@ class RefPreparer:
             verbose=self.verbose,
             cd_hit_est=self.extern_progs.exe('cdhit')
         )
+
+
+        clusters_pickle_file = cdhit_outprefix + '.clusters.pickle'
+        with open(clusters_pickle_file, 'wb') as f:
+            pickle.dump(clusters, f)
+        
 
         mapping.bowtie2_index(
             cdhit_outprefix + '.cluster_representatives.fa',
