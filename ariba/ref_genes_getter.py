@@ -149,7 +149,7 @@ class RefGenesGetter:
 
     def _get_from_resfinder(self, outprefix):
         outprefix = os.path.abspath(outprefix)
-        final_fasta = outprefix + '.genes.fa'
+        final_fasta = outprefix + '.presence_absence.fa'
         tmpdir = outprefix + '.tmp.download'
         current_dir = os.getcwd()
 
@@ -205,7 +205,7 @@ class RefGenesGetter:
         print('Extracted files.')
 
         genes_file = os.path.join(tmpdir, 'Database Nt Sequences File.txt')
-        final_fasta = outprefix + '.fa'
+        final_fasta = outprefix + '.presence_absence.fa'
         pyfastaq.tasks.to_fasta(genes_file, final_fasta)
         shutil.rmtree(tmpdir)
 
