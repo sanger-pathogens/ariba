@@ -1,6 +1,7 @@
 class Error (Exception): pass
 
 import os
+import sys
 import shutil
 import tarfile
 import pyfastaq
@@ -206,7 +207,17 @@ class RefGenesGetter:
 
         genes_file = os.path.join(tmpdir, 'Database Nt Sequences File.txt')
         final_fasta = outprefix + '.presence_absence.fa'
-        pyfastaq.tasks.to_fasta(genes_file, final_fasta)
+
+        seq_reader = pyfastaq.sequences.file_reader(genes_file)
+        ids = {}
+        for seq in seq_reader:
+            ids[seq.id] = ids.get(seq.id, 0) + 1
+
+        for name, count in sorted(ids.items()):
+            if count > 1:
+                print('Warning! Sequence name', name, 'found', count, 'times in download. Keeping longest sequence', file=sys.stderr)
+
+        pyfastaq.tasks.to_unique_by_id(genes_file, final_fasta)
         shutil.rmtree(tmpdir)
 
         print('Finished. Final genes file is called', final_fasta, end='\n\n')
