@@ -62,7 +62,6 @@ class Clusters:
 
         self.cdhit_files_prefix = os.path.join(self.refdata_dir, 'cdhit')
         self.cdhit_cluster_representatives_fa = self.cdhit_files_prefix + '.cluster_representatives.fa'
-        self.cluster_ids = {}
         self.bam_prefix = os.path.join(self.outdir, 'map_reads_to_cluster_reps')
         self.bam = self.bam_prefix + '.bam'
         self.report_file_all_tsv = os.path.join(self.outdir, 'report.all.tsv')
