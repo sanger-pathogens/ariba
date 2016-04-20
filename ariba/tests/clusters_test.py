@@ -62,30 +62,6 @@ class TestClusters(unittest.TestCase):
         self.assertEqual(expected_clusters, got_clusters)
 
 
-    def test_sam_pair_to_insert(self):
-        '''test _sam_pair_to_insert'''
-        expected = [
-            None, # both unmapped
-            None, # read 1 unmapped
-            None, # read 2 unmpapped
-            None, # mapped to different seqs
-            None, # same seqs, wrond orientation
-            660
-        ]
-
-        sam1 = None
-        i = 0
-        sam_reader = pysam.Samfile(os.path.join(data_dir, 'clusters_test_sam_pair_to_insert.bam'), 'rb')
-        for s in sam_reader.fetch(until_eof=True):
-            if sam1 is None:
-                sam1 = s
-                continue
-
-            self.assertEqual(self.clusters._sam_pair_to_insert(s, sam1), expected[i])
-            sam1 = None
-            i += 1
-
-
     def test_bam_to_clusters_reads(self):
         '''test _bam_to_clusters_reads'''
         clusters_dir = 'tmp.Cluster.test_bam_to_clusters_reads'

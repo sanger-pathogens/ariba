@@ -117,7 +117,7 @@ class TestMapping(unittest.TestCase):
 
 
     def test_sam_to_fastq(self):
-        '''test _sam_to_fastq'''
+        '''test sam_to_fastq'''
         expected = [
             pyfastaq.sequences.Fastq('read1/1', 'GTATGAGTAGATATAAAGTCCGGAACTGTGATCGGGGGCGATTTATTTACTGGCCGTCCC', 'GHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII'),
             pyfastaq.sequences.Fastq('read1/2', 'TCCCATACGTTGCAATCTGCAGACGCCACTCTTCCACGTCGGACGAACGCAACGTCAGGA', 'IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIHGEDCBA')
@@ -128,6 +128,30 @@ class TestMapping(unittest.TestCase):
         i = 0
         for s in sam_reader.fetch(until_eof=True):
             self.assertEqual(expected[i], mapping.sam_to_fastq(s))
+            i += 1
+
+
+    def test_sam_pair_to_insert(self):
+        '''test sam_pair_to_insert'''
+        expected = [
+            None, # both unmapped
+            None, # read 1 unmapped
+            None, # read 2 unmpapped
+            None, # mapped to different seqs
+            None, # same seqs, wrond orientation
+            660
+        ]
+
+        sam1 = None
+        i = 0
+        sam_reader = pysam.Samfile(os.path.join(data_dir, 'mapping_test_sam_pair_to_insert.bam'), 'rb')
+        for s in sam_reader.fetch(until_eof=True):
+            if sam1 is None:
+                sam1 = s
+                continue
+
+            self.assertEqual(mapping.sam_pair_to_insert(s, sam1), expected[i])
+            sam1 = None
             i += 1
 
 
