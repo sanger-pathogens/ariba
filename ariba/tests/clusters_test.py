@@ -24,6 +24,14 @@ class TestClusters(unittest.TestCase):
         shutil.rmtree(self.cluster_dir)
 
 
+    def test_load_reference_data_info_file(self):
+        '''test _load_reference_data_info_file'''
+        infile = os.path.join(data_dir, 'clusters_test_load_data_info_file')
+        expected = {'genetic_code': 11}
+        got = clusters.Clusters._load_reference_data_info_file(infile)
+        self.assertEqual(expected, got)
+
+
     def test_sam_to_fastq(self):
         '''test _sam_to_fastq'''
         expected = [

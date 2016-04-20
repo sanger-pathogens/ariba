@@ -107,6 +107,27 @@ class Clusters:
                 raise Error('Error mkdir ' + d)
 
 
+    @classmethod
+    def _load_reference_data_info_file(cls, filename):
+        data = {
+            'genetic_code': None
+        }
+
+        with open(filename) as f:
+            for line in f:
+                key, val = line.rstrip().split('\t')
+                if key in data:
+                    data[key] = val
+
+        if None in data.values():
+            missing_values = [x for x in data if data[x] is None]
+            raise Error('Error reading reference info file ' + filename + '. These values not found: ' + ','.join(missing_values))
+
+        data['genetic_code'] = int(data['genetic_code'])
+        return data
+
+
+
     def _run_cdhit(self):
         self.cluster_ids = self.refdata.cluster_with_cdhit(
             self.refdata_files_prefix + '.01.check_variants',
