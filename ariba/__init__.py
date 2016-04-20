@@ -21,6 +21,7 @@ __all__ = [
     'report',
     'report_filter',
     'scaffold_graph',
+    'samtools_variants',
     'sequence_metadata',
     'sequence_variant',
     'summary',
