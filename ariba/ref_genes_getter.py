@@ -140,7 +140,7 @@ class RefGenesGetter:
         print('   ', variant_metadata_tsv)
 
         print('\nYou can use those files with ARIBA like this:')
-        print('ariba run --ref_prefix', outprefix, 'reads_1.fq reads_2.fq output_directory\n')
+        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
 
         print('If you use this downloaded data, please cite:')
         print('"The Comprehensive Antibiotic Resistance Database", McArthur et al 2013, PMID: 23650175')
@@ -182,7 +182,7 @@ class RefGenesGetter:
         shutil.rmtree(tmpdir)
 
         print('You can use it with ARIBA like this:')
-        print('ariba run --ref_prefix', outprefix, 'reads_1.fq reads_2.fq output_directory\n')
+        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"Identification of acquired antimicrobial resistance genes", Zankari et al 2012, PMID: 22782487\n')
 
@@ -211,7 +211,7 @@ class RefGenesGetter:
 
         print('Finished. Final genes file is called', final_fasta, end='\n\n')
         print('You can use it with ARIBA like this:')
-        print('ariba run --ref_prefix', outprefix, 'reads_1.fq reads_2.fq output_directory\n')
+        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n')
 
