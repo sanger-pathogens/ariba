@@ -1,0 +1,5 @@
+input_presabs	/foo/bar/presence_absence.fa
+input_varonly	/foo/bar/variants_only.fa
+input_noncoding	/foo/bar/noncoding.fa
+input_metadata	/foo/bar/metadata.tsv
+genetic_code	11

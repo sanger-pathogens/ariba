@@ -7,7 +7,7 @@ import openpyxl
 import multiprocessing
 import pysam
 import pyfastaq
-from ariba import cluster, common, mapping, histogram, report, report_filter
+from ariba import cluster, common, mapping, histogram, report, report_filter, reference_data
 
 class Error (Exception): pass
 
@@ -126,6 +126,27 @@ class Clusters:
         data['genetic_code'] = int(data['genetic_code'])
         return data
 
+
+    @staticmethod
+    def _load_reference_data_from_dir(indir):
+        if not os.path.exists(indir):
+            raise Error('Error loading reference data. Input directory ' + indir + ' not found. Cannot continue')
+
+        variants_only_fa = os.path.join(indir, 'refcheck.01.check_variants.variants_only.fa')
+        presence_absence_fa = os.path.join(indir, 'refcheck.01.check_variants.presence_absence.fa')
+        non_coding_fa = os.path.join(indir, 'refcheck.01.check_variants.non_coding.fa')
+        metadata_tsv = os.path.join(indir, 'refcheck.01.check_variants.tsv')
+        info_file = os.path.join(indir, 'info.txt')
+        params = Clusters._load_reference_data_info_file(info_file)
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=presence_absence_fa if os.path.exists(presence_absence_fa) else None,
+            variants_only_fa=variants_only_fa if os.path.exists(variants_only_fa) else None,
+            non_coding_fa=non_coding_fa if os.path.exists(non_coding_fa) else None,
+            metadata_tsv=metadata_tsv if os.path.exists(metadata_tsv) else None,
+            genetic_code=params['genetic_code'],
+        )
+
+        return refdata
 
 
     def _run_cdhit(self):

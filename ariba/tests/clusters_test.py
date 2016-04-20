@@ -4,7 +4,7 @@ import os
 import pysam
 import pyfastaq
 import filecmp
-from ariba import clusters, external_progs, reference_data
+from ariba import clusters, external_progs, reference_data, sequence_metadata
 
 modules_dir = os.path.dirname(os.path.abspath(clusters.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -30,6 +30,33 @@ class TestClusters(unittest.TestCase):
         expected = {'genetic_code': 11}
         got = clusters.Clusters._load_reference_data_info_file(infile)
         self.assertEqual(expected, got)
+
+
+    def test_load_reference_data_from_dir(self):
+        '''test _load_reference_data_from_dir'''
+        indir = os.path.join(data_dir, 'clusters_test_load_reference_data_from_dir')
+        got = clusters.Clusters._load_reference_data_from_dir(indir)
+        expected_seq_dicts = {
+            'variants_only': {'variants_only1': pyfastaq.sequences.Fasta('variants_only1', 'atggcgtgcgatgaataa')},
+            'presence_absence': {'presabs1': pyfastaq.sequences.Fasta('presabs1', 'atgatgatgagcccggcgatggaaggcggctag')},
+            'non_coding': {'noncoding1': pyfastaq.sequences.Fasta('noncoding1', 'ACGTA')},
+        }
+        self.assertEqual(expected_seq_dicts, got.seq_dicts)
+        self.assertEqual(11, got.genetic_code)
+
+        expected_metadata = {
+            'presabs1': {
+                '.': {sequence_metadata.SequenceMetadata('presabs1\t.\t.\tpresabs1 description')},
+                'n': {},
+                'p': {}
+            },
+            'variants_only1': {
+                '.': set(),
+                'n': {},
+                'p': {1: {sequence_metadata.SequenceMetadata('variants_only1\tp\tC2I\tdescription of variants_only1 C2I')}}
+            }
+        }
+        self.assertEqual(expected_metadata, got.metadata)
 
 
     def test_sam_to_fastq(self):
