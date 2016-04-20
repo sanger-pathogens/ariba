@@ -24,7 +24,7 @@ def _run_cluster(obj, verbose):
 
 class Clusters:
     def __init__(self,
-      refdata,
+      refdata_dir,
       reads_1,
       reads_2,
       outdir,
@@ -43,12 +43,10 @@ class Clusters:
       assembled_threshold=0.95,
       unique_threshold=0.03,
       bowtie2_preset='very-sensitive-local',
-      cdhit_seq_identity_threshold=0.9,
-      cdhit_length_diff_cutoff=0.9,
-      run_cd_hit=True,
       clean=1,
     ):
-        self.refdata = refdata
+        self.refdata_dir = os.path.abspath(refdata_dir)
+        self.refdata, self.cluster_ids = self._load_reference_data_from_dir(refdata_dir)
         self.reads_1 = os.path.abspath(reads_1)
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
@@ -62,11 +60,10 @@ class Clusters:
         self.assembly_coverage = assembly_coverage
         self.spades_other = spades_other
 
-        self.refdata_files_prefix = os.path.join(self.outdir, 'refdata')
-        self.cdhit_files_prefix = os.path.join(self.outdir, 'cdhit')
+        self.cdhit_files_prefix = os.path.join(self.refdata_dir, 'cdhit')
         self.cdhit_cluster_representatives_fa = self.cdhit_files_prefix + '.cluster_representatives.fa'
         self.cluster_ids = {}
-        self.bam_prefix = self.cdhit_cluster_representatives_fa + '.map_reads'
+        self.bam_prefix = os.path.join(self.outdir, 'map_reads_to_cluster_reps')
         self.bam = self.bam_prefix + '.bam'
         self.report_file_all_tsv = os.path.join(self.outdir, 'report.all.tsv')
         self.report_file_all_xls = os.path.join(self.outdir, 'report.all.xls')
@@ -96,10 +93,6 @@ class Clusters:
         self.clusters = {}        # gene name -> Cluster object
         self.cluster_read_counts = {} # gene name -> number of reads
         self.cluster_base_counts = {} # gene name -> number of bases
-
-        self.cdhit_seq_identity_threshold = cdhit_seq_identity_threshold
-        self.cdhit_length_diff_cutoff = cdhit_length_diff_cutoff
-        self.run_cd_hit = run_cd_hit
 
         for d in [self.outdir, self.clusters_outdir]:
             try:
@@ -152,18 +145,6 @@ class Clusters:
             cluster_ids = pickle.load(f)
 
         return refdata, cluster_ids
-
-
-    def _run_cdhit(self):
-        self.cluster_ids = self.refdata.cluster_with_cdhit(
-            self.refdata_files_prefix + '.01.check_variants',
-            self.cdhit_files_prefix,
-            seq_identity_threshold=self.cdhit_seq_identity_threshold,
-            threads=self.threads,
-            length_diff_cutoff=self.cdhit_length_diff_cutoff,
-            nocluster=not self.run_cd_hit,
-            verbose=self.verbose,
-        )
 
 
     def _map_reads_to_clustered_genes(self):
@@ -362,30 +343,12 @@ class Clusters:
                 print('   ... not deleting anything because --clean 0 used')
             return
 
-        to_delete= [
-            self.bam,
-            self.cdhit_cluster_representatives_fa,
-            self.cdhit_cluster_representatives_fa + '.fai',
-            self.cdhit_files_prefix + '.non_coding.cdhit',
-            self.cdhit_files_prefix + '.presence_absence.cdhit',
-            self.cdhit_files_prefix + '.variants_only.cdhit',
-        ]
+        to_delete= [self.bam]
 
         if self.clean == 2:
             if self.verbose:
                 print('    rm -r', self.clusters_outdir)
                 shutil.rmtree(self.clusters_outdir)
-
-            to_delete.extend([
-                self.cdhit_files_prefix + '.clusters.tsv',
-                self.refdata_files_prefix + '.00.check_fasta_presence_absence.log',
-                self.refdata_files_prefix + '.00.check_fasta_variants_only.log',
-                self.refdata_files_prefix + '.01.check_variants.log',
-                self.refdata_files_prefix + '.01.check_variants.non_coding.fa',
-                self.refdata_files_prefix + '.01.check_variants.presence_absence.fa',
-                self.refdata_files_prefix + '.01.check_variants.tsv',
-                self.refdata_files_prefix + '.01.check_variants.variants_only.fa',
-            ])
 
         for filename in to_delete:
             if os.path.exists(filename):
@@ -413,16 +376,6 @@ class Clusters:
         self.write_versions_file(cwd)
 
         if self.verbose:
-            print('{:_^79}'.format(' Checking reference data '), flush=True)
-        self.refdata.sanity_check(self.refdata_files_prefix)
-
-        if self.verbose:
-            print()
-            print('{:_^79}'.format(' Running cd-hit '), flush=True)
-        self._run_cdhit()
-
-        if self.verbose:
-            print('Finished cd-hit\n')
             print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
         self._map_reads_to_clustered_genes()
 

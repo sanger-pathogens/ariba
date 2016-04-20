@@ -1,6 +1,7 @@
 import unittest
 import shutil
 import os
+import pickle
 import pysam
 import pyfastaq
 import filecmp
@@ -14,14 +15,23 @@ extern_progs = external_progs.ExternalProgs()
 class TestClusters(unittest.TestCase):
     def setUp(self):
         self.cluster_dir = 'tmp.Cluster'
-        refdata = reference_data.ReferenceData(non_coding_fa = os.path.join(data_dir, 'clusters_test_dummy_db.fa'))
+        self.refdata_dir = 'tmp.RefData'
+        os.mkdir(self.refdata_dir)
+        shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.fa'), os.path.join(self.refdata_dir, 'refcheck.01.check_variants.non_coding.fa'))
+        with open(os.path.join(self.refdata_dir, 'info.txt'), 'w') as f:
+            print('genetic_code\t11', file=f)
+
+        with open(os.path.join(self.refdata_dir, 'cdhit.clusters.pickle'), 'wb') as f:
+            pickle.dump({'x': {'x'}}, f)
+
         reads1 = os.path.join(data_dir, 'clusters_test_dummy_reads_1.fq')
         reads2 = os.path.join(data_dir, 'clusters_test_dummy_reads_2.fq')
-        self.clusters = clusters.Clusters(refdata, reads1, reads2, self.cluster_dir, extern_progs)
+        self.clusters = clusters.Clusters(self.refdata_dir, reads1, reads2, self.cluster_dir, extern_progs)
 
 
     def tearDown(self):
         shutil.rmtree(self.cluster_dir)
+        shutil.rmtree(self.refdata_dir)
 
 
     def test_load_reference_data_info_file(self):
@@ -69,7 +79,7 @@ class TestClusters(unittest.TestCase):
         reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_2.fq')
         ref = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.db.fa')
         refdata = reference_data.ReferenceData(presence_absence_fa = ref)
-        c = clusters.Clusters(refdata, reads1, reads2, clusters_dir, extern_progs)
+        c = clusters.Clusters(self.refdata_dir, reads1, reads2, clusters_dir, extern_progs)
         shutil.copyfile(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.bam'), c.bam)
         c._bam_to_clusters_reads()
         expected = [
