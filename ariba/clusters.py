@@ -1,5 +1,6 @@
 import os
 import copy
+import pickle
 import itertools
 import sys
 import shutil
@@ -137,6 +138,7 @@ class Clusters:
         non_coding_fa = os.path.join(indir, 'refcheck.01.check_variants.non_coding.fa')
         metadata_tsv = os.path.join(indir, 'refcheck.01.check_variants.tsv')
         info_file = os.path.join(indir, 'info.txt')
+        clusters_file = os.path.join(indir, 'cdhit.clusters.pickle')
         params = Clusters._load_reference_data_info_file(info_file)
         refdata = reference_data.ReferenceData(
             presence_absence_fa=presence_absence_fa if os.path.exists(presence_absence_fa) else None,
@@ -146,7 +148,10 @@ class Clusters:
             genetic_code=params['genetic_code'],
         )
 
-        return refdata
+        with open(clusters_file, 'rb') as f:
+            cluster_ids = pickle.load(f)
+
+        return refdata, cluster_ids
 
 
     def _run_cdhit(self):

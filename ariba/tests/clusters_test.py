@@ -35,14 +35,14 @@ class TestClusters(unittest.TestCase):
     def test_load_reference_data_from_dir(self):
         '''test _load_reference_data_from_dir'''
         indir = os.path.join(data_dir, 'clusters_test_load_reference_data_from_dir')
-        got = clusters.Clusters._load_reference_data_from_dir(indir)
+        got_refdata, got_clusters = clusters.Clusters._load_reference_data_from_dir(indir)
         expected_seq_dicts = {
             'variants_only': {'variants_only1': pyfastaq.sequences.Fasta('variants_only1', 'atggcgtgcgatgaataa')},
             'presence_absence': {'presabs1': pyfastaq.sequences.Fasta('presabs1', 'atgatgatgagcccggcgatggaaggcggctag')},
             'non_coding': {'noncoding1': pyfastaq.sequences.Fasta('noncoding1', 'ACGTA')},
         }
-        self.assertEqual(expected_seq_dicts, got.seq_dicts)
-        self.assertEqual(11, got.genetic_code)
+        self.assertEqual(expected_seq_dicts, got_refdata.seq_dicts)
+        self.assertEqual(11, got_refdata.genetic_code)
 
         expected_metadata = {
             'presabs1': {
@@ -56,7 +56,10 @@ class TestClusters(unittest.TestCase):
                 'p': {1: {sequence_metadata.SequenceMetadata('variants_only1\tp\tC2I\tdescription of variants_only1 C2I')}}
             }
         }
-        self.assertEqual(expected_metadata, got.metadata)
+        self.assertEqual(expected_metadata, got_refdata.metadata)
+
+        expected_clusters = {'key1': 1, 'key2': 2}
+        self.assertEqual(expected_clusters, got_clusters)
 
 
     def test_sam_to_fastq(self):
