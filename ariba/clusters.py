@@ -1,5 +1,6 @@
 import os
 import copy
+import pickle
 import itertools
 import sys
 import shutil
@@ -7,7 +8,7 @@ import openpyxl
 import multiprocessing
 import pysam
 import pyfastaq
-from ariba import cluster, common, mapping, histogram, report, report_filter
+from ariba import cluster, common, mapping, histogram, report, report_filter, reference_data
 
 class Error (Exception): pass
 
@@ -23,7 +24,7 @@ def _run_cluster(obj, verbose):
 
 class Clusters:
     def __init__(self,
-      refdata,
+      refdata_dir,
       reads_1,
       reads_2,
       outdir,
@@ -42,12 +43,10 @@ class Clusters:
       assembled_threshold=0.95,
       unique_threshold=0.03,
       bowtie2_preset='very-sensitive-local',
-      cdhit_seq_identity_threshold=0.9,
-      cdhit_length_diff_cutoff=0.9,
-      run_cd_hit=True,
       clean=1,
     ):
-        self.refdata = refdata
+        self.refdata_dir = os.path.abspath(refdata_dir)
+        self.refdata, self.cluster_ids = self._load_reference_data_from_dir(refdata_dir)
         self.reads_1 = os.path.abspath(reads_1)
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
@@ -61,11 +60,9 @@ class Clusters:
         self.assembly_coverage = assembly_coverage
         self.spades_other = spades_other
 
-        self.refdata_files_prefix = os.path.join(self.outdir, 'refdata')
-        self.cdhit_files_prefix = os.path.join(self.outdir, 'cdhit')
+        self.cdhit_files_prefix = os.path.join(self.refdata_dir, 'cdhit')
         self.cdhit_cluster_representatives_fa = self.cdhit_files_prefix + '.cluster_representatives.fa'
-        self.cluster_ids = {}
-        self.bam_prefix = self.cdhit_cluster_representatives_fa + '.map_reads'
+        self.bam_prefix = os.path.join(self.outdir, 'map_reads_to_cluster_reps')
         self.bam = self.bam_prefix + '.bam'
         self.report_file_all_tsv = os.path.join(self.outdir, 'report.all.tsv')
         self.report_file_all_xls = os.path.join(self.outdir, 'report.all.xls')
@@ -96,10 +93,6 @@ class Clusters:
         self.cluster_read_counts = {} # gene name -> number of reads
         self.cluster_base_counts = {} # gene name -> number of bases
 
-        self.cdhit_seq_identity_threshold = cdhit_seq_identity_threshold
-        self.cdhit_length_diff_cutoff = cdhit_length_diff_cutoff
-        self.run_cd_hit = run_cd_hit
-
         for d in [self.outdir, self.clusters_outdir]:
             try:
                 os.mkdir(d)
@@ -107,16 +100,50 @@ class Clusters:
                 raise Error('Error mkdir ' + d)
 
 
-    def _run_cdhit(self):
-        self.cluster_ids = self.refdata.cluster_with_cdhit(
-            self.refdata_files_prefix + '.01.check_variants',
-            self.cdhit_files_prefix,
-            seq_identity_threshold=self.cdhit_seq_identity_threshold,
-            threads=self.threads,
-            length_diff_cutoff=self.cdhit_length_diff_cutoff,
-            nocluster=not self.run_cd_hit,
-            verbose=self.verbose,
+    @classmethod
+    def _load_reference_data_info_file(cls, filename):
+        data = {
+            'genetic_code': None
+        }
+
+        with open(filename) as f:
+            for line in f:
+                key, val = line.rstrip().split('\t')
+                if key in data:
+                    data[key] = val
+
+        if None in data.values():
+            missing_values = [x for x in data if data[x] is None]
+            raise Error('Error reading reference info file ' + filename + '. These values not found: ' + ','.join(missing_values))
+
+        data['genetic_code'] = int(data['genetic_code'])
+        return data
+
+
+    @staticmethod
+    def _load_reference_data_from_dir(indir):
+        if not os.path.exists(indir):
+            raise Error('Error loading reference data. Input directory ' + indir + ' not found. Cannot continue')
+
+        variants_only_fa = os.path.join(indir, 'refcheck.01.check_variants.variants_only.fa')
+        presence_absence_fa = os.path.join(indir, 'refcheck.01.check_variants.presence_absence.fa')
+        non_coding_fa = os.path.join(indir, 'refcheck.01.check_variants.non_coding.fa')
+        metadata_tsv = os.path.join(indir, 'refcheck.01.check_variants.tsv')
+        info_file = os.path.join(indir, 'info.txt')
+        clusters_file = os.path.join(indir, 'cdhit.clusters.pickle')
+        params = Clusters._load_reference_data_info_file(info_file)
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=presence_absence_fa if os.path.exists(presence_absence_fa) else None,
+            variants_only_fa=variants_only_fa if os.path.exists(variants_only_fa) else None,
+            non_coding_fa=non_coding_fa if os.path.exists(non_coding_fa) else None,
+            metadata_tsv=metadata_tsv if os.path.exists(metadata_tsv) else None,
+            genetic_code=params['genetic_code'],
         )
+
+        with open(clusters_file, 'rb') as f:
+            cluster_ids = pickle.load(f)
+
+        return refdata, cluster_ids
 
 
     def _map_reads_to_clustered_genes(self):
@@ -132,40 +159,6 @@ class Clusters:
             verbose=self.verbose,
             remove_both_unmapped=True,
         )
-
-
-    def _sam_to_fastq(self, s):
-        name = s.qname
-        if s.is_read1:
-            name += '/1'
-        elif s.is_read2:
-            name += '/2'
-        else:
-            raise Error('Read ' + name + ' must be first or second of pair according to flag. Cannot continue')
-
-        seq = pyfastaq.sequences.Fastq(name, common.decode(s.seq), common.decode(s.qual))
-        if s.is_reverse:
-            seq.revcomp()
-
-        return seq
-
-
-    def _sam_pair_to_insert(self, s1, s2):
-        if s1.is_unmapped or s2.is_unmapped or (s1.tid != s2.tid) or (s1.is_reverse == s2.is_reverse):
-            return None
-
-        # If here, reads are both mapped to the same ref, and in opposite orientations
-        if s1.is_reverse:
-            end = s1.reference_end - 1
-            start = s2.reference_start
-        else:
-            end = s2.reference_end - 1
-            start = s1.reference_start
-
-        if start < end:
-            return end - start + 1
-        else:
-            return None
 
 
     def _bam_to_clusters_reads(self):
@@ -186,12 +179,12 @@ class Clusters:
             if not sam1.is_unmapped:
                 ref_seqs.add(sam_reader.getrname(sam1.tid))
 
-            read1 = self._sam_to_fastq(sam1)
-            read2 = self._sam_to_fastq(s)
+            read1 = mapping.sam_to_fastq(sam1)
+            read2 = mapping.sam_to_fastq(s)
             if read1.id.endswith('/2'):
                 read1, read2 = read2, read1
 
-            insert = self._sam_pair_to_insert(s, sam1)
+            insert = mapping.sam_pair_to_insert(s, sam1)
             if insert is not None:
                 self.insert_hist.add(insert)
 
@@ -349,30 +342,12 @@ class Clusters:
                 print('   ... not deleting anything because --clean 0 used')
             return
 
-        to_delete= [
-            self.bam,
-            self.cdhit_cluster_representatives_fa,
-            self.cdhit_cluster_representatives_fa + '.fai',
-            self.cdhit_files_prefix + '.non_coding.cdhit',
-            self.cdhit_files_prefix + '.presence_absence.cdhit',
-            self.cdhit_files_prefix + '.variants_only.cdhit',
-        ]
+        to_delete= [self.bam]
 
         if self.clean == 2:
             if self.verbose:
                 print('    rm -r', self.clusters_outdir)
                 shutil.rmtree(self.clusters_outdir)
-
-            to_delete.extend([
-                self.cdhit_files_prefix + '.clusters.tsv',
-                self.refdata_files_prefix + '.00.check_fasta_presence_absence.log',
-                self.refdata_files_prefix + '.00.check_fasta_variants_only.log',
-                self.refdata_files_prefix + '.01.check_variants.log',
-                self.refdata_files_prefix + '.01.check_variants.non_coding.fa',
-                self.refdata_files_prefix + '.01.check_variants.presence_absence.fa',
-                self.refdata_files_prefix + '.01.check_variants.tsv',
-                self.refdata_files_prefix + '.01.check_variants.variants_only.fa',
-            ])
 
         for filename in to_delete:
             if os.path.exists(filename):
@@ -400,16 +375,6 @@ class Clusters:
         self.write_versions_file(cwd)
 
         if self.verbose:
-            print('{:_^79}'.format(' Checking reference data '), flush=True)
-        self.refdata.sanity_check(self.refdata_files_prefix)
-
-        if self.verbose:
-            print()
-            print('{:_^79}'.format(' Running cd-hit '), flush=True)
-        self._run_cdhit()
-
-        if self.verbose:
-            print('Finished cd-hit\n')
             print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
         self._map_reads_to_clustered_genes()
 

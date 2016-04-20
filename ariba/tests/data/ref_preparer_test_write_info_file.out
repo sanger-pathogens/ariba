@@ -1,0 +1,5 @@
+input_presabs	presabs.fa
+input_varonly	None
+input_noncoding	None
+input_metadata	metadata.tsv
+genetic_code	1

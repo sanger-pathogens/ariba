@@ -13,6 +13,7 @@ def run():
     parser.add_argument('--threads', type=int, help='Number of threads [%(default)s]', default=1, metavar='INT')
     parser.add_argument('outdir', help='Name of output directory')
     options = parser.parse_args()
+    ariba_exe = os.path.abspath(sys.argv[0])
 
     print('Running ARIBA on test data...')
 
@@ -32,15 +33,40 @@ def run():
         shutil.copy(os.path.join(test_data_dir, filename), filename)
         print('    copied', filename)
 
-    ariba_command = ' '.join([
-        sys.argv[0],
-        'run',
+
+    prepareref_command = ' '.join([
+        ariba_exe,
+        'prepareref',
         '--verbose',
         '--presabs presence_absence.fa',
         '--varonly variants_only.fa',
         '--noncoding non_coding.fa',
         '--metadata metadata.tsv',
         '--threads', str(options.threads),
+        'PREPAREREF',
+    ])
+
+    print('\nRunning ariba prepareref with:', prepareref_command, '', sep='\n')
+    return_code = subprocess.call(prepareref_command, shell=True)
+
+    if return_code != 0:
+        print('\nSomething went wrong. See above for error message(s). Return code was', return_code)
+        sys.exit(1)
+
+    print()
+    print('-' * 79)
+    print('-' * 79)
+    print('ariba prepareref finished OK')
+    print('-' * 79)
+    print('-' * 79)
+
+
+    ariba_command = ' '.join([
+        ariba_exe,
+        'run',
+        '--verbose',
+        '--threads', str(options.threads),
+        'PREPAREREF',
         'reads_1.fq',
         'reads_2.fq',
         'OUT'
@@ -54,5 +80,10 @@ def run():
         print('\nSomething went wrong. See above for error message(s). Return code was', return_code)
         sys.exit(1)
 
+    print()
+    print('-' * 79)
+    print('-' * 79)
+    print('ariba run finished OK')
+    print('-' * 79)
     print('-' * 79)
     print('Finished run on test data OK')

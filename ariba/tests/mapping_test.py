@@ -2,6 +2,7 @@ import unittest
 import os
 import shutil
 import pysam
+import pyfastaq
 from ariba import mapping, external_progs
 
 modules_dir = os.path.dirname(os.path.abspath(mapping.__file__))
@@ -24,6 +25,24 @@ def get_sam_columns(bamfile):
 
 
 class TestMapping(unittest.TestCase):
+    def test_bowtie2_index(self):
+        '''test bowtie2_index'''
+        tmp_ref = 'tmp.test_bowtie2_index.ref.fa'
+        with open(tmp_ref, 'w') as f:
+            print('>ref', file=f)
+            print('ATCATACTACTCATACTGACTCATCATCATCATGACGTATG', file=f)
+
+        tmp_out = 'tmp.test_bowtie2_index.ref.out'
+        mapping.bowtie2_index(tmp_ref, tmp_out, bowtie2=extern_progs.exe('bowtie2'))
+
+        expected_files = [tmp_out + '.' + x + '.bt2' for x in ['1', '2', '3', '4', 'rev.1', 'rev.2']]
+        for filename in expected_files:
+            self.assertTrue(os.path.exists(filename))
+            os.unlink(filename)
+
+        os.unlink(tmp_ref)
+
+
     def test_run_bowtie2(self):
         '''Test run_bowtie2 unsorted'''
         self.maxDiff = None
@@ -95,4 +114,44 @@ class TestMapping(unittest.TestCase):
         expected = 219
         got = mapping.get_total_alignment_score(bam)
         self.assertEqual(got, expected)
+
+
+    def test_sam_to_fastq(self):
+        '''test sam_to_fastq'''
+        expected = [
+            pyfastaq.sequences.Fastq('read1/1', 'GTATGAGTAGATATAAAGTCCGGAACTGTGATCGGGGGCGATTTATTTACTGGCCGTCCC', 'GHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII'),
+            pyfastaq.sequences.Fastq('read1/2', 'TCCCATACGTTGCAATCTGCAGACGCCACTCTTCCACGTCGGACGAACGCAACGTCAGGA', 'IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIHGEDCBA')
+        ]
+
+
+        sam_reader = pysam.Samfile(os.path.join(data_dir, 'mapping_test_sam_to_fastq.bam'), "rb")
+        i = 0
+        for s in sam_reader.fetch(until_eof=True):
+            self.assertEqual(expected[i], mapping.sam_to_fastq(s))
+            i += 1
+
+
+    def test_sam_pair_to_insert(self):
+        '''test sam_pair_to_insert'''
+        expected = [
+            None, # both unmapped
+            None, # read 1 unmapped
+            None, # read 2 unmpapped
+            None, # mapped to different seqs
+            None, # same seqs, wrond orientation
+            660
+        ]
+
+        sam1 = None
+        i = 0
+        sam_reader = pysam.Samfile(os.path.join(data_dir, 'mapping_test_sam_pair_to_insert.bam'), 'rb')
+        for s in sam_reader.fetch(until_eof=True):
+            if sam1 is None:
+                sam1 = s
+                continue
+
+            self.assertEqual(mapping.sam_pair_to_insert(s, sam1), expected[i])
+            sam1 = None
+            i += 1
+
 

@@ -1,10 +1,11 @@
 import unittest
 import shutil
 import os
+import pickle
 import pysam
 import pyfastaq
 import filecmp
-from ariba import clusters, external_progs, reference_data
+from ariba import clusters, external_progs, reference_data, sequence_metadata
 
 modules_dir = os.path.dirname(os.path.abspath(clusters.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -14,53 +15,61 @@ extern_progs = external_progs.ExternalProgs()
 class TestClusters(unittest.TestCase):
     def setUp(self):
         self.cluster_dir = 'tmp.Cluster'
-        refdata = reference_data.ReferenceData(non_coding_fa = os.path.join(data_dir, 'clusters_test_dummy_db.fa'))
+        self.refdata_dir = 'tmp.RefData'
+        os.mkdir(self.refdata_dir)
+        shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.fa'), os.path.join(self.refdata_dir, 'refcheck.01.check_variants.non_coding.fa'))
+        with open(os.path.join(self.refdata_dir, 'info.txt'), 'w') as f:
+            print('genetic_code\t11', file=f)
+
+        with open(os.path.join(self.refdata_dir, 'cdhit.clusters.pickle'), 'wb') as f:
+            pickle.dump({'x': {'x'}}, f)
+
         reads1 = os.path.join(data_dir, 'clusters_test_dummy_reads_1.fq')
         reads2 = os.path.join(data_dir, 'clusters_test_dummy_reads_2.fq')
-        self.clusters = clusters.Clusters(refdata, reads1, reads2, self.cluster_dir, extern_progs)
+        self.clusters = clusters.Clusters(self.refdata_dir, reads1, reads2, self.cluster_dir, extern_progs)
 
 
     def tearDown(self):
         shutil.rmtree(self.cluster_dir)
+        shutil.rmtree(self.refdata_dir)
 
 
-    def test_sam_to_fastq(self):
-        '''test _sam_to_fastq'''
-        expected = [
-            pyfastaq.sequences.Fastq('read1/1', 'GTATGAGTAGATATAAAGTCCGGAACTGTGATCGGGGGCGATTTATTTACTGGCCGTCCC', 'GHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII'),
-            pyfastaq.sequences.Fastq('read1/2', 'TCCCATACGTTGCAATCTGCAGACGCCACTCTTCCACGTCGGACGAACGCAACGTCAGGA', 'IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIHGEDCBA')
-        ]
+    def test_load_reference_data_info_file(self):
+        '''test _load_reference_data_info_file'''
+        infile = os.path.join(data_dir, 'clusters_test_load_data_info_file')
+        expected = {'genetic_code': 11}
+        got = clusters.Clusters._load_reference_data_info_file(infile)
+        self.assertEqual(expected, got)
 
 
-        sam_reader = pysam.Samfile(os.path.join(data_dir, 'clusters_test_sam_to_fastq.bam'), "rb")
-        i = 0
-        for s in sam_reader.fetch(until_eof=True):
-            self.assertEqual(expected[i], self.clusters._sam_to_fastq(s))
-            i += 1
+    def test_load_reference_data_from_dir(self):
+        '''test _load_reference_data_from_dir'''
+        indir = os.path.join(data_dir, 'clusters_test_load_reference_data_from_dir')
+        got_refdata, got_clusters = clusters.Clusters._load_reference_data_from_dir(indir)
+        expected_seq_dicts = {
+            'variants_only': {'variants_only1': pyfastaq.sequences.Fasta('variants_only1', 'atggcgtgcgatgaataa')},
+            'presence_absence': {'presabs1': pyfastaq.sequences.Fasta('presabs1', 'atgatgatgagcccggcgatggaaggcggctag')},
+            'non_coding': {'noncoding1': pyfastaq.sequences.Fasta('noncoding1', 'ACGTA')},
+        }
+        self.assertEqual(expected_seq_dicts, got_refdata.seq_dicts)
+        self.assertEqual(11, got_refdata.genetic_code)
 
+        expected_metadata = {
+            'presabs1': {
+                '.': {sequence_metadata.SequenceMetadata('presabs1\t.\t.\tpresabs1 description')},
+                'n': {},
+                'p': {}
+            },
+            'variants_only1': {
+                '.': set(),
+                'n': {},
+                'p': {1: {sequence_metadata.SequenceMetadata('variants_only1\tp\tC2I\tdescription of variants_only1 C2I')}}
+            }
+        }
+        self.assertEqual(expected_metadata, got_refdata.metadata)
 
-    def test_sam_pair_to_insert(self):
-        '''test _sam_pair_to_insert'''
-        expected = [
-            None, # both unmapped
-            None, # read 1 unmapped
-            None, # read 2 unmpapped
-            None, # mapped to different seqs
-            None, # same seqs, wrond orientation
-            660
-        ]
-
-        sam1 = None
-        i = 0
-        sam_reader = pysam.Samfile(os.path.join(data_dir, 'clusters_test_sam_pair_to_insert.bam'), 'rb')
-        for s in sam_reader.fetch(until_eof=True):
-            if sam1 is None:
-                sam1 = s
-                continue
-
-            self.assertEqual(self.clusters._sam_pair_to_insert(s, sam1), expected[i])
-            sam1 = None
-            i += 1
+        expected_clusters = {'key1': 1, 'key2': 2}
+        self.assertEqual(expected_clusters, got_clusters)
 
 
     def test_bam_to_clusters_reads(self):
@@ -70,7 +79,7 @@ class TestClusters(unittest.TestCase):
         reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_2.fq')
         ref = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.db.fa')
         refdata = reference_data.ReferenceData(presence_absence_fa = ref)
-        c = clusters.Clusters(refdata, reads1, reads2, clusters_dir, extern_progs)
+        c = clusters.Clusters(self.refdata_dir, reads1, reads2, clusters_dir, extern_progs)
         shutil.copyfile(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.bam'), c.bam)
         c._bam_to_clusters_reads()
         expected = [

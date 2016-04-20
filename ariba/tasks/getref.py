@@ -1,5 +1,4 @@
 import argparse
-import sys
 from ariba import ref_genes_getter
 
 

@@ -1,6 +1,7 @@
 class Error (Exception): pass
 
 import os
+import sys
 import shutil
 import tarfile
 import pyfastaq
@@ -140,7 +141,7 @@ class RefGenesGetter:
         print('   ', variant_metadata_tsv)
 
         print('\nYou can use those files with ARIBA like this:')
-        print('ariba run --ref_prefix', outprefix, 'reads_1.fq reads_2.fq output_directory\n')
+        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
 
         print('If you use this downloaded data, please cite:')
         print('"The Comprehensive Antibiotic Resistance Database", McArthur et al 2013, PMID: 23650175')
@@ -149,7 +150,7 @@ class RefGenesGetter:
 
     def _get_from_resfinder(self, outprefix):
         outprefix = os.path.abspath(outprefix)
-        final_fasta = outprefix + '.genes.fa'
+        final_fasta = outprefix + '.presence_absence.fa'
         tmpdir = outprefix + '.tmp.download'
         current_dir = os.getcwd()
 
@@ -171,8 +172,10 @@ class RefGenesGetter:
         for filename in os.listdir('database'):
             if filename.endswith('.fsa'):
                 print('   ', filename)
+                prefix = filename.split('.')[0]
                 file_reader = pyfastaq.sequences.file_reader(os.path.join('database', filename))
                 for seq in file_reader:
+                    seq.id = prefix + '.' + seq.id
                     print(seq, file=f)
 
         pyfastaq.utils.close(f)
@@ -182,7 +185,7 @@ class RefGenesGetter:
         shutil.rmtree(tmpdir)
 
         print('You can use it with ARIBA like this:')
-        print('ariba run --ref_prefix', outprefix, 'reads_1.fq reads_2.fq output_directory\n')
+        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"Identification of acquired antimicrobial resistance genes", Zankari et al 2012, PMID: 22782487\n')
 
@@ -205,13 +208,23 @@ class RefGenesGetter:
         print('Extracted files.')
 
         genes_file = os.path.join(tmpdir, 'Database Nt Sequences File.txt')
-        final_fasta = outprefix + '.fa'
-        pyfastaq.tasks.to_fasta(genes_file, final_fasta)
+        final_fasta = outprefix + '.presence_absence.fa'
+
+        seq_reader = pyfastaq.sequences.file_reader(genes_file)
+        ids = {}
+        for seq in seq_reader:
+            ids[seq.id] = ids.get(seq.id, 0) + 1
+
+        for name, count in sorted(ids.items()):
+            if count > 1:
+                print('Warning! Sequence name', name, 'found', count, 'times in download. Keeping longest sequence', file=sys.stderr)
+
+        pyfastaq.tasks.to_unique_by_id(genes_file, final_fasta)
         shutil.rmtree(tmpdir)
 
         print('Finished. Final genes file is called', final_fasta, end='\n\n')
         print('You can use it with ARIBA like this:')
-        print('ariba run --ref_prefix', outprefix, 'reads_1.fq reads_2.fq output_directory\n')
+        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n')
 
