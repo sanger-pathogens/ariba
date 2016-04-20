@@ -24,6 +24,24 @@ def get_sam_columns(bamfile):
 
 
 class TestMapping(unittest.TestCase):
+    def test_bowtie2_index(self):
+        '''test bowtie2_index'''
+        tmp_ref = 'tmp.test_bowtie2_index.ref.fa'
+        with open(tmp_ref, 'w') as f:
+            print('>ref', file=f)
+            print('ATCATACTACTCATACTGACTCATCATCATCATGACGTATG', file=f)
+
+        tmp_out = 'tmp.test_bowtie2_index.ref.out'
+        mapping.bowtie2_index(tmp_ref, tmp_out, bowtie2=extern_progs.exe('bowtie2'))
+
+        expected_files = [tmp_out + '.' + x + '.bt2' for x in ['1', '2', '3', '4', 'rev.1', 'rev.2']]
+        for filename in expected_files:
+            self.assertTrue(os.path.exists(filename))
+            os.unlink(filename)
+
+        os.unlink(tmp_ref)
+
+
     def test_run_bowtie2(self):
         '''Test run_bowtie2 unsorted'''
         self.maxDiff = None

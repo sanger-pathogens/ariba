@@ -6,6 +6,27 @@ from ariba import common
 class Error (Exception): pass
 
 
+def bowtie2_index(ref_fa, outprefix, bowtie2='bowtie2', verbose=False, verbose_filehandle=sys.stdout):
+    expected_files = [outprefix + '.' + x + '.bt2' for x in ['1', '2', '3', '4', 'rev.1', 'rev.2']]
+    file_missing = False
+    for filename in expected_files:
+        if not os.path.exists(filename):
+            file_missing = True
+            break 
+
+    if not file_missing:
+        return
+
+    cmd = ' '.join([
+        bowtie2 + '-build',
+        '-q',
+        ref_fa,
+        outprefix
+    ])
+
+    common.syscall(cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
+
+
 def run_bowtie2(
       reads_fwd,
       reads_rev,
@@ -20,16 +41,15 @@ def run_bowtie2(
       verbose=False,
       verbose_filehandle=sys.stdout,
       remove_both_unmapped=False,
+      clean_index=True,
     ):
 
     map_index = out_prefix + '.map_index'
-    clean_files = [map_index + '.' + x + '.bt2' for x in ['1', '2', '3', '4', 'rev.1', 'rev.2']]
-    index_cmd = ' '.join([
-        bowtie2 + '-build',
-        '-q',
-        ref_fa,
-        map_index
-    ])
+
+    if clean_index:
+        clean_files = [map_index + '.' + x + '.bt2' for x in ['1', '2', '3', '4', 'rev.1', 'rev.2']]
+    else:
+        clean_files = []
 
     final_bam = out_prefix + '.bam'
     if sort:
@@ -60,7 +80,7 @@ def run_bowtie2(
 
     map_cmd = ' '.join(map_cmd)
 
-    common.syscall(index_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
+    bowtie2_index(ref_fa, map_index, bowtie2=bowtie2, verbose=verbose, verbose_filehandle=verbose_filehandle)
     common.syscall(map_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
 
     if sort:
