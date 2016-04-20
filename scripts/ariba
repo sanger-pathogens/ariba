@@ -3,10 +3,8 @@
 import argparse
 import sys
 
-
 tasks = {
     'getref': 'Download reference data',
-    'refcheck': 'Check or fix input genes FASTA',
     'prepareref': 'Prepare reference data for running the pipeline',
     'reportfilter': 'Filter report.tsv file',
     'run': 'Run the ARIBA local assembly pipeline',
@@ -19,7 +17,6 @@ tasks = {
 
 ordered_tasks = [
     'getref',
-    'refcheck',
     'prepareref',
     'run',
     'reportfilter',
