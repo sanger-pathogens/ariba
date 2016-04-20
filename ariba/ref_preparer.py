@@ -60,7 +60,7 @@ class RefPreparer:
         }
 
         if verbose:
-            print('Looking for input files ...')
+            print('\nLooking for input files ...')
 
         for key in file_suffixes:
             if ref_prefix is not None:
@@ -78,7 +78,7 @@ class RefPreparer:
                 if os.path.exists(filenames[key]):
                     filenames[key] = os.path.abspath(filenames[key])
                     if verbose:
-                        print('Found: ', filename, 'from option --', key, sep='')
+                        print('Found: ', filenames[key], ' from option --', key, sep='')
                 else:
                     raise Error('File not found! Cannot continue. Looked for: ' + filenames[key])
 
@@ -106,7 +106,7 @@ class RefPreparer:
             raise Error('Error making output directory ' + outdir + '. Cannot continue')
 
 
-        self.filenames = self._get_ref_files(self.ref_prefix, self.presabs, self.varonly, self.metadata, self.verbose)
+        self.filenames = self._get_ref_files(self.ref_prefix, self.presabs, self.varonly, self.noncoding, self.metadata, self.verbose)
         self._write_info_file(os.path.join(outdir, 'info.txt'))
 
         self.refdata = reference_data.ReferenceData(
@@ -141,7 +141,7 @@ class RefPreparer:
         clusters_pickle_file = cdhit_outprefix + '.clusters.pickle'
         with open(clusters_pickle_file, 'wb') as f:
             pickle.dump(clusters, f)
-        
+
         cluster_representatives_fa = cdhit_outprefix + '.cluster_representatives.fa'
 
         mapping.bowtie2_index(
