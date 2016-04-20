@@ -2,7 +2,7 @@ import unittest
 import sys
 import os
 import filecmp
-from ariba import ref_preparer
+from ariba import external_progs, ref_preparer
 
 modules_dir = os.path.dirname(os.path.abspath(ref_preparer.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -106,7 +106,8 @@ class TestRefPreparer(unittest.TestCase):
 
     def test_write_info_file(self):
         '''test _write_info_file'''
-        refprep = ref_preparer.RefPreparer(genetic_code=1)
+        extern_progs = external_progs.ExternalProgs()
+        refprep = ref_preparer.RefPreparer(extern_progs, genetic_code=1)
         refprep.filenames = {
             'presabs': 'presabs.fa',
             'varonly': None,
