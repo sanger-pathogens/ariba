@@ -1,8 +1,6 @@
 import os
 import pickle
-import sys
-import pyfastaq
-from ariba import cdhit, common, mapping, reference_data
+from ariba import common, mapping, reference_data
 
 class Error (Exception): pass
 
