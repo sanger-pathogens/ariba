@@ -62,21 +62,6 @@ class TestClusters(unittest.TestCase):
         self.assertEqual(expected_clusters, got_clusters)
 
 
-    def test_sam_to_fastq(self):
-        '''test _sam_to_fastq'''
-        expected = [
-            pyfastaq.sequences.Fastq('read1/1', 'GTATGAGTAGATATAAAGTCCGGAACTGTGATCGGGGGCGATTTATTTACTGGCCGTCCC', 'GHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII'),
-            pyfastaq.sequences.Fastq('read1/2', 'TCCCATACGTTGCAATCTGCAGACGCCACTCTTCCACGTCGGACGAACGCAACGTCAGGA', 'IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIHGEDCBA')
-        ]
-
-
-        sam_reader = pysam.Samfile(os.path.join(data_dir, 'clusters_test_sam_to_fastq.bam'), "rb")
-        i = 0
-        for s in sam_reader.fetch(until_eof=True):
-            self.assertEqual(expected[i], self.clusters._sam_to_fastq(s))
-            i += 1
-
-
     def test_sam_pair_to_insert(self):
         '''test _sam_pair_to_insert'''
         expected = [

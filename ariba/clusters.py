@@ -181,22 +181,6 @@ class Clusters:
         )
 
 
-    def _sam_to_fastq(self, s):
-        name = s.qname
-        if s.is_read1:
-            name += '/1'
-        elif s.is_read2:
-            name += '/2'
-        else:
-            raise Error('Read ' + name + ' must be first or second of pair according to flag. Cannot continue')
-
-        seq = pyfastaq.sequences.Fastq(name, common.decode(s.seq), common.decode(s.qual))
-        if s.is_reverse:
-            seq.revcomp()
-
-        return seq
-
-
     def _sam_pair_to_insert(self, s1, s2):
         if s1.is_unmapped or s2.is_unmapped or (s1.tid != s2.tid) or (s1.is_reverse == s2.is_reverse):
             return None
@@ -233,8 +217,8 @@ class Clusters:
             if not sam1.is_unmapped:
                 ref_seqs.add(sam_reader.getrname(sam1.tid))
 
-            read1 = self._sam_to_fastq(sam1)
-            read2 = self._sam_to_fastq(s)
+            read1 = mapping.sam_to_fastq(sam1)
+            read2 = mapping.sam_to_fastq(s)
             if read1.id.endswith('/2'):
                 read1, read2 = read2, read1
 

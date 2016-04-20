@@ -1,6 +1,7 @@
 import os
 import sys
 import pysam
+import pyfastaq
 from ariba import common
 
 class Error (Exception): pass
@@ -115,4 +116,23 @@ def get_total_alignment_score(bam):
         except:
             pass
     return total
+
+
+def sam_to_fastq(sam):
+    '''Given a pysam alignment, returns the sequence a Fastq object.
+       Reverse complements as required and add suffix /1 or /2 as appropriate from the flag'''
+    name = sam.qname
+    if sam.is_read1:
+        name += '/1'
+    elif sam.is_read2:
+        name += '/2'
+    else:
+        raise Error('Read ' + name + ' must be first or second of pair according to flag. Cannot continue')
+
+    seq = pyfastaq.sequences.Fastq(name, common.decode(sam.seq), common.decode(sam.qual))
+    if sam.is_reverse:
+        seq.revcomp()
+
+    return seq
+
 

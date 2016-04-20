@@ -2,6 +2,7 @@ import unittest
 import os
 import shutil
 import pysam
+import pyfastaq
 from ariba import mapping, external_progs
 
 modules_dir = os.path.dirname(os.path.abspath(mapping.__file__))
@@ -113,4 +114,20 @@ class TestMapping(unittest.TestCase):
         expected = 219
         got = mapping.get_total_alignment_score(bam)
         self.assertEqual(got, expected)
+
+
+    def test_sam_to_fastq(self):
+        '''test _sam_to_fastq'''
+        expected = [
+            pyfastaq.sequences.Fastq('read1/1', 'GTATGAGTAGATATAAAGTCCGGAACTGTGATCGGGGGCGATTTATTTACTGGCCGTCCC', 'GHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII'),
+            pyfastaq.sequences.Fastq('read1/2', 'TCCCATACGTTGCAATCTGCAGACGCCACTCTTCCACGTCGGACGAACGCAACGTCAGGA', 'IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIHGEDCBA')
+        ]
+
+
+        sam_reader = pysam.Samfile(os.path.join(data_dir, 'mapping_test_sam_to_fastq.bam'), "rb")
+        i = 0
+        for s in sam_reader.fetch(until_eof=True):
+            self.assertEqual(expected[i], mapping.sam_to_fastq(s))
+            i += 1
+
 
