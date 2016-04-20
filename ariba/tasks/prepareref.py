@@ -1,6 +1,4 @@
 import argparse
-import os
-import sys
 from ariba import ref_preparer, external_progs
 
 def run():

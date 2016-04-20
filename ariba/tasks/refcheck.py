@@ -1,6 +1,4 @@
 import argparse
-import sys
-import pyfastaq
 import ariba
 
 def run():
