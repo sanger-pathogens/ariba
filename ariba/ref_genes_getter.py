@@ -172,8 +172,10 @@ class RefGenesGetter:
         for filename in os.listdir('database'):
             if filename.endswith('.fsa'):
                 print('   ', filename)
+                prefix = filename.split('.')[0]
                 file_reader = pyfastaq.sequences.file_reader(os.path.join('database', filename))
                 for seq in file_reader:
+                    seq.id = prefix + '.' + seq.id
                     print(seq, file=f)
 
         pyfastaq.utils.close(f)
