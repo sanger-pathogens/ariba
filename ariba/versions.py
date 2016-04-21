@@ -16,19 +16,18 @@ package_max_versions = {
 }
 
 
-def get_all_versions(filehandle, raise_error=True):
-    if filehandle is not None:
-        print('ARIBA version:', ariba_version, file=filehandle)
-        print('\n\nExternal dependencies:', file=filehandle)
-
+def get_all_versions(raise_error=True):
     extern_progs = external_progs.ExternalProgs(fail_on_error=False)
 
-    if filehandle is not None:
-        print(*extern_progs.version_report, sep='\n', file=filehandle)
-        print('\nExternal dependencies OK:', extern_progs.all_deps_ok, file=filehandle)
-        print('\n\nPython version:', file=filehandle)
-        print(sys.version, file=filehandle)
-        print('\nPython packages:', file=filehandle)
+    report_lines = [
+        'ARIBA version: ' + ariba_version,
+        '\nExternal dependencies:',
+        '\n'.join(extern_progs.version_report),
+        '\nExternal dependencies OK: ' + str(extern_progs.all_deps_ok),
+        '\nPython version:',
+        str(sys.version),
+        '\nPython packages:',
+    ]
 
     python_packages_ok = True
 
@@ -50,16 +49,18 @@ def get_all_versions(filehandle, raise_error=True):
                 version += '...THIS IS TOO HIGH. Needs <=' + package_max_versions[package]
                 python_packages_ok = False
 
-        if filehandle is not None:
-            print(package + '\t' + version + '\t' + path, file=filehandle)
+        report_lines.append(package + '\t' + version + '\t' + path)
 
     all_ok = extern_progs.all_deps_ok and python_packages_ok
 
-    if filehandle is not None:
-        print('\nPython packages OK:', python_packages_ok, file=filehandle)
-        print('\nEverything looks OK:', all_ok, file=filehandle)
+    report_lines.extend([
+        '\nPython packages OK: ' + str(python_packages_ok),
+        '\nEverything looks OK: ' + str(all_ok),
+    ])
 
     if raise_error and not all_ok:
+        print(*report_lines, sep='\n', file=sys.stderr)
         print('Some dependencies not satisfied. Cannot continue.', file=sys.stderr)
         sys.exit(1)
 
+    return extern_progs, report_lines
