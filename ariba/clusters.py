@@ -174,6 +174,7 @@ class Clusters:
         filehandles_2 = {} # gene name -> filehandle of rev_reads
         sam_reader = pysam.Samfile(self.bam, "rb")
         sam1 = None
+        self.proper_pairs = 0
 
         for s in sam_reader.fetch(until_eof=True):
             if sam1 is None:
@@ -194,6 +195,7 @@ class Clusters:
             insert = mapping.sam_pair_to_insert(s, sam1)
             if insert is not None:
                 self.insert_hist.add(insert)
+                self.proper_pairs += 1
 
             for ref in ref_seqs:
                 if ref not in self.cluster_to_dir:
@@ -224,20 +226,23 @@ class Clusters:
             pyfastaq.utils.close(filehandles_2[ref])
 
         if self.verbose:
+            print('Found', self.proper_pairs, 'proper read pairs')
             print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)
 
-
     def _set_insert_size_data(self):
-        assert len(self.insert_hist) > 0
-        (x, self.insert_size, pc95, self.insert_sspace_sd) = self.insert_hist.stats()
-        self.insert_sspace_sd = min(1, self.insert_sspace_sd)
-        self.insert_proper_pair_max = 1.1 * pc95
-        if self.verbose:
-            print('\nInsert size information from reads mapped to reference genes:')
-            print('Insert size:', self.insert_size, sep='\t')
-            print('Insert sspace sd:', self.insert_sspace_sd, sep='\t')
-            print('Max insert:', self.insert_proper_pair_max, sep='\t')
-            print()
+        if len(self.insert_hist) == 0:
+            return False
+        else:
+            (x, self.insert_size, pc95, self.insert_sspace_sd) = self.insert_hist.stats()
+            self.insert_sspace_sd = min(1, self.insert_sspace_sd)
+            self.insert_proper_pair_max = 1.1 * pc95
+            if self.verbose:
+                print('\nInsert size information from reads mapped to reference genes:')
+                print('Insert size:', self.insert_size, sep='\t')
+                print('Insert sspace sd:', self.insert_sspace_sd, sep='\t')
+                print('Max insert:', self.insert_proper_pair_max, sep='\t')
+                print()
+            return True
 
 
     def _init_and_run_clusters(self):
@@ -390,13 +395,19 @@ class Clusters:
         self._bam_to_clusters_reads()
 
         if len(self.cluster_to_dir) > 0:
-            self._set_insert_size_data()
-            if self.verbose:
-                print('{:_^79}'.format(' Assembling each cluster '))
-                print('Will run', self.threads, 'cluster(s) in parallel', flush=True)
-            self._init_and_run_clusters()
-            if self.verbose:
-                print('Finished assembling clusters\n')
+            got_insert_data_ok = self._set_insert_size_data()
+            if not got_insert_data_ok:
+                print('WARNING: not enough proper read pairs (found ' + str(self.proper_pairs) + ') to determine insert size.', file=sys.stderr)
+                print('This probably means that very few reads were mapped at all. No local assemblies will be run', file=sys.stderr)
+                if self.verbose:
+                    print('Not enough proper read pairs mapped to determine insert size. Skipping all assemblies.', flush=True)
+            else:
+                if self.verbose:
+                    print('{:_^79}'.format(' Assembling each cluster '))
+                    print('Will run', self.threads, 'cluster(s) in parallel', flush=True)
+                self._init_and_run_clusters()
+                if self.verbose:
+                    print('Finished assembling clusters\n')
         else:
             if self.verbose:
                 print('No reads mapped. Skipping all assemblies', flush=True)
