@@ -53,7 +53,9 @@ def run():
         print('Input directory', options.prepareref_dir, 'not found. Cannot continue', file=sys.stderr)
         sys.exit(1)
 
-    extern_progs = ariba.external_progs.ExternalProgs(verbose=options.verbose)
+    extern_progs, version_report_lines = ariba.versions.get_all_versions()
+    if options.verbose:
+        print(*version_report_lines, sep='\n')
 
     c = ariba.clusters.Clusters(
           options.prepareref_dir,
@@ -61,6 +63,7 @@ def run():
           options.reads_2,
           options.outdir,
           extern_progs,
+          version_report_lines=version_report_lines,
           assembly_kmer=options.assembler_k,
           assembly_coverage=options.assembly_cov,
           assembler='spades',
