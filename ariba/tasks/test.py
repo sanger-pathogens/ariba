@@ -6,6 +6,14 @@ import sys
 import ariba
 
 
+def boxymcboxface(message):
+    print('-' * 79)
+    print('|', '=' * 77, '|', sep='')
+    print('|', '{: ^75}'.format(message), '|')
+    print('|', '=' * 77, '|', sep='')
+    print('-' * 79)
+
+
 def run():
     parser = argparse.ArgumentParser(
         description = 'Run ARIBA on a small test dataset',
@@ -17,6 +25,8 @@ def run():
 
     print('Running ARIBA on test data...')
 
+    boxymcboxface('Preparing input data')
+
     try:
         os.mkdir(options.outdir)
         os.chdir(options.outdir)
@@ -24,7 +34,7 @@ def run():
         print('Error making output directory "', options.outdir, '". Cannot continue.', sep='', file=sys.stderr)
         sys.exit(1)
 
-    print('Made output directory. Copying test data files into it:')
+    print('Made output directory ', options.outdir, '. Copying test data files into it:', sep='')
 
     modules_dir = os.path.dirname(os.path.abspath(ariba.__file__))
     test_data_dir = os.path.join(modules_dir, 'test_run_data')
@@ -33,6 +43,8 @@ def run():
         shutil.copy(os.path.join(test_data_dir, filename), filename)
         print('    copied', filename)
 
+
+    boxymcboxface('Try running ariba prepareref')
 
     prepareref_command = ' '.join([
         ariba_exe,
@@ -54,11 +66,7 @@ def run():
         sys.exit(1)
 
     print()
-    print('-' * 79)
-    print('-' * 79)
     print('ariba prepareref finished OK')
-    print('-' * 79)
-    print('-' * 79)
 
 
     ariba_command = ' '.join([
@@ -72,6 +80,7 @@ def run():
         'OUT'
     ])
 
+    boxymcboxface('Try running ariba run')
     print('\nRunning ARIBA with:', ariba_command, '', sep='\n')
 
     return_code = subprocess.call(ariba_command, shell=True)
@@ -81,9 +90,5 @@ def run():
         sys.exit(1)
 
     print()
-    print('-' * 79)
-    print('-' * 79)
     print('ariba run finished OK')
-    print('-' * 79)
-    print('-' * 79)
     print('Finished run on test data OK')

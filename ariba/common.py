@@ -1,8 +1,6 @@
 import sys
 import subprocess
 
-version = '0.6.0'
-
 def syscall(cmd, allow_fail=False, verbose=False, verbose_filehandle=sys.stdout, print_errors=True):
     if verbose:
         print('syscall:', cmd, flush=True, file=verbose_filehandle)

@@ -47,14 +47,14 @@ min_versions = {
 
 
 class ExternalProgs:
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=False, fail_on_error=True):
         optional_progs = {'sspace', 'gapfiller'}
         self.progs = {}
-        self.version_report = ['\t'.join(['tool', 'version', 'path'])]
+        self.version_report = []
+        self.all_deps_ok = True
 
         if verbose:
             print('{:_^79}'.format(' Checking dependencies and their versions '))
-            print(self.version_report[-1])
 
         errors = []
         warnings = []
@@ -66,13 +66,13 @@ class ExternalProgs:
             # python3.4, not python2. SPAdes throws an error about not being
             # compatible with python3.4.
             # This means we need to explicitly run SPAdes with python2.
-            if prog == 'spades':
+            if prog == 'spades' and self.progs[prog] is not None:
                 self.progs[prog] = 'python2 ' + self.progs[prog]
             if self.progs[prog] is None:
                 if prog in optional_progs:
                     warnings.append(prog + ' not found in path. Looked for ' + prog_exe + '. But it is optional so will be skipped during assembly')
                 else:
-                    errors.append(prog + ' not found in path. Looked for ' + prog_exe + '. Cannot continue')
+                    errors.append(prog + ' not found in path. Looked for ' + prog_exe)
 
                 self.version_report.append('\t'.join([prog, 'NA', 'NOT_FOUND']))
                 if verbose:
@@ -103,10 +103,13 @@ class ExternalProgs:
 
 
         if len(errors):
+            self.all_deps_ok = False
+
             for line in errors:
                 print('ERROR:', line, file=sys.stderr)
             print('\nSomething wrong with at least one dependency. Please see the above error message(s)', file=sys.stderr)
-            raise Error('Depency error(s). Cannot continue')
+            if fail_on_error:
+                raise Error('Dependency error(s). Cannot continue')
         elif verbose:
             if len(warnings):
                 print('\nWARNING: Required dependencies found, but at least one optional one was not. Please see previous warning(s) for more details.', file=sys.stderr)
