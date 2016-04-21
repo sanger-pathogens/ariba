@@ -72,7 +72,7 @@ class ExternalProgs:
                 if prog in optional_progs:
                     warnings.append(prog + ' not found in path. Looked for ' + prog_exe + '. But it is optional so will be skipped during assembly')
                 else:
-                    errors.append(prog + ' not found in path. Looked for ' + prog_exe + '. Cannot continue')
+                    errors.append(prog + ' not found in path. Looked for ' + prog_exe)
 
                 self.version_report.append('\t'.join([prog, 'NA', 'NOT_FOUND']))
                 if verbose:
