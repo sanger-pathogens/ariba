@@ -29,6 +29,7 @@ class Clusters:
       reads_2,
       outdir,
       extern_progs,
+      version_report_lines=None,
       assembly_kmer=21,
       assembly_coverage=100,
       threads=1,
@@ -51,6 +52,12 @@ class Clusters:
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
         self.extern_progs = extern_progs
+
+        if version_report_lines is None:
+            self.version_report_lines = []
+        else:
+            self.version_report_lines = version_report_lines
+
         self.clusters_outdir = os.path.join(self.outdir, 'Clusters')
         self.clean = clean
 
@@ -361,12 +368,11 @@ class Clusters:
 
     def write_versions_file(self, original_dir):
         with open('version_info.txt', 'w') as f:
-            print('ARIBA version', common.version, 'run with this command:', file=f)
+            print('ARIBA run with this command:', file=f)
             print(' '.join([sys.argv[0]] + ['run'] + sys.argv[1:]), file=f)
             print('from this directory:', original_dir, file=f)
             print(file=f)
-            print('Versions of dependencies:\n', file=f)
-            print(*self.extern_progs.version_report, sep='\n', file=f)
+            print(*self.version_report_lines, sep='\n', file=f)
 
 
     def run(self):
@@ -409,12 +415,13 @@ class Clusters:
         rf.run(self.report_file_filtered_prefix)
 
         if self.verbose:
+            print()
             print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
             print(self.catted_assembled_seqs_fasta)
         self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
 
         if self.verbose:
-            print('\n\nCleaning files:', flush=True)
+            print('{:_^79}'.format(' Cleaning files '), flush=True)
         self._clean()
 
         if self.verbose:
