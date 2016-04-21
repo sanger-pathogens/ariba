@@ -1,6 +1,5 @@
-import ariba
-
-from ariba import __version__ as ariba_version
+import sys
+from ariba import versions
 
 def run():
-    print(ariba_version)
+    versions.get_all_versions(sys.stdout, raise_error=False)

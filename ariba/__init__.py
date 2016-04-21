@@ -34,6 +34,7 @@ __all__ = [
     'sequence_variant',
     'summary',
     'tasks',
+    'versions',
 ]
 
 from ariba import *
