@@ -1,3 +1,4 @@
+import sys
 import pymummer
 
 columns = [
@@ -15,20 +16,20 @@ columns = [
     'var_type',              # 11 The type of variant. Currently only SNP supported
     'var_seq_type',          # 12 if known_var=1, n|p for nucleotide or protein
     'known_var_change',      # 13 if known_var=1, the wild/variant change, eg I42L
-    'has_known_var',         # 13 if known_var=1, 1|0 for whether or not the assembly has the variant
-    'ref_ctg_change',        # 14 amino acid or nucleotide change between reference and contig, eg I42L
-    'ref_ctg_effect',        # 15 effect of change between reference and contig, eg SYS, NONSYN (amino acid changes only)
-    'ref_start',             # 16 start position of variant in contig
-    'ref_end',               # 17 end position of variant in contig
-    'ref_nt',                # 18 nucleotide(s) in contig at variant position
-    'ctg_start',             # 19 start position of variant in contig
-    'ctg_end',               # 20 end position of variant in contig
-    'ctg_nt',                # 21 nucleotide(s) in contig at variant position
-    'smtls_total_depth',     # 22 total read depth at variant start position in contig, reported by mpileup
-    'smtls_alt_nt',          # 23 alt nucleotides on contig, reported by mpileup
-    'smtls_alt_depth',       # 24 alt depth on contig, reported by mpileup
-    'var_description',       # 25 description of variant from reference metdata
-    'free_text',             # 26 other free text about reference sequence, from reference metadata
+    'has_known_var',         # 14 if known_var=1, 1|0 for whether or not the assembly has the variant
+    'ref_ctg_change',        # 15 amino acid or nucleotide change between reference and contig, eg I42L
+    'ref_ctg_effect',        # 16 effect of change between reference and contig, eg SYS, NONSYN (amino acid changes only)
+    'ref_start',             # 17 start position of variant in contig
+    'ref_end',               # 18 end position of variant in contig
+    'ref_nt',                # 19 nucleotide(s) in contig at variant position
+    'ctg_start',             # 20 start position of variant in contig
+    'ctg_end',               # 21 end position of variant in contig
+    'ctg_nt',                # 22 nucleotide(s) in contig at variant position
+    'smtls_total_depth',     # 23 total read depth at variant start position in contig, reported by mpileup
+    'smtls_alt_nt',          # 24 alt nucleotides on contig, reported by mpileup
+    'smtls_alt_depth',       # 25 alt depth on contig, reported by mpileup
+    'var_description',       # 26 description of variant from reference metdata
+    'free_text',             # 27 other free text about reference sequence, from reference metadata
 ]
 
 
@@ -141,9 +142,9 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
     ]
 
     if cluster.ref_sequence.id in cluster.refdata.metadata and  len(cluster.refdata.metadata[cluster.ref_sequence.id]['.']) > 0:
-        free_text_columns = [x.free_text for x in cluster.refdata.metadata[cluster.ref_sequence.id]['.']]
+        free_text_column = ';'.join([x.free_text for x in cluster.refdata.metadata[cluster.ref_sequence.id]['.']])
     else:
-        free_text_columns = ['.']
+        free_text_column = ';'.join(['.'])
 
     if cluster.assembled_ok and contig_name in cluster.assembly_variants and len(cluster.assembly_variants[contig_name]) > 0:
         for (position, var_seq_type, ref_ctg_change, var_effect, contributing_vars, matching_vars_set, metainfo_set) in cluster.assembly_variants[contig_name]:
@@ -208,15 +209,15 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                     if samtools_columns is None:
                         samtools_columns = [['.'] * 9]
 
-                    lines.append('\t'.join(common_first_columns + var_columns + samtools_columns + [matching_vars_column] + free_text_columns))
+                    lines.append('\t'.join(common_first_columns + var_columns + samtools_columns + [matching_vars_column] + [free_text_column]))
             else:
                 lines.append('\t'.join(
                     common_first_columns + var_columns + \
                     samtools_columns + \
-                    [matching_vars_column] + free_text_columns
+                    [matching_vars_column] + [free_text_column]
                 ))
     else:
-        lines.append('\t'.join(common_first_columns + ['.'] * (len(columns) - len(common_first_columns) - 1) + free_text_columns))
+        lines.append('\t'.join(common_first_columns + ['.'] * (len(columns) - len(common_first_columns) - 1) + [free_text_column]))
 
     return lines
 
@@ -236,8 +237,16 @@ def report_lines(cluster):
         contig_pymummer_variants = [x for x in pymummer_variants if x.qry_name == contig_name]
         lines.extend(_report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, contig_pymummer_variants))
 
+    lines_ok = True
+
     for line in lines:
-        assert len(line.split('\t')) == len(columns)
+        if len(line.split('\t')) != len(columns):
+            print('Error making report - wrong number of columns. Expected', len(columns), 'but got', len(line.split('\t')), file=sys.stderr)
+            print(line, file=sys.stderr)
+            lines_ok = False
+
+    if not lines_ok:
+        raise Error('Error making report. Cannot continue')
 
     return lines if len(lines) > 0 else None
 
