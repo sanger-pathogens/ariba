@@ -1,3 +1,4 @@
+import sys
 import os
 import pickle
 from ariba import common, mapping, reference_data
@@ -8,6 +9,7 @@ class Error (Exception): pass
 class RefPreparer:
     def __init__(self,
         extern_progs,
+        version_report_lines=None,
         ref_prefix=None,
         presabs=None,
         varonly=None,
@@ -23,6 +25,12 @@ class RefPreparer:
         verbose=False,
     ):
         self.extern_progs = extern_progs
+
+        if version_report_lines is None:
+            self.version_report_lines = []
+        else:
+            self.version_report_lines = version_report_lines
+
         self.ref_prefix = ref_prefix
         self.presabs = presabs
         self.varonly = varonly
@@ -95,6 +103,8 @@ class RefPreparer:
 
 
     def run(self, outdir):
+        original_dir = os.getcwd()
+
         if os.path.exists(outdir):
             raise Error('Error! Output directory ' + outdir + ' already exists. Cannot continue')
 
@@ -103,6 +113,12 @@ class RefPreparer:
         except:
             raise Error('Error making output directory ' + outdir + '. Cannot continue')
 
+        with open(os.path.join(outdir, 'version_info.txt'), 'w') as f:
+            print('ARIBA run with this command:', file=f)
+            print(' '.join([sys.argv[0]] + ['prepareref'] + sys.argv[1:]), file=f)
+            print('from this directory:', original_dir, file=f)
+            print(file=f)
+            print(*self.version_report_lines, sep='\n', file=f)
 
         self.filenames = self._get_ref_files(self.ref_prefix, self.presabs, self.varonly, self.noncoding, self.metadata, self.verbose)
         self._write_info_file(os.path.join(outdir, 'info.txt'))
@@ -118,10 +134,13 @@ class RefPreparer:
         )
 
         if self.verbose:
-            print('{:_^79}'.format(' Checking reference data '), flush=True)
+            print('\nLoading and checking input data', flush=True)
 
         refdata_outprefix = os.path.join(outdir, 'refcheck')
         self.refdata.sanity_check(refdata_outprefix)
+
+        if self.verbose:
+            print('\nRunning cdhit', flush=True)
         cdhit_outprefix = os.path.join(outdir, 'cdhit')
 
         clusters = self.refdata.cluster_with_cdhit(
@@ -135,6 +154,8 @@ class RefPreparer:
             cd_hit_est=self.extern_progs.exe('cdhit')
         )
 
+        if self.verbose:
+            print('\nWriting clusters to file.', len(clusters), 'in total', flush=True)
 
         clusters_pickle_file = cdhit_outprefix + '.clusters.pickle'
         with open(clusters_pickle_file, 'wb') as f:
@@ -142,12 +163,18 @@ class RefPreparer:
 
         cluster_representatives_fa = cdhit_outprefix + '.cluster_representatives.fa'
 
+        if self.verbose:
+            print('\nRunning bowtie2-build on FASTA of cluster representatives')
+
         mapping.bowtie2_index(
             cluster_representatives_fa,
             cluster_representatives_fa,
             bowtie2=self.extern_progs.exe('bowtie2'),
             verbose=self.verbose,
         )
+
+        if self.verbose:
+            print('\nRunning samtools faidx on FASTA of cluster representatives')
 
         cmd = ' '.join([
             self.extern_progs.exe('samtools'),
