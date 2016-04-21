@@ -22,8 +22,8 @@ class Assembly:
       min_scaff_depth=10,
       min_scaff_length=50,
       nucmer_min_id=90,
-      nucmer_min_len=50,
-      nucmer_breaklen=50,
+      nucmer_min_len=20,
+      nucmer_breaklen=200,
       spades_other_options=None,
       sspace_k=20,
       sspace_sd=0.4,
@@ -214,7 +214,7 @@ class Assembly:
 
 
     @staticmethod
-    def _fix_contig_orientation(contigs_fa, ref_fa, outfile, min_id=90, min_length=50, breaklen=50):
+    def _fix_contig_orientation(contigs_fa, ref_fa, outfile, min_id=90, min_length=20, breaklen=200):
         '''Changes orientation of each contig to match the reference, when possible.
            Returns a set of names of contigs that had hits in both orientations to the reference'''
         if not os.path.exists(contigs_fa):
@@ -228,6 +228,7 @@ class Assembly:
             min_id=min_id,
             min_length=min_length,
             breaklen=breaklen,
+            maxmatch=True,
         ).run()
 
         to_revcomp = set()
@@ -289,7 +290,7 @@ class Assembly:
                 self.log_fh = None
                 return
 
-            contigs_both_strands = self._fix_contig_orientation(self.gapfilled_length_filtered, self.ref_fasta, self.final_assembly_fa)
+            contigs_both_strands = self._fix_contig_orientation(self.gapfilled_length_filtered, self.ref_fasta, self.final_assembly_fa, min_id=self.nucmer_min_id, min_length=self.nucmer_min_len, breaklen=self.nucmer_breaklen)
             self.has_contigs_on_both_strands = len(contigs_both_strands) > 0
             pyfastaq.tasks.file_to_dict(self.final_assembly_fa, self.sequences)
 

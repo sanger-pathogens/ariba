@@ -14,8 +14,8 @@ class AssemblyCompare:
       outprefix,
       refdata,
       nucmer_min_id=90,
-      nucmer_min_len=50,
-      nucmer_breaklen=50,
+      nucmer_min_len=20,
+      nucmer_breaklen=200,
       assembled_threshold=0.95,
       unique_threshold=0.03,
     ):
@@ -45,6 +45,7 @@ class AssemblyCompare:
             min_id=self.nucmer_min_id,
             min_length=self.nucmer_min_len,
             breaklen=self.nucmer_breaklen,
+            maxmatch=True,
             show_snps=True
         ).run()
 
