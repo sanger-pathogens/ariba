@@ -1,4 +1,6 @@
 import ariba
 
+from ariba import __version__ as ariba_version
+
 def run():
-    print(ariba.common.version)
+    print(ariba_version)
