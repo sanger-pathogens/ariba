@@ -72,6 +72,25 @@ class TestClusters(unittest.TestCase):
         self.assertEqual(expected_clusters, got_clusters)
 
 
+    def test_bam_to_clusters_reads_no_reads_map(self):
+        '''test _bam_to_clusters_reads when no reads map'''
+        clusters_dir = 'tmp.Cluster.test_bam_to_clusters_reads_no_reads_map'
+        reads1 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads_no_reads_map_1.fq')
+        reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads_no_reads_map_2.fq')
+        ref = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.db.fa')
+        refdata = reference_data.ReferenceData(presence_absence_fa = ref)
+        c = clusters.Clusters(self.refdata_dir, reads1, reads2, clusters_dir, extern_progs)
+        shutil.copyfile(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads_no_reads_map.bam'), c.bam)
+        c._bam_to_clusters_reads()
+
+        self.assertEqual({}, c.insert_hist.bins)
+        self.assertEqual({}, c.cluster_read_counts)
+        self.assertEqual({}, c.cluster_base_counts)
+        self.assertEqual(0, c.proper_pairs)
+
+        shutil.rmtree(clusters_dir)
+
+
     def test_bam_to_clusters_reads(self):
         '''test _bam_to_clusters_reads'''
         clusters_dir = 'tmp.Cluster.test_bam_to_clusters_reads'
@@ -104,6 +123,7 @@ class TestClusters(unittest.TestCase):
         self.assertEqual({780:1}, c.insert_hist.bins)
         self.assertEqual({'ref1': 4, 'ref2': 2}, c.cluster_read_counts)
         self.assertEqual({'ref1': 240, 'ref2': 120}, c.cluster_base_counts)
+        self.assertEqual(1, c.proper_pairs)
 
         shutil.rmtree(clusters_dir)
 
