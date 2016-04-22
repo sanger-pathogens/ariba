@@ -6,7 +6,7 @@ columns = [
     'ref_type',              # 1  type of reference sequence (presence/absence, variants only, noncoding)
     'flag',                  # 2  cluster flag
     'reads',                 # 3  number of reads in this cluster
-    'cluster_rep',           # 4  name of cluster representitive from cd hit
+    'cluster',               # 4  name of cluster
     'ref_len',               # 5  length of reference sequence
     'ref_base_assembled',    # 6  number of reference nucleotides assembled by this contig
     'pc_ident',              # 7  %identity between ref sequence and contig
