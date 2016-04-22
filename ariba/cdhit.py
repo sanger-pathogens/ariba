@@ -16,6 +16,7 @@ class Runner:
       length_diff_cutoff=0.9,
       verbose=False,
       cd_hit_est='cd-hit-est',
+      rename_suffix='x',
     ):
 
         if not os.path.exists(infile):
@@ -28,23 +29,29 @@ class Runner:
         self.length_diff_cutoff = length_diff_cutoff
         self.verbose = verbose
         self.cd_hit_est = cd_hit_est
+        self.rename_suffix = rename_suffix
 
 
     def fake_run(self):
         '''Doesn't actually run cd-hit. Instead, puts each input sequence into its own cluster. So it's as if cdhit was run, but didn't cluster anything'''
+        tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
+        tmp_fa = os.path.join(tmpdir, 'cdhit.fa')
         clusters = {}
         seq_reader = pyfastaq.sequences.file_reader(self.infile)
-        f = pyfastaq.utils.open_file_write(self.outfile)
+        f = pyfastaq.utils.open_file_write(tmp_fa)
 
         for seq in seq_reader:
             if seq.id in clusters:
                 pyfastaq.utils.close(f)
+                shutil.rmtree(tmpdir)
                 raise Error('Sequence name "' + seq.id + '" not unique. Cannot continue')
 
             clusters[seq.id] = {seq.id}
             print(seq, file=f)
 
         pyfastaq.utils.close(f)
+        clusters = self._rename_clusters(clusters, tmp_fa, self.outfile)
+        shutil.rmtree(tmpdir)
         return clusters
 
 
@@ -87,6 +94,32 @@ class Runner:
         return clusters
 
 
+    @staticmethod
+    def _rename_clusters(clusters_dict, infile, outfile, rename_suffix='x'):
+        new_clusters_dict = {}
+        freader = pyfastaq.sequences.file_reader(infile)
+        f_out = pyfastaq.utils.open_file_write(outfile)
+
+        for seq in freader:
+            original_name = seq.id
+            assert original_name in clusters_dict
+            new_name = original_name.split('.')[0] + '.' + rename_suffix
+
+            if new_name in new_clusters_dict:
+                suffix = 2
+                while new_name + '.' + str(suffix) in new_clusters_dict:
+                    suffix += 1
+                new_name += '.' + str(suffix)
+
+            new_clusters_dict[new_name] = clusters_dict[original_name]
+            seq.id = new_name
+            print(seq, file=f_out)
+
+        pyfastaq.utils.close(f_out)
+
+        return new_clusters_dict
+
+
     def run(self):
         tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
         cdhit_fasta = os.path.join(tmpdir, 'cdhit')
@@ -106,11 +139,7 @@ class Runner:
         common.syscall(cmd, verbose=self.verbose)
         cluster_representatives = self._get_ids(cdhit_fasta)
         clusters = self._parse_cluster_info_file(cluster_info_outfile, cluster_representatives)
-
-        try:
-            os.rename(cdhit_fasta, self.outfile)
-        except:
-            raise Error('Error rname ' + cdhit_fasta + ' ' + self.outfile + '. Cannot continue')
+        clusters = self._rename_clusters(clusters, cdhit_fasta, self.outfile, rename_suffix=self.rename_suffix)
 
         shutil.rmtree(tmpdir)
         return clusters

@@ -28,7 +28,7 @@ class TestSummary(unittest.TestCase):
             'ref_type': 'reftype',
             'flag': flag.Flag(19),
             'reads': 78,
-            'cluster_rep': 'cluster',
+            'cluster': 'cluster',
             'ref_len': 120,
             'ref_base_assembled': 120,
             'pc_ident': 98.33,

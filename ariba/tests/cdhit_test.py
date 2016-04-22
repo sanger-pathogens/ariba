@@ -36,6 +36,29 @@ class TestCdhit(unittest.TestCase):
         self.assertEqual(expected_clusters, got_clusters)
 
 
+    def test_rename_clusters(self):
+        '''test _rename_clusters'''
+        infile = os.path.join(data_dir, 'cdhit_test_rename_clusters.in.fa')
+        tmpfile = 'tmp.test_rename_clusters.out.fa'
+        expected_file = os.path.join(data_dir, 'cdhit_test_rename_clusters.expected.fa')
+
+        clusters_in = {
+            'seq.foo': {'seq.foo', 'seq'},
+            'seq.bar': {'seq.bar', 'seq3.spam'},
+            'seq4.eggs': {'seq4.eggs'}
+        }
+        tmp_out = 'tmp.test_rename_clusters.out.fa'
+        expected_clusters = {
+            'seq.x': {'seq.foo', 'seq'},
+            'seq.x.2': {'seq.bar', 'seq3.spam'},
+            'seq4.x': {'seq4.eggs'}
+        }
+        got = cdhit.Runner._rename_clusters(clusters_in, infile, tmpfile)
+        self.assertEqual(expected_clusters, got)
+        self.assertTrue(filecmp.cmp(expected_file, tmpfile, shallow=False))
+        os.unlink(tmpfile)
+
+
     def test_run(self):
         '''test run'''
         infile = os.path.join(data_dir, 'cdhit_test_run.in.fa')
@@ -44,8 +67,8 @@ class TestCdhit(unittest.TestCase):
         r = cdhit.Runner(infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
         clusters = r.run()
         expected_clusters = {
-            'seq1': {'seq1', 'seq2', 'seq3'},
-            'seq4': {'seq4'},
+            'seq1.x': {'seq1', 'seq2', 'seq3'},
+            'seq4.x': {'seq4'},
         }
         self.assertEqual(clusters, expected_clusters)
         self.assertTrue(filecmp.cmp(tmpfile, expected_outfile, shallow=False))
@@ -60,10 +83,10 @@ class TestCdhit(unittest.TestCase):
         r = cdhit.Runner(infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
         clusters = r.fake_run()
         expected_clusters = {
-            'seq1': {'seq1'},
-            'seq2': {'seq2'},
-            'seq3': {'seq3'},
-            'seq4': {'seq4'},
+            'seq1.x': {'seq1'},
+            'seq2.x': {'seq2'},
+            'seq3.x': {'seq3'},
+            'seq4.x': {'seq4'},
         }
         self.assertEqual(clusters, expected_clusters)
         self.assertTrue(filecmp.cmp(tmpfile, expected_outfile, shallow=False))
@@ -77,5 +100,4 @@ class TestCdhit(unittest.TestCase):
         r = cdhit.Runner(infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
         with self.assertRaises(cdhit.Error):
             clusters = r.fake_run()
-        os.unlink(tmpfile)
 
