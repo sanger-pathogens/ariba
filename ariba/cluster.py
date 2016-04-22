@@ -328,6 +328,9 @@ class Cluster:
                 bcf_min_qual=self.bcf_min_qual,
             )
             self.samtools_vars.run()
+
+            self.total_contig_depths = self.samtools_vars.total_depth_per_contig(self.samtools_vars.read_depths_file)
+
             if self.samtools_vars.variants_in_coords(self.assembly_compare.assembly_match_coords(), self.samtools_vars.vcf_file):
                 self.status_flag.add('variants_suggest_collapsed_repeat')
         else:

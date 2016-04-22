@@ -21,7 +21,7 @@ class TestSummary(unittest.TestCase):
 
     def test_line2dict(self):
         '''Test _line2dict'''
-        line = 'refname\treftype\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
+        line = 'refname\treftype\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
 
         expected = {
             'ref_name': 'refname',
@@ -34,6 +34,7 @@ class TestSummary(unittest.TestCase):
             'pc_ident': 98.33,
             'ctg': 'ctg_name',
             'ctg_len': 279,
+            'ctg_cov': '24.4',
             'known_var': '1',
             'var_type': 'SNP',
             'var_seq_type': 'n',
@@ -88,10 +89,10 @@ class TestSummary(unittest.TestCase):
     def test_load_file(self):
         '''Test _load_file'''
         lines = [
-            'noncoding1\tnon_coding\t19\t78\tnoncoding1\t120\t120\t98.33\tnoncoding1.scaffold.1\t279\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, reads have variant so should report\tgeneric description of noncoding1',
-            'noncoding1\tnon_coding\t19\t78\tnoncoding1\t120\t120\t98.33\tnoncoding1.scaffold.1\t279\t1\tSNP\tn\tA6G\t1\t.\t.\t6\t6\tG\t77\t77\tG\t18\t.\t18\tnoncoding1_n_A6G_N_variant in ref and reads so should report\tgeneric description of noncoding1',
-            'presence_absence1\tpresence_absence\t27\t88\tpresence_absence1\t96\t96\t98.96\tpresence_absence1.scaffold.1\t267\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t28\tC\t113\t113\tT\t29\t.\t29\tpresence_absence1_p_A10V_N_Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
-            'variants_only1\tvariants_only\t27\t64\tvariants_only1\t90\t90\t100.0\tvariants_only1.scaffold.1\t260\t1\tSNP\tp\tS5T\t1\t.\t.\t13\t15\tA;C;C\t96\t98\tA;C;C\t12;13;13\t.;.;.\t12;13;13\tvariants_only1_p_S5T_N_Ref and reads have variant so report\tGeneric description of variants_only1',
+            'noncoding1\tnon_coding\t19\t78\tnoncoding1\t120\t120\t98.33\tnoncoding1.scaffold.1\t279\t35.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, reads have variant so should report\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t19\t78\tnoncoding1\t120\t120\t98.33\tnoncoding1.scaffold.1\t279\t35.4\t1\tSNP\tn\tA6G\t1\t.\t.\t6\t6\tG\t77\t77\tG\t18\t.\t18\tnoncoding1_n_A6G_N_variant in ref and reads so should report\tgeneric description of noncoding1',
+            'presence_absence1\tpresence_absence\t27\t88\tpresence_absence1\t96\t96\t98.96\tpresence_absence1.scaffold.1\t267\t35.1\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t28\tC\t113\t113\tT\t29\t.\t29\tpresence_absence1_p_A10V_N_Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
+            'variants_only1\tvariants_only\t27\t64\tvariants_only1\t90\t90\t100.0\tvariants_only1.scaffold.1\t260\t42.4\t1\tSNP\tp\tS5T\t1\t.\t.\t13\t15\tA;C;C\t96\t98\tA;C;C\t12;13;13\t.;.;.\t12;13;13\tvariants_only1_p_S5T_N_Ref and reads have variant so report\tGeneric description of variants_only1',
         ]
 
         dicts = [summary.Summary._line2dict(x) for x in lines]

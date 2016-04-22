@@ -12,24 +12,25 @@ columns = [
     'pc_ident',              # 7  %identity between ref sequence and contig
     'ctg',                   # 8  name of contig matching reference
     'ctg_len',               # 9  length of contig matching reference
-    'known_var',             # 10 is this a known SNP from reference metadata? 1|0
-    'var_type',              # 11 The type of variant. Currently only SNP supported
-    'var_seq_type',          # 12 if known_var=1, n|p for nucleotide or protein
-    'known_var_change',      # 13 if known_var=1, the wild/variant change, eg I42L
-    'has_known_var',         # 14 if known_var=1, 1|0 for whether or not the assembly has the variant
-    'ref_ctg_change',        # 15 amino acid or nucleotide change between reference and contig, eg I42L
-    'ref_ctg_effect',        # 16 effect of change between reference and contig, eg SYS, NONSYN (amino acid changes only)
-    'ref_start',             # 17 start position of variant in contig
-    'ref_end',               # 18 end position of variant in contig
-    'ref_nt',                # 19 nucleotide(s) in contig at variant position
-    'ctg_start',             # 20 start position of variant in contig
-    'ctg_end',               # 21 end position of variant in contig
-    'ctg_nt',                # 22 nucleotide(s) in contig at variant position
-    'smtls_total_depth',     # 23 total read depth at variant start position in contig, reported by mpileup
-    'smtls_alt_nt',          # 24 alt nucleotides on contig, reported by mpileup
-    'smtls_alt_depth',       # 25 alt depth on contig, reported by mpileup
-    'var_description',       # 26 description of variant from reference metdata
-    'free_text',             # 27 other free text about reference sequence, from reference metadata
+    'ctg_cov',               # 10 mean mapped read depth of this contig
+    'known_var',             # 11 is this a known SNP from reference metadata? 1|0
+    'var_type',              # 12 The type of variant. Currently only SNP supported
+    'var_seq_type',          # 13 if known_var=1, n|p for nucleotide or protein
+    'known_var_change',      # 14 if known_var=1, the wild/variant change, eg I42L
+    'has_known_var',         # 15 if known_var=1, 1|0 for whether or not the assembly has the variant
+    'ref_ctg_change',        # 16 amino acid or nucleotide change between reference and contig, eg I42L
+    'ref_ctg_effect',        # 17 effect of change between reference and contig, eg SYS, NONSYN (amino acid changes only)
+    'ref_start',             # 18 start position of variant in contig
+    'ref_end',               # 19 end position of variant in contig
+    'ref_nt',                # 20 nucleotide(s) in contig at variant position
+    'ctg_start',             # 21 start position of variant in contig
+    'ctg_end',               # 22 end position of variant in contig
+    'ctg_nt',                # 23 nucleotide(s) in contig at variant position
+    'smtls_total_depth',     # 24 total read depth at variant start position in contig, reported by mpileup
+    'smtls_alt_nt',          # 25 alt nucleotides on contig, reported by mpileup
+    'smtls_alt_depth',       # 26 alt depth on contig, reported by mpileup
+    'var_description',       # 27 description of variant from reference metdata
+    'free_text',             # 28 other free text about reference sequence, from reference metadata
 ]
 
 
@@ -65,7 +66,10 @@ int_columns = [
 ]
 
 
-float_columns = ['pc_ident']
+float_columns = [
+    'ctg_cov',
+    'pc_ident',
+]
 
 
 def header_line():
@@ -127,6 +131,8 @@ def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster,
 
 def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymummer_variants):
     lines = []
+    contig_length = len(cluster.assembly.sequences[contig_name])
+    assert contig_length != 0
 
     common_first_columns = [
         cluster.ref_sequence.id,
@@ -138,7 +144,8 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
         str(ref_cov_per_contig[contig_name]) if contig_name in ref_cov_per_contig else '0', # 6 ref bases assembled
         str(cluster.assembly_compare.percent_identities[contig_name]) if contig_name in cluster.assembly_compare.percent_identities else '0',
         contig_name,
-        str(len(cluster.assembly.sequences[contig_name])),  # 9 length of scaffold matching reference
+        str(contig_length),  # 9 length of scaffold matching reference
+        str(round(cluster.total_contig_depths[contig_name] / contig_length, 1)), # 10 mean mapped read depth
     ]
 
     if cluster.ref_sequence.id in cluster.refdata.metadata and  len(cluster.refdata.metadata[cluster.ref_sequence.id]['.']) > 0:
@@ -161,7 +168,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 var_type = '.'
                 matching_vars_column = '.'
 
-            var_columns = ['.' if x is None else str(x) for x in [is_known_var, var_type, var_seq_type, known_var_change, has_known_var, ref_ctg_change, var_effect]]
+            variant_columns = ['.' if x is None else str(x) for x in [is_known_var, var_type, var_seq_type, known_var_change, has_known_var, ref_ctg_change, var_effect]]
 
             if contributing_vars is None:
                 samtools_columns = [['.'] * 9]
@@ -199,20 +206,20 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 for matching_var in matching_vars_set:
                     if contributing_vars is None:
                         samtools_columns = _samtools_depths_at_known_snps_all_wild(matching_var, contig_name, cluster, pymummer_variants)
-                    var_columns[3] = str(matching_var.variant)
+                    variant_columns[3] = str(matching_var.variant)
 
                     if matching_var.has_variant(cluster.ref_sequence) == (ref_ctg_change is not None):
-                        var_columns[4] = '0'
+                        variant_columns[4] = '0'
                     else:
-                        var_columns[4] = '1'
+                        variant_columns[4] = '1'
 
                     if samtools_columns is None:
                         samtools_columns = [['.'] * 9]
 
-                    lines.append('\t'.join(common_first_columns + var_columns + samtools_columns + [matching_vars_column] + [free_text_column]))
+                    lines.append('\t'.join(common_first_columns + variant_columns + samtools_columns + [matching_vars_column] + [free_text_column]))
             else:
                 lines.append('\t'.join(
-                    common_first_columns + var_columns + \
+                    common_first_columns + variant_columns + \
                     samtools_columns + \
                     [matching_vars_column] + [free_text_column]
                 ))

@@ -125,6 +125,14 @@ class TestSamtoolsVariants(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_total_depth_per_contig(self):
+        '''test total_depth_per_contig'''
+        infile = os.path.join(data_dir, 'samtools_variants_test_total_depth_per_contig')
+        expected = {'scaff1': 67, 'scaff2': 72}
+        got = samtools_variants.SamtoolsVariants.total_depth_per_contig(infile)
+        self.assertEqual(expected, got)
+
+
     def test_variants_in_coords(self):
         '''test variants_in_coords'''
         vcf_file = os.path.join(data_dir, 'samtools_variants_test_variants_in_coords.vcf')
