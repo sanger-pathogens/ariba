@@ -378,7 +378,7 @@ class ReferenceData:
                   length_diff_cutoff=length_diff_cutoff,
                   verbose=verbose,
                   cd_hit_est=cd_hit_est,
-                  rename_suffix = seq_type[0]
+                  rename_suffix = seqs_type[0]
                 )
 
                 if nocluster:

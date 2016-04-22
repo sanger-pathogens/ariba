@@ -349,21 +349,20 @@ class TestReferenceData(unittest.TestCase):
 
         expected = {
             'non_coding': {
-                'noncoding1': {'noncoding1'}
+                'noncoding1.n': {'noncoding1'}
             },
             'presence_absence': {
-                'presence_absence1': {'presence_absence1', 'presence_absence2'},
-                'presence_absence3': {'presence_absence4', 'presence_absence3'}
+                'presence_absence1.p': {'presence_absence1', 'presence_absence2'},
+                'presence_absence3.p': {'presence_absence4', 'presence_absence3'}
             },
             'variants_only': None,
         }
 
         got = refdata.cluster_with_cdhit(inprefix, outprefix)
         self.assertEqual(expected, got)
-        all_seqs = {}
-        pyfastaq.tasks.file_to_dict(presence_absence_fa, all_seqs)
-        pyfastaq.tasks.file_to_dict(non_coding_fa, all_seqs)
-        expected_seqs = {x: all_seqs[x] for x in ['presence_absence1', 'presence_absence3', 'noncoding1']}
+        expected_seqs = {}
+        expected_cluster_reps_fa = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit.expected_representatives.fa')
+        pyfastaq.tasks.file_to_dict(expected_cluster_reps_fa, expected_seqs)
         got_seqs = {}
         pyfastaq.tasks.file_to_dict(outprefix + '.cluster_representatives.fa', got_seqs)
         self.assertEqual(expected_seqs, got_seqs)
