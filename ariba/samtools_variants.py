@@ -139,6 +139,24 @@ class SamtoolsVariants:
 
 
     @staticmethod
+    def total_depth_per_contig(read_depths_file):
+        f = pyfastaq.utils.open_file_read(read_depths_file)
+        depths = {}
+        for line in f:
+            try:
+                name, pos, base, var, depth, depth2 = line.rstrip().split('\t')
+                depth = int(depth)
+            except:
+                pyfastaq.utils.close(f)
+                raise Error('Error getting read depth from he following line of file ' + read_depths_file + ':\n' + line)
+
+            depths[name] = depths.get(name, 0) + depth
+
+        pyfastaq.utils.close(f)
+        return depths
+
+
+    @staticmethod
     def variants_in_coords(nucmer_matches, vcf_file):
         '''nucmer_matches = made by assembly_compare.assembly_match_coords().
            Returns number of variants that lie in nucmer_matches'''
