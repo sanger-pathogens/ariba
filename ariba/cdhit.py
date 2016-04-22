@@ -16,6 +16,7 @@ class Runner:
       length_diff_cutoff=0.9,
       verbose=False,
       cd_hit_est='cd-hit-est',
+      rename_suffix='x',
     ):
 
         if not os.path.exists(infile):
@@ -28,6 +29,7 @@ class Runner:
         self.length_diff_cutoff = length_diff_cutoff
         self.verbose = verbose
         self.cd_hit_est = cd_hit_est
+        self.rename_suffix = rename_suffix
 
 
     def fake_run(self):
@@ -85,6 +87,22 @@ class Runner:
             clusters[cluster_name] = cluster_sets[cluster_number]
 
         return clusters
+
+
+    @staticmethod
+    def _rename_clusters(clusters_dict, rename_suffix='x'):
+        new_clusters_dict = {}
+
+        for original_name in clusters_dict:
+            new_name = original_name.split('.')[0] + '.' + rename_suffix
+            if new_name in new_clusters_dict:
+                suffix = 2
+                while new_name + '.' + str(suffix) in new_clusters_dict:
+                    suffix += 1
+                new_name += '.' + str(suffix)
+                new_clusters_dict[new_name] = clusters_dict[original_name]
+
+        return new_clusters_dict
 
 
     def run(self):
