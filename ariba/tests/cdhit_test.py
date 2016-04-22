@@ -39,6 +39,9 @@ class TestCdhit(unittest.TestCase):
     def test_rename_clusters(self):
         '''test _rename_clusters'''
         infile = os.path.join(data_dir, 'cdhit_test_rename_clusters.in.fa')
+        tmpfile = 'tmp.test_rename_clusters.out.fa'
+        expected_file = os.path.join(data_dir, 'cdhit_test_rename_clusters.expected.fa')
+
         clusters_in = {
             'seq.foo': {'seq.foo', 'seq'},
             'seq.bar': {'seq.bar', 'seq3.spam'},
@@ -50,7 +53,10 @@ class TestCdhit(unittest.TestCase):
             'seq.x.2': {'seq.bar', 'seq3.spam'},
             'seq4.x': {'seq4.eggs'}
         }
-        cdhit.Runner._rename_clusters(clusters_in)
+        got = cdhit.Runner._rename_clusters(clusters_in, infile, tmpfile)
+        self.assertEqual(expected_clusters, got)
+        self.assertTrue(filecmp.cmp(expected_file, tmpfile, shallow=False))
+        os.unlink(tmpfile)
 
 
     def test_run(self):

@@ -90,17 +90,27 @@ class Runner:
 
 
     @staticmethod
-    def _rename_clusters(clusters_dict, rename_suffix='x'):
+    def _rename_clusters(clusters_dict, infile, outfile, rename_suffix='x'):
         new_clusters_dict = {}
+        freader = pyfastaq.sequences.file_reader(infile)
+        f_out = pyfastaq.utils.open_file_write(outfile)
 
-        for original_name in clusters_dict:
+        for seq in freader:
+            original_name = seq.id
+            assert original_name in clusters_dict
             new_name = original_name.split('.')[0] + '.' + rename_suffix
+
             if new_name in new_clusters_dict:
                 suffix = 2
                 while new_name + '.' + str(suffix) in new_clusters_dict:
                     suffix += 1
                 new_name += '.' + str(suffix)
-                new_clusters_dict[new_name] = clusters_dict[original_name]
+
+            new_clusters_dict[new_name] = clusters_dict[original_name]
+            seq.id = new_name
+            print(seq, file=f_out)
+
+        pyfastaq.utils.close(f_out)
 
         return new_clusters_dict
 

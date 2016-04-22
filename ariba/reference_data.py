@@ -377,7 +377,8 @@ class ReferenceData:
                   threads=threads,
                   length_diff_cutoff=length_diff_cutoff,
                   verbose=verbose,
-                  cd_hit_est=cd_hit_est
+                  cd_hit_est=cd_hit_est,
+                  rename_suffix = seq_type[0]
                 )
 
                 if nocluster:
