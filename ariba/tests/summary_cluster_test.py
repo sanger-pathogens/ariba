@@ -176,3 +176,35 @@ class TestSummaryCluster(unittest.TestCase):
             for assembled_summary in ['yes', 'fragmented', 'yes_nonunique']:
                 self.assertEqual(expected[i], cluster._to_cluster_summary_number_has_nonsynonymous(assembled_summary))
             self.assertEqual('NA', cluster._to_cluster_summary_number_has_nonsynonymous('no'))
+
+
+    def test_get_nonsynonymous_var(self):
+        '''Test _get_nonsynonymous_var'''
+        d = {
+            'ref_name': 'ref',
+            'var_type': '.',
+            'known_var_change': '.',
+            'has_known_var': '.',
+            'known_var': '0',
+            'ref_ctg_change': '.',
+            'ref_ctg_effect': 'SNP',
+            'var_seq_type': '.'
+        }
+
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+
+        d['var_type'] = 'p'
+        d['has_known_var'] = '1'
+        with self.assertRaises(summary_cluster.Error):
+            summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
+
+        d['known_var_change'] = 'I42L'
+        self.assertEqual('ref.I42L', summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+
+        d['ref_ctg_change'] = 'P43Q'
+        with self.assertRaises(summary_cluster.Error):
+            summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
+
+        d['known_var_change'] = '.'
+        self.assertEqual('ref.P43Q', summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+

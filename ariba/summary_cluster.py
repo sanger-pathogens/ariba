@@ -111,8 +111,8 @@ class SummaryCluster:
             return 'fragmented'
 
 
-    @staticmethod
-    def _has_nonsynonymous(data_dict):
+    @classmethod
+    def _has_nonsynonymous(cls, data_dict):
         return data_dict['ref_ctg_effect'] != 'SYN' and \
           (data_dict['has_known_var'] == '1' or (data_dict['known_var'] != '1' and data_dict['ref_ctg_change'] != '.'))
 
@@ -132,6 +132,27 @@ class SummaryCluster:
             return self._has_any_nonsynonymous()
 
 
+    @staticmethod
+    def _get_nonsynonymous_var(data_dict):
+        '''if data_dict has a non synonymous variant, return string:
+        ref_name.change. Otherwise return None'''
+        has_nonsyn = SummaryCluster._has_nonsynonymous(data_dict)
+
+        if not has_nonsyn:
+            return None
+        elif data_dict['known_var_change'] == data_dict['ref_ctg_change'] == '.':
+            raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change and ref_ctg_change both equal to ".", but var_type was not a ".". Cannot continue')
+        else:
+            if '.' not in [data_dict['known_var_change'], data_dict['ref_ctg_change']] and \
+              data_dict['known_var_change'] != data_dict['ref_ctg_change']:
+                raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change != ref_ctg_change. Cannot continue')
+
+            if data_dict['known_var_change'] != '.':
+                return data_dict['ref_name'] + '.' + data_dict['known_var_change']
+            else:
+                return data_dict['ref_name'] + '.' + data_dict['ref_ctg_change']
+
+
     def column_data(self):
         '''Returns a dictionary of column name -> value'''
         assembled_summary = self._to_cluster_summary_number_assembled()
@@ -142,3 +163,4 @@ class SummaryCluster:
             self.name + '.pct_id': self.pc_id_of_longest(),
             self.name + '.any_var': self._to_cluster_summary_number_has_nonsynonymous(assembled_summary)
         }
+
