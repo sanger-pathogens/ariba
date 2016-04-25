@@ -117,10 +117,17 @@ class Summary:
                     raise Error('Error parsing the following line.\n' + line)
                 continue
             data = Summary._line2dict(line)
-            key = Summary._dict2key(data)
-            if key[0] not in d:
-                d[key[0]] = {}
-            d[key[0]][key] = data
+            #key = Summary._dict2key(data)
+            cluster = data['cluster']
+            ref_name = data['ref_name']
+
+            if cluster not in d:
+                d[cluster] = {}
+
+            if ref_name not in d[cluster]:
+                d[cluster][ref_name] = []
+
+            d[cluster][ref_name].append(data)
 
         pyfastaq.utils.close(f)
         return d
