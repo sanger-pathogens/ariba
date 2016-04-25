@@ -68,7 +68,11 @@ class Summary:
         if len(data) != len(report.columns):
             raise Error('Wrong number of columns in the following line. Expected ' + str(len(report.columns)) + ' but got ' + str(len(data)) + '\n' + line)
         d = {report.columns[i]: data[i] for i in range(len(data))}
-        d['flag'] = flag.Flag(int(d['flag']) )
+        try:
+            d['flag'] = flag.Flag(int(d['flag']) )
+        except:
+            raise Error('Error getting flag in the following line. Got "' + d['flag'] + '" for the flag.\n' + line)
+
         for key in int_columns:
             try:
                 d[key] = int(d[key])
