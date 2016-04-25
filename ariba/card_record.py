@@ -1,5 +1,8 @@
 import sys
 import pprint
+import re
+
+aro_regex = re.compile(r'\b([a-z]{3}[A-Z])\b')
 
 class Error (Exception): pass
 
@@ -29,6 +32,18 @@ class CardRecord:
 
 
     @staticmethod
+    def _ARO_name_to_fasta_name(aro_name):
+        if ' ' not in aro_name:
+            return aro_name
+
+        re_search = aro_regex.search(aro_name)
+        if re_search is not None:
+            return re_search.group(1)
+        else:
+            return '_'.join(aro_name.split()[:3])
+
+
+    @staticmethod
     def _dna_seqs_and_genbank_ids(gene_dict):
         try:
             seq_dict = gene_dict['model_sequences']['sequence']
@@ -44,7 +59,8 @@ class CardRecord:
             try:
                 dna_seq = seq_dict['dna_sequence']['sequence']
                 genbank_id = seq_dict['dna_sequence']['accession']
-                strand = seq_dict['dna_sequence']['strand']
+                start = seq_dict['dna_sequence']['fmin']
+                end = seq_dict['dna_sequence']['fmax']
                 gi = seq_dict['protein_sequence']['GI']
                 protein_seq = seq_dict['protein_sequence']['sequence']
             except:
@@ -57,7 +73,7 @@ class CardRecord:
                 assert protein_seq == ''
                 gi = 'NA'
 
-            seqs_and_ids.append((key, gi, genbank_id, strand, dna_seq, protein_seq))
+            seqs_and_ids.append((key, gi, genbank_id, start, end, dna_seq, protein_seq))
 
         return seqs_and_ids
 
