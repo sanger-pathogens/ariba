@@ -44,7 +44,7 @@ class RefGenesGetter:
         current_dir = os.getcwd()
 
         try:
-            #os.mkdir(tmpdir)
+            os.mkdir(tmpdir)
             os.chdir(tmpdir)
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
@@ -54,7 +54,7 @@ class RefGenesGetter:
         card_tarball = 'card.tar.gz'
         print('Working in temporary directory', tmpdir)
         print('Downloading data from card:', card_tarball_url, flush=True)
-        #common.syscall('wget -O ' + card_tarball + ' ' + card_tarball_url, verbose=True)
+        common.syscall('wget -O ' + card_tarball + ' ' + card_tarball_url, verbose=True)
         print('...finished downloading', flush=True)
         if not tarfile.is_tarfile(card_tarball):
             raise Error('File ' + card_tarball + ' downloaded from ' + card_tarball_url + ' does not look like a valid tar archive. Cannot continue')
@@ -90,12 +90,18 @@ class RefGenesGetter:
                 data['ARO_accession'],
             ])
 
-            for card_key, gi, genbank_id, strand, dna_seq, protein_seq in data['dna_seqs_and_ids']:
+            for card_key, gi, genbank_id, start, end, dna_seq, protein_seq in data['dna_seqs_and_ids']:
                 if dna_seq == '':
                     print('Empty dna sequence', gene_key, data['ARO_id'], data['ARO_accession'], sep='\t', file=f_out_log)
                     continue
 
-                fasta = pyfastaq.sequences.Fasta(fasta_name_prefix + '.' + genbank_id + '.' + card_key, dna_seq)
+                fasta_id = '.'.join([
+                    fasta_name_prefix,
+                    genbank_id,
+                    start + '-' + end,
+                    card_key
+                ])
+                fasta = pyfastaq.sequences.Fasta(fasta_id, dna_seq)
                 variant_type = 'p'
 
                 if gi != 'NA':
@@ -121,7 +127,6 @@ class RefGenesGetter:
                     fasta_filehandle = f_out_var_only
 
                 print(fasta.id, '.', '.', data['ARO_name'], sep='\t', file=f_out_tsv)
-                print(card_record.CardRecord._ARO_name_to_fasta_name(data['ARO_name']), data['ARO_name'], sep='\t\t')
 
                 if len(data['snps']) == 0:
                     print(fasta, file=fasta_filehandle)
