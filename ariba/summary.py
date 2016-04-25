@@ -2,7 +2,7 @@ import os
 import re
 import openpyxl
 import pyfastaq
-from ariba import flag, common, report
+from ariba import flag, common, report, summary_cluster
 
 class Error (Exception): pass
 
@@ -31,6 +31,7 @@ class Summary:
         self.min_id = min_id
         self.outfile = outfile
         self.phandango_prefix = phandango_prefix
+        self.clusters = {}
 
 
     def _load_fofn(self, fofn):
@@ -67,7 +68,7 @@ class Summary:
     @classmethod
     def _load_file(cls, filename):
         f = pyfastaq.utils.open_file_read(filename)
-        d = {}
+        clusters = {}
 
         for line in f:
             if line.startswith('#'):
@@ -75,20 +76,16 @@ class Summary:
                     pyfastaq.utils.close(f)
                     raise Error('Error parsing the following line.\n' + line)
                 continue
-            data = Summary._line2dict(line)
+            data = summary_cluster.SummaryCluster.line2dict(line)
             cluster = data['cluster']
-            ref_name = data['ref_name']
 
-            if cluster not in d:
-                d[cluster] = {}
+            if cluster not in clusters:
+                clusters[cluster] = summary_cluster.SummaryCluster()
 
-            if ref_name not in d[cluster]:
-                d[cluster][ref_name] = []
-
-            d[cluster][ref_name].append(data)
+            clusters[cluster].add_data_dict(data)
 
         pyfastaq.utils.close(f)
-        return d
+        return clusters
 
 
     @classmethod

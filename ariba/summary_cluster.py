@@ -22,6 +22,10 @@ class SummaryCluster:
         self.data = {}
 
 
+    def __eq__(self, other):
+       return type(other) is type(self) and self.__dict__ == other.__dict__
+
+
     @classmethod
     def line2dict(cls, line):
         data = line.rstrip().split('\t')
