@@ -110,3 +110,10 @@ class SummaryCluster:
         else:
             return 'fragmented'
 
+
+    def _has_any_nonsynonymous(self):
+        for d in self.data:
+            if d['ref_ctg_effect'] != 'SYN' and d['has_known_var'] == '1' or (d['known_var'] != '1' and d['ref_ctg_change'] != '.'):
+                return 'yes'
+        return 'no'
+
