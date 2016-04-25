@@ -117,3 +117,10 @@ class SummaryCluster:
                 return 'yes'
         return 'no'
 
+
+    def _to_cluster_summary_number_has_nonsynonymous(self, assembled_summary):
+        if assembled_summary == 'no':
+            return 'NA'
+        else:
+            return self._has_any_nonsynonymous()
+
