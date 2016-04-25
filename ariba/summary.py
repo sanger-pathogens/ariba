@@ -89,20 +89,6 @@ class Summary:
 
 
     @classmethod
-    def _pc_id_of_longest(cls, data_dict, seq_name):
-        longest = 0
-        identity = 0
-        assert seq_name in data_dict
-
-        for d in data_dict[seq_name].values():
-            if d['ref_base_assembled'] > longest:
-                longest = d['ref_base_assembled']
-                identity = d['pc_ident']
-
-        return identity
-
-
-    @classmethod
     def _to_summary_number_for_seq(cls, data_dict, seq_name, min_id):
         f = list(data_dict[seq_name].values())[0]['flag']
 

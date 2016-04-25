@@ -67,3 +67,15 @@ class SummaryCluster:
 
         self.data.append(data_dict)
 
+
+    def pc_id_of_longest():
+        longest = 0
+        identity = 0
+
+        for d in self.data:
+            if d['ref_base_assembled'] > longest:
+                longest = d['ref_base_assembled']
+                identity = d['pc_ident']
+
+        return identity
+
