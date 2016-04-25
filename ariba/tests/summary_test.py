@@ -19,34 +19,6 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(s.filenames, ['file42', 'file1', 'file2'])
 
 
-    def test_dict2key(self):
-        '''Test _dict2key'''
-        d = {
-            'ref_name': 'ref',
-            'var_type': '.',
-            'known_var_change': '.',
-            'ref_ctg_change': '.',
-            'var_seq_type': '.'
-        }
-
-        self.assertEqual(('ref', '', ''), summary.Summary._dict2key(d))
-
-        d['var_type'] = 'p'
-        with self.assertRaises(summary.Error):
-            summary.Summary._dict2key(d)
-
-        d['known_var_change'] = 'I42L'
-        d['var_seq_type'] = 'p'
-        self.assertEqual(('ref', 'p', 'I42L'), summary.Summary._dict2key(d))
-
-        d['ref_ctg_change'] = 'P43Q'
-        with self.assertRaises(summary.Error):
-            summary.Summary._dict2key(d)
-
-        d['known_var_change'] = '.'
-        self.assertEqual(('ref', 'p', 'P43Q'), summary.Summary._dict2key(d))
-
-
     def test_load_file(self):
         '''Test _load_file'''
         infile = os.path.join(data_dir, 'summary_test_load_file.in.tsv')

@@ -49,23 +49,6 @@ class Summary:
 
 
     @classmethod
-    def _dict2key(cls, d):
-        if d['var_type'] == '.':
-            return d['ref_name'], '', ''
-        elif d['known_var_change'] == d['ref_ctg_change'] == '.':
-            raise Error('Unexpected data in ariba summary... \n' + str(d) + '\n... known_var_change and ref_ctg_change both equal to ".", but var_type was not a ".". Cannot continue')
-        else:
-            if '.' not in [d['known_var_change'], d['ref_ctg_change']] and d['known_var_change'] != d['ref_ctg_change']:
-                raise Error('Unexpected data in ariba summary... \n' + str(d) + '\n... known_var_change != ref_ctg_change. Cannot continue')
-            if d['known_var_change'] != '.':
-                change = d['known_var_change']
-            else:
-                change = d['ref_ctg_change']
-
-            return d['ref_name'], d['var_seq_type'], change
-
-
-    @classmethod
     def _load_file(cls, filename):
         f = pyfastaq.utils.open_file_read(filename)
         clusters = {}
