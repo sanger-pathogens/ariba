@@ -111,16 +111,34 @@ class SummaryCluster:
             return 'fragmented'
 
 
+    @staticmethod
+    def _has_nonsynonymous(data_dict):
+        return data_dict['ref_ctg_effect'] != 'SYN' and \
+          (data_dict['has_known_var'] == '1' or (data_dict['known_var'] != '1' and data_dict['ref_ctg_change'] != '.'))
+
+
     def _has_any_nonsynonymous(self):
         for d in self.data:
-            if d['ref_ctg_effect'] != 'SYN' and d['has_known_var'] == '1' or (d['known_var'] != '1' and d['ref_ctg_change'] != '.'):
+            if self._has_nonsynonymous(d):
                 return 'yes'
         return 'no'
 
 
     def _to_cluster_summary_number_has_nonsynonymous(self, assembled_summary):
+        '''assembled_summary should be output of _to_cluster_summary_number_assembled'''
         if assembled_summary == 'no':
             return 'NA'
         else:
             return self._has_any_nonsynonymous()
 
+
+    def column_data(self):
+        '''Returns a dictionary of column name -> value'''
+        assembled_summary = self._to_cluster_summary_number_assembled()
+
+        columns = {
+            self.name: self._to_cluster_summary_number_assembled(),
+            self.name + '.allele': self.ref_name,
+            self.name + '.pct_id': self.pc_id_of_longest(),
+            self.name + '.any_var': self._to_cluster_summary_number_has_nonsynonymous(assembled_summary)
+        }

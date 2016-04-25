@@ -119,6 +119,24 @@ class TestSummaryCluster(unittest.TestCase):
             self.assertEqual(expected, cluster._to_cluster_summary_number_assembled())
 
 
+    def test_has_nonsynonymous(self):
+        '''Test _has_nonsynonymous'''
+        lines = [
+            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\t.\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+        ]
+
+        dicts = [summary_cluster.SummaryCluster.line2dict(x) for x in lines]
+        expected = [False, True, False, True, False]
+        assert len(dicts) == len(expected)
+
+        for i in range(len(dicts)):
+            self.assertEqual(expected[i], summary_cluster.SummaryCluster._has_nonsynonymous(dicts[i]))
+
+
     def test_has_any_nonsynonymous(self):
         '''Test _has_any_nonsynonymous'''
         lines = [
