@@ -75,41 +75,6 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_to_summary_number_for_seq(self):
-        '''Test _to_summary_number_for_seq'''
-        tests = [
-            (0, 0),
-            (64, 0),
-            (7, 1),
-            (259, 1),
-            (15, 1),
-            (539, 2),
-            (27, 3),
-        ]
-
-        for test_flag, expected in tests:
-            data_dict = {'name': {
-                'key1': {'flag': flag.Flag(test_flag), 'ref_base_assembled': 100, 'pc_ident': 99}
-            }}
-
-            self.assertEqual(expected, summary.Summary._to_summary_number_for_seq(data_dict, 'name', 90))
-
-
-    def test_to_summary_number_for_variant(self):
-        '''Test _to_summary_number_for_variant'''
-        tests = [
-            (1, {'known_var': '1', 'has_known_var': '1', 'ref_ctg_change': 'I42L'}),
-            (1, {'known_var': '1', 'has_known_var': '1', 'ref_ctg_change': '.'}),
-            (0, {'known_var': '1', 'has_known_var': '0', 'ref_ctg_change': 'I42L'}),
-            (0, {'known_var': '1', 'has_known_var': '0', 'ref_ctg_change': '.'}),
-            (1, {'known_var': '0', 'has_known_var': '0', 'ref_ctg_change': 'I42L'}),
-            (0, {'known_var': '0', 'has_known_var': '0', 'ref_ctg_change': '.'}),
-        ]
-
-        for expected, data_dict in tests:
-            self.assertEqual(expected, summary.Summary._to_summary_number_for_variant(data_dict))
-
-
     def test_gather_output_rows(self):
         '''Test _gather_output_rows'''
         infiles = [

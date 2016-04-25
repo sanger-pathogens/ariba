@@ -89,29 +89,6 @@ class Summary:
 
 
     @classmethod
-    def _to_summary_number_for_seq(cls, data_dict, seq_name, min_id):
-        f = list(data_dict[seq_name].values())[0]['flag']
-
-        if f.has('assembly_fail') or (not f.has('assembled')) or f.has('ref_seq_choose_fail') or Summary._pc_id_of_longest(data_dict, seq_name) <= min_id:
-            return 0
-        elif f.has('assembled_into_one_contig') and f.has('complete_orf') and f.has('unique_contig') and (not f.has('scaffold_graph_bad')) and (not f.has('variants_suggest_collapsed_repeat')) and (not f.has('hit_both_strands')) and (not f.has('region_assembled_twice')):
-            if f.has('has_nonsynonymous_variants'):
-                return 2
-            else:
-                return 3
-        else:
-            return 1
-
-
-    @classmethod
-    def _to_summary_number_for_variant(cls, data_dict):
-        if data_dict['has_known_var'] == '1' or (data_dict['known_var'] != '1' and data_dict['ref_ctg_change'] != '.'):
-            return 1
-        else:
-            return 0
-
-
-    @classmethod
     def _gather_output_rows(cls, filenames, min_id):
         data = {filename: Summary._load_file(filename) for filename in filenames}
 
