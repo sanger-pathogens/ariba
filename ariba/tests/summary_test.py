@@ -19,45 +19,6 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(s.filenames, ['file42', 'file1', 'file2'])
 
 
-    def test_line2dict(self):
-        '''Test _line2dict'''
-        line = 'refname\treftype\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
-
-        expected = {
-            'ref_name': 'refname',
-            'ref_type': 'reftype',
-            'flag': flag.Flag(19),
-            'reads': 78,
-            'cluster': 'cluster',
-            'ref_len': 120,
-            'ref_base_assembled': 120,
-            'pc_ident': 98.33,
-            'ctg': 'ctg_name',
-            'ctg_len': 279,
-            'ctg_cov': '24.4',
-            'known_var': '1',
-            'var_type': 'SNP',
-            'var_seq_type': 'n',
-            'known_var_change': 'A14T',
-            'has_known_var': '1',
-            'ref_ctg_change': 'A14T',
-            'ref_ctg_effect': 'SNP',
-            'ref_start': 13,
-            'ref_end': 13,
-            'ref_nt': 'A',
-            'ctg_start': 84,
-            'ctg_end': 84,
-            'ctg_nt': 'T',
-            'smtls_total_depth': '17',
-            'smtls_alt_nt': '.',
-            'smtls_alt_depth': '17',
-            'var_description': 'noncoding1_n_A14T_N_ref has wild type, foo bar',
-            'free_text': 'some free text'
-        }
-
-        self.assertEqual(summary.Summary._line2dict(line), expected)
-
-
     def test_dict2key(self):
         '''Test _dict2key'''
         d = {
