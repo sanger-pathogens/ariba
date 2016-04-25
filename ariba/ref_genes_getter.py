@@ -85,14 +85,23 @@ class RefGenesGetter:
         for gene_key, gene_dict in sorted(json_data.items()):
             crecord = card_record.CardRecord(gene_dict)
             data = crecord.get_data()
-            fasta_name_prefix = '.'.join([data[x] for x in ['ARO_id', 'ARO_accession']])
+            fasta_name_prefix = '.'.join([
+                card_record.CardRecord._ARO_name_to_fasta_name(data['ARO_name']),
+                data['ARO_accession'],
+            ])
 
-            for card_key, gi, genbank_id, strand, dna_seq, protein_seq in data['dna_seqs_and_ids']:
+            for card_key, gi, genbank_id, start, end, dna_seq, protein_seq in data['dna_seqs_and_ids']:
                 if dna_seq == '':
                     print('Empty dna sequence', gene_key, data['ARO_id'], data['ARO_accession'], sep='\t', file=f_out_log)
                     continue
 
-                fasta = pyfastaq.sequences.Fasta(fasta_name_prefix + '.' + gi + '.' + genbank_id + '.' + card_key, dna_seq)
+                fasta_id = '.'.join([
+                    fasta_name_prefix,
+                    genbank_id,
+                    start + '-' + end,
+                    card_key
+                ])
+                fasta = pyfastaq.sequences.Fasta(fasta_id, dna_seq)
                 variant_type = 'p'
 
                 if gi != 'NA':
