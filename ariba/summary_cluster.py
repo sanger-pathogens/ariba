@@ -17,9 +17,11 @@ int_columns = [
 float_columns = ['pc_ident']
 
 class SummaryCluster:
-    def __init__(self):
+    def __init__(self, min_pc_id=90):
+        self.min_pc_id = min_pc_id
         self.name = None
         self.ref_name = None
+        self.flag = None
         self.data = []
 
 
@@ -54,10 +56,14 @@ class SummaryCluster:
 
 
     def add_data_dict(self, data_dict):
+        if data_dict['pc_ident'] < self.min_pc_id:
+            return
+
         if self.name is None:
-            assert self.ref_name is None
+            assert self.ref_name is None and self.flag is None
             self.name = data_dict['cluster']
             self.ref_name = data_dict['ref_name']
+            self.flag = data_dict['flag']
 
         if self.name != data_dict['cluster']:
             raise Error('Cannot add dict to SummaryCluster. Expected cluster name "' + self.name + '" but got "' + data_dict['cluster'] + '".')
@@ -65,10 +71,12 @@ class SummaryCluster:
         if self.ref_name != data_dict['ref_name']:
             raise Error('Cannot add dict to SummaryCluster. Expected ref_name "' + self.ref_name + '" but got "' + data_dict['ref_name'] + '".')
 
+        if self.flag != data_dict['flag']:
+            raise Error('Cannot add dict to SummaryCluster. Expected flag "' + str(self.flag) + '" but got "' + str(data_dict['flag']) + '".')
         self.data.append(data_dict)
 
 
-    def pc_id_of_longest():
+    def pc_id_of_longest(self):
         longest = 0
         identity = 0
 

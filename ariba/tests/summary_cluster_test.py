@@ -67,13 +67,13 @@ class TestSummaryCluster(unittest.TestCase):
             cluster.add_data_dict(data_dict3)
 
 
-    def pc_id_of_longest():
+    def test_pc_id_of_longest(self):
         '''Test pc_id_of_longest'''
         cluster = summary_cluster.SummaryCluster()
         self.assertTrue(cluster.name is None)
         line1 = 'refname\treftype\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
-        line2 = 'refname\treftype\t19\t78\tcluster2\t120\t119\t98.20\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
-        line3 = 'refname2\treftype\t19\t78\tcluster\t120\t114\t98.32\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
+        line2 = 'refname\treftype\t19\t78\tcluster\t120\t119\t98.20\tctg_name2\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
+        line3 = 'refname\treftype\t19\t78\tcluster\t120\t114\t98.32\tctg_name3\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
         data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
         data_dict2 = summary_cluster.SummaryCluster.line2dict(line2)
         data_dict3 = summary_cluster.SummaryCluster.line2dict(line3)
