@@ -19,7 +19,8 @@ float_columns = ['pc_ident']
 class SummaryCluster:
     def __init__(self):
         self.name = None
-        self.data = {}
+        self.ref_name = None
+        self.data = []
 
 
     def __eq__(self, other):
@@ -54,14 +55,15 @@ class SummaryCluster:
 
     def add_data_dict(self, data_dict):
         if self.name is None:
+            assert self.ref_name is None
             self.name = data_dict['cluster']
+            self.ref_name = data_dict['ref_name']
 
         if self.name != data_dict['cluster']:
             raise Error('Cannot add dict to SummaryCluster. Expected cluster name "' + self.name + '" but got "' + data_dict['cluster'] + '".')
 
-        if data_dict['ref_name'] not in self.data:
-            self.data[data_dict['ref_name']] = []
+        if self.ref_name != data_dict['ref_name']:
+            raise Error('Cannot add dict to SummaryCluster. Expected ref_name "' + self.ref_name + '" but got "' + data_dict['ref_name'] + '".')
 
-        self.data[data_dict['ref_name']].append(data_dict)
-
+        self.data.append(data_dict)
 

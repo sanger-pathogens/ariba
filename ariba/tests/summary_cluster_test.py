@@ -53,12 +53,16 @@ class TestSummaryCluster(unittest.TestCase):
         self.assertTrue(cluster.name is None)
         line1 = 'refname\treftype\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
         line2 = 'refname\treftype\t19\t78\tcluster2\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
+        line3 = 'refname2\treftype\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
         data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
         data_dict2 = summary_cluster.SummaryCluster.line2dict(line2)
+        data_dict3 = summary_cluster.SummaryCluster.line2dict(line3)
         cluster.add_data_dict(data_dict1)
         self.assertEqual(cluster.name, data_dict1['cluster'])
-        self.assertEqual(cluster.data, {data_dict1['ref_name']: [data_dict1]})
+        self.assertEqual(cluster.data,[data_dict1])
         with self.assertRaises(summary_cluster.Error):
             cluster.add_data_dict(data_dict2)
 
+        with self.assertRaises(summary_cluster.Error):
+            cluster.add_data_dict(data_dict3)
 
