@@ -87,3 +87,26 @@ class SummaryCluster:
 
         return identity
 
+
+    def _to_cluster_summary_number_assembled(self):
+        if self.data[0]['ref_type'] == 'non_coding':
+            has_complete_orf = True
+        else:
+            has_complete_orf = self.flag.has('complete_orf')
+        print(self.data[0]['ref_type'], self.flag, has_complete_orf, sep='\t')
+
+        if self.flag.has('assembly_fail') or \
+          (not self.flag.has('assembled')) or \
+          self.flag.has('ref_seq_choose_fail'):
+            return 0
+        elif self.flag.has('assembled_into_one_contig') and has_complete_orf:
+            if self.flag.has('unique_contig') and \
+              (not self.flag.has('scaffold_graph_bad')) and \
+              (not self.flag.has('variants_suggest_collapsed_repeat')) and \
+              (not self.flag.has('hit_both_strands')) and \
+              (not self.flag.has('region_assembled_twice')):
+                return 3
+            else:
+                return 2
+        else:
+            return 1

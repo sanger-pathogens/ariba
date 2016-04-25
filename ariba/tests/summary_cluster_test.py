@@ -82,3 +82,39 @@ class TestSummaryCluster(unittest.TestCase):
         cluster.add_data_dict(data_dict3)
         self.assertEqual(98.2, cluster.pc_id_of_longest())
 
+
+    def test_to_cluster_summary_number(self):
+        '''Test _to_cluster_summary_number_assembled'''
+        line = 'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text'
+        data_dict = summary_cluster.SummaryCluster.line2dict(line)
+
+        tests = [
+            ('non_coding', 0, 0),
+            ('non_coding', 64, 0),
+            ('non_coding', 1024, 0),
+            ('non_coding', 1, 1),
+            ('non_coding', 3, 2),
+            ('non_coding', 19, 3),
+            ('non_coding', 23, 2),
+            ('non_coding', 51, 2),
+            ('non_coding', 147, 2),
+            ('non_coding', 275, 2),
+            ('presence_absence', 0, 0),
+            ('presence_absence', 64, 0),
+            ('presence_absence', 1024, 0),
+            ('presence_absence', 1, 1),
+            ('presence_absence', 11, 2),
+            ('presence_absence', 27, 3),
+            ('presence_absence', 29, 1),
+            ('presence_absence', 59, 2),
+            ('presence_absence', 155, 2),
+            ('presence_absence', 283, 2),
+        ]
+
+        for seq_type, f, expected in tests:
+            cluster = summary_cluster.SummaryCluster()
+            data_dict['ref_type'] = seq_type
+            data_dict['flag'] = flag.Flag(f)
+            cluster.add_data_dict(data_dict)
+            self.assertEqual(expected, cluster._to_cluster_summary_number_assembled())
+
