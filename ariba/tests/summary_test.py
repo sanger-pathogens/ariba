@@ -62,13 +62,57 @@ class TestSummary(unittest.TestCase):
             os.path.join(data_dir, 'summary_test_gather_output_rows.in.1.tsv'),
             os.path.join(data_dir, 'summary_test_gather_output_rows.in.2.tsv')
         ]
-        got = summary.Summary._gather_output_rows(infiles, 90)
-        expected = [
-            ['filename', 'noncoding1', 'noncoding1;var.n.A14T', 'noncoding1;var.n.A6G', 'presence_absence1', 'presence_absence1;var.p.A10V', 'variants_only1'],
-            [infiles[0], 1, 1, 0, 3, 1, 0],
-            [infiles[1], 1, 1, 1, 3, 1, 0],
-        ]
-
+        s = summary.Summary('out', filenames=infiles)
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        expected = {
+            infiles[0]: {
+                'noncoding1': {
+                    'assembled': 'yes',
+                    'ref_seq': 'noncoding1',
+                    'any_var': 'yes',
+                    'pct_id': '98.33',
+                    'noncoding1.A14T': 'yes',
+                    'noncoding1.A6G': 'no',
+                },
+                'presence_absence1': {
+                    'assembled': 'yes',
+                    'ref_seq': 'presence_absence1',
+                    'any_var': 'yes',
+                    'pct_id': '98.96',
+                    'presence_absence1.A10V': 'yes',
+                },
+                'variants_only1': {
+                    'assembled': 'no',
+                    'ref_seq': 'NA',
+                    'any_var': 'NA',
+                    'pct_id': 'NA',
+                }
+            },
+            infiles[1]: {
+                'noncoding1': {
+                    'assembled': 'yes',
+                    'ref_seq': 'noncoding1',
+                    'any_var': 'yes',
+                    'pct_id': '98.33',
+                    'noncoding1.A14T': 'yes',
+                    'noncoding1.A6G': 'yes',
+                },
+                'presence_absence1': {
+                    'assembled': 'yes',
+                    'ref_seq': 'presence_absence1',
+                    'pct_id': '98.96',
+                    'any_var': 'yes',
+                    'presence_absence1.A10V': 'yes',
+                },
+                'variants_only1': {
+                    'assembled': 'no',
+                    'ref_seq': 'NA',
+                    'any_var': 'NA',
+                    'pct_id': 'NA',
+                }
+            },
+        }
+        got = s._gather_output_rows()
         self.assertEqual(expected, got)
 
 

@@ -81,41 +81,36 @@ class Summary:
         return columns
 
 
-    @classmethod
-    def _gather_output_rows(cls, filenames, min_id):
-        data = {filename: Summary._load_file(filename) for filename in filenames}
+    def _gather_output_rows(self):
+        all_cluster_names = Summary._get_all_cluster_names(self.samples)
+        all_var_columns = Summary._get_all_variant_columns(self.samples)
+        rows = {}
 
-        all_column_tuples = set()
+        for filename, sample in self.samples.items():
+            rows[filename] = {}
 
-        for filename, data_dict in data.items():
-            for seq_name, seq_data_dict in data_dict.items():
-                all_column_tuples.update(set(seq_data_dict.keys()))
-                all_column_tuples.add((seq_name, '', ''))
+            for cluster in all_cluster_names:
+                rows[filename][cluster] = {}
 
-
-
-        all_column_tuples = list(all_column_tuples)
-        all_column_tuples.sort()
-        rows = [['filename']]
-        for t in all_column_tuples:
-            if t[1] == t[2] == '':
-                rows[0].append(t[0])
-            else:
-                rows[0].append(t[0] + ';' + 'var.' + t[1] + '.' + t[2])
-
-        for filename in filenames:
-            new_row = [filename]
-            for column_tuple in all_column_tuples:
-                if column_tuple[0] not in data[filename]:
-                    new_row.append(0)
-                elif column_tuple[1] == '':
-                    new_row.append(Summary._to_summary_number_for_seq(data[filename], column_tuple[0], min_id))
-                elif column_tuple in data[filename][column_tuple[0]]:
-                    new_row.append(Summary._to_summary_number_for_variant(data[filename][column_tuple[0]][column_tuple]))
+                if cluster in sample.column_summary_data and sample.column_summary_data[cluster]['assembled'].startswith('yes'):
+                    rows[filename][cluster] = sample.column_summary_data[cluster]
                 else:
-                    new_row.append(0)
+                    rows[filename][cluster] = {
+                        'assembled': 'no',
+                        'ref_seq': 'NA',
+                        'any_var': 'NA',
+                        'pct_id': 'NA'
+                    }
 
-            rows.append(new_row)
+                if cluster in all_var_columns:
+                    for (ref_name, variant) in all_var_columns[cluster]:
+                        key = ref_name + '.' + variant
+                        if rows[filename][cluster]['assembled'] == 'no':
+                            rows[filename][cluster][key] = 'NA'
+                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant) in sample.variant_column_names_tuples[cluster]:
+                            rows[filename][cluster][key] = 'yes'
+                        else:
+                            rows[filename][cluster][key] = 'no'
 
         return rows
 
