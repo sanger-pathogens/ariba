@@ -10,6 +10,10 @@ class SummarySample:
         self.clusters = {}
 
 
+    def __eq__(self, other):
+       return type(other) is type(self) and self.__dict__ == other.__dict__
+
+
     @staticmethod
     def _load_file(filename, min_pc_id):
         f = pyfastaq.utils.open_file_read(filename)
@@ -34,3 +38,8 @@ class SummarySample:
 
     def _column_summary_data(self):
         return {c: self.clusters[c].column_summary_data() for c in self.clusters}
+
+
+    def run(self):
+        self._load_file(self.report_tsv, self.min_pc_id)
+        self.column_summary_data = self._column_summary_data()
