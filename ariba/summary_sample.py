@@ -62,7 +62,7 @@ class SummarySample:
 
 
     def run(self):
-        self._load_file(self.report_tsv, self.min_pc_id)
+        self.clusters = self._load_file(self.report_tsv, self.min_pc_id)
         self.column_summary_data = self._column_summary_data()
         self.variants = self._non_synon_variants()
         self.variant_column_names = self._variant_column_names_tuples()
