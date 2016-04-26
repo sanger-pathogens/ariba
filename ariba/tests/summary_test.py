@@ -71,15 +71,12 @@ class TestSummary(unittest.TestCase):
                     'ref_seq': 'noncoding1',
                     'any_var': 'yes',
                     'pct_id': '98.33',
-                    'noncoding1.A14T': 'yes',
-                    'noncoding1.A6G': 'no',
                 },
                 'presence_absence1': {
                     'assembled': 'yes',
                     'ref_seq': 'presence_absence1',
                     'any_var': 'yes',
                     'pct_id': '98.96',
-                    'presence_absence1.A10V': 'yes',
                 },
                 'variants_only1': {
                     'assembled': 'no',
@@ -94,15 +91,12 @@ class TestSummary(unittest.TestCase):
                     'ref_seq': 'noncoding1',
                     'any_var': 'yes',
                     'pct_id': '98.33',
-                    'noncoding1.A14T': 'yes',
-                    'noncoding1.A6G': 'yes',
                 },
                 'presence_absence1': {
                     'assembled': 'yes',
                     'ref_seq': 'presence_absence1',
                     'pct_id': '98.96',
                     'any_var': 'yes',
-                    'presence_absence1.A10V': 'yes',
                 },
                 'variants_only1': {
                     'assembled': 'no',
@@ -112,6 +106,16 @@ class TestSummary(unittest.TestCase):
                 }
             },
         }
+        got = s._gather_output_rows()
+        self.assertEqual(expected, got)
+
+        s.include_all_variant_columns = True
+        expected[infiles[0]]['noncoding1']['noncoding1.A14T'] = 'yes'
+        expected[infiles[0]]['noncoding1']['noncoding1.A6G'] = 'no'
+        expected[infiles[0]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
+        expected[infiles[1]]['noncoding1']['noncoding1.A14T'] = 'yes'
+        expected[infiles[1]]['noncoding1']['noncoding1.A6G'] = 'yes'
+        expected[infiles[1]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 

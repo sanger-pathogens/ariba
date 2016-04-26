@@ -12,8 +12,7 @@ class Summary:
       outfile,
       filenames=None,
       fofn=None,
-      filter_output=True,
-      all_variant_columns=False,
+      include_all_variant_columns=False,
       phandango_prefix=None,
       min_id=90.0
     ):
@@ -28,8 +27,7 @@ class Summary:
         if fofn is not None:
             self.filenames.extend(self._load_fofn(fofn))
 
-        self.filter_output = filter_output
-        self.all_variant_columns = all_variant_columns
+        self.include_all_variant_columns = include_all_variant_columns
         self.min_id = min_id
         self.outfile = outfile
         self.phandango_prefix = phandango_prefix
@@ -102,7 +100,7 @@ class Summary:
                         'pct_id': 'NA'
                     }
 
-                if cluster in all_var_columns:
+                if self.include_all_variant_columns and cluster in all_var_columns:
                     for (ref_name, variant) in all_var_columns[cluster]:
                         key = ref_name + '.' + variant
                         if rows[filename][cluster]['assembled'] == 'no':
@@ -111,23 +109,6 @@ class Summary:
                             rows[filename][cluster][key] = 'yes'
                         else:
                             rows[filename][cluster][key] = 'no'
-
-        return rows
-
-
-    @classmethod
-    def _filter_output_rows(cls, rows):
-        # remove rows that are all zeros
-        rows = [x for x in rows if x[1:] != [0]*(len(x)-1)]
-
-        # remove columns that are all zeros
-        to_remove = []
-        for i in range(1, len(rows[0])):
-            if sum([x[i] for x in rows[1:]]) == 0:
-                to_remove.append(i)
-
-        for i in range(len(rows)):
-            rows[i] = [rows[i][j] for j in range(len(rows[i])) if j not in to_remove]
 
         return rows
 
