@@ -148,15 +148,14 @@ class SummaryCluster:
                 raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change != ref_ctg_change. Cannot continue')
 
             if data_dict['known_var_change'] != '.':
-                return data_dict['ref_name'] + '.' + data_dict['known_var_change']
+                return data_dict['known_var_change']
             else:
-                return data_dict['ref_name'] + '.' + data_dict['ref_ctg_change']
+                return data_dict['ref_ctg_change']
 
 
     def column_summary_data(self):
         '''Returns a dictionary of column name -> value, for cluster-level results'''
         assembled_summary = self._to_cluster_summary_assembled()
-        nonsynon_vars = [self._get_nonsynonymous_var(d) for d in self.data]
 
         columns = {
             self.name: self._to_cluster_summary_assembled(),
@@ -166,3 +165,9 @@ class SummaryCluster:
         }
 
         return columns
+
+
+    def non_synon_variants(self):
+        variants = {self._get_nonsynonymous_var(d) for d in self.data}
+        variants.discard(None)
+        return variants
