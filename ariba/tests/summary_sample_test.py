@@ -65,7 +65,7 @@ class TestSummarySample(unittest.TestCase):
 
     def test_non_synon_variants(self):
         '''Test _non_synon_variants'''
-        infile = os.path.join(data_dir, 'summary_sample_test_column_summary_data.tsv')
+        infile = os.path.join(data_dir, 'summary_sample_test_non_synon_variants.tsv')
         sample_summary = summary_sample.SummarySample(infile)
         sample_summary.clusters = sample_summary._load_file(infile, 90)
         expected = {
