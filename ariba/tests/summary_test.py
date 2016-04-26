@@ -179,6 +179,7 @@ class TestSummary(unittest.TestCase):
             'file1,yes,noncoding1,98.33,yes,yes,yes,presence_absence1,98.96,yes,yes,yes,varonly1,99.42,no',
             'file2,yes,noncoding1,98.33,no,no,yes,presence_absence1,98.96,no,no,no,NA,NA,NA'
 ]
+        expected_lines = [x.split(',') for x in expected_lines]
         self.assertEqual(expected_lines, got_lines)
 
         got_lines = summary.Summary._write_csv(filenames, rows, tmp_out, phandango=True)
@@ -187,6 +188,7 @@ class TestSummary(unittest.TestCase):
             'file1,yes,noncoding1,98.33,yes,yes,yes,presence_absence1,98.96,yes,yes,yes,varonly1,99.42,no',
             'file2,yes,noncoding1,98.33,no,no,yes,presence_absence1,98.96,no,no,no,NA,NA,NA'
 ]
+        expected_lines = [x.split(',') for x in expected_lines]
         self.assertEqual(expected_lines, got_lines)
         expected_file = os.path.join(data_dir, 'summary_test_write_tsv.out.phandango.csv')
         self.assertTrue(filecmp.cmp(tmp_out, expected_file, shallow=False))

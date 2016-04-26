@@ -156,12 +156,12 @@ class Summary:
                     line.append(value)
 
             making_header_line = False
-            lines.append(','.join(line))
+            lines.append(line)
 
-        first_line = ','.join(first_line)
         f = pyfastaq.utils.open_file_write(outfile)
-        print(first_line, file=f)
-        print(*lines, sep='\n', file=f)
+        print(','.join(first_line), file=f)
+        for line in lines:
+            print(*line, sep=',', file=f)
         pyfastaq.utils.close(f)
         return [first_line] + lines
 
@@ -182,14 +182,10 @@ class Summary:
 
 
     @classmethod
-    def _write_distance_matrix(cls, rows, outfile):
+    def _write_distance_matrix(cls, lines, outfile):
         if len(rows) < 3:
             raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
                         'Only one sample present.')
-
-        if len(rows[0]) < 2:
-            raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
-                        'No genes present in output')
 
         with open(outfile, 'w') as f:
             sample_names = [x[0] for x in rows]
