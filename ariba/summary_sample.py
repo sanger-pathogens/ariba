@@ -7,6 +7,7 @@ class SummarySample:
     def __init__(self, report_tsv, min_pc_id=90):
         self.report_tsv = report_tsv
         self.min_pc_id = min_pc_id
+        self.clusters = {}
 
 
     @staticmethod
@@ -31,3 +32,5 @@ class SummarySample:
         return clusters
 
 
+    def _column_summary_data(self):
+        return {c: self.clusters[c].column_summary_data() for c in self.clusters}

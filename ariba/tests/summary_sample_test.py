@@ -32,3 +32,32 @@ class TestSummarySample(unittest.TestCase):
 
         got = summary_sample.SummarySample._load_file(infile, 90)
         self.assertEqual(expected, got)
+
+
+    def test_column_summary_data(self):
+        '''Test _column_summary_data'''
+        infile = os.path.join(data_dir, 'summary_sample_test_column_summary_data.tsv')
+        sample_summary = summary_sample.SummarySample(infile)
+        sample_summary.clusters = sample_summary._load_file(infile, 90)
+        expected = {
+            'cluster.n': {
+                'cluster.n': 'yes',
+                'cluster.n.allele': 'noncoding1',
+                'cluster.n.any_var': 'yes',
+                'cluster.n.pct_id': '98.33'
+            },
+            'cluster.p': {
+                'cluster.p': 'yes',
+                'cluster.p.allele': 'presence_absence1',
+                'cluster.p.any_var': 'yes',
+                'cluster.p.pct_id': '98.96'
+            },
+            'cluster.v': {
+                'cluster.v': 'yes',
+                'cluster.v.allele': 'variants_only1',
+                'cluster.v.any_var': 'yes',
+                'cluster.v.pct_id': '100.0'
+            }
+        }
+        got = sample_summary._column_summary_data()
+        self.assertEqual(expected, got)
