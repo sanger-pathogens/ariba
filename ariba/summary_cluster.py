@@ -88,7 +88,7 @@ class SummaryCluster:
         return identity
 
 
-    def _to_cluster_summary_number_assembled(self):
+    def _to_cluster_summary_assembled(self):
         if self.data[0]['ref_type'] == 'non_coding':
             has_complete_orf = True
         else:
@@ -124,8 +124,8 @@ class SummaryCluster:
         return 'no'
 
 
-    def _to_cluster_summary_number_has_nonsynonymous(self, assembled_summary):
-        '''assembled_summary should be output of _to_cluster_summary_number_assembled'''
+    def _to_cluster_summary_has_nonsynonymous(self, assembled_summary):
+        '''assembled_summary should be output of _to_cluster_summary_assembled'''
         if assembled_summary == 'no':
             return 'NA'
         else:
@@ -155,14 +155,14 @@ class SummaryCluster:
 
     def column_summary_data(self):
         '''Returns a dictionary of column name -> value, for cluster-level results'''
-        assembled_summary = self._to_cluster_summary_number_assembled()
+        assembled_summary = self._to_cluster_summary_assembled()
         nonsynon_vars = [self._get_nonsynonymous_var(d) for d in self.data]
 
         columns = {
-            self.name: self._to_cluster_summary_number_assembled(),
+            self.name: self._to_cluster_summary_assembled(),
             self.name + '.allele': self.ref_name,
             self.name + '.pct_id': str(self.pc_id_of_longest()),
-            self.name + '.any_var': self._to_cluster_summary_number_has_nonsynonymous(assembled_summary)
+            self.name + '.any_var': self._to_cluster_summary_has_nonsynonymous(assembled_summary)
         }
 
         return columns
