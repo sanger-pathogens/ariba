@@ -75,3 +75,21 @@ class TestSummarySample(unittest.TestCase):
         }
         got = sample_summary._non_synon_variants()
         self.assertEqual(expected, got)
+
+
+    def test_variant_column_names_tuples(self):
+        '''Test _variant_column_names_tuples'''
+        infile = os.path.join(data_dir, 'summary_sample_test_column_names_tuples.tsv')
+        sample_summary = summary_sample.SummarySample(infile)
+        sample_summary.clusters = sample_summary._load_file(infile, 90)
+        sample_summary.column_summary_data = sample_summary._column_summary_data()
+        sample_summary.variants = sample_summary._non_synon_variants()
+        expected = {
+            ('cluster.v', 'variants_only1', 'S5T'),
+            ('cluster.n', 'noncoding1', 'A14T'),
+            ('cluster.n', 'noncoding1', 'A6G'),
+            ('cluster.p', 'presence_absence1', 'A10V')
+        }
+        got = sample_summary._variant_column_names_tuples()
+        self.assertEqual(expected, got)
+

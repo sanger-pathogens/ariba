@@ -49,8 +49,21 @@ class SummarySample:
         return variants
 
 
+    def _variant_column_names_tuples(self):
+        # assumes this has been run:
+        # self.column_summary_data = self._column_summary_data()
+        # self.variants = self._non_synon_variants()
+        columns = set()
+        for cluster_name, variants in self.variants.items():
+           ref_name = self.column_summary_data[cluster_name]['ref_seq']
+           for var in variants:
+               columns.add((cluster_name, ref_name, var))
+        return columns
+
+
     def run(self):
         self._load_file(self.report_tsv, self.min_pc_id)
         self.column_summary_data = self._column_summary_data()
         self.variants = self._non_synon_variants()
+        self.variant_column_names = self._variant_column_names_tuples()
 
