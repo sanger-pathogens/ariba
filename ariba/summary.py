@@ -162,16 +162,6 @@ class Summary:
         pyfastaq.utils.close(f)
 
 
-    @classmethod
-    def _write_xls(cls, rows, outfile):
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.worksheets[0]
-        worksheet.title = 'ARIBA_summary'
-        for row in rows:
-            worksheet.append(row)
-        workbook.save(outfile)
-
-
     @staticmethod
     def _distance_score_between_values(value1, value2):
         if value1 != value2 and 0 in [value1, value2]:
