@@ -153,14 +153,16 @@ class SummaryCluster:
                 return data_dict['ref_name'] + '.' + data_dict['ref_ctg_change']
 
 
-    def column_data(self):
-        '''Returns a dictionary of column name -> value'''
+    def column_summary_data(self):
+        '''Returns a dictionary of column name -> value, for cluster-level results'''
         assembled_summary = self._to_cluster_summary_number_assembled()
+        nonsynon_vars = [self._get_nonsynonymous_var(d) for d in self.data]
 
         columns = {
             self.name: self._to_cluster_summary_number_assembled(),
             self.name + '.allele': self.ref_name,
-            self.name + '.pct_id': self.pc_id_of_longest(),
+            self.name + '.pct_id': str(self.pc_id_of_longest()),
             self.name + '.any_var': self._to_cluster_summary_number_has_nonsynonymous(assembled_summary)
         }
 
+        return columns

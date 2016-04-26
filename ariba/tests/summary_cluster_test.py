@@ -208,3 +208,23 @@ class TestSummaryCluster(unittest.TestCase):
         d['known_var_change'] = '.'
         self.assertEqual('ref.P43Q', summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
+
+    def test_column_summary_data(self):
+        '''Test column_summary_data'''
+        line1 = 'ref1\tnon_coding\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tfoo bar\tspam eggs'
+        line2 = 'ref1\tnon_coding\t531\t78\tcluster1\t120\t95\t98.42\tctg_name\t279\t24.4\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tsome free text'
+
+        data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
+        data_dict2 = summary_cluster.SummaryCluster.line2dict(line2)
+        cluster = summary_cluster.SummaryCluster()
+        cluster.add_data_dict(data_dict1)
+        cluster.add_data_dict(data_dict2)
+        expected = {
+            'cluster1': 'yes',
+            'cluster1.allele': 'ref1',
+            'cluster1.any_var': 'yes',
+            'cluster1.pct_id': '98.33',
+        }
+        got = cluster.column_summary_data()
+        self.assertEqual(expected, got)
+
