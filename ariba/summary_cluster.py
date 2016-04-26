@@ -158,10 +158,10 @@ class SummaryCluster:
         assembled_summary = self._to_cluster_summary_assembled()
 
         columns = {
-            self.name: self._to_cluster_summary_assembled(),
-            self.name + '.allele': self.ref_name,
-            self.name + '.pct_id': str(self.pc_id_of_longest()),
-            self.name + '.any_var': self._to_cluster_summary_has_nonsynonymous(assembled_summary)
+            'assembled': self._to_cluster_summary_assembled(),
+            'ref_seq': self.ref_name,
+            'pct_id': str(self.pc_id_of_longest()),
+            'any_var': self._to_cluster_summary_has_nonsynonymous(assembled_summary)
         }
 
         return columns

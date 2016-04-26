@@ -220,10 +220,10 @@ class TestSummaryCluster(unittest.TestCase):
         cluster.add_data_dict(data_dict1)
         cluster.add_data_dict(data_dict2)
         expected = {
-            'cluster1': 'yes',
-            'cluster1.allele': 'ref1',
-            'cluster1.any_var': 'yes',
-            'cluster1.pct_id': '98.33',
+            'assembled': 'yes',
+            'ref_seq': 'ref1',
+            'any_var': 'yes',
+            'pct_id': '98.33',
         }
         got = cluster.column_summary_data()
         self.assertEqual(expected, got)

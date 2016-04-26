@@ -32,9 +32,6 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-
-
-
     def test_gather_output_rows(self):
         '''Test _gather_output_rows'''
         infiles = [

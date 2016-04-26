@@ -41,22 +41,22 @@ class TestSummarySample(unittest.TestCase):
         sample_summary.clusters = sample_summary._load_file(infile, 90)
         expected = {
             'cluster.n': {
-                'cluster.n': 'yes',
-                'cluster.n.allele': 'noncoding1',
-                'cluster.n.any_var': 'yes',
-                'cluster.n.pct_id': '98.33'
+                'assembled': 'yes',
+                'ref_seq': 'noncoding1',
+                'any_var': 'yes',
+                'pct_id': '98.33'
             },
             'cluster.p': {
-                'cluster.p': 'yes',
-                'cluster.p.allele': 'presence_absence1',
-                'cluster.p.any_var': 'yes',
-                'cluster.p.pct_id': '98.96'
+                'assembled': 'yes',
+                'ref_seq': 'presence_absence1',
+                'any_var': 'yes',
+                'pct_id': '98.96'
             },
             'cluster.v': {
-                'cluster.v': 'yes',
-                'cluster.v.allele': 'variants_only1',
-                'cluster.v.any_var': 'yes',
-                'cluster.v.pct_id': '100.0'
+                'assembled': 'yes',
+                'ref_seq': 'variants_only1',
+                'any_var': 'yes',
+                'pct_id': '100.0'
             }
         }
         got = sample_summary._column_summary_data()
