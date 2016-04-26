@@ -85,10 +85,9 @@ class TestSummarySample(unittest.TestCase):
         sample_summary.column_summary_data = sample_summary._column_summary_data()
         sample_summary.variants = sample_summary._non_synon_variants()
         expected = {
-            ('cluster.v', 'variants_only1', 'S5T'),
-            ('cluster.n', 'noncoding1', 'A14T'),
-            ('cluster.n', 'noncoding1', 'A6G'),
-            ('cluster.p', 'presence_absence1', 'A10V')
+            'cluster.v': {('variants_only1', 'S5T')},
+            'cluster.n': {('noncoding1', 'A6G'), ('noncoding1', 'A14T')},
+            'cluster.p': {('presence_absence1', 'A10V')}
         }
         got = sample_summary._variant_column_names_tuples()
         self.assertEqual(expected, got)
