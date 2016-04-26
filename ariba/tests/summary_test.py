@@ -19,34 +19,6 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(s.filenames, ['file42', 'file1', 'file2'])
 
 
-    def test_load_file(self):
-        '''Test _load_file'''
-        infile = os.path.join(data_dir, 'summary_test_load_file.in.tsv')
-        with open(infile) as f:
-             lines = [x.rstrip() for x in f]
-
-        dicts = [summary_cluster.SummaryCluster.line2dict(x) for x in lines[1:]]
-        cluster1 = summary_cluster.SummaryCluster()
-        cluster1.add_data_dict(dicts[0])
-        cluster1.add_data_dict(dicts[1])
-        cluster1.add_data_dict(dicts[2])
-        cluster2 = summary_cluster.SummaryCluster()
-        cluster2.add_data_dict(dicts[3])
-        cluster2.add_data_dict(dicts[4])
-        cluster3 = summary_cluster.SummaryCluster()
-        cluster3.add_data_dict(dicts[5])
-
-        expected = {
-            'cluster.n': cluster1,
-            'cluster.p': cluster2,
-            'cluster.v': cluster3
-        }
-
-        infile = os.path.join(data_dir, 'summary_test_load_file.in.tsv')
-        got = summary.Summary._load_file(infile)
-        self.assertEqual(expected, got)
-
-
     def test_gather_output_rows(self):
         '''Test _gather_output_rows'''
         infiles = [

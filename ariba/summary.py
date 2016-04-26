@@ -47,30 +47,6 @@ class Summary:
                 raise Error('File not found: "' + fname + '". Cannot continue')
 
 
-
-    @classmethod
-    def _load_file(cls, filename):
-        f = pyfastaq.utils.open_file_read(filename)
-        clusters = {}
-
-        for line in f:
-            if line.startswith('#'):
-                if line.rstrip()[1:].split('\t') != report.columns:
-                    pyfastaq.utils.close(f)
-                    raise Error('Error parsing the following line.\n' + line)
-                continue
-            data = summary_cluster.SummaryCluster.line2dict(line)
-            cluster = data['cluster']
-
-            if cluster not in clusters:
-                clusters[cluster] = summary_cluster.SummaryCluster()
-
-            clusters[cluster].add_data_dict(data)
-
-        pyfastaq.utils.close(f)
-        return clusters
-
-
     @classmethod
     def _gather_output_rows(cls, filenames, min_id):
         data = {filename: Summary._load_file(filename) for filename in filenames}
