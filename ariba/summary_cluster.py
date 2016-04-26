@@ -56,7 +56,7 @@ class SummaryCluster:
 
 
     def add_data_dict(self, data_dict):
-        if data_dict['pc_ident'] < self.min_pc_id:
+        if data_dict['pc_ident'] == '.' or data_dict['pc_ident'] < self.min_pc_id:
             return
 
         if self.name is None:
