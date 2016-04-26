@@ -2,7 +2,7 @@ import unittest
 import copy
 import filecmp
 import os
-from ariba import flag, summary, summary_cluster
+from ariba import flag, summary, summary_cluster, summary_sample
 
 modules_dir = os.path.dirname(os.path.abspath(summary.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -17,6 +17,22 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(s.filenames, ['file42'])
         s = summary.Summary('out', fofn=fofn, filenames=['file42'])
         self.assertEqual(s.filenames, ['file42', 'file1', 'file2'])
+
+
+    def test_load_input_files(self):
+        '''Test _load_input_files'''
+        file1 = os.path.join(data_dir, 'summary_test_load_input_files.1.tsv')
+        file2 = os.path.join(data_dir, 'summary_test_load_input_files.2.tsv')
+        sample1 = summary_sample.SummarySample(file1)
+        sample2 = summary_sample.SummarySample(file2)
+        sample1.run()
+        sample2.run()
+        got = summary.Summary._load_input_files([file1, file2], 90)
+        expected = {file1: sample1, file2: sample2}
+        self.assertEqual(expected, got)
+
+
+
 
 
     def test_gather_output_rows(self):

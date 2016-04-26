@@ -2,7 +2,7 @@ import os
 import re
 import openpyxl
 import pyfastaq
-from ariba import flag, common, report, summary_cluster
+from ariba import flag, common, report, summary_cluster, summary_sample
 
 class Error (Exception): pass
 
@@ -31,7 +31,6 @@ class Summary:
         self.min_id = min_id
         self.outfile = outfile
         self.phandango_prefix = phandango_prefix
-        self.clusters = {}
 
 
     def _load_fofn(self, fofn):
@@ -45,6 +44,15 @@ class Summary:
         for fname in self.filenames:
             if not os.path.exists(fname):
                 raise Error('File not found: "' + fname + '". Cannot continue')
+
+
+    @classmethod
+    def _load_input_files(cls, filenames, min_id):
+        samples = {}
+        for filename in filenames:
+            samples[filename] = summary_sample.SummarySample(filename, min_pc_id=min_id)
+            samples[filename].run()
+        return samples
 
 
     @classmethod
@@ -214,7 +222,7 @@ class Summary:
 
     def run(self):
         self._check_files_exist()
-        rows = Summary._gather_output_rows(self.filenames, self.min_id)
+        self.samples = self._load_input_files(self.filenames, self.min_id)
 
         if self.filter_output:
             rows = Summary._filter_output_rows(rows)
