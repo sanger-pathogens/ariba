@@ -10,7 +10,7 @@ class SummarySample:
 
 
     @staticmethod
-    def _load_file(filename):
+    def _load_file(filename, min_pc_id):
         f = pyfastaq.utils.open_file_read(filename)
         clusters = {}
 
@@ -24,9 +24,10 @@ class SummarySample:
             data_dict = summary_cluster.SummaryCluster.line2dict(line)
             cluster = data_dict['cluster']
             if cluster not in clusters:
-                clusters[cluster] = summary_cluster.SummaryCluster()
+                clusters[cluster] = summary_cluster.SummaryCluster(min_pc_id=min_pc_id)
             clusters[cluster].add_data_dict(data_dict)
 
         pyfastaq.utils.close(f)
         return clusters
+
 

@@ -30,5 +30,5 @@ class TestSummarySample(unittest.TestCase):
             'cluster.v': cluster3
         }
 
-        got = summary_sample.SummarySample._load_file(infile)
+        got = summary_sample.SummarySample._load_file(infile, 90)
         self.assertEqual(expected, got)
