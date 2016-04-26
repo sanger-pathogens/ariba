@@ -195,22 +195,6 @@ class TestSummary(unittest.TestCase):
         os.unlink(tmp_out)
 
 
-    def test_write_phandango_csv(self):
-        '''Test _write_phandango_csv'''
-        tmp_out = 'tmp.test_write_phandango.csv'
-        rows = [
-            ['filename', 'seq1', 'seq1;var.p.I14L', 'seq1;var.p.P42Q', 'seq2', 'seq2;var.n.A14T'],
-            ['file1', 3, 0, 1, 3, 1],
-            ['file2', 3, 1, 0, 3, 0],
-            ['file3', 1, 0, 0, 3, 0],
-            ['file4', 2, 1, 0, 0, 0],
-        ]
-        summary.Summary._write_phandango_csv(rows, tmp_out)
-        expected = os.path.join(data_dir, 'summary_test_write_phandango_csv.csv')
-        self.assertTrue(filecmp.cmp(expected, tmp_out, shallow=False))
-        os.unlink(tmp_out)
-
-
     def test_distance_score_bewteen_values(self):
         '''Test _distance_score_bewteen_values'''
         tests = [
@@ -273,23 +257,4 @@ class TestSummary(unittest.TestCase):
         expected = os.path.join(data_dir, 'summary_test_newick_from_dist_matrix.tre')
         self.assertTrue(filecmp.cmp(expected, tmp_tree, shallow=False))
         os.unlink(tmp_tree)
-
-
-    def test_write_phandango_files(self):
-        '''Test _write_phandango_files'''
-        tmp_prefix = 'tmp.test.write_phandango_files'
-        rows = [
-            ['filename', 'seq1', 'seq1;var.p.I14L', 'seq1;var.p.P42Q', 'seq2', 'seq2;var.n.A14T'],
-            ['file1', 3, 0, 1, 3, 1],
-            ['file2', 3, 1, 0, 3, 0],
-            ['file3', 1, 0, 0, 3, 0],
-            ['file4', 2, 1, 0, 0, 0],
-        ]
-        summary.Summary._write_phandango_files(rows, tmp_prefix)
-        expected_csv = os.path.join(data_dir, 'summary_test_write_phandango_files.csv')
-        expected_tre = os.path.join(data_dir, 'summary_test_write_phandango_files.tre')
-        self.assertTrue(filecmp.cmp(expected_csv, tmp_prefix + '.csv', shallow=False))
-        self.assertTrue(filecmp.cmp(expected_tre, tmp_prefix + '.tre', shallow=False))
-        os.unlink(tmp_prefix + '.csv')
-        os.unlink(tmp_prefix + '.tre')
 

@@ -218,25 +218,13 @@ class Summary:
         os.unlink(r_script)
 
 
-    @classmethod
-    def _write_phandango_files(cls, rows, outprefix):
-        distance_file = outprefix + '.distance_matrix'
-        tree_file = outprefix + '.tre'
-        csv_file = outprefix + '.csv'
-        Summary._write_distance_matrix(rows, distance_file)
-        Summary._newick_from_dist_matrix(distance_file, tree_file)
-        os.unlink(distance_file)
-        Summary._write_phandango_csv(rows, csv_file)
-
-
     def run(self):
         self._check_files_exist()
         self.samples = self._load_input_files(self.filenames, self.min_id)
-
-        if self.outfile.endswith('.xls'):
-            Summary._write_xls(rows, self.outfile)
-        else:
-            Summary._write_tsv(rows, self.outfile)
-
-        if self.phandango_prefix is not None:
-            Summary._write_phandango_files(rows, self.phandango_prefix)
+        self.rows = self._gather_output_rows()
+        Summary._write_csv(self.filenames, self.rows, self.outprefix + '.csv', phandango=False)
+        lines = Summary._write_csv(self.filenames, self.rows, self.outprefix + '.phandango.csv', phandango=True)
+        dist_matrix_file = outprefix + '.phandango.distance_matrix'
+        tree_file = outprefix + '.phandango.tre'
+        Summary._write_distance_matrix(lines, dist_matrix_file)
+        Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
