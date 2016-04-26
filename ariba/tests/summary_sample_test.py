@@ -61,3 +61,17 @@ class TestSummarySample(unittest.TestCase):
         }
         got = sample_summary._column_summary_data()
         self.assertEqual(expected, got)
+
+
+    def test_non_synon_variants(self):
+        '''Test _non_synon_variants'''
+        infile = os.path.join(data_dir, 'summary_sample_test_column_summary_data.tsv')
+        sample_summary = summary_sample.SummarySample(infile)
+        sample_summary.clusters = sample_summary._load_file(infile, 90)
+        expected = {
+            'cluster.n': {'A14T', 'A6G'},
+            'cluster.p': {'A10V'},
+            'cluster.v': {'S5T'}
+        }
+        got = sample_summary._non_synon_variants()
+        self.assertEqual(expected, got)

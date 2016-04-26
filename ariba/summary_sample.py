@@ -40,6 +40,17 @@ class SummarySample:
         return {c: self.clusters[c].column_summary_data() for c in self.clusters}
 
 
+    def _non_synon_variants(self):
+        variants = {}
+        for cluster_name, cluster in self.clusters.items():
+            cluster_vars = cluster.non_synon_variants()
+            if len(cluster_vars):
+                variants[cluster_name] = cluster_vars
+        return variants
+
+
     def run(self):
         self._load_file(self.report_tsv, self.min_pc_id)
         self.column_summary_data = self._column_summary_data()
+        self.variants = self._non_synon_variants()
+
