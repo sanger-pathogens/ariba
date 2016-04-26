@@ -13,6 +13,7 @@ class Summary:
       filenames=None,
       fofn=None,
       filter_output=True,
+      all_variant_columns=False,
       phandango_prefix=None,
       min_id=90.0
     ):
@@ -28,6 +29,7 @@ class Summary:
             self.filenames.extend(self._load_fofn(fofn))
 
         self.filter_output = filter_output
+        self.all_variant_columns = all_variant_columns
         self.min_id = min_id
         self.outfile = outfile
         self.phandango_prefix = phandango_prefix
@@ -53,6 +55,15 @@ class Summary:
             samples[filename] = summary_sample.SummarySample(filename, min_pc_id=min_id)
             samples[filename].run()
         return samples
+
+
+    @classmethod
+    def _get_all_cluster_names(cls, samples_dict):
+        '''Input should be output of _load_input_files'''
+        cluster_names = set()
+        for filename, sample in samples_dict.items():
+            cluster_names.update(set(sample.clusters.keys()))
+        return cluster_names
 
 
     @classmethod

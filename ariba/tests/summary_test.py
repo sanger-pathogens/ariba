@@ -32,6 +32,17 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+
+    def test_get_all_cluster_names(self):
+        '''Test _get_all_cluster_names'''
+        file1 = os.path.join(data_dir, 'summary_test_get_all_cluster_names.1.tsv')
+        file2 = os.path.join(data_dir, 'summary_test_get_all_cluster_names.2.tsv')
+        samples = summary.Summary._load_input_files([file1, file2], 90)
+        got = summary.Summary._get_all_cluster_names(samples)
+        expected = {'cluster.n.1', 'cluster.v.1', 'cluster.p.1', 'cluster.p.2'}
+        self.assertEqual(expected, got)
+
+
     def test_gather_output_rows(self):
         '''Test _gather_output_rows'''
         infiles = [
