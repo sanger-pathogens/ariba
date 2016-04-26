@@ -156,10 +156,12 @@ class Summary:
             making_header_line = False
             lines.append(','.join(line))
 
+        first_line = ','.join(first_line)
         f = pyfastaq.utils.open_file_write(outfile)
-        print(*first_line, sep=',', file=f)
+        print(first_line, file=f)
         print(*lines, sep='\n', file=f)
         pyfastaq.utils.close(f)
+        return [first_line] + lines
 
 
     @staticmethod

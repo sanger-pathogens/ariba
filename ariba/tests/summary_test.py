@@ -170,13 +170,26 @@ class TestSummary(unittest.TestCase):
             },
         }
         filenames = ['file1', 'file2']
-        summary.Summary._write_csv(filenames, rows, tmp_out, phandango=False)
-        expected = os.path.join(data_dir, 'summary_test_write_tsv.out.not_phandango.csv')
-        self.assertTrue(filecmp.cmp(tmp_out, expected, shallow=False))
+        got_lines = summary.Summary._write_csv(filenames, rows, tmp_out, phandango=False)
+        expected_file = os.path.join(data_dir, 'summary_test_write_tsv.out.not_phandango.csv')
+        self.assertTrue(filecmp.cmp(tmp_out, expected_file, shallow=False))
         os.unlink(tmp_out)
-        summary.Summary._write_csv(filenames, rows, tmp_out, phandango=True)
-        expected = os.path.join(data_dir, 'summary_test_write_tsv.out.phandango.csv')
-        self.assertTrue(filecmp.cmp(tmp_out, expected, shallow=False))
+        expected_lines = [
+            'name,cluster.n.1,cluster.n.1.ref,cluster.n.1.idty,cluster.n.1.any_var,cluster.n.1.noncoding1.A14T,cluster.p.1,cluster.p.1.ref,cluster.p.1.idty,cluster.p.1.any_var,cluster.p.1.presence_absence1.I42L,cluster.v.1,cluster.v.1.ref,cluster.v.1.idty,cluster.v.1.any_var',
+            'file1,yes,noncoding1,98.33,yes,yes,yes,presence_absence1,98.96,yes,yes,yes,varonly1,99.42,no',
+            'file2,yes,noncoding1,98.33,no,no,yes,presence_absence1,98.96,no,no,no,NA,NA,NA'
+]
+        self.assertEqual(expected_lines, got_lines)
+
+        got_lines = summary.Summary._write_csv(filenames, rows, tmp_out, phandango=True)
+        expected_lines = [
+            'name,cluster.n.1:o1,cluster.n.1.ref:o2,cluster.n.1.idty:c1,cluster.n.1.any_var:o1,cluster.n.1.noncoding1.A14T:o1,cluster.p.1:o1,cluster.p.1.ref:o2,cluster.p.1.idty:c1,cluster.p.1.any_var:o1,cluster.p.1.presence_absence1.I42L:o1,cluster.v.1:o1,cluster.v.1.ref:o2,cluster.v.1.idty:c1,cluster.v.1.any_var:o1',
+            'file1,yes,noncoding1,98.33,yes,yes,yes,presence_absence1,98.96,yes,yes,yes,varonly1,99.42,no',
+            'file2,yes,noncoding1,98.33,no,no,yes,presence_absence1,98.96,no,no,no,NA,NA,NA'
+]
+        self.assertEqual(expected_lines, got_lines)
+        expected_file = os.path.join(data_dir, 'summary_test_write_tsv.out.phandango.csv')
+        self.assertTrue(filecmp.cmp(tmp_out, expected_file, shallow=False))
         os.unlink(tmp_out)
 
 
