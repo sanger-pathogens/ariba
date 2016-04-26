@@ -6,6 +6,8 @@ from ariba import flag, common, report, summary_cluster, summary_sample
 
 class Error (Exception): pass
 
+required_keys_for_difference = {'no', 'yes', 'yes_nonunique', 'fragmented'}
+
 class Summary:
     def __init__(
       self,
@@ -166,10 +168,11 @@ class Summary:
 
     @staticmethod
     def _distance_score_between_values(value1, value2):
-        if value1 != value2 and 0 in [value1, value2]:
-            return 1
-        else:
+        value_set = {value1, value2}
+        if value_set.isdisjoint(required_keys_for_difference) or value1 == value2 or value_set == {'NA', 'no'}:
             return 0
+        else:
+            return 1
 
 
     @classmethod

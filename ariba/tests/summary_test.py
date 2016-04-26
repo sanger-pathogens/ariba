@@ -212,26 +212,32 @@ class TestSummary(unittest.TestCase):
     def test_distance_score_bewteen_values(self):
         '''Test _distance_score_bewteen_values'''
         tests = [
-            ((0, 0), 0),
-            ((0, 1), 1),
-            ((0, 2), 1),
-            ((1, 0), 1),
-            ((1, 1), 0),
-            ((1, 2), 0),
-            ((2, 0), 1),
-            ((2, 1), 0),
-            ((2, 2), 0),
+            (('no', 'no'), 0),
+            (('no', 'yes'), 1),
+            (('no', 'yes_nonunique'), 1),
+            (('no', 'fragmented'), 1),
+            (('yes', 'no'), 1),
+            (('yes', 'yes'), 0),
+            (('yes', 'yes_nonunique'), 1),
+            (('yes', 'fragmented'), 1),
+            (('yes_nonunique', 'no'), 1),
+            (('yes_nonunique', 'yes'), 1),
+            (('yes_nonunique', 'yes_nonunique'), 0),
+            (('yes_nonunique', 'fragmented'), 1),
+            (('fragmented', 'no'), 1),
+            (('fragmented', 'yes'), 1),
+            (('fragmented', 'yes_nonunique'), 1),
+            (('fragmented', 'fragmented'), 0),
+            (('NA', 'no'), 0),
+            (('NA', 'yes'), 1),
+            (('NA', 'yes_nonunique'), 1),
+            (('NA', 'fragmented'), 1),
         ]
 
         for (val1, val2), expected in tests:
             self.assertEqual(expected, summary.Summary._distance_score_between_values(val1, val2))
+            self.assertEqual(expected, summary.Summary._distance_score_between_values(val2, val1))
 
-        # check distance calculation is commutative
-        for val1 in range(5):
-            for val2 in range(5):
-                d1 = summary.Summary._distance_score_between_values(val1, val2)
-                d2 = summary.Summary._distance_score_between_values(val2, val1)
-                self.assertEqual(d1, d2)
 
 
     def test_distance_score_between_lists(self):
