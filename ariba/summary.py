@@ -9,11 +9,10 @@ class Error (Exception): pass
 class Summary:
     def __init__(
       self,
-      outfile,
+      outprefix,
       filenames=None,
       fofn=None,
       include_all_variant_columns=False,
-      phandango_prefix=None,
       min_id=90.0
     ):
         if filenames is None and fofn is None:
@@ -29,8 +28,7 @@ class Summary:
 
         self.include_all_variant_columns = include_all_variant_columns
         self.min_id = min_id
-        self.outfile = outfile
-        self.phandango_prefix = phandango_prefix
+        self.outprefix = outprefix
 
 
     def _load_fofn(self, fofn):
@@ -114,39 +112,53 @@ class Summary:
 
 
     @classmethod
-    def _write_tsv(cls, rows, outfile):
+    def _write_csv(cls, filenames, rows, outfile, phandango=False):
+        lines = []
+        non_var_keys_list = ['assembled', 'ref_seq', 'pct_id', 'any_var']
+        non_var_keys_set = set(non_var_keys_list)
+        making_header_line = True
+        first_line = ['name']
+
+        # loop over filenames not rows to preserve their order
+        for filename in filenames:
+            assert filename in rows
+            line = [filename]
+
+            for cluster_name in sorted(rows[filename]):
+                if making_header_line:
+                    first_line.extend([
+                        cluster_name,
+                        cluster_name + '.ref',
+                        cluster_name + '.idty',
+                        cluster_name + '.any_var',
+                    ])
+                    if phandango:
+                        first_line[-4] += ':o1'
+                        first_line[-3] += ':o2'
+                        first_line[-2] += ':c1'
+                        first_line[-1] += ':o1'
+
+                d = rows[filename][cluster_name]
+                line.extend([d[x] for x in non_var_keys_list])
+
+                for key, value in sorted(d.items()):
+                    if key in non_var_keys_set:
+                        continue
+
+                    if making_header_line:
+                        if phandango:
+                            first_line.append(cluster_name + '.' + key + ':o1')
+                        else:
+                            first_line.append(cluster_name + '.' + key)
+
+                    line.append(value)
+
+            making_header_line = False
+            lines.append(','.join(line))
+
         f = pyfastaq.utils.open_file_write(outfile)
-        print('#', end='', file=f)
-        for row in rows:
-            print('\t'.join([str(x) for x in row]), file=f)
-        pyfastaq.utils.close(f)
-
-
-    @classmethod
-    def _write_phandango_csv(cls, rows, outfile):
-        # phandango needs the "name" column.
-        # Names must match those used in the tree file.
-        # we also need to add suffixes like :z1 to make phandango colour
-        # the columns consistently. We want to colour just sequence
-        # columns the same, and then all variant columns the same
-        header_line = ['name']
-        var_regex = re.compile('^.*;var\.[np.]\.\S+$')
-        var_columns = []
-
-        for i in range(1, len(rows[0]), 1):
-            heading = rows[0][i]
-            if var_regex.search(heading) is not None:
-                var_columns.append(i)
-
-            header_line.append(heading + ':o1')
-
-        f = pyfastaq.utils.open_file_write(outfile)
-        print(*header_line, sep=',', file=f)
-        for row in rows[1:]:
-            to_print = list(row)
-            for i in var_columns:
-                to_print[i] *= 3
-            print(*to_print, sep=',', file=f)
+        print(*first_line, sep=',', file=f)
+        print(*lines, sep='\n', file=f)
         pyfastaq.utils.close(f)
 
 
@@ -225,9 +237,6 @@ class Summary:
     def run(self):
         self._check_files_exist()
         self.samples = self._load_input_files(self.filenames, self.min_id)
-
-        if self.filter_output:
-            rows = Summary._filter_output_rows(rows)
 
         if self.outfile.endswith('.xls'):
             Summary._write_xls(rows, self.outfile)
