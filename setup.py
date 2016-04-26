@@ -18,7 +18,6 @@ setup(
     test_suite='nose.collector',
     tests_require=['nose >= 1.3'],
     install_requires=[
-        'openpyxl >= 1.6.2',
         'pyfastaq >= 3.12.0',
         'pysam >= 0.8.1, <= 0.8.3',
         'pymummer>=0.6.1',
