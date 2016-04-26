@@ -32,7 +32,6 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-
     def test_get_all_cluster_names(self):
         '''Test _get_all_cluster_names'''
         file1 = os.path.join(data_dir, 'summary_test_get_all_cluster_names.1.tsv')
@@ -40,6 +39,21 @@ class TestSummary(unittest.TestCase):
         samples = summary.Summary._load_input_files([file1, file2], 90)
         got = summary.Summary._get_all_cluster_names(samples)
         expected = {'cluster.n.1', 'cluster.v.1', 'cluster.p.1', 'cluster.p.2'}
+        self.assertEqual(expected, got)
+
+
+    def test_get_all_variant_column_tuples(self):
+        '''Test _get_all_variant_column_tuples'''
+        file1 = os.path.join(data_dir, 'summary_test_get_all_cluster_names.1.tsv')
+        file2 = os.path.join(data_dir, 'summary_test_get_all_cluster_names.2.tsv')
+        samples = summary.Summary._load_input_files([file1, file2], 90)
+        got = summary.Summary._get_all_variant_column_tuples(samples)
+        expected = {
+            ('cluster.p.2', 'presence_absence1', 'A10V'),
+            ('cluster.n.1', 'noncoding1', 'A6G'),
+            ('cluster.n.1', 'noncoding1', 'A14T'),
+            ('cluster.p.1', 'presence_absence1', 'A10V'),
+        }
         self.assertEqual(expected, got)
 
 

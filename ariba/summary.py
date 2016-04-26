@@ -67,6 +67,20 @@ class Summary:
 
 
     @classmethod
+    def _get_all_variant_column_tuples(cls, samples_dict):
+        '''Input should be output of _load_input_files'''
+        tuples = set()
+        for filename, sample in samples_dict.items():
+            for cluster in sample.column_summary_data:
+                if sample.column_summary_data[cluster]['assembled'] == 'yes':
+                    for key, tuple_set in sample.variant_column_names_tuples.items():
+                        for t in tuple_set:
+                            tuples.add((key,) + t)
+        return tuples
+
+
+
+    @classmethod
     def _gather_output_rows(cls, filenames, min_id):
         data = {filename: Summary._load_file(filename) for filename in filenames}
 
