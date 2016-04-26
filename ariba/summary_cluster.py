@@ -89,6 +89,9 @@ class SummaryCluster:
 
 
     def _to_cluster_summary_assembled(self):
+        if len(self.data) == 0:
+            return 'no'
+
         if self.data[0]['ref_type'] == 'non_coding':
             has_complete_orf = True
         else:
