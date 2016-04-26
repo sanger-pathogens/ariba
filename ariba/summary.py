@@ -224,7 +224,8 @@ class Summary:
         self.rows = self._gather_output_rows()
         Summary._write_csv(self.filenames, self.rows, self.outprefix + '.csv', phandango=False)
         lines = Summary._write_csv(self.filenames, self.rows, self.outprefix + '.phandango.csv', phandango=True)
-        dist_matrix_file = outprefix + '.phandango.distance_matrix'
-        tree_file = outprefix + '.phandango.tre'
+        dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
+        tree_file = self.outprefix + '.phandango.tre'
         Summary._write_distance_matrix(lines, dist_matrix_file)
         Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
+        os.unlink(dist_matrix_file)
