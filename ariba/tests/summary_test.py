@@ -242,9 +242,9 @@ class TestSummary(unittest.TestCase):
 
     def test_distance_score_between_lists(self):
         '''Test _distance_score_between_lists'''
-        list1 = ['na', 0, 0, 0, 1, 1, 1, 2, 2, 2]
-        list2 = ['na', 0, 1, 2, 0, 1, 2, 1, 2, 2]
-        self.assertEqual(3, summary.Summary._distance_score_between_lists(list1, list2))
+        list1 = ['NA', 'no', 'yes']
+        list2 = ['NA', 'no', 'no']
+        self.assertEqual(1, summary.Summary._distance_score_between_lists(list1, list2))
 
 
     def test_write_distance_matrix(self):
