@@ -253,9 +253,9 @@ class TestSummary(unittest.TestCase):
         '''Test _write_distance_matrix'''
         rows = [
             ['filename', 'gene1', 'gene2', 'gene3'],
-            ['file1', 0, 1, 0],
-            ['file2', 1, 0, 3],
-            ['file3', 0, 0, 4],
+            ['file1', 'no', 'yes', 'no'],
+            ['file2', 'yes', 'no', 'yes'],
+            ['file3', 'no', 'no', 'yes'],
         ]
 
         tmp_distances = 'tmp.test.write_distance_matrix.distances'

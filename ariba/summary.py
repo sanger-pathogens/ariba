@@ -183,19 +183,23 @@ class Summary:
 
     @classmethod
     def _write_distance_matrix(cls, lines, outfile):
-        if len(rows) < 3:
+        if len(lines) < 3:
             raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
                         'Only one sample present.')
 
+        if len(lines[0]) < 2:
+            raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
+                        'No genes present in output')
+
         with open(outfile, 'w') as f:
-            sample_names = [x[0] for x in rows]
+            sample_names = [x[0] for x in lines]
             print(*sample_names[1:], sep='\t', file=f)
 
-            for i in range(1,len(rows)):
+            for i in range(1,len(lines)):
                 scores = []
-                for j in range(2, len(rows)):
-                    scores.append(Summary._distance_score_between_lists(rows[i], rows[j]))
-                print(rows[i][0], *scores, sep='\t', file=f)
+                for j in range(2, len(lines)):
+                    scores.append(Summary._distance_score_between_lists(lines[i], lines[j]))
+                print(lines[i][0], *scores, sep='\t', file=f)
 
 
     @classmethod
