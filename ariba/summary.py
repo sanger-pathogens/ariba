@@ -2,34 +2,19 @@ import os
 import re
 import openpyxl
 import pyfastaq
-from ariba import flag, common, report
+from ariba import flag, common, report, summary_cluster, summary_sample
 
 class Error (Exception): pass
 
-
-int_columns = [
-    'reads',
-    'ref_len',
-    'ref_base_assembled',
-    'ctg_len',
-    'ref_start',
-    'ref_end',
-    'ctg_start',
-    'ctg_end',
-]
-
-
-float_columns = ['pc_ident']
-
+required_keys_for_difference = {'no', 'yes', 'yes_nonunique', 'fragmented'}
 
 class Summary:
     def __init__(
       self,
-      outfile,
+      outprefix,
       filenames=None,
       fofn=None,
-      filter_output=True,
-      phandango_prefix=None,
+      include_all_variant_columns=False,
       min_id=90.0
     ):
         if filenames is None and fofn is None:
@@ -43,10 +28,9 @@ class Summary:
         if fofn is not None:
             self.filenames.extend(self._load_fofn(fofn))
 
-        self.filter_output = filter_output
+        self.include_all_variant_columns = include_all_variant_columns
         self.min_id = min_id
-        self.outfile = outfile
-        self.phandango_prefix = phandango_prefix
+        self.outprefix = outprefix
 
 
     def _load_fofn(self, fofn):
@@ -63,211 +47,132 @@ class Summary:
 
 
     @classmethod
-    def _line2dict(cls, line):
-        data = line.rstrip().split('\t')
-        if len(data) != len(report.columns):
-            raise Error('Wrong number of columns in the following line. Expected ' + str(len(report.columns)) + ' but got ' + str(len(data)) + '\n' + line)
-        d = {report.columns[i]: data[i] for i in range(len(data))}
-        d['flag'] = flag.Flag(int(d['flag']) )
-        for key in int_columns:
-            try:
-                d[key] = int(d[key])
-            except:
-                assert d[key] == '.'
-
-        for key in float_columns:
-            try:
-                d[key] = float(d[key])
-            except:
-                assert d[key] == '.'
-
-        return d
-
-
-    @classmethod
-    def _dict2key(cls, d):
-        if d['var_type'] == '.':
-            return d['ref_name'], '', ''
-        elif d['known_var_change'] == d['ref_ctg_change'] == '.':
-            raise Error('Unexpected data in ariba summary... \n' + str(d) + '\n... known_var_change and ref_ctg_change both equal to ".", but var_type was not a ".". Cannot continue')
-        else:
-            if '.' not in [d['known_var_change'], d['ref_ctg_change']] and d['known_var_change'] != d['ref_ctg_change']:
-                raise Error('Unexpected data in ariba summary... \n' + str(d) + '\n... known_var_change != ref_ctg_change. Cannot continue')
-            if d['known_var_change'] != '.':
-                change = d['known_var_change']
-            else:
-                change = d['ref_ctg_change']
-
-            return d['ref_name'], d['var_seq_type'], change
-
-
-    @classmethod
-    def _load_file(cls, filename):
-        f = pyfastaq.utils.open_file_read(filename)
-        d = {}
-
-        for line in f:
-            if line.startswith('#'):
-                if line.rstrip()[1:].split('\t') != report.columns:
-                    pyfastaq.utils.close(f)
-                    raise Error('Error parsing the following line.\n' + line)
-                continue
-            data = Summary._line2dict(line)
-            key = Summary._dict2key(data)
-            if key[0] not in d:
-                d[key[0]] = {}
-            d[key[0]][key] = data
-
-        pyfastaq.utils.close(f)
-        return d
-
-
-    @classmethod
-    def _pc_id_of_longest(cls, data_dict, seq_name):
-        longest = 0
-        identity = 0
-        assert seq_name in data_dict
-
-        for d in data_dict[seq_name].values():
-            if d['ref_base_assembled'] > longest:
-                longest = d['ref_base_assembled']
-                identity = d['pc_ident']
-
-        return identity
-
-
-    @classmethod
-    def _to_summary_number_for_seq(cls, data_dict, seq_name, min_id):
-        f = list(data_dict[seq_name].values())[0]['flag']
-
-        if f.has('assembly_fail') or (not f.has('assembled')) or f.has('ref_seq_choose_fail') or Summary._pc_id_of_longest(data_dict, seq_name) <= min_id:
-            return 0
-        elif f.has('assembled_into_one_contig') and f.has('complete_orf') and f.has('unique_contig') and (not f.has('scaffold_graph_bad')) and (not f.has('variants_suggest_collapsed_repeat')) and (not f.has('hit_both_strands')) and (not f.has('region_assembled_twice')):
-            if f.has('has_nonsynonymous_variants'):
-                return 2
-            else:
-                return 3
-        else:
-            return 1
-
-
-    @classmethod
-    def _to_summary_number_for_variant(cls, data_dict):
-        if data_dict['has_known_var'] == '1' or (data_dict['known_var'] != '1' and data_dict['ref_ctg_change'] != '.'):
-            return 1
-        else:
-            return 0
-
-
-    @classmethod
-    def _gather_output_rows(cls, filenames, min_id):
-        data = {filename: Summary._load_file(filename) for filename in filenames}
-
-        all_column_tuples = set()
-
-        for filename, data_dict in data.items():
-            for seq_name, seq_data_dict in data_dict.items():
-                all_column_tuples.update(set(seq_data_dict.keys()))
-                all_column_tuples.add((seq_name, '', ''))
-
-
-
-        all_column_tuples = list(all_column_tuples)
-        all_column_tuples.sort()
-        rows = [['filename']]
-        for t in all_column_tuples:
-            if t[1] == t[2] == '':
-                rows[0].append(t[0])
-            else:
-                rows[0].append(t[0] + ';' + 'var.' + t[1] + '.' + t[2])
-
+    def _load_input_files(cls, filenames, min_id):
+        samples = {}
         for filename in filenames:
-            new_row = [filename]
-            for column_tuple in all_column_tuples:
-                if column_tuple[0] not in data[filename]:
-                    new_row.append(0)
-                elif column_tuple[1] == '':
-                    new_row.append(Summary._to_summary_number_for_seq(data[filename], column_tuple[0], min_id))
-                elif column_tuple in data[filename][column_tuple[0]]:
-                    new_row.append(Summary._to_summary_number_for_variant(data[filename][column_tuple[0]][column_tuple]))
+            samples[filename] = summary_sample.SummarySample(filename, min_pc_id=min_id)
+            samples[filename].run()
+        return samples
+
+
+    @classmethod
+    def _get_all_cluster_names(cls, samples_dict):
+        '''Input should be output of _load_input_files'''
+        cluster_names = set()
+        for filename, sample in samples_dict.items():
+            cluster_names.update(set(sample.clusters.keys()))
+        return cluster_names
+
+
+    @classmethod
+    def _get_all_variant_columns(cls, samples_dict):
+        '''Input should be output of _load_input_files'''
+        columns = {}
+        for filename, sample in samples_dict.items():
+            for cluster in sample.column_summary_data:
+                if sample.column_summary_data[cluster]['assembled'] == 'yes':
+                    for key, tuple_set in sample.variant_column_names_tuples.items():
+                        for t in tuple_set:
+                            if key not in columns:
+                                columns[key] = set()
+                            columns[key].add(t)
+        return columns
+
+
+    def _gather_output_rows(self):
+        all_cluster_names = Summary._get_all_cluster_names(self.samples)
+        all_var_columns = Summary._get_all_variant_columns(self.samples)
+        rows = {}
+
+        for filename, sample in self.samples.items():
+            rows[filename] = {}
+
+            for cluster in all_cluster_names:
+                rows[filename][cluster] = {}
+
+                if cluster in sample.column_summary_data and sample.column_summary_data[cluster]['assembled'].startswith('yes'):
+                    rows[filename][cluster] = sample.column_summary_data[cluster]
                 else:
-                    new_row.append(0)
+                    rows[filename][cluster] = {
+                        'assembled': 'no',
+                        'ref_seq': 'NA',
+                        'any_var': 'NA',
+                        'pct_id': 'NA'
+                    }
 
-            rows.append(new_row)
-
-        return rows
-
-
-    @classmethod
-    def _filter_output_rows(cls, rows):
-        # remove rows that are all zeros
-        rows = [x for x in rows if x[1:] != [0]*(len(x)-1)]
-
-        # remove columns that are all zeros
-        to_remove = []
-        for i in range(1, len(rows[0])):
-            if sum([x[i] for x in rows[1:]]) == 0:
-                to_remove.append(i)
-
-        for i in range(len(rows)):
-            rows[i] = [rows[i][j] for j in range(len(rows[i])) if j not in to_remove]
+                if self.include_all_variant_columns and cluster in all_var_columns:
+                    for (ref_name, variant) in all_var_columns[cluster]:
+                        key = ref_name + '.' + variant
+                        if rows[filename][cluster]['assembled'] == 'no':
+                            rows[filename][cluster][key] = 'NA'
+                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant) in sample.variant_column_names_tuples[cluster]:
+                            rows[filename][cluster][key] = 'yes'
+                        else:
+                            rows[filename][cluster][key] = 'no'
 
         return rows
 
 
     @classmethod
-    def _write_tsv(cls, rows, outfile):
+    def _write_csv(cls, filenames, rows, outfile, phandango=False):
+        lines = []
+        non_var_keys_list = ['assembled', 'ref_seq', 'pct_id', 'any_var']
+        non_var_keys_set = set(non_var_keys_list)
+        making_header_line = True
+        first_line = ['name']
+
+        # loop over filenames not rows to preserve their order
+        for filename in filenames:
+            assert filename in rows
+            line = [filename]
+
+            for cluster_name in sorted(rows[filename]):
+                if making_header_line:
+                    first_line.extend([
+                        cluster_name,
+                        cluster_name + '.ref',
+                        cluster_name + '.idty',
+                        cluster_name + '.any_var',
+                    ])
+                    if phandango:
+                        first_line[-4] += ':o1'
+                        first_line[-3] += ':o2'
+                        first_line[-2] += ':c1'
+                        first_line[-1] += ':o1'
+
+                d = rows[filename][cluster_name]
+                line.extend([d[x] for x in non_var_keys_list])
+
+                for key, value in sorted(d.items()):
+                    if key in non_var_keys_set:
+                        continue
+
+                    if making_header_line:
+                        if phandango:
+                            first_line.append(cluster_name + '.' + key + ':o1')
+                        else:
+                            first_line.append(cluster_name + '.' + key)
+
+                    line.append(value)
+
+            making_header_line = False
+            lines.append(line)
+
         f = pyfastaq.utils.open_file_write(outfile)
-        print('#', end='', file=f)
-        for row in rows:
-            print('\t'.join([str(x) for x in row]), file=f)
+        print(','.join(first_line), file=f)
+        for line in lines:
+            print(*line, sep=',', file=f)
         pyfastaq.utils.close(f)
-
-
-    @classmethod
-    def _write_phandango_csv(cls, rows, outfile):
-        # phandango needs the "name" column.
-        # Names must match those used in the tree file.
-        # we also need to add suffixes like :z1 to make phandango colour
-        # the columns consistently. We want to colour just sequence
-        # columns the same, and then all variant columns the same
-        header_line = ['name']
-        var_regex = re.compile('^.*;var\.[np.]\.\S+$')
-        var_columns = []
-
-        for i in range(1, len(rows[0]), 1):
-            heading = rows[0][i]
-            if var_regex.search(heading) is not None:
-                var_columns.append(i)
-
-            header_line.append(heading + ':o1')
-
-        f = pyfastaq.utils.open_file_write(outfile)
-        print(*header_line, sep=',', file=f)
-        for row in rows[1:]:
-            to_print = list(row)
-            for i in var_columns:
-                to_print[i] *= 3
-            print(*to_print, sep=',', file=f)
-        pyfastaq.utils.close(f)
-
-
-    @classmethod
-    def _write_xls(cls, rows, outfile):
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.worksheets[0]
-        worksheet.title = 'ARIBA_summary'
-        for row in rows:
-            worksheet.append(row)
-        workbook.save(outfile)
+        return [first_line] + lines
 
 
     @staticmethod
     def _distance_score_between_values(value1, value2):
-        if value1 != value2 and 0 in [value1, value2]:
-            return 1
-        else:
+        value_set = {value1, value2}
+        if value_set.isdisjoint(required_keys_for_difference) or value1 == value2 or value_set == {'NA', 'no'}:
             return 0
+        else:
+            return 1
 
 
     @classmethod
@@ -277,24 +182,24 @@ class Summary:
 
 
     @classmethod
-    def _write_distance_matrix(cls, rows, outfile):
-        if len(rows) < 3:
+    def _write_distance_matrix(cls, lines, outfile):
+        if len(lines) < 3:
             raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
                         'Only one sample present.')
 
-        if len(rows[0]) < 2:
+        if len(lines[0]) < 2:
             raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
                         'No genes present in output')
 
         with open(outfile, 'w') as f:
-            sample_names = [x[0] for x in rows]
+            sample_names = [x[0] for x in lines]
             print(*sample_names[1:], sep='\t', file=f)
 
-            for i in range(1,len(rows)):
+            for i in range(1,len(lines)):
                 scores = []
-                for j in range(2, len(rows)):
-                    scores.append(Summary._distance_score_between_lists(rows[i], rows[j]))
-                print(rows[i][0], *scores, sep='\t', file=f)
+                for j in range(2, len(lines)):
+                    scores.append(Summary._distance_score_between_lists(lines[i], lines[j]))
+                print(lines[i][0], *scores, sep='\t', file=f)
 
 
     @classmethod
@@ -313,28 +218,14 @@ class Summary:
         os.unlink(r_script)
 
 
-    @classmethod
-    def _write_phandango_files(cls, rows, outprefix):
-        distance_file = outprefix + '.distance_matrix'
-        tree_file = outprefix + '.tre'
-        csv_file = outprefix + '.csv'
-        Summary._write_distance_matrix(rows, distance_file)
-        Summary._newick_from_dist_matrix(distance_file, tree_file)
-        os.unlink(distance_file)
-        Summary._write_phandango_csv(rows, csv_file)
-
-
     def run(self):
         self._check_files_exist()
-        rows = Summary._gather_output_rows(self.filenames, self.min_id)
-
-        if self.filter_output:
-            rows = Summary._filter_output_rows(rows)
-
-        if self.outfile.endswith('.xls'):
-            Summary._write_xls(rows, self.outfile)
-        else:
-            Summary._write_tsv(rows, self.outfile)
-
-        if self.phandango_prefix is not None:
-            Summary._write_phandango_files(rows, self.phandango_prefix)
+        self.samples = self._load_input_files(self.filenames, self.min_id)
+        self.rows = self._gather_output_rows()
+        Summary._write_csv(self.filenames, self.rows, self.outprefix + '.csv', phandango=False)
+        lines = Summary._write_csv(self.filenames, self.rows, self.outprefix + '.phandango.csv', phandango=True)
+        dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
+        tree_file = self.outprefix + '.phandango.tre'
+        Summary._write_distance_matrix(lines, dist_matrix_file)
+        Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
+        os.unlink(dist_matrix_file)

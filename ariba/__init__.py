@@ -33,6 +33,8 @@ __all__ = [
     'sequence_metadata',
     'sequence_variant',
     'summary',
+    'summary_cluster',
+    'summary_sample',
     'tasks',
     'versions',
 ]
