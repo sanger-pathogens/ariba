@@ -353,6 +353,7 @@ class TestReferenceData(unittest.TestCase):
         refdata.rename_sequences(tmp_out)
         expected_file = os.path.join(data_dir, 'reference_data_test_rename_sequences.out')
         self.assertTrue(filecmp.cmp(expected_file, tmp_out, shallow=False))
+        os.unlink(tmp_out)
 
         meta1 = sequence_metadata.SequenceMetadata('noncoding1\t.\t.\toriginal name "noncoding1"')
         meta2 = sequence_metadata.SequenceMetadata('noncoding1_1\t.\t.\toriginal name "noncoding1 blah"')
