@@ -145,8 +145,13 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
         str(cluster.assembly_compare.percent_identities[contig_name]) if contig_name in cluster.assembly_compare.percent_identities else '0',
         contig_name,
         str(contig_length),  # 9 length of scaffold matching reference
-        str(round(cluster.total_contig_depths[contig_name] / contig_length, 1)), # 10 mean mapped read depth
     ]
+
+    # it's possible that there is no read depth on an assembled contig
+    if contig_name in cluster.total_contig_depths:
+        common_first_columns.append(str(round(cluster.total_contig_depths[contig_name] / contig_length, 1)))
+    else:
+        common_first_columns.append('0')
 
     if cluster.ref_sequence.id in cluster.refdata.metadata and  len(cluster.refdata.metadata[cluster.ref_sequence.id]['.']) > 0:
         free_text_column = ';'.join([x.free_text for x in cluster.refdata.metadata[cluster.ref_sequence.id]['.']])
