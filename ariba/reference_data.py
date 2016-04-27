@@ -1,11 +1,14 @@
 import os
 import sys
+import re
 import copy
 import pyfastaq
 from ariba import sequence_metadata, cdhit
 
 
 class Error (Exception): pass
+
+rename_sub_regex = re.compile(r'\W')
 
 
 class ReferenceData:
@@ -105,7 +108,7 @@ class ReferenceData:
         if filename is not None:
             seq_reader = pyfastaq.sequences.file_reader(filename)
             for seq in seq_reader:
-                seq.id = seq.id.split()[0]
+                #seq.id = seq.id.split()[0]
                 if seq.id in d:
                     raise Error('Duplicate name "' + seq.id + '" found in file ' + filename + '. Cannot continue)')
                 d[seq.id] = copy.copy(seq)
@@ -292,6 +295,100 @@ class ReferenceData:
         variants_only_removed = self._remove_bad_genes(self.seq_dicts['variants_only'], outprefix + '.00.check_fasta_variants_only.log')
         presence_absence_removed = self._remove_bad_genes(self.seq_dicts['presence_absence'], outprefix + '.00.check_fasta_presence_absence.log')
         self._filter_bad_variant_data(outprefix + '.01.check_variants', variants_only_removed, presence_absence_removed)
+
+
+    @classmethod
+    def _new_seq_name(cls, name):
+        name = name.split()[0]
+        return re.sub(rename_sub_regex, '_', name)
+
+
+    @classmethod
+    def _seq_names_to_rename_dict(cls, names):
+        used_names = set()
+        old_name_to_new = {}
+
+        for old_name in sorted(names):
+            new_name = ReferenceData._new_seq_name(old_name)
+            if new_name in used_names:
+                i = 1
+                new_name_prefix = new_name
+                while new_name in used_names:
+                    new_name = new_name_prefix + '_' + str(i)
+                    i += 1
+
+            assert new_name not in used_names
+            if new_name != old_name:
+                old_name_to_new[old_name] = new_name
+
+            used_names.add(new_name)
+
+        return old_name_to_new
+
+
+    @classmethod
+    def _rename_names_in_seq_dicts(cls, seq_dicts, rename_dict):
+        '''Changes seq_dicts in place'''
+        for seq_type in ['presence_absence', 'variants_only', 'non_coding']:
+            new_dict = {}
+            while len(seq_dicts[seq_type]):
+                old_name, seq = seq_dicts[seq_type].popitem()
+                if old_name in rename_dict:
+                    seq.id = rename_dict[old_name]
+
+                new_dict[seq.id] = seq
+            seq_dicts[seq_type] = new_dict
+
+
+    @classmethod
+    def _rename_metadata_set(cls, metadata_set, new_name):
+        new_set = set()
+        for meta in metadata_set:
+            new_meta = copy.copy(meta)
+            new_meta.name = new_name
+            new_set.add(new_meta)
+        return new_set
+
+
+    @classmethod
+    def _rename_names_in_metadata(cls, meta_dict, rename_dict):
+        new_dict = {}
+
+        while len(meta_dict):
+            old_name, gene_dict = meta_dict.popitem()
+            if old_name in rename_dict:
+                new_name = rename_dict[old_name]
+                for seq_type in ['n', 'p']:
+                    for position, metaset in gene_dict[seq_type].items():
+                        gene_dict[seq_type][position] = ReferenceData._rename_metadata_set(metaset, new_name)
+
+                gene_dict['.'] = ReferenceData._rename_metadata_set(gene_dict['.'], new_name)
+            else:
+                new_name = old_name
+
+            new_dict[new_name] = gene_dict
+
+        return new_dict
+
+
+    def rename_sequences(self, outfile):
+        presabs_names = set(self.seq_dicts['presence_absence'].keys())
+        noncoding_names = set(self.seq_dicts['non_coding'].keys())
+        varonly_names = set(self.seq_dicts['variants_only'].keys())
+        # we should have already checked that all the names are unique, but let's do it again!
+        all_names = presabs_names.union(noncoding_names).union(varonly_names)
+        if len(all_names) != len(presabs_names) + len(noncoding_names) + len(varonly_names):
+            raise Error('Got a non-unique name in input data. Cannot continue')
+
+        rename_dict = ReferenceData._seq_names_to_rename_dict(all_names)
+        if len(rename_dict):
+            print('Had to rename some sequences. See', outfile, 'for old -> new names', file=sys.stderr)
+            with open(outfile, 'w') as f:
+                for old_name, new_name in sorted(rename_dict.items()):
+                    print(old_name, new_name, sep='\t', file=f)
+
+            ReferenceData._rename_names_in_seq_dicts(self.seq_dicts, rename_dict)
+            self.metadata = ReferenceData._rename_names_in_metadata(self.metadata, rename_dict)
 
 
     def make_catted_fasta(self, outfile):

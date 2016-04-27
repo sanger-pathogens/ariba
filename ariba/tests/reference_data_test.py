@@ -212,6 +212,199 @@ class TestReferenceData(unittest.TestCase):
         os.unlink(tmp_log)
 
 
+    def test_new_seq_name(self):
+        '''Test _new_seq_name'''
+        tests = [
+            ('name', 'name'),
+            ('name ', 'name'),
+            ('name xyz', 'name'),
+            ('name_a', 'name_a'),
+            ('name spam eggs foo', 'name'),
+            ('name!', 'name_'),
+            ('name:foo', 'name_foo'),
+            ('name:!@foo', 'name___foo'),
+        ]
+
+        for name, expected in tests:
+            self.assertEqual(expected, reference_data.ReferenceData._new_seq_name(name))
+
+
+    def test_seq_names_to_rename_dict(self):
+        '''Test _seq_names_to_rename_dict'''
+        names = {'foo', 'foo abc', 'foo xyz', 'bar!', 'bar:', 'spam abc', 'eggs'}
+        got = reference_data.ReferenceData._seq_names_to_rename_dict(names)
+        expected = {
+            'foo abc': 'foo_1',
+            'foo xyz': 'foo_2',
+            'bar!': 'bar_',
+            'bar:': 'bar__1',
+            'spam abc': 'spam'
+        }
+        self.assertEqual(expected, got)
+
+
+    def test_rename_names_in_seq_dicts(self):
+        '''Test _rename_names_in_seq_dicts'''
+        rename_dict = {
+            'pa abc': 'pa',
+            'pa 1': 'pa_1',
+            'vo:': 'vo_',
+        }
+        seqs_dict = {
+            'presence_absence': {
+                'pa abc': pyfastaq.sequences.Fasta('pa abc', 'AAAA'),
+                'pa 1': pyfastaq.sequences.Fasta('pa 1', 'CCC'),
+            },
+            'variants_only': {
+                'vo:': pyfastaq.sequences.Fasta('vo:', 'GGG'),
+            },
+            'non_coding': {
+                'nonc': pyfastaq.sequences.Fasta('nonc', 'TTT'),
+            }
+        }
+
+        got = reference_data.ReferenceData._rename_names_in_seq_dicts(seqs_dict, rename_dict)
+        expected = {
+            'presence_absence': {
+                'pa': pyfastaq.sequences.Fasta('pa', 'AAAA'),
+                'pa_1': pyfastaq.sequences.Fasta('pa_1', 'CCC'),
+            },
+            'variants_only': {
+                'vo_': pyfastaq.sequences.Fasta('vo_', 'GGG'),
+            },
+            'non_coding': {
+                'nonc': pyfastaq.sequences.Fasta('nonc', 'TTT'),
+            }
+        }
+        self.assertEqual(expected, seqs_dict)
+
+
+    def test_rename_metadata_set(self):
+        '''Test _rename_metadata_set'''
+        metaset = {
+            sequence_metadata.SequenceMetadata('foo 1\t.\t.\tdescription'),
+            sequence_metadata.SequenceMetadata('foo 1\tp\tI42L\tspam eggs')
+        }
+
+        expected = {
+            sequence_metadata.SequenceMetadata('new_name\t.\t.\tdescription'),
+            sequence_metadata.SequenceMetadata('new_name\tp\tI42L\tspam eggs')
+        }
+        got = reference_data.ReferenceData._rename_metadata_set(metaset, 'new_name')
+        self.assertEqual(expected, got)
+
+
+    def test_rename_names_in_metadata(self):
+        '''Test _rename_names_in_metadata'''
+        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\tfree text')
+        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tA42T\tfree text2')
+        meta3 = sequence_metadata.SequenceMetadata('gene1\t.\t.\tfree text3')
+        meta4 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\tconfers killer rabbit resistance')
+        meta5 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\tremoves tardigrade's space-living capability")
+        meta1rename = sequence_metadata.SequenceMetadata('new_gene1\tn\tA42G\tfree text')
+        meta2rename = sequence_metadata.SequenceMetadata('new_gene1\tn\tA42T\tfree text2')
+        meta3rename = sequence_metadata.SequenceMetadata('new_gene1\t.\t.\tfree text3')
+        meta4rename = sequence_metadata.SequenceMetadata('new_gene1\tn\tG13T\tconfers killer rabbit resistance')
+
+        metadata = {
+            'gene1': {
+                'n': {12: {meta4}, 41: {meta1, meta2}},
+                'p': {},
+                '.': {meta3},
+            },
+            'gene2': {
+                'n': {},
+                'p': {41: {meta5}},
+                '.': set(),
+            }
+        }
+
+        expected = {
+            'new_gene1': {
+                'n': {12: {meta4rename}, 41: {meta1rename, meta2rename}},
+                'p': {},
+                '.': {meta3rename},
+            },
+            'gene2': {
+                'n': {},
+                'p': {41: {meta5}},
+                '.': set(),
+            }
+        }
+
+        rename_dict = {'gene1': 'new_gene1'}
+        got = reference_data.ReferenceData._rename_names_in_metadata(metadata, rename_dict)
+        self.assertEqual(expected, got)
+
+
+    def test_rename_sequences(self):
+        '''Test rename_sequences'''
+        presence_absence_fa = os.path.join(data_dir, 'reference_data_rename_sequences.presence_absence.fa')
+        variants_only_fa = os.path.join(data_dir, 'reference_data_rename_sequences.variants_only.fa')
+        noncoding_fa = os.path.join(data_dir, 'reference_data_rename_sequences.noncoding.fa')
+        metadata_tsv = os.path.join(data_dir, 'reference_data_rename_sequences_metadata.tsv')
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=presence_absence_fa,
+            variants_only_fa=variants_only_fa,
+            non_coding_fa=noncoding_fa,
+            metadata_tsv=metadata_tsv
+        )
+        tmp_out = 'tmp.test_rename_sequences.out'
+        refdata.rename_sequences(tmp_out)
+        expected_file = os.path.join(data_dir, 'reference_data_test_rename_sequences.out')
+        self.assertTrue(filecmp.cmp(expected_file, tmp_out, shallow=False))
+
+        meta1 = sequence_metadata.SequenceMetadata('noncoding1\t.\t.\toriginal name "noncoding1"')
+        meta2 = sequence_metadata.SequenceMetadata('noncoding1_1\t.\t.\toriginal name "noncoding1 blah"')
+        meta3 = sequence_metadata.SequenceMetadata('pres_abs1_2\t.\t.\toriginal name "pres_abs1 foo bar spam eggs"')
+        meta4 = sequence_metadata.SequenceMetadata('pres_abs1_1\t.\t.\toriginal name "pres_abs1 blah"')
+        meta5 = sequence_metadata.SequenceMetadata('pres_abs1\t.\t.\toriginal name "pres\'abs1"')
+        meta6 = sequence_metadata.SequenceMetadata('pres_abs2\t.\t.\toriginal name "pres_abs2"')
+        meta7 = sequence_metadata.SequenceMetadata('pres_abs3\t.\t.\toriginal name "pres!abs3"')
+        meta8 = sequence_metadata.SequenceMetadata('var_only1_2\t.\t.\toriginal name "var_only1 hello"')
+        meta9 = sequence_metadata.SequenceMetadata('var_only1\t.\t.\toriginal name "var:only1 boo"')
+        meta10 = sequence_metadata.SequenceMetadata('var_only1_1\t.\t.\toriginal name "var_only1"')
+        meta11 = sequence_metadata.SequenceMetadata('var_only2\t.\t.\toriginal name "var_only2"')
+
+        expected_meta = {
+            'noncoding1': {'n': {}, 'p': {}, '.': {meta1}},
+            'noncoding1_1': {'n': {}, 'p': {}, '.': {meta2}},
+            'pres_abs1_2': {'n': {}, 'p': {}, '.': {meta3}},
+            'pres_abs1_1': {'n': {}, 'p': {}, '.': {meta4}},
+            'pres_abs1': {'n': {}, 'p': {}, '.': {meta5}},
+            'pres_abs2': {'n': {}, 'p': {}, '.': {meta6}},
+            'pres_abs3': {'n': {}, 'p': {}, '.': {meta7}},
+            'var_only1_2': {'n': {}, 'p': {}, '.': {meta8}},
+            'var_only1': {'n': {}, 'p': {}, '.': {meta9}},
+            'var_only1_1': {'n': {}, 'p': {}, '.': {meta10}},
+            'var_only2': {'n': {}, 'p': {}, '.': {meta11}},
+        }
+
+        self.assertEqual(expected_meta, refdata.metadata)
+
+        expected_seqs_dict = {
+            'non_coding': {
+                'noncoding1': pyfastaq.sequences.Fasta('noncoding1', 'AAAA'),
+                'noncoding1_1': pyfastaq.sequences.Fasta('noncoding1_1', 'CCCC'),
+            },
+            'presence_absence': {
+                'pres_abs1_2': pyfastaq.sequences.Fasta('pres_abs1_2', 'ACGT'),
+                'pres_abs1_1': pyfastaq.sequences.Fasta('pres_abs1_1', 'AAAA'),
+                'pres_abs1': pyfastaq.sequences.Fasta('pres_abs1', 'CCCC'),
+                'pres_abs2': pyfastaq.sequences.Fasta('pres_abs2', 'TTTT'),
+                'pres_abs3': pyfastaq.sequences.Fasta('pres_abs3', 'GGGG'),
+            },
+            'variants_only': {
+                'var_only1_2': pyfastaq.sequences.Fasta('var_only1_2', 'AAAA'),
+                'var_only1': pyfastaq.sequences.Fasta('var_only1', 'CCCC'),
+                'var_only1_1': pyfastaq.sequences.Fasta('var_only1_1', 'GGGG'),
+                'var_only2': pyfastaq.sequences.Fasta('var_only2', 'TTTT'),
+            }
+        }
+
+        self.assertEqual(expected_seqs_dict, refdata.seq_dicts)
+
+
     def test_make_catted_fasta(self):
         '''Test make_catted_fasta'''
         presence_absence_fa = os.path.join(data_dir, 'reference_data_make_catted_fasta.presence_absence.fa')
