@@ -248,17 +248,17 @@ class RefGenesGetter:
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
         
-        zipfile = 'VFDB_setB_nt.fas.gz'
-        self._download_file('http://www.mgc.ac.cn/VFs/Down/VFDB_setB_nt.fas.gz', zipfile)
+        zipfile = 'VFDB_setA_nt.fas.gz'
+        self._download_file('http://www.mgc.ac.cn/VFs/Down/VFDB_setA_nt.fas.gz', zipfile)
         common.syscall('gunzip ' + zipfile)
         os.chdir(current_dir)
         print('Extracted files.')
         
         final_fasta = outprefix + '_VFDB.fa'
-        shutil.move(tmpdir+'/VFDB_setB_nt.fas',final_fasta)
+        shutil.move(tmpdir+'/VFDB_setA_nt.fas',final_fasta)
         shutil.rmtree(tmpdir)
         
-        print('Extracted full DNA sequence dataset. Final file is called', final_fasta, end='\n\n')
+        print('Extracted core DNA sequence dataset. Final file is called', final_fasta, end='\n\n')
         print('You can use it with ARIBA like this:')
         print('ariba prepareref --presabs', final_fasta, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
