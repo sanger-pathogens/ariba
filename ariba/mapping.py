@@ -6,6 +6,7 @@ from ariba import common
 
 class Error (Exception): pass
 
+bowtie2_index_extensions = [x + '.bt2' for x in ['1', '2', '3', '4', 'rev.1', 'rev.2']]
 
 def bowtie2_index(ref_fa, outprefix, bowtie2='bowtie2', verbose=False, verbose_filehandle=sys.stdout):
     expected_files = [outprefix + '.' + x + '.bt2' for x in ['1', '2', '3', '4', 'rev.1', 'rev.2']]
@@ -13,7 +14,7 @@ def bowtie2_index(ref_fa, outprefix, bowtie2='bowtie2', verbose=False, verbose_f
     for filename in expected_files:
         if not os.path.exists(filename):
             file_missing = True
-            break 
+            break
 
     if not file_missing:
         return
@@ -45,12 +46,24 @@ def run_bowtie2(
       clean_index=True,
     ):
 
-    map_index = out_prefix + '.map_index'
+    ref_is_indexed = True
+    for ext in bowtie2_index_extensions:
+        if not os.path.exists(ref_fa + '.' + ext):
+            ref_is_indexed = False
+            break
 
-    if clean_index:
-        clean_files = [map_index + '.' + x + '.bt2' for x in ['1', '2', '3', '4', 'rev.1', 'rev.2']]
+    clean_files = []
+
+    if ref_is_indexed:
+        if verbose:
+            print('Bowtie2 index files found (', ref_fa, '.*.bt2) so no need to index', sep='', file=verbose_filehandle)
+        map_index = ref_fa
     else:
-        clean_files = []
+        map_index = out_prefix + '.map_index'
+        bowtie2_index(ref_fa, map_index, bowtie2=bowtie2, verbose=verbose, verbose_filehandle=verbose_filehandle)
+
+        if clean_index:
+            clean_files = [map_index + '.' + x + '.bt2' for x in ['1', '2', '3', '4', 'rev.1', 'rev.2']]
 
     final_bam = out_prefix + '.bam'
     if sort:
@@ -81,7 +94,6 @@ def run_bowtie2(
 
     map_cmd = ' '.join(map_cmd)
 
-    bowtie2_index(ref_fa, map_index, bowtie2=bowtie2, verbose=verbose, verbose_filehandle=verbose_filehandle)
     common.syscall(map_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
 
     if sort:
