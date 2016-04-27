@@ -9,6 +9,7 @@ addons:
     - libncurses5-dev
     - r-base
     - r-base-dev
+    - r-base-core
 cache:
   directories:
   - "build"
