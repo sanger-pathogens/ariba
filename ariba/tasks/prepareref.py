@@ -4,9 +4,10 @@ from ariba import ref_preparer, external_progs, versions
 def run():
     parser = argparse.ArgumentParser(
         description = 'ARIBA: Antibiotic Resistance Identification By Assembly',
-        usage = 'ariba prepareref [options] <outdir>')
+        usage = 'ariba prepareref [options] <outdir>',
+        epilog = 'REQUIRED: either --ref_prefix, or at least one of --presabs, --varonly, --noncoding')
     input_group = parser.add_argument_group('input files options')
-    input_group.add_argument('--ref_prefix', help='Prefix of input files (same as was used with getref), to save listing --preseabs,--varonly ...etc. Will look for files called ref_prefix. followed by: metadata.tsv,presence_absence.fa,noncoding.fa,presence_absence.fa. Using this will cause these to be ignored if used: --presabs,--varonly,--noncoding,--metadata', metavar='FILENAME_PREFIX')
+    input_group.add_argument('--ref_prefix', help='Prefix of input files (same as was used with getref), to save listing --preseabs,--varonly ...etc. Will look for files called "ref_prefix." followed by: metadata.tsv,presence_absence.fa,noncoding.fa,variants_only.fa. Using this will cause these to be ignored if used: --presabs,--varonly,--noncoding,--metadata', metavar='FILENAME_PREFIX')
     input_group.add_argument('--presabs', help='FASTA file of presence absence genes', metavar='FILENAME')
     input_group.add_argument('--varonly', help='FASTA file of variants only genes', metavar='FILENAME')
     input_group.add_argument('--noncoding', help='FASTA file of noncoding sequences', metavar='FILENAME')
