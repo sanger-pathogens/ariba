@@ -137,6 +137,7 @@ class RefPreparer:
             print('\nLoading and checking input data', flush=True)
 
         refdata_outprefix = os.path.join(outdir, 'refcheck')
+        self.refdata.rename_sequences(refdata_outprefix + '.rename_info')
         self.refdata.sanity_check(refdata_outprefix)
 
         if self.verbose:
