@@ -219,6 +219,8 @@ class TestReferenceData(unittest.TestCase):
             ('name ', 'name'),
             ('name xyz', 'name'),
             ('name_a', 'name_a'),
+            ('name.a', 'name.a'),
+            ('name-a', 'name-a'),
             ('name spam eggs foo', 'name'),
             ('name!', 'name_'),
             ('name:foo', 'name_foo'),
