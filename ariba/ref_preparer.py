@@ -138,6 +138,7 @@ class RefPreparer:
 
         refdata_outprefix = os.path.join(outdir, 'refcheck')
         self.refdata.sanity_check(refdata_outprefix)
+        self.refdata.rename_sequences(refdata_outprefix + '.rename_info')
 
         if self.verbose:
             print('\nRunning cdhit', flush=True)
