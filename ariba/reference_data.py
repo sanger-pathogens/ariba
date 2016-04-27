@@ -8,7 +8,7 @@ from ariba import sequence_metadata, cdhit
 
 class Error (Exception): pass
 
-rename_sub_regex = re.compile(r'\W')
+rename_sub_regex = re.compile(r'[^\w.-]')
 
 
 class ReferenceData:
