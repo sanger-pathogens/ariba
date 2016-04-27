@@ -38,9 +38,9 @@ class CardRecord:
 
         re_search = aro_regex.search(aro_name)
         if re_search is not None:
-            return re_search.group(1)
+            return re_search.group(1).replace('.', '_')
         else:
-            return '_'.join(aro_name.split()[:3])
+            return '_'.join(aro_name.split()[:3]).replace('.', '_')
 
 
     @staticmethod
