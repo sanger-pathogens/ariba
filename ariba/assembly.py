@@ -244,6 +244,9 @@ class Assembly:
         common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
         self._rename_scaffolds(gapfilled_scaffolds, self.gapfilled_scaffolds, self.scaff_name_prefix)
         os.chdir(cwd)
+        if self.clean > 0:
+            print('Deleting GapFiller directory', self.gapfill_dir, file=self.log_fh)
+            shutil.rmtree(self.gapfill_dir)
 
 
     @staticmethod
