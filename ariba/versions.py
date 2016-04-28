@@ -31,7 +31,7 @@ def get_all_versions(raise_error=True):
 
     python_packages_ok = True
 
-    for package in ['openpyxl', 'pyfastaq', 'pymummer', 'pysam']:
+    for package in ['ariba', 'openpyxl', 'pyfastaq', 'pymummer', 'pysam']:
         try:
             exec('import ' + package)
             version = eval(package + '.__version__')
