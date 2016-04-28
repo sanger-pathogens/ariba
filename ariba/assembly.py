@@ -30,7 +30,7 @@ class Assembly:
       sspace_sd=0.4,
       reads_insert=500,
       extern_progs=None,
-      clean=1,
+      clean=True,
     ):
         self.reads1 = os.path.abspath(reads1)
         self.reads2 = os.path.abspath(reads2)
@@ -142,7 +142,7 @@ class Assembly:
 
         os.chdir(cwd)
 
-        if self.clean > 0:
+        if self.clean:
             print('Deleting assembly directory', self.assembler_dir, file=self.log_fh)
             shutil.rmtree(self.assembler_dir)
 
@@ -188,7 +188,7 @@ class Assembly:
         os.rename(sspace_scaffolds, self.scaffolder_scaffolds)
         os.chdir(cwd)
 
-        if self.clean > 0:
+        if self.clean:
             print('Deleting scaffolding directory', self.scaffold_dir, file=self.log_fh)
             shutil.rmtree(self.scaffold_dir)
 
@@ -244,7 +244,7 @@ class Assembly:
         common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
         self._rename_scaffolds(gapfilled_scaffolds, self.gapfilled_scaffolds, self.scaff_name_prefix)
         os.chdir(cwd)
-        if self.clean > 0:
+        if self.clean:
             print('Deleting GapFiller directory', self.gapfill_dir, file=self.log_fh)
             shutil.rmtree(self.gapfill_dir)
 
