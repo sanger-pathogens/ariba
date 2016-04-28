@@ -176,11 +176,21 @@ class Assembly:
             '-s', self.assembly_contigs
         ])
 
-        sspace_scaffolds = os.path.abspath('standard_output.final.scaffolds.fasta')
         common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
-        os.chdir(self.working_dir)
-        os.symlink(os.path.relpath(sspace_scaffolds), os.path.basename(self.scaffolder_scaffolds))
+        sspace_scaffolds = os.path.abspath('standard_output.final.scaffolds.fasta')
+        sspace_log = os.path.abspath('standard_output.logfile.txt')
+        with open(sspace_log) as f:
+            print('\n_______________ SSPACE log __________________\n', file=self.log_fh)
+            for line in f:
+                print(line.rstrip(), file=self.log_fh)
+            print('_______________ End of SSPACE log __________________\n', file=self.log_fh)
+
+        os.rename(sspace_scaffolds, self.scaffolder_scaffolds)
         os.chdir(cwd)
+
+        if self.clean > 0:
+            print('Deleting scaffolding directory', self.scaffold_dir, file=self.log_fh)
+            shutil.rmtree(self.scaffold_dir)
 
 
     @staticmethod
