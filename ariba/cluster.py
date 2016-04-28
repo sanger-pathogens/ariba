@@ -18,7 +18,7 @@ class Cluster:
       total_reads,
       total_reads_bases,
       logfile=None,
-      assembly_coverage=100,
+      assembly_coverage=50,
       assembly_kmer=21,
       assembler='spades',
       max_insert=1000,
