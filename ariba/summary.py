@@ -116,7 +116,8 @@ class Summary:
 
     @classmethod
     def _filter_clusters(cls, rows):
-        '''Removes any cluster where every sample has assembled == "no"'''
+        '''Removes any cluster where every sample has assembled == "no".
+           Returns tuple: (filtered rows, number of remaining columns)'''
         found_a_yes = set()
         first_filename = True
         all_clusters = set()
@@ -131,7 +132,6 @@ class Summary:
 
                 if rows[filename][cluster]['assembled'] == 'yes':
                     found_a_yes.add(cluster)
-                    break
 
             first_filename = False
 
@@ -141,7 +141,7 @@ class Summary:
             for cluster in to_delete:
                 del rows[filename][cluster]
 
-        return rows
+        return rows, len(found_a_yes)
 
 
     @classmethod
@@ -253,6 +253,11 @@ class Summary:
         self._check_files_exist()
         self.samples = self._load_input_files(self.filenames, self.min_id)
         self.rows = self._gather_output_rows()
+        self.rows, remaining_clusters = Summary._filter_clusters(self.rows)
+        if remaining_clusters == 0:
+            print('No clusters found that are present in any sample. Will not write any output files', file=sys.stderr)
+            sys.exit(1)
+
         Summary._write_csv(self.filenames, self.rows, self.outprefix + '.csv', phandango=False)
 
         if len(self.samples) > 1:

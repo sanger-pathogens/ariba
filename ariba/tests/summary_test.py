@@ -151,7 +151,7 @@ class TestSummary(unittest.TestCase):
         }
 
         got = summary.Summary._filter_clusters(rows)
-        self.assertEqual(expected, got)
+        self.assertEqual((expected, 3), got)
 
 
     def test_write_csv(self):
