@@ -1,4 +1,5 @@
 import os
+import shutil
 import pyfastaq
 import pymummer
 from ariba import common, mapping, bam_parse, external_progs
@@ -29,6 +30,7 @@ class Assembly:
       sspace_sd=0.4,
       reads_insert=500,
       extern_progs=None,
+      clean=True,
     ):
         self.reads1 = os.path.abspath(reads1)
         self.reads2 = os.path.abspath(reads2)
@@ -52,6 +54,7 @@ class Assembly:
         self.sspace_k = sspace_k
         self.sspace_sd = sspace_sd
         self.reads_insert = reads_insert
+        self.clean = clean
 
         if extern_progs is None:
             self.extern_progs = external_progs.ExternalProgs()
@@ -114,14 +117,34 @@ class Assembly:
         else:
             self.assembled_ok, err = common.syscall(cmd, verbose=True, allow_fail=True, verbose_filehandle=self.log_fh, print_errors=False)
         if self.assembled_ok:
-            os.symlink(spades_contigs, os.path.basename(self.assembly_contigs))
+            os.rename(spades_contigs, os.path.basename(self.assembly_contigs))
         else:
-            spades_errors_file = os.path.join(self.working_dir, 'spades_errors')
-            with open(spades_errors_file, 'w') as f:
-                print(err, file=f)
-            f.close()
+            print('Assembly finished with errors. These are the errors:', file=self.log_fh)
+            print(err, file=self.log_fh)
+            print('\nEnd of spades errors\n', file=self.log_fh)
+
+        spades_log = os.path.join(self.assembler_dir, 'spades.log')
+        if os.path.exists(spades_log):
+            with open(spades_log) as f:
+                print('\n______________ SPAdes log ___________________\n', file=self.log_fh)
+                for line in f:
+                    print(line.rstrip(), file=self.log_fh)
+                print('\n______________ End of SPAdes log _________________\n', file=self.log_fh)
+
+
+        spades_warnings = os.path.join(self.assembler_dir, 'warnings.log')
+        if os.path.exists(spades_warnings):
+            with open(spades_warnings) as f:
+                print('\n______________ SPAdes warnings ___________________\n', file=self.log_fh)
+                for line in f:
+                    print(line.rstrip(), file=self.log_fh)
+                print('\n______________ End of SPAdes warnings _________________\n', file=self.log_fh)
 
         os.chdir(cwd)
+
+        if self.clean:
+            print('Deleting assembly directory', self.assembler_dir, file=self.log_fh)
+            shutil.rmtree(self.assembler_dir)
 
 
     def _scaffold_with_sspace(self):
@@ -153,11 +176,21 @@ class Assembly:
             '-s', self.assembly_contigs
         ])
 
-        sspace_scaffolds = os.path.abspath('standard_output.final.scaffolds.fasta')
         common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
-        os.chdir(self.working_dir)
-        os.symlink(os.path.relpath(sspace_scaffolds), os.path.basename(self.scaffolder_scaffolds))
+        sspace_scaffolds = os.path.abspath('standard_output.final.scaffolds.fasta')
+        sspace_log = os.path.abspath('standard_output.logfile.txt')
+        with open(sspace_log) as f:
+            print('\n_______________ SSPACE log __________________\n', file=self.log_fh)
+            for line in f:
+                print(line.rstrip(), file=self.log_fh)
+            print('_______________ End of SSPACE log __________________\n', file=self.log_fh)
+
+        os.rename(sspace_scaffolds, self.scaffolder_scaffolds)
         os.chdir(cwd)
+
+        if self.clean:
+            print('Deleting scaffolding directory', self.scaffold_dir, file=self.log_fh)
+            shutil.rmtree(self.scaffold_dir)
 
 
     @staticmethod
@@ -211,6 +244,9 @@ class Assembly:
         common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
         self._rename_scaffolds(gapfilled_scaffolds, self.gapfilled_scaffolds, self.scaff_name_prefix)
         os.chdir(cwd)
+        if self.clean:
+            print('Deleting GapFiller directory', self.gapfill_dir, file=self.log_fh)
+            shutil.rmtree(self.gapfill_dir)
 
 
     @staticmethod
@@ -309,6 +345,14 @@ class Assembly:
             )
 
             self.scaff_graph_ok = self._parse_bam(self.sequences, self.final_assembly_bam, self.min_scaff_depth, self.max_insert)
+            print('Scaffolding graph is OK:', self.scaff_graph_ok, file=self.log_fh)
+
+            if self.clean:
+                for suffix in ['soft_clipped', 'unmapped_mates', 'scaff']:
+                    filename = self.final_assembly_bam + '.' + suffix
+                    print('Deleting file', filename, file=self.log_fh)
+                    os.unlink(filename)
+
 
         # This is to make this object picklable, to keep multithreading happy
         self.log_fh = None

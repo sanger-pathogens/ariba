@@ -332,6 +332,4 @@ class TestReportFilter(unittest.TestCase):
         rf.run(tmpprefix)
         self.assertTrue(filecmp.cmp(expected_file, tmpprefix + '.tsv', shallow=False))
         os.unlink(tmpprefix + '.tsv')
-        self.assertTrue(os.path.exists(tmpprefix + '.xls'))
-        os.unlink(tmpprefix + '.xls')
 

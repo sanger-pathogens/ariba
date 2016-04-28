@@ -19,9 +19,9 @@ def run():
     nucmer_group.add_argument('--nucmer_breaklen', type=int, help='Value to use for -breaklen when running nucmer [%(default)s]', default=200, metavar='INT')
 
     assembly_group = parser.add_argument_group('Assembly options')
-    assembly_group.add_argument('--assembly_cov', type=int, help='Target read coverage when sampling reads for assembly [%(default)s]', default=100, metavar='INT')
+    assembly_group.add_argument('--assembly_cov', type=int, help='Target read coverage when sampling reads for assembly [%(default)s]', default=50, metavar='INT')
     assembly_group.add_argument('--assembler_k', type=int, help='kmer size to use with assembler. You can use 0 to set kmer to 2/3 of the read length. Warning - lower kmers are usually better. [%(default)s]', metavar='INT', default=21)
-    assembly_group.add_argument('--spades_other', help='Put options string to be used with spades in quotes. This will NOT be sanity checked. Do not use -k or -t: for these options you should use the ariba run options --assembler_k and --threads [%(default)s]', default="--only-assembler", metavar="OPTIONS")
+    assembly_group.add_argument('--spades_other', help='Put options string to be used with spades in quotes. This will NOT be sanity checked. Do not use -k (see --assembler_k), --untrusted-contigs (it is always used), or -t [%(default)s]', default="--only-assembler -m 4", metavar="OPTIONS")
     assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs. This is also the value used for sspace -k when scaffolding [%(default)s]', default=10, metavar='INT')
 
     other_group = parser.add_argument_group('Other options')
@@ -30,7 +30,7 @@ def run():
     other_group.add_argument('--bowtie2_preset', choices=bowtie2_presets, help='Preset option for bowtie2 mapping [%(default)s]', default='very-sensitive-local', metavar='|'.join(bowtie2_presets))
     other_group.add_argument('--assembled_threshold', type=float, help='If proportion of gene assembled (regardless of into how many contigs) is at least this value then the flag gene_assembled is set [%(default)s]', default=0.95, metavar='FLOAT (between 0 and 1)')
     other_group.add_argument('--unique_threshold', type=float, help='If proportion of bases in gene assembled more than once is <= this value, then the flag unique_contig is set [%(default)s]', default=0.03, metavar='FLOAT (between 0 and 1)')
-    other_group.add_argument('--clean', type=int, choices=[0,1,2], help='Specify how much cleaning to do. 0=none, 1=some, 2=only keep the report [%(default)s]', default=1, metavar='INT')
+    other_group.add_argument('--noclean', action='store_true', help='Do not clean up intermediate files')
     other_group.add_argument('--verbose', action='store_true', help='Be verbose')
 
     options = parser.parse_args()
@@ -77,7 +77,7 @@ def run():
           assembled_threshold=options.assembled_threshold,
           unique_threshold=options.unique_threshold,
           bowtie2_preset=options.bowtie2_preset,
-          clean=options.clean,
+          clean=(not options.noclean),
         )
     c.run()
 

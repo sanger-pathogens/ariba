@@ -212,6 +212,5 @@ class ReportFilter:
 
     def run(self, outprefix):
         self._filter_dicts()
-        self._write_report_xls(outprefix + '.xls')
         self._write_report_tsv(outprefix + '.tsv')
 

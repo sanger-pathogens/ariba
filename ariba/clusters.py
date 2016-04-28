@@ -44,7 +44,7 @@ class Clusters:
       assembled_threshold=0.95,
       unique_threshold=0.03,
       bowtie2_preset='very-sensitive-local',
-      clean=1,
+      clean=True,
     ):
         self.refdata_dir = os.path.abspath(refdata_dir)
         self.refdata, self.cluster_ids = self._load_reference_data_from_dir(refdata_dir)
@@ -60,6 +60,8 @@ class Clusters:
 
         self.clusters_outdir = os.path.join(self.outdir, 'Clusters')
         self.clean = clean
+
+        self.logs_dir = os.path.join(self.outdir, 'Logs')
 
         self.assembler = assembler
         assert self.assembler in ['spades']
@@ -100,7 +102,7 @@ class Clusters:
         self.cluster_read_counts = {} # gene name -> number of reads
         self.cluster_base_counts = {} # gene name -> number of bases
 
-        for d in [self.outdir, self.clusters_outdir]:
+        for d in [self.outdir, self.clusters_outdir, self.logs_dir]:
             try:
                 os.mkdir(d)
             except:
@@ -251,6 +253,7 @@ class Clusters:
 
         counter = 0
         cluster_list = []
+        self.log_files = []
 
         for seq_type in sorted(self.cluster_ids):
             if self.cluster_ids[seq_type] is None:
@@ -264,6 +267,7 @@ class Clusters:
                     print('Constructing cluster', seq_name + '.', counter, 'of', str(len(self.cluster_to_dir)))
                 new_dir = self.cluster_to_dir[seq_name]
                 self.refdata.write_seqs_to_fasta(os.path.join(new_dir, 'references.fa'), self.cluster_ids[seq_type][seq_name])
+                self.log_files.append(os.path.join(self.logs_dir, seq_name + '.log'))
 
                 cluster_list.append(cluster.Cluster(
                     new_dir,
@@ -271,6 +275,7 @@ class Clusters:
                     self.refdata,
                     self.cluster_read_counts[seq_name],
                     self.cluster_base_counts[seq_name],
+                    logfile=self.log_files[-1],
                     assembly_coverage=self.assembly_coverage,
                     assembly_kmer=self.assembly_kmer,
                     assembler=self.assembler,
@@ -307,7 +312,7 @@ class Clusters:
 
 
     @staticmethod
-    def _write_reports(clusters_in, tsv_out, xls_out):
+    def _write_reports(clusters_in, tsv_out, xls_out=None):
         columns = copy.copy(report.columns)
         columns[0] = '#' + columns[0]
 
@@ -329,7 +334,8 @@ class Clusters:
                 worksheet.append(line.split('\t'))
 
         pyfastaq.utils.close(f)
-        workbook.save(xls_out)
+        if xls_out is not None:
+            workbook.save(xls_out)
 
 
     def _write_catted_assembled_seqs_fasta(self, outfile):
@@ -349,26 +355,15 @@ class Clusters:
 
 
     def _clean(self):
-        if self.clean == 0:
+        if self.clean:
             if self.verbose:
-                print('   ... not deleting anything because --clean 0 used')
-            return
-
-        to_delete= [self.bam]
-
-        if self.clean == 2:
-            if self.verbose:
-                print('    rm -r', self.clusters_outdir)
+                print('Deleting clusters direcory', self.clusters_outdir)
                 shutil.rmtree(self.clusters_outdir)
-
-        for filename in to_delete:
-            if os.path.exists(filename):
-                if self.verbose:
-                    print('    rm', filename)
-                try:
-                    os.unlink(filename)
-                except:
-                    raise Error('Error deleting file', filename)
+                print('Deleting Logs directory', self.logs_dir)
+                shutil.rmtree(self.logs_dir)
+        else:
+            if self.verbose:
+                print('Not deleting anything because --noclean used')
 
 
     def write_versions_file(self, original_dir):
@@ -393,6 +388,10 @@ class Clusters:
             print('Finished mapping\n')
             print('{:_^79}'.format(' Generating clusters '), flush=True)
         self._bam_to_clusters_reads()
+        if self.clean:
+            if self.verbose:
+                print('Deleting BAM', self.bam, flush=True)
+            os.unlink(self.bam)
 
         if len(self.cluster_to_dir) > 0:
             got_insert_data_ok = self._set_insert_size_data()
@@ -414,14 +413,12 @@ class Clusters:
             print('WARNING: no reads mapped to reference genes. Therefore no local assemblies will be run', file=sys.stderr)
 
         if self.verbose:
-            print('{:_^79}'.format(' Writing report files '), flush=True)
-            print(self.report_file_all_tsv)
-            print(self.report_file_all_xls)
-        self._write_reports(self.clusters, self.report_file_all_tsv, self.report_file_all_xls)
+            print('{:_^79}'.format(' Writing reports '), flush=True)
+            print('Making', self.report_file_all_tsv)
+        self._write_reports(self.clusters, self.report_file_all_tsv)
 
         if self.verbose:
-            print(self.report_file_filtered_prefix + '.tsv')
-            print(self.report_file_filtered_prefix + '.xls')
+            print('Making', self.report_file_filtered_prefix + '.tsv')
         rf = report_filter.ReportFilter(infile=self.report_file_all_tsv)
         rf.run(self.report_file_filtered_prefix)
 
@@ -431,7 +428,15 @@ class Clusters:
             print(self.catted_assembled_seqs_fasta)
         self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
 
+        clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
         if self.verbose:
+            print()
+            print('{:_^79}'.format(' Catting cluster log files '), flush=True)
+            print('Writing file', clusters_log_file, flush=True)
+        common.cat_files(self.log_files, clusters_log_file)
+
+        if self.verbose:
+            print()
             print('{:_^79}'.format(' Cleaning files '), flush=True)
         self._clean()
 

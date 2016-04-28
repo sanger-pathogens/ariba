@@ -1,5 +1,6 @@
 import sys
 import subprocess
+import pyfastaq
 
 def syscall(cmd, allow_fail=False, verbose=False, verbose_filehandle=sys.stdout, print_errors=True):
     if verbose:
@@ -28,3 +29,16 @@ def decode(x):
     except:
         return x
     return s
+
+
+def cat_files(infiles, outfile):
+    '''Cats all files in list infiles into outfile'''
+    f_out = pyfastaq.utils.open_file_write(outfile)
+
+    for filename in infiles:
+        f_in = pyfastaq.utils.open_file_read(filename)
+        for line in f_in:
+            print(line, end='', file=f_out)
+        pyfastaq.utils.close(f_in)
+
+    pyfastaq.utils.close(f_out)
