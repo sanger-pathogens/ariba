@@ -428,7 +428,7 @@ class Clusters:
             print(self.catted_assembled_seqs_fasta)
         self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
 
-        clusters_log_file = os.path.join(self.outdir, 'log.clusters.txt')
+        clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
         if self.verbose:
             print()
             print('{:_^79}'.format(' Catting cluster log files '), flush=True)
