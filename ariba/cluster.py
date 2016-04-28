@@ -131,42 +131,30 @@ class Cluster:
 
 
     def _clean(self):
-        pass
-        #if self.clean:
+        if not self.clean:
+            print('   ... not deleting anything because --noclean used', file=self.log_fh, flush=True)
+            return
 
-        #if not self.clean:
-        #    print('   ... not deleting anything because --clean 0 used', file=self.log_fh, flush=True)
-        #    return
 
-        #elif self.clean == 2:
-        #    print('    rm -r ', self.root_dir)
-        #    shutil.rmtree(self.root_dir)
-        #    return
+        to_delete = [
+            'assembly.fa',
+            'assembly.fa.fai',
+            'assembly_compare.nucmer.coords',
+            'assembly_compare.nucmer.coords.snps',
+            'assembly.reads_mapped.bam.bai',
+            'assembly.reads_mapped.bam.vcf',
+            'assembly.reads_mapped.bam',
+            'assembly.reads_mapped.bam.read_depths.gz',
+            'assembly.reads_mapped.bam.read_depths.gz.tbi',
+            'reads_1.fq',
+            'reads_2.fq',
+            'reference.fa',
+        ]
 
-        #if os.path.exists(self.assembly_dir):
-        #    print('    rm -r', self.assembly_dir, file=self.log_fh, flush=True)
-        #    shutil.rmtree(self.assembly_dir)
 
-        #to_delete = [
-        #    self.all_reads1,
-        #    self.all_reads2,
-        #    self.references_fa,
-        #    self.references_fa + '.fai',
-        #    self.final_assembly_bam + '.read_depths.gz',
-        #    self.final_assembly_bam + '.read_depths.gz.tbi',
-        #    self.final_assembly_bam + '.scaff',
-        #    self.final_assembly_bam + '.soft_clipped',
-        #    self.final_assembly_bam + '.unmapped_mates',
-        #    self.final_assembly_bam + '.unsorted.bam',
-        #]
-
-        #for filename in to_delete:
-        #    if os.path.exists(filename):
-        #        print('    rm', filename, file=self.log_fh, flush=True)
-        #        try:
-        #            os.unlink(filename)
-        #        except:
-        #            raise Error('Error deleting file', filename)
+        for filename in to_delete:
+            if os.path.exists(filename):
+                self._clean_file(filename)
 
 
     @staticmethod
@@ -272,6 +260,9 @@ class Cluster:
             self.assembled_ok = self.assembly.assembled_ok
             self._clean_file(self.reads_for_assembly1)
             self._clean_file(self.reads_for_assembly2)
+            if self.clean:
+                print('Deleting Assembly directory', self.assembly_dir, file=self.log_fh, flush=True)
+                shutil.rmtree(self.assembly_dir)
 
         if self.assembled_ok:
             print('\nAssembly was successful\n\nMapping reads to assembly:', file=self.log_fh, flush=True)
@@ -359,8 +350,7 @@ class Cluster:
 
         print('\nMaking report lines', file=self.log_fh, flush=True)
         self.report_lines = report.report_lines(self)
-        #print('\nCleaning with clean option ', self.clean, ':', sep='', file=self.log_fh, flush=True)
-        #self._clean()
+
         print('Finished', file=self.log_fh, flush=True)
         print('{:_^79}'.format(' LOG FILE END ' + self.name + ' '), file=self.log_fh, flush=True)
         pyfastaq.utils.close(self.log_fh)
