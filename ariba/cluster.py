@@ -254,6 +254,9 @@ class Cluster:
 
             self.assembly.run()
             self.assembled_ok = self.assembly.assembled_ok
+            if self.clean > 0:
+                os.unlink(self.reads_for_assembly1)
+                os.unlink(self.reads_for_assembly2)
 
         if self.assembled_ok:
             print('\nAssembly was successful\n\nMapping reads to assembly:', file=self.log_fh, flush=True)
