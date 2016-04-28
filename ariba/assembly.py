@@ -1,4 +1,5 @@
 import os
+import shutil
 import pyfastaq
 import pymummer
 from ariba import common, mapping, bam_parse, external_progs
@@ -29,6 +30,7 @@ class Assembly:
       sspace_sd=0.4,
       reads_insert=500,
       extern_progs=None,
+      clean=1,
     ):
         self.reads1 = os.path.abspath(reads1)
         self.reads2 = os.path.abspath(reads2)
@@ -52,6 +54,7 @@ class Assembly:
         self.sspace_k = sspace_k
         self.sspace_sd = sspace_sd
         self.reads_insert = reads_insert
+        self.clean = clean
 
         if extern_progs is None:
             self.extern_progs = external_progs.ExternalProgs()
@@ -114,14 +117,34 @@ class Assembly:
         else:
             self.assembled_ok, err = common.syscall(cmd, verbose=True, allow_fail=True, verbose_filehandle=self.log_fh, print_errors=False)
         if self.assembled_ok:
-            os.symlink(spades_contigs, os.path.basename(self.assembly_contigs))
+            os.rename(spades_contigs, os.path.basename(self.assembly_contigs))
         else:
-            spades_errors_file = os.path.join(self.working_dir, 'spades_errors')
-            with open(spades_errors_file, 'w') as f:
-                print(err, file=f)
-            f.close()
+            print('Assembly finished with errors. These are the errors:', file=self.log_fh)
+            print(err, file=self.log_fh)
+            print('\nEnd of spades errors\n', file=self.log_fh)
+
+        spades_log = os.path.join(self.assembler_dir, 'spades.log')
+        if os.path.exists(spades_log):
+            with open(spades_log) as f:
+                print('\n______________ SPAdes log ___________________\n', file=self.log_fh)
+                for line in f:
+                    print(line.rstrip(), file=self.log_fh)
+                print('\n______________ End of SPAdes log _________________\n', file=self.log_fh)
+
+
+        spades_warnings = os.path.join(self.assembler_dir, 'warnings.log')
+        if os.path.exists(spades_warnings):
+            with open(spades_warnings) as f:
+                print('\n______________ SPAdes warnings ___________________\n', file=self.log_fh)
+                for line in f:
+                    print(line.rstrip(), file=self.log_fh)
+                print('\n______________ End of SPAdes warnings _________________\n', file=self.log_fh)
 
         os.chdir(cwd)
+
+        if self.clean > 0:
+            print('Deleting assembly directory', self.assembler_dir, file=self.log_fh)
+            shutil.rmtree(self.assembler_dir)
 
 
     def _scaffold_with_sspace(self):
