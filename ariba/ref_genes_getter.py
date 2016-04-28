@@ -13,7 +13,7 @@ from ariba import common, card_record
 
 class RefGenesGetter:
     def __init__(self, ref_db, genetic_code=11):
-        allowed_ref_dbs = {'card', 'argannot', 'resfinder'}
+        allowed_ref_dbs = {'card', 'argannot', 'resfinder','vfdb'}
         if ref_db not in allowed_ref_dbs:
             raise Error('Error in RefGenesGetter. ref_db must be one of: ' + str(allowed_ref_dbs) + ', but I got "' + ref_db)
         self.ref_db=ref_db
@@ -189,7 +189,7 @@ class RefGenesGetter:
 
         pyfastaq.utils.close(f)
 
-        print('\nCombined files. Final genes file is callled', final_fasta, end='\n\n')
+        print('\nCombined files. Final genes file is called', final_fasta, end='\n\n')
         os.chdir(current_dir)
         shutil.rmtree(tmpdir)
 
@@ -237,6 +237,32 @@ class RefGenesGetter:
         print('If you use this downloaded data, please cite:')
         print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n')
 
+    def _get_from_vfdb(self, outprefix):
+        outprefix = os.path.abspath(outprefix)
+        tmpdir = outprefix + '.tmp.download'
+        current_dir = os.getcwd()
+        
+        try:
+            os.mkdir(tmpdir)
+            os.chdir(tmpdir)
+        except:
+            raise Error('Error mkdir/chdir ' + tmpdir)
+        
+        zipfile = 'VFDB_setA_nt.fas.gz'
+        self._download_file('http://www.mgc.ac.cn/VFs/Down/VFDB_setA_nt.fas.gz', zipfile)
+        common.syscall('gunzip ' + zipfile)
+        os.chdir(current_dir)
+        print('Extracted files.')
+        
+        final_fasta = outprefix + '_VFDB.fa'
+        shutil.move(tmpdir+'/VFDB_setA_nt.fas',final_fasta)
+        shutil.rmtree(tmpdir)
+        
+        print('Extracted core DNA sequence dataset. Final file is called', final_fasta, end='\n\n')
+        print('You can use it with ARIBA like this:')
+        print('ariba prepareref --presabs', final_fasta, 'output_directory\n')
+        print('If you use this downloaded data, please cite:')
+        print('"VFDB 2016: hierarchical and refined dataset for big data analysis-10 years on",\nChen LH et al 2016, Nucleic Acids Res. 44(Database issue):D694-D697. PMID: 26578559\n')
 
     def run(self, outprefix):
         exec('self._get_from_' + self.ref_db + '(outprefix)')

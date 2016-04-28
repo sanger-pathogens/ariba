@@ -212,7 +212,7 @@ class Summary:
             print('h=hclust(dist(a))', file=f)
             print('write.tree(as.phylo(h), file="', outfile, '")', sep='', file=f)
 
-        common.syscall('R CMD BATCH --no-save ' + r_script)
+        common.syscall('Rscript --no-save ' + r_script)
         if os.path.exists(r_script + 'out'):
             os.unlink(r_script + 'out')
         os.unlink(r_script)
