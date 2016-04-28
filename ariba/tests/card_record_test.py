@@ -46,6 +46,8 @@ class TestCardRecord(unittest.TestCase):
             ('abcD foo bar match at the start', 'abcD'),
             ('foo bar abcD match in the middle', 'abcD'),
             ('match at the end abcD', 'abcD'),
+            ('use first three foo bar', 'use_first_three'),
+            ('remove.any.dots first three', 'remove_any_dots_first_three')
         ]
 
         for aro_name, expected in tests:

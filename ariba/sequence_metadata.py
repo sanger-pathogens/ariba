@@ -24,10 +24,9 @@ class SequenceMetadata:
         else:
             self.variant = sequence_variant.Variant(self.variant_type, variant_string)
 
-        self.hashed = hash((self.name, self.variant_type, variant_string))
 
     def __eq__(self, other):
-       return type(other) is type(self) and self.__dict__ == other.__dict__
+       return type(other) is type(self) and self.name == other.name and self.variant == other.variant and self.variant_type == other.variant_type and self.free_text == other.free_text
 
 
     def __lt__(self, other):
@@ -35,7 +34,7 @@ class SequenceMetadata:
 
 
     def __hash__(self):
-        return self.hashed
+        return hash((self.name, self.variant_type, str(self.variant), self.free_text))
 
 
     def __str__(self):
