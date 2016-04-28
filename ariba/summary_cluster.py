@@ -117,7 +117,10 @@ class SummaryCluster:
     @classmethod
     def _has_nonsynonymous(cls, data_dict):
         return data_dict['ref_ctg_effect'] != 'SYN' and \
-          (data_dict['has_known_var'] == '1' or (data_dict['known_var'] != '1' and data_dict['ref_ctg_change'] != '.'))
+          (
+              data_dict['has_known_var'] == '1' or \
+              (data_dict['known_var'] != '1' and (data_dict['ref_ctg_change'] != '.' or data_dict['ref_ctg_effect'] != '.'))
+          )
 
 
     def _has_any_nonsynonymous(self):
@@ -144,7 +147,7 @@ class SummaryCluster:
         if not has_nonsyn:
             return None
         elif data_dict['known_var_change'] == data_dict['ref_ctg_change'] == '.':
-            raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change and ref_ctg_change both equal to ".", but var_type was not a ".". Cannot continue')
+            raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change and ref_ctg_change both equal to ".", but has a non synonymous change. Something is inconsistent. Cannot continue')
         else:
             if '.' not in [data_dict['known_var_change'], data_dict['ref_ctg_change']] and \
               data_dict['known_var_change'] != data_dict['ref_ctg_change']:

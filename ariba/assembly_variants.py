@@ -68,7 +68,6 @@ class AssemblyVariants:
 
         var_types = [x.var_type for x in variants]
         if len(set(var_types)) != 1:
-            print('More than one type of variant in the same codon not yet implemented!', ref_sequence.id, file=sys.stderr)
             return 'MULTIPLE', '.', '.'
 
         var_type = var_types[0]
@@ -96,7 +95,6 @@ class AssemblyVariants:
                 return ('NONSYN', ref_aa.seq + str(aa_start + 1) + qry_aa.seq, aa_start)
         elif var_type in [pymummer.variant.INS, pymummer.variant.DEL]:
             if len(variants) > 1:
-                print('More than one indel in same codon not yet implemented!', ref_sequence.id, file=sys.stderr)
                 return 'INDELS', '.', aa_start
 
             var = variants[0]
