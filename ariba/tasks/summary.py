@@ -17,7 +17,7 @@ def run():
         options.infiles = None
 
     s = ariba.summary.Summary(
-        options.outfile,
+        options.outprefix,
         fofn=options.fofn,
         filenames=options.infiles,
         include_all_variant_columns=(not options.no_var_columns),
