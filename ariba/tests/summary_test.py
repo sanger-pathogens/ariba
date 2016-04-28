@@ -120,6 +120,40 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_filter_clusters(self):
+        '''Test _filter_clusters'''
+        rows = {
+            'file1': {
+                'cluster1': {'assembled': 'yes'},
+                'cluster2': {'assembled': 'yes'},
+                'cluster3': {'assembled': 'no'},
+                'cluster4': {'assembled': 'no'},
+            },
+            'file2': {
+                'cluster1': {'assembled': 'yes'},
+                'cluster2': {'assembled': 'no'},
+                'cluster3': {'assembled': 'yes'},
+                'cluster4': {'assembled': 'no'},
+            }
+        }
+
+        expected = {
+            'file1': {
+                'cluster1': {'assembled': 'yes'},
+                'cluster2': {'assembled': 'yes'},
+                'cluster3': {'assembled': 'no'},
+            },
+            'file2': {
+                'cluster1': {'assembled': 'yes'},
+                'cluster2': {'assembled': 'no'},
+                'cluster3': {'assembled': 'yes'},
+            }
+        }
+
+        got = summary.Summary._filter_clusters(rows)
+        self.assertEqual(expected, got)
+
+
     def test_write_csv(self):
         '''Test _write_csv'''
         tmp_out = 'tmp.out.tsv'

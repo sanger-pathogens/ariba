@@ -115,6 +115,36 @@ class Summary:
 
 
     @classmethod
+    def _filter_clusters(cls, rows):
+        '''Removes any cluster where every sample has assembled == "no"'''
+        found_a_yes = set()
+        first_filename = True
+        all_clusters = set()
+
+        for filename in rows:
+            for cluster in rows[filename]:
+                if first_filename:
+                    all_clusters.add(cluster)
+
+                if cluster in found_a_yes:
+                    continue
+
+                if rows[filename][cluster]['assembled'] == 'yes':
+                    found_a_yes.add(cluster)
+                    break
+
+            first_filename = False
+
+        to_delete = all_clusters.difference(found_a_yes)
+
+        for filename in rows:
+            for cluster in to_delete:
+                del rows[filename][cluster]
+
+        return rows
+
+
+    @classmethod
     def _write_csv(cls, filenames, rows, outfile, phandango=False):
         lines = []
         non_var_keys_list = ['assembled', 'ref_seq', 'pct_id', 'any_var']
