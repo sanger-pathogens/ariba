@@ -345,6 +345,14 @@ class Assembly:
             )
 
             self.scaff_graph_ok = self._parse_bam(self.sequences, self.final_assembly_bam, self.min_scaff_depth, self.max_insert)
+            print('Scaffolding graph is OK:', self.scaff_graph_ok, file=self.log_fh)
+
+            if self.clean:
+                for suffix in ['soft_clipped', 'unmapped_mates', 'scaff']:
+                    filename = self.final_assembly_bam + '.' + suffix
+                    print('Deleting file', filename, file=self.log_fh)
+                    os.unlink(filename)
+
 
         # This is to make this object picklable, to keep multithreading happy
         self.log_fh = None
