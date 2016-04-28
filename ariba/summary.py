@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import openpyxl
 import pyfastaq
 from ariba import flag, common, report, summary_cluster, summary_sample
@@ -223,9 +224,13 @@ class Summary:
         self.samples = self._load_input_files(self.filenames, self.min_id)
         self.rows = self._gather_output_rows()
         Summary._write_csv(self.filenames, self.rows, self.outprefix + '.csv', phandango=False)
-        lines = Summary._write_csv(self.filenames, self.rows, self.outprefix + '.phandango.csv', phandango=True)
-        dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
-        tree_file = self.outprefix + '.phandango.tre'
-        Summary._write_distance_matrix(lines, dist_matrix_file)
-        Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
-        os.unlink(dist_matrix_file)
+
+        if len(self.samples) > 1:
+            lines = Summary._write_csv(self.filenames, self.rows, self.outprefix + '.phandango.csv', phandango=True)
+            dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
+            tree_file = self.outprefix + '.phandango.tre'
+            Summary._write_distance_matrix(lines, dist_matrix_file)
+            Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
+            os.unlink(dist_matrix_file)
+        else:
+            print('Made csv file. Not making Phandango files because only one input file given', file=sys.stderr)
