@@ -3,9 +3,9 @@ import ariba
 
 def run():
     parser = argparse.ArgumentParser(
-        description = 'Make a summry of ARIBA report files',
+        description = 'Make a summary of ARIBA report files, and Phandango files',
         usage = 'ariba summary [options] <outprefix> [report1.tsv report2.tsv ...]',
-        epilog = 'Files must be listed after the output file and/or the option --fofn must be used. If both used, all files in the filename specified by --fofn AND the files listed after the output file will be used as input. The input report files must be in tsv format, not xls.')
+        epilog = 'Files must be listed after the output file and/or the option --fofn must be used. If both used, all files in the filename specified by --fofn AND the files listed after the output file will be used as input.')
     parser.add_argument('-f', '--fofn', help='File of filenames of ariba reports in tsv format (not xls) to be summarised. Must be used if no input files listed after the outfile.', metavar='FILENAME')
     parser.add_argument('--no_var_columns', action='store_true', help='Do not keep a column for every variant. Default is to include them')
     parser.add_argument('--min_id', type=float, help='Minimum percent identity cutoff to count as assembled [%(default)s]', default=90, metavar='FLOAT')
