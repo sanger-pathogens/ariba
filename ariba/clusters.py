@@ -44,7 +44,7 @@ class Clusters:
       assembled_threshold=0.95,
       unique_threshold=0.03,
       bowtie2_preset='very-sensitive-local',
-      clean=1,
+      clean=True,
     ):
         self.refdata_dir = os.path.abspath(refdata_dir)
         self.refdata, self.cluster_ids = self._load_reference_data_from_dir(refdata_dir)
@@ -389,6 +389,8 @@ class Clusters:
             print('{:_^79}'.format(' Generating clusters '), flush=True)
         self._bam_to_clusters_reads()
         if self.clean:
+            if self.verbose:
+                print('Deleting BAM', self.bam, flush=True)
             os.unlink(self.bam)
 
         if len(self.cluster_to_dir) > 0:
