@@ -17,6 +17,7 @@ class Cluster:
       refdata,
       total_reads,
       total_reads_bases,
+      logfile=None,
       assembly_coverage=100,
       assembly_kmer=21,
       assembler='spades',
@@ -37,7 +38,7 @@ class Cluster:
       unique_threshold=0.03,
       bowtie2_preset='very-sensitive-local',
       spades_other_options=None,
-      clean=1,
+      clean=True,
       extern_progs=None,
       random_seed=42,
     ):
@@ -50,6 +51,7 @@ class Cluster:
         self.refdata = refdata
         self.total_reads = total_reads
         self.total_reads_bases = total_reads_bases
+        self.logfile = logfile
         self.assembly_coverage = assembly_coverage
         self.assembly_kmer = assembly_kmer
         self.assembler = assembler
@@ -122,39 +124,49 @@ class Cluster:
         self.random_seed = random_seed
 
 
+    def _clean_file(self, filename):
+        if self.clean:
+            print('Deleting file', filename, file=self.log_fh)
+            os.unlink(filename)
+
+
     def _clean(self):
-        if self.clean == 0:
-            print('   ... not deleting anything because --clean 0 used', file=self.log_fh, flush=True)
-            return
-        elif self.clean == 2:
-            print('    rm -r ', self.root_dir)
-            shutil.rmtree(self.root_dir)
-            return
+        pass
+        #if self.clean:
 
-        if os.path.exists(self.assembly_dir):
-            print('    rm -r', self.assembly_dir, file=self.log_fh, flush=True)
-            shutil.rmtree(self.assembly_dir)
+        #if not self.clean:
+        #    print('   ... not deleting anything because --clean 0 used', file=self.log_fh, flush=True)
+        #    return
 
-        to_delete = [
-            self.all_reads1,
-            self.all_reads2,
-            self.references_fa,
-            self.references_fa + '.fai',
-            self.final_assembly_bam + '.read_depths.gz',
-            self.final_assembly_bam + '.read_depths.gz.tbi',
-            self.final_assembly_bam + '.scaff',
-            self.final_assembly_bam + '.soft_clipped',
-            self.final_assembly_bam + '.unmapped_mates',
-            self.final_assembly_bam + '.unsorted.bam',
-        ]
+        #elif self.clean == 2:
+        #    print('    rm -r ', self.root_dir)
+        #    shutil.rmtree(self.root_dir)
+        #    return
 
-        for filename in to_delete:
-            if os.path.exists(filename):
-                print('    rm', filename, file=self.log_fh, flush=True)
-                try:
-                    os.unlink(filename)
-                except:
-                    raise Error('Error deleting file', filename)
+        #if os.path.exists(self.assembly_dir):
+        #    print('    rm -r', self.assembly_dir, file=self.log_fh, flush=True)
+        #    shutil.rmtree(self.assembly_dir)
+
+        #to_delete = [
+        #    self.all_reads1,
+        #    self.all_reads2,
+        #    self.references_fa,
+        #    self.references_fa + '.fai',
+        #    self.final_assembly_bam + '.read_depths.gz',
+        #    self.final_assembly_bam + '.read_depths.gz.tbi',
+        #    self.final_assembly_bam + '.scaff',
+        #    self.final_assembly_bam + '.soft_clipped',
+        #    self.final_assembly_bam + '.unmapped_mates',
+        #    self.final_assembly_bam + '.unsorted.bam',
+        #]
+
+        #for filename in to_delete:
+        #    if os.path.exists(filename):
+        #        print('    rm', filename, file=self.log_fh, flush=True)
+        #        try:
+        #            os.unlink(filename)
+        #        except:
+        #            raise Error('Error deleting file', filename)
 
 
     @staticmethod
@@ -208,8 +220,10 @@ class Cluster:
 
 
     def run(self):
-        self.logfile = os.path.join(self.root_dir, 'log.txt')
+        if self.logfile is None:
+            self.logfile = os.path.join(self.root_dir, 'log.txt')
         self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
+        print('{:_^79}'.format(' LOG FILE START ' + self.name + ' '), file=self.log_fh, flush=True)
 
         print('Choosing best reference sequence:', file=self.log_fh, flush=True)
         seq_chooser = best_seq_chooser.BestSeqChooser(
@@ -223,6 +237,8 @@ class Cluster:
             threads=1,
         )
         self.ref_sequence = seq_chooser.best_seq(self.reference_fa)
+        self._clean_file(self.references_fa)
+        self._clean_file(self.references_fa + '.fai')
 
         if self.ref_sequence is None:
             self.status_flag.add('ref_seq_choose_fail')
@@ -254,9 +270,8 @@ class Cluster:
 
             self.assembly.run()
             self.assembled_ok = self.assembly.assembled_ok
-            if self.clean > 0:
-                os.unlink(self.reads_for_assembly1)
-                os.unlink(self.reads_for_assembly2)
+            self._clean_file(self.reads_for_assembly1)
+            self._clean_file(self.reads_for_assembly2)
 
         if self.assembled_ok:
             print('\nAssembly was successful\n\nMapping reads to assembly:', file=self.log_fh, flush=True)
@@ -280,10 +295,12 @@ class Cluster:
 
             print('\nMaking and checking scaffold graph', file=self.log_fh, flush=True)
 
-            bam_parser = bam_parse.Parser(self.final_assembly_bam, self.assembly.sequences)
-            bam_parser.parse()
-            if not bam_parser.scaff_graph_is_consistent(self.min_scaff_depth, self.max_insert):
+            #bam_parser = bam_parse.Parser(self.final_assembly_bam, self.assembly.sequences)
+            #bam_parser.parse()
+            if not self.assembly.scaff_graph_ok:
                 self.status_flag.add('scaffold_graph_bad')
+            #if not bam_parser.scaff_graph_is_consistent(self.min_scaff_depth, self.max_insert):
+            #    self.status_flag.add('scaffold_graph_bad')
 
             print('Comparing assembly against reference sequence', file=self.log_fh, flush=True)
             self.assembly_compare = assembly_compare.AssemblyCompare(
@@ -342,9 +359,10 @@ class Cluster:
 
         print('\nMaking report lines', file=self.log_fh, flush=True)
         self.report_lines = report.report_lines(self)
-        print('\nCleaning with clean option ', self.clean, ':', sep='', file=self.log_fh, flush=True)
-        self._clean()
+        #print('\nCleaning with clean option ', self.clean, ':', sep='', file=self.log_fh, flush=True)
+        #self._clean()
         print('Finished', file=self.log_fh, flush=True)
+        print('{:_^79}'.format(' LOG FILE END ' + self.name + ' '), file=self.log_fh, flush=True)
         pyfastaq.utils.close(self.log_fh)
 
         # This stops multiprocessing complaining with the error:
