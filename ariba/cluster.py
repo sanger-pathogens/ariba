@@ -151,6 +151,7 @@ class Cluster:
             'reference.fa',
         ]
 
+        to_delete = [os.path.join(self.root_dir, x) for x in to_delete]
 
         for filename in to_delete:
             if os.path.exists(filename):
@@ -350,7 +351,7 @@ class Cluster:
 
         print('\nMaking report lines', file=self.log_fh, flush=True)
         self.report_lines = report.report_lines(self)
-
+        self._clean()
         print('Finished', file=self.log_fh, flush=True)
         print('{:_^79}'.format(' LOG FILE END ' + self.name + ' '), file=self.log_fh, flush=True)
         pyfastaq.utils.close(self.log_fh)
