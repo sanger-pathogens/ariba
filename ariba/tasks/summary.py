@@ -10,6 +10,7 @@ def run():
     parser.add_argument('--no_var_columns', action='store_true', help='Do not keep a column for every variant. Default is to include them')
     parser.add_argument('--min_id', type=float, help='Minimum percent identity cutoff to count as assembled [%(default)s]', default=90, metavar='FLOAT')
     parser.add_argument('--no_filter', action='store_true', help='Do not filter rows or columns of output that are all 0 (by default, they are removed from the output)')
+    parser.add_argument('--verbose', action='store_true', help='Be verbose')
     parser.add_argument('outprefix', help='Prefix of output files')
     parser.add_argument('infiles', nargs='*', help='Files to be summarised')
     options = parser.parse_args()
@@ -22,5 +23,6 @@ def run():
         filenames=options.infiles,
         include_all_variant_columns=(not options.no_var_columns),
         min_id=options.min_id,
+        verbose=options.verbose
     )
     s.run()

@@ -209,6 +209,13 @@ class TestSummaryCluster(unittest.TestCase):
         d['known_var_change'] = '.'
         self.assertEqual('P43Q', summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
+        d['ref_ctg_change'] = '.'
+        with self.assertRaises(summary_cluster.Error):
+            summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
+
+        d['ref_ctg_effect'] = 'MULTIPLE'
+        self.assertEqual('MULTIPLE', summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+
 
     def test_column_summary_data(self):
         '''Test column_summary_data'''
