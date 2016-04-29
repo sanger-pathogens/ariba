@@ -7,6 +7,7 @@ class Error (Exception): pass
 
 class ReadStore:
     def __init__(self, infile, outprefix, log_fh=None):
+        assert infile != outprefix
         self.infile = os.path.abspath(infile)
         self.outprefix = os.path.abspath(outprefix)
         self.log_fh = log_fh
