@@ -7,13 +7,18 @@ from ariba import common
 class Error (Exception): pass
 
 class ReadStore:
-    def __init__(self, infile, outfile, log_fh=None):
+    def __init__(self, infile, outprefix, log_fh=None):
         self.infile = os.path.abspath(infile)
-        self.outfile = os.path.abspath(outfile)
+        self.outprefix = os.path.abspath(outprefix)
         self.log_fh = log_fh
+        self.outfile = os.path.abspath(outprefix) + '.gz'
 
         if not os.path.exists(self.infile):
             raise Error('File not found ' + self.infile + '. Cannot continue')
+
+        self._sort_file(self.infile, self.outprefix, log_fh=self.log_fh)
+        self._compress_and_index_file(self.outprefix, log_fh=self.log_fh)
+        os.unlink(self.outprefix)
 
 
     @staticmethod
