@@ -37,6 +37,8 @@ class ReadStore:
 
 
     def get_reads(self, cluster_name, out1, out2):
+        if self.log_fh is not None:
+            print('Getting reads for', cluster_name, 'from', self.outfile, file=self.log_fh)
         tabix_file = pysam.TabixFile(self.outfile)
         f_out1 = pyfastaq.utils.open_file_write(out1)
         f_out2 = pyfastaq.utils.open_file_write(out2)
@@ -51,6 +53,8 @@ class ReadStore:
 
         pyfastaq.utils.close(f_out1)
         pyfastaq.utils.close(f_out2)
+        if self.log_fh is not None:
+            print('Finished getting reads for', cluster_name, 'from', self.outfile, file=self.log_fh)
 
 
     def clean(self):
