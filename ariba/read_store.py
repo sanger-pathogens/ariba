@@ -1,4 +1,3 @@
-import pysam
 import pyfastaq
 import os
 import pysam
