@@ -45,3 +45,20 @@ class TestReadStore(unittest.TestCase):
         os.unlink(tmpfile_gz + '.tbi')
 
 
+    def test_get_reads(self):
+        '''Test get_reads'''
+        infile = os.path.join(data_dir, 'read_store_test_get_reads.in')
+        expected1 = os.path.join(data_dir, 'read_store_test_get_reads.reads_1.fq')
+        expected2 = os.path.join(data_dir, 'read_store_test_get_reads.reads_2.fq')
+        outprefix = 'tmp.read_store_test_get_reads'
+        reads1 = outprefix + '.reads_1.fq'
+        reads2 = outprefix + '.reads_2.fq'
+        rstore = read_store.ReadStore(infile, outprefix)
+        rstore.get_reads('cluster2', reads1, reads2)
+        self.assertTrue(filecmp.cmp(expected1, reads1))
+        self.assertTrue(filecmp.cmp(expected2, reads2))
+        os.unlink(outprefix + '.gz')
+        os.unlink(outprefix + '.gz.tbi')
+        os.unlink(reads1)
+        os.unlink(reads2)
+

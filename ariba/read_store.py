@@ -34,3 +34,20 @@ class ReadStore:
             print('Compressing file', infile, file=log_fh, flush=True)
         pysam.tabix_compress(infile, infile + '.gz')
         pysam.tabix_index(infile + '.gz', seq_col=0, start_col=1, end_col=1)
+
+
+    def get_reads(self, cluster_name, out1, out2):
+        tabix_file = pysam.TabixFile(self.outfile)
+        f_out1 = pyfastaq.utils.open_file_write(out1)
+        f_out2 = pyfastaq.utils.open_file_write(out2)
+
+        for line in tabix_file.fetch(reference=cluster_name):
+            cluster, number, seq, qual = line.rstrip().split()
+            number = int(number)
+            if number % 2 == 0:
+                print(str(number - 1) + '/2', seq, '+', qual, sep='\n', file=f_out2)
+            else:
+                print(str(number) + '/1', seq, '+', qual, sep='\n', file=f_out1)
+
+        pyfastaq.utils.close(f_out1)
+        pyfastaq.utils.close(f_out2)
