@@ -23,6 +23,7 @@ __all__ = [
     'histogram',
     'link',
     'mapping',
+    'read_store',
     'reference_data',
     'ref_genes_getter',
     'ref_preparer',
