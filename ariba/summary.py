@@ -16,7 +16,8 @@ class Summary:
       filenames=None,
       fofn=None,
       include_all_variant_columns=False,
-      min_id=90.0
+      min_id=90.0,
+      verbose=False,
     ):
         if filenames is None and fofn is None:
             raise Error('Error! Must supply filenames or fofn to Summary(). Cannot continue')
@@ -32,6 +33,7 @@ class Summary:
         self.include_all_variant_columns = include_all_variant_columns
         self.min_id = min_id
         self.outprefix = outprefix
+        self.verbose = verbose
 
 
     def _load_fofn(self, fofn):
@@ -48,11 +50,13 @@ class Summary:
 
 
     @classmethod
-    def _load_input_files(cls, filenames, min_id):
+    def _load_input_files(cls, filenames, min_id, verbose=False):
         samples = {}
         for filename in filenames:
             samples[filename] = summary_sample.SummarySample(filename, min_pc_id=min_id)
             samples[filename].run()
+            if verbose:
+                print('Loaded file', filename, flush=True)
         return samples
 
 
@@ -250,22 +254,45 @@ class Summary:
 
 
     def run(self):
+        if self.verbose:
+            print('Loading input files...', flush=True)
         self._check_files_exist()
-        self.samples = self._load_input_files(self.filenames, self.min_id)
+        self.samples = self._load_input_files(self.filenames, self.min_id, verbose=self.verbose)
+        if self.verbose:
+            print('Generating output rows', flush=True)
         self.rows = self._gather_output_rows()
+
+        if self.verbose:
+            print('Filtering columns', flush=True)
         self.rows, remaining_clusters = Summary._filter_clusters(self.rows)
+
         if remaining_clusters == 0:
             print('No clusters found that are present in any sample. Will not write any output files', file=sys.stderr)
             sys.exit(1)
 
-        Summary._write_csv(self.filenames, self.rows, self.outprefix + '.csv', phandango=False)
+        csv_file = self.outprefix + '.csv'
+        if self.verbose:
+            print('Writing csv file', csv_file, flush=True)
+        Summary._write_csv(self.filenames, self.rows, csv_file, phandango=False)
 
         if len(self.samples) > 1:
-            lines = Summary._write_csv(self.filenames, self.rows, self.outprefix + '.phandango.csv', phandango=True)
+            if self.verbose:
+                print('Making Phandango csv file', csv_file, flush=True)
+            csv_file = self.outprefix + '.phandango.csv'
+            lines = Summary._write_csv(self.filenames, self.rows, csv_file, phandango=True)
             dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
             tree_file = self.outprefix + '.phandango.tre'
+
+            if self.verbose:
+                print('Making Phandango distance matrix', dist_matrix_file, flush=True)
             Summary._write_distance_matrix(lines, dist_matrix_file)
+
+            if self.verbose:
+                print('Making Phandango tree file', tree_file, flush=True)
             Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
             os.unlink(dist_matrix_file)
         else:
             print('Made csv file. Not making Phandango files because only one input file given', file=sys.stderr)
+
+        if self.verbose:
+            print('Finished', flush=True)
