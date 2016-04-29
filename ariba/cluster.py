@@ -50,7 +50,12 @@ class Cluster:
         self.name = name
         self.reference_fa = os.path.join(self.root_dir, 'reference.fa')
         self.reference_names = reference_names
-        self._set_up_input_files()
+        self.all_reads1 = os.path.join(self.root_dir, 'reads_1.fq')
+        self.all_reads2 = os.path.join(self.root_dir, 'reads_2.fq')
+        self.references_fa = os.path.join(self.root_dir, 'references.fa')
+
+        if os.path.exists(self.root_dir):
+            self._input_files_exist()
 
         self.total_reads = total_reads
         self.total_reads_bases = total_reads_bases
@@ -65,11 +70,6 @@ class Cluster:
 
         self.reads_for_assembly1 = os.path.join(self.root_dir, 'reads_for_assembly_1.fq')
         self.reads_for_assembly2 = os.path.join(self.root_dir, 'reads_for_assembly_2.fq')
-
-        for fname in [self.all_reads1, self.all_reads2, self.references_fa]:
-            if not os.path.exists(fname):
-                raise Error('File ' + fname + ' not found. Cannot continue')
-
 
         self.ref_sequence = None
 
@@ -123,17 +123,17 @@ class Cluster:
         self.random_seed = random_seed
 
 
-    def _set_up_input_files(self):
-        self.all_reads1 = os.path.join(self.root_dir, 'reads_1.fq')
-        self.all_reads2 = os.path.join(self.root_dir, 'reads_2.fq')
-        self.references_fa = os.path.join(self.root_dir, 'references.fa')
+    def _input_files_exist(self):
+        assert self.read_store is None
+        if not (os.path.exists(self.all_reads1) and os.path.exists(self.all_reads2)):
+            raise Error('Error making cluster. Reads files not found')
+        if not os.path.exists(self.references_fa):
+            raise Error('Error making cluster. References fasta not found')
 
+
+    def _set_up_input_files(self):
         if os.path.exists(self.root_dir):
-            assert self.read_store is None
-            if not (os.path.exists(self.all_reads1) and os.path.exists(self.all_reads2)):
-                raise Error('Error making cluster. Reads files not found')
-            if not os.path.exists(self.references_fa):
-                raise Error('Error making cluster. References fasta not found')
+            self._input_files_exist()
         else:
             assert self.read_store is not None
             assert self.reference_names is not None
@@ -232,6 +232,13 @@ class Cluster:
     def run(self):
         if self.logfile is None:
             self.logfile = os.path.join(self.root_dir, 'log.txt')
+
+        self._set_up_input_files()
+
+        for fname in [self.all_reads1, self.all_reads2, self.references_fa]:
+            if not os.path.exists(fname):
+                raise Error('File ' + fname + ' not found. Cannot continue')
+
         self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
         print('{:_^79}'.format(' LOG FILE START ' + self.name + ' '), file=self.log_fh, flush=True)
 
