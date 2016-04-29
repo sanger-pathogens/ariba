@@ -217,7 +217,17 @@ class Clusters:
         pyfastaq.utils.close(f_out)
 
         if len(self.cluster_read_counts):
-            self.read_store = read_store.ReadStore(reads_file_for_read_store, os.path.join(self.outdir, 'read_store'))
+            if self.verbose:
+                filehandle = sys.stdout
+            else:
+                filehandle = None
+
+            self.read_store = read_store.ReadStore(
+              reads_file_for_read_store,
+              os.path.join(self.outdir, 'read_store'),
+              log_fh=filehandle
+            )
+
         os.unlink(reads_file_for_read_store)
 
         if self.verbose:
@@ -260,7 +270,7 @@ class Clusters:
                 if self.verbose:
                     print('Constructing cluster', seq_name + '.', counter, 'of', str(len(self.cluster_to_dir)))
                 new_dir = self.cluster_to_dir[seq_name]
-                self.refdata.write_seqs_to_fasta(os.path.join(new_dir, 'references.fa'), self.cluster_ids[seq_type][seq_name])
+                #self.refdata.write_seqs_to_fasta(os.path.join(new_dir, 'references.fa'), self.cluster_ids[seq_type][seq_name])
                 self.log_files.append(os.path.join(self.logs_dir, seq_name + '.log'))
 
                 cluster_list.append(cluster.Cluster(
@@ -269,6 +279,8 @@ class Clusters:
                     self.refdata,
                     self.cluster_read_counts[seq_name],
                     self.cluster_base_counts[seq_name],
+                    read_store=self.read_store,
+                    reference_names=self.cluster_ids[seq_type][seq_name],
                     logfile=self.log_files[-1],
                     assembly_coverage=self.assembly_coverage,
                     assembly_kmer=self.assembly_kmer,
