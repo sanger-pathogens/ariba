@@ -275,7 +275,8 @@ class Cluster:
               sspace_k=self.sspace_k,
               sspace_sd=self.sspace_sd,
               reads_insert=self.reads_insert,
-              extern_progs=self.extern_progs
+              extern_progs=self.extern_progs,
+              clean=self.clean
             )
 
             self.assembly.run()
