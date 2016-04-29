@@ -62,3 +62,19 @@ class TestReadStore(unittest.TestCase):
         os.unlink(reads1)
         os.unlink(reads2)
 
+
+    def test_clean(self):
+        '''Test clean'''
+        infile = os.path.join(data_dir, 'read_store_test_clean.in')
+        outprefix = 'tmp.read_store_test_clean'
+        self.assertFalse(os.path.exists(outprefix))
+        self.assertFalse(os.path.exists(outprefix + '.gz'))
+        self.assertFalse(os.path.exists(outprefix + '.gz.tbi'))
+        rstore = read_store.ReadStore(infile, outprefix)
+        self.assertFalse(os.path.exists(outprefix))
+        self.assertTrue(os.path.exists(outprefix + '.gz'))
+        self.assertTrue(os.path.exists(outprefix + '.gz.tbi'))
+        rstore.clean()
+        self.assertFalse(os.path.exists(outprefix))
+        self.assertFalse(os.path.exists(outprefix + '.gz'))
+        self.assertFalse(os.path.exists(outprefix + '.gz.tbi'))

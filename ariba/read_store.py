@@ -50,3 +50,8 @@ class ReadStore:
 
         pyfastaq.utils.close(f_out1)
         pyfastaq.utils.close(f_out2)
+
+
+    def clean(self):
+        os.unlink(self.outfile)
+        os.unlink(self.outfile + '.tbi')
