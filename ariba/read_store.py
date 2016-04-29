@@ -47,15 +47,14 @@ class ReadStore:
             cluster, number, seq, qual = line.rstrip().split()
             number = int(number)
             if number % 2 == 0:
-                print(str(number - 1) + '/2', seq, '+', qual, sep='\n', file=f_out2)
+                print('@' + str(number - 1) + '/2', seq, '+', qual, sep='\n', file=f_out2)
             else:
-                print(str(number) + '/1', seq, '+', qual, sep='\n', file=f_out1)
+                print('@' + str(number) + '/1', seq, '+', qual, sep='\n', file=f_out1)
 
         pyfastaq.utils.close(f_out1)
         pyfastaq.utils.close(f_out2)
         if self.log_fh is not None:
             print('Finished getting reads for', cluster_name, 'from', self.outfile, file=self.log_fh)
-
 
     def clean(self):
         os.unlink(self.outfile)
