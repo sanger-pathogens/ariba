@@ -8,7 +8,7 @@ import openpyxl
 import multiprocessing
 import pysam
 import pyfastaq
-from ariba import cluster, common, mapping, histogram, report, report_filter, reference_data
+from ariba import cluster, common, mapping, histogram, read_store, report, report_filter, reference_data
 
 class Error (Exception): pass
 
@@ -171,9 +171,10 @@ class Clusters:
 
 
     def _bam_to_clusters_reads(self):
-        '''Sets up Cluster directories (one for each gene that has reads that mapped to it), writes reads fwd and rev files. Also gathers histogram data of insert size'''
-        filehandles_1 = {} # gene name -> filehandle of fwd_reads
-        filehandles_2 = {} # gene name -> filehandle of rev_reads
+        '''Sets up ReadStore of reads for all the clusters. Also gathers histogram data of insert size'''
+        reads_file_for_read_store = os.path.join(self.outdir, 'reads')
+        f_out = pyfastaq.utils.open_file_write(reads_file_for_read_store)
+
         sam_reader = pysam.Samfile(self.bam, "rb")
         sam1 = None
         self.proper_pairs = 0
@@ -201,35 +202,28 @@ class Clusters:
 
             for ref in ref_seqs:
                 if ref not in self.cluster_to_dir:
-                    assert ref not in filehandles_1
-                    assert ref not in filehandles_2
-
                     new_dir = os.path.join(self.clusters_outdir, ref)
-                    try:
-                        os.mkdir(new_dir)
-                    except:
-                        raise Error('Error mkdir ' + new_dir)
-
                     self.cluster_to_dir[ref] = new_dir
-                    filehandles_1[ref] = pyfastaq.utils.open_file_write(os.path.join(new_dir, 'reads_1.fq'))
-                    filehandles_2[ref] = pyfastaq.utils.open_file_write(os.path.join(new_dir, 'reads_2.fq'))
                     if self.verbose:
                         print('New cluster with reads that hit:', ref, flush=True)
 
-                print(read1, file=filehandles_1[ref])
-                print(read2, file=filehandles_2[ref])
                 self.cluster_read_counts[ref] = self.cluster_read_counts.get(ref, 0) + 2
                 self.cluster_base_counts[ref] = self.cluster_base_counts.get(ref, 0) + len(read1) + len(read2)
+                print(ref, self.cluster_read_counts[ref] - 1, read1.seq, read1.qual, sep='\t', file=f_out)
+                print(ref, self.cluster_read_counts[ref], read2.seq, read2.qual, sep='\t', file=f_out)
 
             sam1 = None
 
-        for ref in filehandles_1:
-            pyfastaq.utils.close(filehandles_1[ref])
-            pyfastaq.utils.close(filehandles_2[ref])
+        pyfastaq.utils.close(f_out)
+
+        if len(self.cluster_read_counts):
+            self.read_store = read_store.ReadStore(reads_file_for_read_store, os.path.join(self.outdir, 'read_store'))
+        os.unlink(reads_file_for_read_store)
 
         if self.verbose:
             print('Found', self.proper_pairs, 'proper read pairs')
             print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)
+
 
     def _set_insert_size_data(self):
         if len(self.insert_hist) == 0:

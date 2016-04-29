@@ -12,6 +12,13 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 extern_progs = external_progs.ExternalProgs()
 
 
+def file_to_list(infile):
+    f = pyfastaq.utils.open_file_read(infile)
+    lines = [x for x in f.readlines()]
+    pyfastaq.utils.close(f)
+    return lines
+
+
 class TestClusters(unittest.TestCase):
     def setUp(self):
         self.cluster_dir = 'tmp.Cluster'
@@ -108,18 +115,10 @@ class TestClusters(unittest.TestCase):
             os.path.join(data_dir, 'clusters_test_bam_to_clusters.out.ref2.reads_2.fq'),
         ]
 
-        got = [
-            os.path.join(clusters_dir, 'Clusters/ref1/reads_1.fq'),
-            os.path.join(clusters_dir, 'Clusters/ref1/reads_2.fq'),
-            os.path.join(clusters_dir, 'Clusters/ref2/reads_1.fq'),
-            os.path.join(clusters_dir, 'Clusters/ref2/reads_2.fq'),
-        ]
+        got_reads_store_lines = file_to_list(os.path.join(clusters_dir, 'read_store.gz'))
+        expected_reads_store_lines = file_to_list(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.read_store.gz'))
 
-
-        for i in range(len(got)):
-            self.assertTrue(os.path.exists(got[i]))
-            self.assertTrue(filecmp.cmp(expected[i], got[i], shallow=False))
-
+        self.assertEqual(expected_reads_store_lines, got_reads_store_lines)
         self.assertEqual({780:1}, c.insert_hist.bins)
         self.assertEqual({'ref1': 4, 'ref2': 2}, c.cluster_read_counts)
         self.assertEqual({'ref1': 240, 'ref2': 120}, c.cluster_base_counts)
