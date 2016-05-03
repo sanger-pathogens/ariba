@@ -34,7 +34,6 @@ class AssemblyCompare:
 
         self.nucmer_coords_file = self.outprefix + '.nucmer.coords'
         self.nucmer_snps_file = self.nucmer_coords_file + '.snps'
-        self.assembled_ref_seqs_file = self.outprefix + '.assembled_refs.fasta'
 
 
     def _run_nucmer(self):
@@ -287,4 +286,4 @@ class AssemblyCompare:
         self._run_nucmer()
         self.nucmer_hits = self._parse_nucmer_coords_file(self.nucmer_coords_file, self.ref_sequence.id)
         self.percent_identities = self._nucmer_hits_to_percent_identity(self.nucmer_hits)
-        self.assembled_reference_sequences = self._write_assembled_reference_sequences(self.nucmer_hits, self.ref_sequence, self.assembly_sequences, self.assembled_ref_seqs_file)
+        self.assembled_reference_sequences = self._get_assembled_reference_sequences(self.nucmer_hits, self.ref_sequence, self.assembly_sequences)
