@@ -133,8 +133,8 @@ class TestAssemblyCompare(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_write_assembled_reference_sequences(self):
-        '''test _write_assembled_reference_sequences'''
+    def test_get_assembled_reference_sequences(self):
+        '''test _get_assembled_reference_sequences'''
         ref_sequence = pyfastaq.sequences.Fasta('ref_seq', 'ATGGTACAAGACGGCCCTTTGCAGTCCTGTGTACTTGCGGGTCGCTCCTTTGCATTGAATTATCGAACATCGTCGCGTTCAAGATCCCGCGAAAAAAATTATAGATCGCAGGATATCACTGCCAGTGGCATCTGTGTAAGCGCTTAG')
         assembly = {
             'contig1': pyfastaq.sequences.Fasta('contig1', 'CATCTATGCTGCATCGATCACTGACGTATCATCATCAGCGTACTGACGTATTAGTTTGTAATGGTACAAGACGGCCCTTTGCAGTCCTGTGTACTTGCGGGTCGCTCCTTTGCATTGAATTATCGAACATCGTCGCGTTCAAGATCCCGCGAAAAAAATTATAGATCGCAGGATATCACTGCCAGTGGCATCTGTGTAAGCGCTTAGACGTCGTACTACTGTATATGCATCGATCTGAA'),
@@ -154,11 +154,12 @@ class TestAssemblyCompare(unittest.TestCase):
             ]
         }
 
-        tmp_outfile = 'tmp.test_nucmer_hits_to_assembled_gene_sequences.out.fa'
-        assembly_compare.AssemblyCompare._write_assembled_reference_sequences(nucmer_hits, ref_sequence, assembly, tmp_outfile)
-        expected_outfile = os.path.join(data_dir, 'assembly_compare_write_assembled_reference_sequences.expected.fa')
-        self.assertTrue(filecmp.cmp(tmp_outfile, expected_outfile, shallow=False))
-        os.unlink(tmp_outfile)
+        expected = {'ref_seq.1.147.contig1.61.207.+.complete': pyfastaq.sequences.Fasta('ref_seq.1.147.contig1.61.207.+.complete', 'ATGGTACAAGACGGCCCTTTGCAGTCCTGTGTACTTGCGGGTCGCTCCTTTGCATTGAATTATCGAACATCGTCGCGTTCAAGATCCCGCGAAAAAAATTATAGATCGCAGGATATCACTGCCAGTGGCATCTGTGTAAGCGCTTAG'),
+            'ref_seq.18.120.contig2.1.103.-': pyfastaq.sequences.Fasta('ref_seq.18.120.contig2.1.103.-', 'TTTGCAGTCCTGTGTACTTGCGGGTCGCTCCTTTGCATTGAATTATCGAACATCGTCGCGTTCAAGATCCCGCGAAAAAAATTATAGATCGCAGGATATCACT')
+        }
+
+        got = assembly_compare.AssemblyCompare._get_assembled_reference_sequences(nucmer_hits, ref_sequence, assembly)
+        self.assertEqual(expected, got)
 
 
     def test_whole_gene_covered_by_nucmer_hits(self):

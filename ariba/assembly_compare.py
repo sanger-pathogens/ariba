@@ -137,13 +137,13 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def _write_assembled_reference_sequences(nucmer_hits, ref_sequence, assembly, outfile):
+    def _get_assembled_reference_sequences(nucmer_hits, ref_sequence, assembly):
         '''nucmer_hits =  hits made by self._parse_nucmer_coords_file.
            ref_gene = reference sequence (pyfastaq.sequences.Fasta object)
            assembly = dictionary of contig name -> contig.
-           Writes each piece of assembly that corresponds to the reference sequence
-           to a fasta file.'''
-        f = pyfastaq.utils.open_file_write(outfile)
+           Makes a set of Fasta objects of each piece of assembly that
+           corresponds to the reference sequeunce.'''
+        sequences = {}
 
         for contig in sorted(nucmer_hits):
             for hit in nucmer_hits[contig]:
@@ -168,9 +168,9 @@ class AssemblyCompare:
                 if hit.hit_length_ref == hit.ref_length:
                     fa.id += '.complete'
 
-                print(fa, file=f)
+                sequences[fa.id] = fa
 
-        pyfastaq.utils.close(f)
+        return sequences
 
 
     @staticmethod
@@ -287,4 +287,4 @@ class AssemblyCompare:
         self._run_nucmer()
         self.nucmer_hits = self._parse_nucmer_coords_file(self.nucmer_coords_file, self.ref_sequence.id)
         self.percent_identities = self._nucmer_hits_to_percent_identity(self.nucmer_hits)
-        self._write_assembled_reference_sequences(self.nucmer_hits, self.ref_sequence, self.assembly_sequences, self.assembled_ref_seqs_file)
+        self.assembled_reference_sequences = self._write_assembled_reference_sequences(self.nucmer_hits, self.ref_sequence, self.assembly_sequences, self.assembled_ref_seqs_file)
