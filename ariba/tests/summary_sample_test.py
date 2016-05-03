@@ -43,22 +43,26 @@ class TestSummarySample(unittest.TestCase):
             'cluster.n': {
                 'assembled': 'yes',
                 'ref_seq': 'noncoding1',
-                'any_var': 'yes',
+                'known_var': 'yes',
+                'novel_var': 'no',
                 'pct_id': '98.33'
             },
             'cluster.p': {
                 'assembled': 'yes',
                 'ref_seq': 'presence_absence1',
-                'any_var': 'yes',
+                'known_var': 'yes',
+                'novel_var': 'no',
                 'pct_id': '98.96'
             },
             'cluster.v': {
                 'assembled': 'yes',
                 'ref_seq': 'variants_only1',
-                'any_var': 'yes',
+                'known_var': 'yes',
+                'novel_var': 'no',
                 'pct_id': '100.0'
             }
         }
+        self.maxDiff = None
         got = sample_summary._column_summary_data()
         self.assertEqual(expected, got)
 
