@@ -13,12 +13,18 @@ from ariba import cluster, common, mapping, histogram, read_store, report, repor
 class Error (Exception): pass
 
 
-def _run_cluster(obj, verbose):
+def _run_cluster(obj, verbose, clean):
     if verbose:
         print('Start running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
     obj.run()
     if verbose:
         print('Finished running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
+
+    if clean:
+        if verbose:
+            print('Deleting cluster dir', obj.root_dir, flush=True)
+        shutil.rmtree(obj.root_dir)
+
     return obj
 
 
@@ -312,7 +318,7 @@ class Clusters:
             cluster_list = pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose)))
         else:
             for c in cluster_list:
-                _run_cluster(c, self.verbose)
+                _run_cluster(c, self.verbose, self.clean)
 
         self.clusters = {c.name: c for c in cluster_list}
 
