@@ -76,7 +76,7 @@ class Clusters:
         self.report_file_all_tsv = os.path.join(self.outdir, 'report.all.tsv')
         self.report_file_all_xls = os.path.join(self.outdir, 'report.all.xls')
         self.report_file_filtered_prefix = os.path.join(self.outdir, 'report')
-        self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa')
+        self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa.gz')
         self.threads = threads
         self.verbose = verbose
 
