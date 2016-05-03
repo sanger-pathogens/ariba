@@ -315,7 +315,7 @@ class Clusters:
 
         if self.threads > 1:
             pool = multiprocessing.Pool(self.threads)
-            cluster_list = pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose)))
+            cluster_list = pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose), itertools.repeat(self.clean)))
         else:
             for c in cluster_list:
                 _run_cluster(c, self.verbose, self.clean)
