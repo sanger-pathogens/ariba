@@ -119,6 +119,24 @@ class TestSummaryCluster(unittest.TestCase):
             self.assertEqual(expected, cluster._to_cluster_summary_assembled())
 
 
+    def test_has_known_variant(self):
+        '''Test _has_known_variant'''
+        lines = [
+            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tpresence_absence\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
+            'refname\tpresence_absence\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
+        ]
+
+        dicts = [summary_cluster.SummaryCluster.line2dict(x) for x in lines]
+        expected = [True, False, False, False, False]
+        assert len(dicts) == len(expected)
+
+        for i in range(len(dicts)):
+            self.assertEqual(expected[i], summary_cluster.SummaryCluster._has_known_variant(dicts[i]))
+
+
     def test_has_nonsynonymous(self):
         '''Test _has_nonsynonymous'''
         lines = [
