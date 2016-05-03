@@ -10,14 +10,13 @@ class ReadStore:
         assert infile != outprefix
         self.infile = os.path.abspath(infile)
         self.outprefix = os.path.abspath(outprefix)
-        self.log_fh = log_fh
         self.outfile = os.path.abspath(outprefix) + '.gz'
 
         if not os.path.exists(self.infile):
             raise Error('File not found ' + self.infile + '. Cannot continue')
 
-        self._sort_file(self.infile, self.outprefix, log_fh=self.log_fh)
-        self._compress_and_index_file(self.outprefix, log_fh=self.log_fh)
+        self._sort_file(self.infile, self.outprefix, log_fh)
+        self._compress_and_index_file(self.outprefix, log_fh)
         os.unlink(self.outprefix)
 
 
@@ -36,9 +35,9 @@ class ReadStore:
         pysam.tabix_index(infile + '.gz', seq_col=0, start_col=1, end_col=1)
 
 
-    def get_reads(self, cluster_name, out1, out2):
-        if self.log_fh is not None:
-            print('Getting reads for', cluster_name, 'from', self.outfile, file=self.log_fh)
+    def get_reads(self, cluster_name, out1, out2, log_fh=None):
+        if log_fh is not None:
+            print('Getting reads for', cluster_name, 'from', self.outfile, file=log_fh)
         tabix_file = pysam.TabixFile(self.outfile)
         f_out1 = pyfastaq.utils.open_file_write(out1)
         f_out2 = pyfastaq.utils.open_file_write(out2)
@@ -53,8 +52,8 @@ class ReadStore:
 
         pyfastaq.utils.close(f_out1)
         pyfastaq.utils.close(f_out2)
-        if self.log_fh is not None:
-            print('Finished getting reads for', cluster_name, 'from', self.outfile, file=self.log_fh)
+        if log_fh is not None:
+            print('Finished getting reads for', cluster_name, 'from', self.outfile, file=log_fh)
 
     def clean(self):
         os.unlink(self.outfile)
