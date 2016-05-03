@@ -154,6 +154,14 @@ class SummaryCluster:
         return 'no'
 
 
+    def _to_cluster_summary_has_known_nonsynonymous(self, assembled_summary):
+        '''assembled_summary should be output of _to_cluster_summary_assembled'''
+        if assembled_summary == 'no':
+            return 'NA'
+        else:
+            return self._has_any_known_variant()
+
+
     def _to_cluster_summary_has_novel_nonsynonymous(self, assembled_summary):
         '''assembled_summary should be output of _to_cluster_summary_assembled'''
         if assembled_summary == 'no':
