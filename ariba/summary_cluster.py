@@ -209,7 +209,8 @@ class SummaryCluster:
             'assembled': self._to_cluster_summary_assembled(),
             'ref_seq': self.ref_name,
             'pct_id': str(self.pc_id_of_longest()),
-            'any_var': self._to_cluster_summary_has_nonsynonymous(assembled_summary)
+            'known_var': self._to_cluster_summary_has_known_nonsynonymous(assembled_summary),
+            'novel_var': self._to_cluster_summary_has_novel_nonsynonymous(assembled_summary)
         }
 
         return columns

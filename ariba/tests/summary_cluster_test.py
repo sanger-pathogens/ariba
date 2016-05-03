@@ -347,7 +347,8 @@ class TestSummaryCluster(unittest.TestCase):
         expected = {
             'assembled': 'yes',
             'ref_seq': 'ref1',
-            'any_var': 'yes',
+            'novel_var': 'no',
+            'known_var': 'yes',
             'pct_id': '98.33',
         }
         got = cluster.column_summary_data()
