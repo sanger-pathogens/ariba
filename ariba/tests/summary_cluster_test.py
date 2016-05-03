@@ -254,7 +254,7 @@ class TestSummaryCluster(unittest.TestCase):
             self.assertEqual('NA', cluster._to_cluster_summary_has_nonsynonymous('no'))
 
 
-    def _to_cluster_summary_has_novel_nonsynonymous(self):
+    def test_to_cluster_summary_has_novel_nonsynonymous(self):
         '''Test _to_cluster_summary_has_novel_nonsynonymous'''
         lines = [
             'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
@@ -264,7 +264,7 @@ class TestSummaryCluster(unittest.TestCase):
             'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\t.\tn\t.\t.\t.\tMULTIPLE\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
         ]
 
-        expected = ['no', 'yes', 'no', 'yes', 'yes']
+        expected = ['no', 'no', 'no', 'yes', 'yes']
 
         for i in range(len(lines)):
             data_dict = summary_cluster.SummaryCluster.line2dict(lines[i])
