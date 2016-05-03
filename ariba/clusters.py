@@ -8,17 +8,23 @@ import openpyxl
 import multiprocessing
 import pysam
 import pyfastaq
-from ariba import cluster, common, mapping, histogram, report, report_filter, reference_data
+from ariba import cluster, common, mapping, histogram, read_store, report, report_filter, reference_data
 
 class Error (Exception): pass
 
 
-def _run_cluster(obj, verbose):
+def _run_cluster(obj, verbose, clean):
     if verbose:
         print('Start running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
     obj.run()
     if verbose:
         print('Finished running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
+
+    if clean:
+        if verbose:
+            print('Deleting cluster dir', obj.root_dir, flush=True)
+        shutil.rmtree(obj.root_dir)
+
     return obj
 
 
@@ -76,7 +82,7 @@ class Clusters:
         self.report_file_all_tsv = os.path.join(self.outdir, 'report.all.tsv')
         self.report_file_all_xls = os.path.join(self.outdir, 'report.all.xls')
         self.report_file_filtered_prefix = os.path.join(self.outdir, 'report')
-        self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa')
+        self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa.gz')
         self.threads = threads
         self.verbose = verbose
 
@@ -171,9 +177,10 @@ class Clusters:
 
 
     def _bam_to_clusters_reads(self):
-        '''Sets up Cluster directories (one for each gene that has reads that mapped to it), writes reads fwd and rev files. Also gathers histogram data of insert size'''
-        filehandles_1 = {} # gene name -> filehandle of fwd_reads
-        filehandles_2 = {} # gene name -> filehandle of rev_reads
+        '''Sets up ReadStore of reads for all the clusters. Also gathers histogram data of insert size'''
+        reads_file_for_read_store = os.path.join(self.outdir, 'reads')
+        f_out = pyfastaq.utils.open_file_write(reads_file_for_read_store)
+
         sam_reader = pysam.Samfile(self.bam, "rb")
         sam1 = None
         self.proper_pairs = 0
@@ -201,35 +208,38 @@ class Clusters:
 
             for ref in ref_seqs:
                 if ref not in self.cluster_to_dir:
-                    assert ref not in filehandles_1
-                    assert ref not in filehandles_2
-
                     new_dir = os.path.join(self.clusters_outdir, ref)
-                    try:
-                        os.mkdir(new_dir)
-                    except:
-                        raise Error('Error mkdir ' + new_dir)
-
                     self.cluster_to_dir[ref] = new_dir
-                    filehandles_1[ref] = pyfastaq.utils.open_file_write(os.path.join(new_dir, 'reads_1.fq'))
-                    filehandles_2[ref] = pyfastaq.utils.open_file_write(os.path.join(new_dir, 'reads_2.fq'))
                     if self.verbose:
                         print('New cluster with reads that hit:', ref, flush=True)
 
-                print(read1, file=filehandles_1[ref])
-                print(read2, file=filehandles_2[ref])
                 self.cluster_read_counts[ref] = self.cluster_read_counts.get(ref, 0) + 2
                 self.cluster_base_counts[ref] = self.cluster_base_counts.get(ref, 0) + len(read1) + len(read2)
+                print(ref, self.cluster_read_counts[ref] - 1, read1.seq, read1.qual, sep='\t', file=f_out)
+                print(ref, self.cluster_read_counts[ref], read2.seq, read2.qual, sep='\t', file=f_out)
 
             sam1 = None
 
-        for ref in filehandles_1:
-            pyfastaq.utils.close(filehandles_1[ref])
-            pyfastaq.utils.close(filehandles_2[ref])
+        pyfastaq.utils.close(f_out)
+
+        if len(self.cluster_read_counts):
+            if self.verbose:
+                filehandle = sys.stdout
+            else:
+                filehandle = None
+
+            self.read_store = read_store.ReadStore(
+              reads_file_for_read_store,
+              os.path.join(self.outdir, 'read_store'),
+              log_fh=filehandle
+            )
+
+        os.unlink(reads_file_for_read_store)
 
         if self.verbose:
             print('Found', self.proper_pairs, 'proper read pairs')
             print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)
+
 
     def _set_insert_size_data(self):
         if len(self.insert_hist) == 0:
@@ -266,7 +276,7 @@ class Clusters:
                 if self.verbose:
                     print('Constructing cluster', seq_name + '.', counter, 'of', str(len(self.cluster_to_dir)))
                 new_dir = self.cluster_to_dir[seq_name]
-                self.refdata.write_seqs_to_fasta(os.path.join(new_dir, 'references.fa'), self.cluster_ids[seq_type][seq_name])
+                #self.refdata.write_seqs_to_fasta(os.path.join(new_dir, 'references.fa'), self.cluster_ids[seq_type][seq_name])
                 self.log_files.append(os.path.join(self.logs_dir, seq_name + '.log'))
 
                 cluster_list.append(cluster.Cluster(
@@ -275,6 +285,8 @@ class Clusters:
                     self.refdata,
                     self.cluster_read_counts[seq_name],
                     self.cluster_base_counts[seq_name],
+                    read_store=self.read_store,
+                    reference_names=self.cluster_ids[seq_type][seq_name],
                     logfile=self.log_files[-1],
                     assembly_coverage=self.assembly_coverage,
                     assembly_kmer=self.assembly_kmer,
@@ -303,10 +315,10 @@ class Clusters:
 
         if self.threads > 1:
             pool = multiprocessing.Pool(self.threads)
-            cluster_list = pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose)))
+            cluster_list = pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose), itertools.repeat(self.clean)))
         else:
             for c in cluster_list:
-                _run_cluster(c, self.verbose)
+                _run_cluster(c, self.verbose, self.clean)
 
         self.clusters = {c.name: c for c in cluster_list}
 
@@ -343,13 +355,12 @@ class Clusters:
 
         for gene in sorted(self.clusters):
             try:
-                cluster_fasta = self.clusters[gene].assembly_compare.assembled_ref_seqs_file
+                seq_dict = self.clusters[gene].assembly_compare.assembled_reference_sequences
             except:
                 continue
-            if os.path.exists(cluster_fasta):
-                file_reader = pyfastaq.sequences.file_reader(cluster_fasta)
-                for seq in file_reader:
-                    print(seq, file=f)
+
+            for seq_name in sorted(seq_dict):
+                print(seq_dict[seq_name], file=f)
 
         pyfastaq.utils.close(f)
 
@@ -357,10 +368,12 @@ class Clusters:
     def _clean(self):
         if self.clean:
             if self.verbose:
-                print('Deleting clusters direcory', self.clusters_outdir)
+                print('Deleting clusters directory', self.clusters_outdir)
                 shutil.rmtree(self.clusters_outdir)
                 print('Deleting Logs directory', self.logs_dir)
                 shutil.rmtree(self.logs_dir)
+                print('Deleting reads store files', self.read_store.outfile + '[.tbi]')
+                self.read_store.clean()
         else:
             if self.verbose:
                 print('Not deleting anything because --noclean used')

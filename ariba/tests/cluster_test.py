@@ -51,9 +51,6 @@ class TestCluster(unittest.TestCase):
                 c = cluster.Cluster(tmpdir, 'name', refdata=refdata, total_reads=42, total_reads_bases=4242)
             shutil.rmtree(tmpdir)
 
-        with self.assertRaises(cluster.Error):
-            c = cluster.Cluster('directorydoesnotexistshouldthrowerror', 'name', refdata=refdata, total_reads=42, total_reads_bases=4242)
-
 
     def test_number_of_reads_for_assembly(self):
         '''Test _number_of_reads_for_assembly'''
