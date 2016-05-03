@@ -362,7 +362,7 @@ class Clusters:
     def _clean(self):
         if self.clean:
             if self.verbose:
-                print('Deleting clusters direcory', self.clusters_outdir)
+                print('Deleting clusters directory', self.clusters_outdir)
                 shutil.rmtree(self.clusters_outdir)
                 print('Deleting Logs directory', self.logs_dir)
                 shutil.rmtree(self.logs_dir)
