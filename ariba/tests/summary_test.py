@@ -69,19 +69,22 @@ class TestSummary(unittest.TestCase):
                 'noncoding1': {
                     'assembled': 'yes',
                     'ref_seq': 'noncoding1',
-                    'any_var': 'yes',
+                    'known_var': 'yes',
+                    'novel_var': 'no',
                     'pct_id': '98.33',
                 },
                 'presence_absence1': {
                     'assembled': 'yes',
                     'ref_seq': 'presence_absence1',
-                    'any_var': 'yes',
+                    'known_var': 'yes',
+                    'novel_var': 'no',
                     'pct_id': '98.96',
                 },
                 'variants_only1': {
                     'assembled': 'no',
                     'ref_seq': 'NA',
-                    'any_var': 'NA',
+                    'known_var': 'NA',
+                    'novel_var': 'NA',
                     'pct_id': 'NA',
                 }
             },
@@ -89,19 +92,22 @@ class TestSummary(unittest.TestCase):
                 'noncoding1': {
                     'assembled': 'yes',
                     'ref_seq': 'noncoding1',
-                    'any_var': 'yes',
+                    'known_var': 'yes',
+                    'novel_var': 'no',
                     'pct_id': '98.33',
                 },
                 'presence_absence1': {
                     'assembled': 'yes',
                     'ref_seq': 'presence_absence1',
                     'pct_id': '98.96',
-                    'any_var': 'yes',
+                    'known_var': 'yes',
+                    'novel_var': 'no',
                 },
                 'variants_only1': {
                     'assembled': 'no',
                     'ref_seq': 'NA',
-                    'any_var': 'NA',
+                    'known_var': 'NA',
+                    'novel_var': 'NA',
                     'pct_id': 'NA',
                 }
             },
@@ -162,21 +168,24 @@ class TestSummary(unittest.TestCase):
                 'cluster.n.1': {
                     'assembled': 'yes',
                     'ref_seq': 'noncoding1',
-                    'any_var': 'yes',
+                    'known_var': 'yes',
+                    'novel_var': 'no',
                     'pct_id': '98.33',
                     'noncoding1.A14T': 'yes'
                 },
                 'cluster.p.1': {
                     'assembled': 'yes',
                     'ref_seq': 'presence_absence1',
-                    'any_var': 'yes',
+                    'known_var': 'yes',
+                    'novel_var': 'no',
                     'pct_id': '98.96',
                     'presence_absence1.I42L': 'yes'
                 },
                 'cluster.v.1': {
                     'assembled': 'yes',
                     'ref_seq': 'varonly1',
-                    'any_var': 'no',
+                    'known_var': 'no',
+                    'novel_var': 'no',
                     'pct_id': '99.42',
                 }
             },
@@ -184,7 +193,8 @@ class TestSummary(unittest.TestCase):
                 'cluster.n.1': {
                     'assembled': 'yes',
                     'ref_seq': 'noncoding1',
-                    'any_var': 'no',
+                    'known_var': 'no',
+                    'novel_var': 'no',
                     'pct_id': '98.33',
                     'noncoding1.A14T': 'no'
                 },
@@ -192,13 +202,15 @@ class TestSummary(unittest.TestCase):
                     'assembled': 'yes',
                     'ref_seq': 'presence_absence1',
                     'pct_id': '98.96',
-                    'any_var': 'no',
+                    'known_var': 'no',
+                    'novel_var': 'no',
                     'presence_absence1.I42L': 'no'
                 },
                 'cluster.v.1': {
                     'assembled': 'no',
                     'ref_seq': 'NA',
-                    'any_var': 'NA',
+                    'known_var': 'NA',
+                    'novel_var': 'NA',
                     'pct_id': 'NA',
                 }
             },
@@ -209,18 +221,18 @@ class TestSummary(unittest.TestCase):
         self.assertTrue(filecmp.cmp(tmp_out, expected_file, shallow=False))
         os.unlink(tmp_out)
         expected_lines = [
-            'name,cluster.n.1,cluster.n.1.ref,cluster.n.1.idty,cluster.n.1.any_var,cluster.n.1.noncoding1.A14T,cluster.p.1,cluster.p.1.ref,cluster.p.1.idty,cluster.p.1.any_var,cluster.p.1.presence_absence1.I42L,cluster.v.1,cluster.v.1.ref,cluster.v.1.idty,cluster.v.1.any_var',
-            'file1,yes,noncoding1,98.33,yes,yes,yes,presence_absence1,98.96,yes,yes,yes,varonly1,99.42,no',
-            'file2,yes,noncoding1,98.33,no,no,yes,presence_absence1,98.96,no,no,no,NA,NA,NA'
+            'name,cluster.n.1,cluster.n.1.ref,cluster.n.1.idty,cluster.n.1.known_var,cluster.n.1.novel_var,cluster.n.1.noncoding1.A14T,cluster.p.1,cluster.p.1.ref,cluster.p.1.idty,cluster.p.1.known_var,cluster.p.1.novel_var,cluster.p.1.presence_absence1.I42L,cluster.v.1,cluster.v.1.ref,cluster.v.1.idty,cluster.v.1.known_var,cluster.v.1.novel_var',
+            'file1,yes,noncoding1,98.33,yes,no,yes,yes,presence_absence1,98.96,yes,no,yes,yes,varonly1,99.42,no,no',
+            'file2,yes,noncoding1,98.33,no,no,no,yes,presence_absence1,98.96,no,no,no,no,NA,NA,NA,NA'
 ]
         expected_lines = [x.split(',') for x in expected_lines]
         self.assertEqual(expected_lines, got_lines)
 
         got_lines = summary.Summary._write_csv(filenames, rows, tmp_out, phandango=True)
         expected_lines = [
-            'name,cluster.n.1:o1,cluster.n.1.ref:o2,cluster.n.1.idty:c1,cluster.n.1.any_var:o1,cluster.n.1.noncoding1.A14T:o1,cluster.p.1:o1,cluster.p.1.ref:o2,cluster.p.1.idty:c1,cluster.p.1.any_var:o1,cluster.p.1.presence_absence1.I42L:o1,cluster.v.1:o1,cluster.v.1.ref:o2,cluster.v.1.idty:c1,cluster.v.1.any_var:o1',
-            'file1,yes,noncoding1,98.33,yes,yes,yes,presence_absence1,98.96,yes,yes,yes,varonly1,99.42,no',
-            'file2,yes,noncoding1,98.33,no,no,yes,presence_absence1,98.96,no,no,no,NA,NA,NA'
+            'name,cluster.n.1:o1,cluster.n.1.ref:o2,cluster.n.1.idty:c1,cluster.n.1.known_var:o1,cluster.n.1.novel_var:o1,cluster.n.1.noncoding1.A14T:o1,cluster.p.1:o1,cluster.p.1.ref:o2,cluster.p.1.idty:c1,cluster.p.1.known_var:o1,cluster.p.1.novel_var:o1,cluster.p.1.presence_absence1.I42L:o1,cluster.v.1:o1,cluster.v.1.ref:o2,cluster.v.1.idty:c1,cluster.v.1.known_var:o1,cluster.v.1.novel_var:o1',
+            'file1,yes,noncoding1,98.33,yes,no,yes,yes,presence_absence1,98.96,yes,no,yes,yes,varonly1,99.42,no,no',
+            'file2,yes,noncoding1,98.33,no,no,no,yes,presence_absence1,98.96,no,no,no,no,NA,NA,NA,NA'
 ]
         expected_lines = [x.split(',') for x in expected_lines]
         self.assertEqual(expected_lines, got_lines)

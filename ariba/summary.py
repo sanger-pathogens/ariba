@@ -101,7 +101,8 @@ class Summary:
                     rows[filename][cluster] = {
                         'assembled': 'no',
                         'ref_seq': 'NA',
-                        'any_var': 'NA',
+                        'known_var': 'NA',
+                        'novel_var': 'NA',
                         'pct_id': 'NA'
                     }
 
@@ -151,7 +152,7 @@ class Summary:
     @classmethod
     def _write_csv(cls, filenames, rows, outfile, phandango=False):
         lines = []
-        non_var_keys_list = ['assembled', 'ref_seq', 'pct_id', 'any_var']
+        non_var_keys_list = ['assembled', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
         non_var_keys_set = set(non_var_keys_list)
         making_header_line = True
         first_line = ['name']
@@ -167,12 +168,14 @@ class Summary:
                         cluster_name,
                         cluster_name + '.ref',
                         cluster_name + '.idty',
-                        cluster_name + '.any_var',
+                        cluster_name + '.known_var',
+                        cluster_name + '.novel_var',
                     ])
                     if phandango:
-                        first_line[-4] += ':o1'
-                        first_line[-3] += ':o2'
-                        first_line[-2] += ':c1'
+                        first_line[-5] += ':o1'
+                        first_line[-4] += ':o2'
+                        first_line[-3] += ':c1'
+                        first_line[-2] += ':o1'
                         first_line[-1] += ':o1'
 
                 d = rows[filename][cluster_name]

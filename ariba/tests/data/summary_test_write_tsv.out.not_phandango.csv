@@ -1,3 +1,3 @@
-name,cluster.n.1,cluster.n.1.ref,cluster.n.1.idty,cluster.n.1.any_var,cluster.n.1.noncoding1.A14T,cluster.p.1,cluster.p.1.ref,cluster.p.1.idty,cluster.p.1.any_var,cluster.p.1.presence_absence1.I42L,cluster.v.1,cluster.v.1.ref,cluster.v.1.idty,cluster.v.1.any_var
-file1,yes,noncoding1,98.33,yes,yes,yes,presence_absence1,98.96,yes,yes,yes,varonly1,99.42,no
-file2,yes,noncoding1,98.33,no,no,yes,presence_absence1,98.96,no,no,no,NA,NA,NA
+name,cluster.n.1,cluster.n.1.ref,cluster.n.1.idty,cluster.n.1.known_var,cluster.n.1.novel_var,cluster.n.1.noncoding1.A14T,cluster.p.1,cluster.p.1.ref,cluster.p.1.idty,cluster.p.1.known_var,cluster.p.1.novel_var,cluster.p.1.presence_absence1.I42L,cluster.v.1,cluster.v.1.ref,cluster.v.1.idty,cluster.v.1.known_var,cluster.v.1.novel_var
+file1,yes,noncoding1,98.33,yes,no,yes,yes,presence_absence1,98.96,yes,no,yes,yes,varonly1,99.42,no,no
+file2,yes,noncoding1,98.33,no,no,no,yes,presence_absence1,98.96,no,no,no,no,NA,NA,NA,NA
