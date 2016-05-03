@@ -366,6 +366,8 @@ class Clusters:
                 shutil.rmtree(self.clusters_outdir)
                 print('Deleting Logs directory', self.logs_dir)
                 shutil.rmtree(self.logs_dir)
+                print('Deleting reads store files', self.read_store.outfile + '[.tbi]')
+                self.read_store.clean()
         else:
             if self.verbose:
                 print('Not deleting anything because --noclean used')
