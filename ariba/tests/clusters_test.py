@@ -171,18 +171,22 @@ class TestClusters(unittest.TestCase):
 
     def test_write_catted_assembled_seqs_fasta(self):
         '''test _write_catted_assembled_seqs_fasta'''
+        seq1 = pyfastaq.sequences.Fasta('seq1', 'ACGT')
+        seq2 = pyfastaq.sequences.Fasta('seq2', 'TTTT')
+        seq3 = pyfastaq.sequences.Fasta('seq3', 'AAAA')
         class FakeAssemblyCompare:
-            def __init__(self, filename):
-                self.assembled_ref_seqs_file = filename
+            def __init__(self, assembled_seqs):
+                if assembled_seqs is not None:
+                    self.assembled_reference_sequences = {x.id: x for x in assembled_seqs}
 
         class FakeCluster:
-            def __init__(self, filename):
-                #self.final_assembled_genes_fa = filename
-                self.assembly_compare = FakeAssemblyCompare(filename)
+            def __init__(self, assembled_seqs):
+                self.assembly_compare = FakeAssemblyCompare(assembled_seqs)
 
         self.clusters.clusters = {
-            'gene1': FakeCluster(os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.in.gene1.fa')),
-            'gene2': FakeCluster(os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.in.gene2.fa')),
+            'gene1': FakeCluster([seq1, seq2]),
+            'gene2': FakeCluster([seq3]),
+            'gene3': FakeCluster(None),
         }
 
         tmp_file = 'tmp.test_write_catted_assembled_seqs_fasta.fa'

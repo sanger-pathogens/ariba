@@ -1,6 +1,6 @@
->gene1.1
+>seq1
 ACGT
->gene1.2
-CAT
->gene2
-GTGT
+>seq2
+TTTT
+>seq3
+AAAA

@@ -349,13 +349,12 @@ class Clusters:
 
         for gene in sorted(self.clusters):
             try:
-                cluster_fasta = self.clusters[gene].assembly_compare.assembled_ref_seqs_file
+                seq_dict = self.clusters[gene].assembly_compare.assembled_reference_sequences
             except:
                 continue
-            if os.path.exists(cluster_fasta):
-                file_reader = pyfastaq.sequences.file_reader(cluster_fasta)
-                for seq in file_reader:
-                    print(seq, file=f)
+
+            for seq_name in sorted(seq_dict):
+                print(seq_dict[seq_name], file=f)
 
         pyfastaq.utils.close(f)
 
