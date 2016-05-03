@@ -119,6 +119,13 @@ class SummaryCluster:
         return data_dict['has_known_var'] == '1'
 
 
+    def _has_any_known_variant(self):
+        for d in self.data:
+            if self._has_known_variant(d):
+                return 'yes'
+        return 'no'
+
+
     @classmethod
     def _has_nonsynonymous(cls, data_dict):
         return data_dict['ref_ctg_effect'] != 'SYN' and \
