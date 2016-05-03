@@ -147,6 +147,13 @@ class SummaryCluster:
         return SummaryCluster._has_nonsynonymous(data_dict) and not SummaryCluster._has_known_variant(data_dict)
 
 
+    def _has_any_novel_nonsynonymous(self):
+        for d in self.data:
+            if self._has_novel_nonsynonymous(d):
+                return 'yes'
+        return 'no'
+
+
     def _to_cluster_summary_has_nonsynonymous(self, assembled_summary):
         '''assembled_summary should be output of _to_cluster_summary_assembled'''
         if assembled_summary == 'no':
