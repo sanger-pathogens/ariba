@@ -17,6 +17,7 @@ class Summary:
       fofn=None,
       include_all_variant_columns=False,
       min_id=90.0,
+      cluster_cols='assembled,ref,idty,known_var,novel_var',
       verbose=False,
     ):
         if filenames is None and fofn is None:
@@ -30,10 +31,22 @@ class Summary:
         if fofn is not None:
             self.filenames.extend(self._load_fofn(fofn))
 
+        self.cluster_columns = self._determine_cluster_cols(cluster_cols)
         self.include_all_variant_columns = include_all_variant_columns
         self.min_id = min_id
         self.outprefix = outprefix
         self.verbose = verbose
+
+
+    @staticmethod
+    def _determine_cluster_cols(cols_string):
+        allowed_cols = {'assembled', 'ref', 'idty', 'known_var', 'novel_var'}
+        if cols_string == '' or cols_string is None:
+            return {x: False for x in allowed_cols}
+        wanted_cols = set(cols_string.split(','))
+        if not wanted_cols.issubset(allowed_cols):
+            raise Error('Error in cluster names. Allowed values are: ' + str(','.join(list(allowed_cols))) + '. Got: ' + cols_string)
+        return {x: x in wanted_cols for x in allowed_cols}
 
 
     def _load_fofn(self, fofn):

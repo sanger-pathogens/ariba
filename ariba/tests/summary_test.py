@@ -19,6 +19,31 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(s.filenames, ['file42', 'file1', 'file2'])
 
 
+    def test_determine_cluster_cols(self):
+        col_strings = [
+            'assembled,ref,idty,known_var,novel_var',
+            'ref,idty,known_var,novel_var',
+            'assembled,idty,known_var,novel_var',
+            'assembled',
+            '',
+            None,
+        ]
+
+        expected = [
+            {'assembled': True, 'ref': True, 'idty': True, 'known_var': True, 'novel_var': True},
+            {'assembled': False, 'ref': True, 'idty': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'ref': False, 'idty': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'ref': False, 'idty': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'ref': False, 'idty': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'ref': False, 'idty': False, 'known_var': False, 'novel_var': False},
+        ]
+
+        assert len(col_strings) == len(expected)
+
+        for i in range(len(col_strings)):
+            self.assertEqual(expected[i], summary.Summary._determine_cluster_cols(col_strings[i]))
+
+
     def test_load_input_files(self):
         '''Test _load_input_files'''
         file1 = os.path.join(data_dir, 'summary_test_load_input_files.1.tsv')
