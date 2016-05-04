@@ -218,6 +218,7 @@ class SummaryCluster:
 
         columns = {
             'assembled': self._to_cluster_summary_assembled(),
+            'has_res': self._has_resistance(assembled_summary),
             'ref_seq': self.ref_name,
             'pct_id': str(self.pc_id_of_longest()),
             'known_var': self._to_cluster_summary_has_known_nonsynonymous(assembled_summary),

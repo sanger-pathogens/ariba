@@ -372,6 +372,7 @@ class TestSummaryCluster(unittest.TestCase):
         cluster.add_data_dict(data_dict2)
         expected = {
             'assembled': 'yes',
+            'has_res': 'yes',
             'ref_seq': 'ref1',
             'novel_var': 'no',
             'known_var': 'yes',
