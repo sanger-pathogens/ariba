@@ -17,7 +17,7 @@ class Summary:
       fofn=None,
       include_all_variant_columns=False,
       min_id=90.0,
-      cluster_cols='assembled,ref,idty,known_var,novel_var',
+      cluster_cols='assembled,ref_seq,idty,known_var,novel_var',
       verbose=False,
     ):
         if filenames is None and fofn is None:
@@ -40,7 +40,7 @@ class Summary:
 
     @staticmethod
     def _determine_cluster_cols(cols_string):
-        allowed_cols = {'assembled', 'ref', 'idty', 'known_var', 'novel_var'}
+        allowed_cols = {'assembled', 'ref_seq', 'idty', 'known_var', 'novel_var'}
         if cols_string == '' or cols_string is None:
             return {x: False for x in allowed_cols}
         wanted_cols = set(cols_string.split(','))
@@ -128,6 +128,10 @@ class Summary:
                             rows[filename][cluster][key] = 'yes'
                         else:
                             rows[filename][cluster][key] = 'no'
+
+                for key, wanted in self.cluster_columns.items():
+                    if not wanted:
+                        del rows[filename][cluster][key]
 
         return rows
 

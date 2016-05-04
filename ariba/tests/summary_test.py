@@ -21,8 +21,8 @@ class TestSummary(unittest.TestCase):
 
     def test_determine_cluster_cols(self):
         col_strings = [
-            'assembled,ref,idty,known_var,novel_var',
-            'ref,idty,known_var,novel_var',
+            'assembled,ref_seq,idty,known_var,novel_var',
+            'ref_seq,idty,known_var,novel_var',
             'assembled,idty,known_var,novel_var',
             'assembled',
             '',
@@ -30,12 +30,12 @@ class TestSummary(unittest.TestCase):
         ]
 
         expected = [
-            {'assembled': True, 'ref': True, 'idty': True, 'known_var': True, 'novel_var': True},
-            {'assembled': False, 'ref': True, 'idty': True, 'known_var': True, 'novel_var': True},
-            {'assembled': True, 'ref': False, 'idty': True, 'known_var': True, 'novel_var': True},
-            {'assembled': True, 'ref': False, 'idty': False, 'known_var': False, 'novel_var': False},
-            {'assembled': False, 'ref': False, 'idty': False, 'known_var': False, 'novel_var': False},
-            {'assembled': False, 'ref': False, 'idty': False, 'known_var': False, 'novel_var': False},
+            {'assembled': True, 'ref_seq': True, 'idty': True, 'known_var': True, 'novel_var': True},
+            {'assembled': False, 'ref_seq': True, 'idty': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'ref_seq': False, 'idty': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'ref_seq': False, 'idty': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'ref_seq': False, 'idty': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'ref_seq': False, 'idty': False, 'known_var': False, 'novel_var': False},
         ]
 
         assert len(col_strings) == len(expected)
@@ -147,6 +147,16 @@ class TestSummary(unittest.TestCase):
         expected[infiles[1]]['noncoding1']['noncoding1.A14T'] = 'yes'
         expected[infiles[1]]['noncoding1']['noncoding1.A6G'] = 'yes'
         expected[infiles[1]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
+        got = s._gather_output_rows()
+        self.assertEqual(expected, got)
+
+        for filename in expected:
+            for gene_type in expected[filename]:
+                del expected[filename][gene_type]['ref_seq']
+
+        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,idty,known_var,novel_var')
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        s.include_all_variant_columns = True
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 
