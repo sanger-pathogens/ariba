@@ -101,8 +101,8 @@ class TestSummary(unittest.TestCase):
                 'presence_absence1': {
                     'assembled': 'yes',
                     'ref_seq': 'presence_absence1',
-                    'known_var': 'yes',
-                    'novel_var': 'no',
+                    'known_var': 'no',
+                    'novel_var': 'yes',
                     'pct_id': '98.96',
                 },
                 'variants_only1': {
@@ -125,8 +125,8 @@ class TestSummary(unittest.TestCase):
                     'assembled': 'yes',
                     'ref_seq': 'presence_absence1',
                     'pct_id': '98.96',
-                    'known_var': 'yes',
-                    'novel_var': 'no',
+                    'known_var': 'no',
+                    'novel_var': 'yes',
                 },
                 'variants_only1': {
                     'assembled': 'no',
@@ -138,14 +138,18 @@ class TestSummary(unittest.TestCase):
             },
         }
         got = s._gather_output_rows()
-        self.assertEqual(expected[infiles[0]], got[infiles[0]])
+        self.assertEqual(expected, got)
 
         s.include_all_known_variant_columns = True
         expected[infiles[0]]['noncoding1']['noncoding1.A14T'] = 'yes'
         expected[infiles[0]]['noncoding1']['noncoding1.A6G'] = 'no'
-        expected[infiles[0]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
         expected[infiles[1]]['noncoding1']['noncoding1.A14T'] = 'yes'
         expected[infiles[1]]['noncoding1']['noncoding1.A6G'] = 'yes'
+        got = s._gather_output_rows()
+        self.assertEqual(expected, got)
+
+        s.include_all_novel_variant_columns = True
+        expected[infiles[0]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
         expected[infiles[1]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
@@ -154,7 +158,7 @@ class TestSummary(unittest.TestCase):
             for gene_type in expected[filename]:
                 del expected[filename][gene_type]['ref_seq']
 
-        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,idty,known_var,novel_var')
+        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,idty,known_var,novel_var', include_all_novel_variant_columns=True)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s.include_all_variant_columns = True
         got = s._gather_output_rows()
