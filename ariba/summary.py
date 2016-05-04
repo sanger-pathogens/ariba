@@ -15,7 +15,8 @@ class Summary:
       outprefix,
       filenames=None,
       fofn=None,
-      include_all_variant_columns=False,
+      include_all_known_variant_columns=True,
+      include_all_novel_variant_columns=False,
       min_id=90.0,
       cluster_cols='assembled,ref_seq,idty,known_var,novel_var',
       verbose=False,
@@ -32,7 +33,8 @@ class Summary:
             self.filenames.extend(self._load_fofn(fofn))
 
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
-        self.include_all_variant_columns = include_all_variant_columns
+        self.include_all_known_variant_columns = include_all_known_variant_columns
+        self.include_all_novel_variant_columns = include_all_novel_variant_columns
         self.min_id = min_id
         self.outprefix = outprefix
         self.verbose = verbose
@@ -119,12 +121,21 @@ class Summary:
                         'pct_id': 'NA'
                     }
 
-                if self.include_all_variant_columns and cluster in all_var_columns:
-                    for (ref_name, variant) in all_var_columns[cluster]:
+                wanted_var_types = set()
+                if self.include_all_known_variant_columns:
+                    wanted_var_types.add('known')
+                if self.include_all_novel_variant_columns:
+                    wanted_var_types.add('unknown')
+
+                if len(wanted_var_types) and cluster in all_var_columns:
+                    for (ref_name, variant, known_or_unknown) in all_var_columns[cluster]:
+                        if known_or_unknown not in wanted_var_types:
+                            continue
+
                         key = ref_name + '.' + variant
                         if rows[filename][cluster]['assembled'] == 'no':
                             rows[filename][cluster][key] = 'NA'
-                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant) in sample.variant_column_names_tuples[cluster]:
+                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant, known_or_unknown) in sample.variant_column_names_tuples[cluster]:
                             rows[filename][cluster][key] = 'yes'
                         else:
                             rows[filename][cluster][key] = 'no'

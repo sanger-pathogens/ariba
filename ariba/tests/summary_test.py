@@ -74,9 +74,9 @@ class TestSummary(unittest.TestCase):
         samples = summary.Summary._load_input_files([file1, file2], 90)
         got = summary.Summary._get_all_variant_columns(samples)
         expected = {
-            'cluster.p.2': {('presence_absence1', 'A10V')},
-            'cluster.n.1': {('noncoding1', 'A6G'), ('noncoding1', 'A14T')},
-            'cluster.p.1': {('presence_absence1', 'A10V')},
+            'cluster.p.2': {('presence_absence1', 'A10V', 'known')},
+            'cluster.n.1': {('noncoding1', 'A6G', 'known'), ('noncoding1', 'A14T', 'known')},
+            'cluster.p.1': {('presence_absence1', 'A10V', 'known')},
         }
         self.assertEqual(expected, got)
 
@@ -87,7 +87,7 @@ class TestSummary(unittest.TestCase):
             os.path.join(data_dir, 'summary_test_gather_output_rows.in.1.tsv'),
             os.path.join(data_dir, 'summary_test_gather_output_rows.in.2.tsv')
         ]
-        s = summary.Summary('out', filenames=infiles)
+        s = summary.Summary('out', filenames=infiles, include_all_known_variant_columns=False)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         expected = {
             infiles[0]: {
@@ -138,9 +138,9 @@ class TestSummary(unittest.TestCase):
             },
         }
         got = s._gather_output_rows()
-        self.assertEqual(expected, got)
+        self.assertEqual(expected[infiles[0]], got[infiles[0]])
 
-        s.include_all_variant_columns = True
+        s.include_all_known_variant_columns = True
         expected[infiles[0]]['noncoding1']['noncoding1.A14T'] = 'yes'
         expected[infiles[0]]['noncoding1']['noncoding1.A6G'] = 'no'
         expected[infiles[0]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
