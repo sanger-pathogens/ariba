@@ -21,7 +21,7 @@ class TestSummary(unittest.TestCase):
 
     def test_determine_cluster_cols(self):
         col_strings = [
-            'assembled,ref_seq,idty,known_var,novel_var',
+            'assembled,has_res,ref_seq,idty,known_var,novel_var',
             'ref_seq,idty,known_var,novel_var',
             'assembled,idty,known_var,novel_var',
             'assembled',
@@ -30,12 +30,12 @@ class TestSummary(unittest.TestCase):
         ]
 
         expected = [
-            {'assembled': True, 'ref_seq': True, 'idty': True, 'known_var': True, 'novel_var': True},
-            {'assembled': False, 'ref_seq': True, 'idty': True, 'known_var': True, 'novel_var': True},
-            {'assembled': True, 'ref_seq': False, 'idty': True, 'known_var': True, 'novel_var': True},
-            {'assembled': True, 'ref_seq': False, 'idty': False, 'known_var': False, 'novel_var': False},
-            {'assembled': False, 'ref_seq': False, 'idty': False, 'known_var': False, 'novel_var': False},
-            {'assembled': False, 'ref_seq': False, 'idty': False, 'known_var': False, 'novel_var': False},
+            {'assembled': True, 'has_res': True, 'ref_seq': True, 'idty': True, 'known_var': True, 'novel_var': True},
+            {'assembled': False, 'has_res': False, 'ref_seq': True, 'idty': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'has_res': False, 'ref_seq': False, 'idty': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'has_res': False, 'ref_seq': False, 'idty': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'has_res': False, 'ref_seq': False, 'idty': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'has_res': False, 'ref_seq': False, 'idty': False, 'known_var': False, 'novel_var': False},
         ]
 
         assert len(col_strings) == len(expected)
@@ -93,6 +93,7 @@ class TestSummary(unittest.TestCase):
             infiles[0]: {
                 'noncoding1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'noncoding1',
                     'known_var': 'yes',
                     'novel_var': 'no',
@@ -100,6 +101,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'presence_absence1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'presence_absence1',
                     'known_var': 'no',
                     'novel_var': 'yes',
@@ -107,6 +109,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'variants_only1': {
                     'assembled': 'no',
+                    'has_res': 'NA',
                     'ref_seq': 'NA',
                     'known_var': 'NA',
                     'novel_var': 'NA',
@@ -116,6 +119,7 @@ class TestSummary(unittest.TestCase):
             infiles[1]: {
                 'noncoding1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'noncoding1',
                     'known_var': 'yes',
                     'novel_var': 'no',
@@ -123,6 +127,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'presence_absence1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'presence_absence1',
                     'pct_id': '98.96',
                     'known_var': 'no',
@@ -130,6 +135,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'variants_only1': {
                     'assembled': 'no',
+                    'has_res': 'NA',
                     'ref_seq': 'NA',
                     'known_var': 'NA',
                     'novel_var': 'NA',
@@ -158,7 +164,7 @@ class TestSummary(unittest.TestCase):
             for gene_type in expected[filename]:
                 del expected[filename][gene_type]['ref_seq']
 
-        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,idty,known_var,novel_var', include_all_novel_variant_columns=True)
+        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,has_res,idty,known_var,novel_var', include_all_novel_variant_columns=True)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s.include_all_variant_columns = True
         got = s._gather_output_rows()
