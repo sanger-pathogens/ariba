@@ -209,6 +209,26 @@ class Summary:
 
 
     @classmethod
+    def _filter_matrix_columns(cls, matrix, phandango_header, csv_header):
+        '''phandango_header, csv_header, matrix = output from _to_matrix'''
+        indexes_to_keep = set()
+
+        for row in matrix:
+            for i in range(len(row)):
+                if row[i] not in {'NA', 'no'}:
+                    indexes_to_keep.add(i)
+
+        indexes_to_keep = sorted(list(indexes_to_keep))
+
+        for i in range(len(matrix)):
+            matrix[i] = [matrix[i][j] for j in indexes_to_keep]
+
+        phandango_header = [phandango_header[i] for i in indexes_to_keep]
+        csv_header = [csv_header[i] for i in indexes_to_keep]
+        return phandango_header, csv_header, matrix
+
+
+    @classmethod
     def _filter_clusters(cls, rows):
         '''Removes any column where every sample has "no" or "NA".
            Returns tuple: (filtered rows, number of remaining columns)'''

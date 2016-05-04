@@ -266,6 +266,27 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_filter_matrix_columns(self):
+        '''Test _filter_matrix_columns'''
+        matrix = [
+            ['yes', 'yes', 'no', 'yes_nonunique', 'NA', 'no', 'NA'],
+            ['yes', 'no', 'no', 'no', 'no', 'NA', 'NA']
+        ]
+        phandango_header = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7']
+        csv_header = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7']
+
+        got_phandago_header, got_csv_header, got_matrix  = summary.Summary._filter_matrix_columns(matrix, phandango_header, csv_header)
+        expected_phandango_header = ['p1', 'p2', 'p4']
+        expected_csv_header = ['h1', 'h2', 'h4']
+        expected_matrix = [
+            ['yes', 'yes', 'yes_nonunique'],
+            ['yes', 'no', 'no'],
+        ]
+        self.assertEqual(expected_phandango_header, got_phandago_header)
+        self.assertEqual(expected_csv_header, got_csv_header)
+        self.assertEqual(expected_matrix, got_matrix)
+
+
     def test_filter_clusters(self):
         '''Test _filter_clusters'''
         rows = {
