@@ -165,7 +165,7 @@ class Summary:
             for cluster_name in sorted(rows[filename]):
                 if making_header_line:
                     first_line.extend([
-                        cluster_name + '.present',
+                        cluster_name + '.assembled',
                         cluster_name + '.ref',
                         cluster_name + '.idty',
                         cluster_name + '.known_var',
