@@ -58,7 +58,10 @@ class SummarySample:
            ref_name = self.column_summary_data[cluster_name]['ref_seq']
            columns[cluster_name] = set()
            for var in variants:
-               columns[cluster_name].add((ref_name, var))
+               if self.column_summary_data[cluster_name]['known_var'] == 'yes':
+                   columns[cluster_name].add((ref_name, var, 'known'))
+               else:
+                   columns[cluster_name].add((ref_name, var, 'unknown'))
         return columns
 
 
