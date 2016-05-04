@@ -192,6 +192,23 @@ class Summary:
 
 
     @classmethod
+    def _filter_matrix_rows(cls, matrix):
+        '''matrix = output from _to_matrix'''
+        indexes_to_keep = []
+
+        for i in range(len(matrix)):
+            keep_row = False
+            for element in matrix[i]:
+                if element not in {'NA', 'no'}:
+                    keep_row = True
+                    break
+            if keep_row:
+                indexes_to_keep.append(i)
+
+        return [matrix[i] for i in indexes_to_keep]
+
+
+    @classmethod
     def _filter_clusters(cls, rows):
         '''Removes any column where every sample has "no" or "NA".
            Returns tuple: (filtered rows, number of remaining columns)'''

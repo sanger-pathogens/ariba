@@ -245,6 +245,27 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected_lines, got_lines)
 
 
+    def test_filter_matrix_rows(self):
+        '''Test _filter_matrix_rows'''
+        matrix = [
+            ['yes', 'yes'],
+            ['yes', 'no'],
+            ['no', 'no'],
+            ['yes_nonunique', 'no'],
+            ['NA', 'no'],
+            ['no', 'NA'],
+            ['NA', 'NA']
+        ]
+
+        expected = [
+            ['yes', 'yes'],
+            ['yes', 'no'],
+            ['yes_nonunique', 'no'],
+        ]
+        got = summary.Summary._filter_matrix_rows(matrix)
+        self.assertEqual(expected, got)
+
+
     def test_filter_clusters(self):
         '''Test _filter_clusters'''
         rows = {
