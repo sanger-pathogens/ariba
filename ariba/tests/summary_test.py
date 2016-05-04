@@ -221,7 +221,7 @@ class TestSummary(unittest.TestCase):
         self.assertTrue(filecmp.cmp(tmp_out, expected_file, shallow=False))
         os.unlink(tmp_out)
         expected_lines = [
-            'name,cluster.n.1,cluster.n.1.ref,cluster.n.1.idty,cluster.n.1.known_var,cluster.n.1.novel_var,cluster.n.1.noncoding1.A14T,cluster.p.1,cluster.p.1.ref,cluster.p.1.idty,cluster.p.1.known_var,cluster.p.1.novel_var,cluster.p.1.presence_absence1.I42L,cluster.v.1,cluster.v.1.ref,cluster.v.1.idty,cluster.v.1.known_var,cluster.v.1.novel_var',
+            'name,cluster.n.1.present,cluster.n.1.ref,cluster.n.1.idty,cluster.n.1.known_var,cluster.n.1.novel_var,cluster.n.1.noncoding1.A14T,cluster.p.1.present,cluster.p.1.ref,cluster.p.1.idty,cluster.p.1.known_var,cluster.p.1.novel_var,cluster.p.1.presence_absence1.I42L,cluster.v.1.present,cluster.v.1.ref,cluster.v.1.idty,cluster.v.1.known_var,cluster.v.1.novel_var',
             'file1,yes,noncoding1,98.33,yes,no,yes,yes,presence_absence1,98.96,yes,no,yes,yes,varonly1,99.42,no,no',
             'file2,yes,noncoding1,98.33,no,no,no,yes,presence_absence1,98.96,no,no,no,no,NA,NA,NA,NA'
 ]
@@ -230,7 +230,7 @@ class TestSummary(unittest.TestCase):
 
         got_lines = summary.Summary._write_csv(filenames, rows, tmp_out, phandango=True)
         expected_lines = [
-            'name,cluster.n.1:o1,cluster.n.1.ref:o2,cluster.n.1.idty:c1,cluster.n.1.known_var:o1,cluster.n.1.novel_var:o1,cluster.n.1.noncoding1.A14T:o1,cluster.p.1:o1,cluster.p.1.ref:o2,cluster.p.1.idty:c1,cluster.p.1.known_var:o1,cluster.p.1.novel_var:o1,cluster.p.1.presence_absence1.I42L:o1,cluster.v.1:o1,cluster.v.1.ref:o2,cluster.v.1.idty:c1,cluster.v.1.known_var:o1,cluster.v.1.novel_var:o1',
+            'name,cluster.n.1.present:o1,cluster.n.1.ref:o2,cluster.n.1.idty:c1,cluster.n.1.known_var:o1,cluster.n.1.novel_var:o1,cluster.n.1.noncoding1.A14T:o1,cluster.p.1.present:o1,cluster.p.1.ref:o2,cluster.p.1.idty:c1,cluster.p.1.known_var:o1,cluster.p.1.novel_var:o1,cluster.p.1.presence_absence1.I42L:o1,cluster.v.1.present:o1,cluster.v.1.ref:o2,cluster.v.1.idty:c1,cluster.v.1.known_var:o1,cluster.v.1.novel_var:o1',
             'file1,yes,noncoding1,98.33,yes,no,yes,yes,presence_absence1,98.96,yes,no,yes,yes,varonly1,99.42,no,no',
             'file2,yes,noncoding1,98.33,no,no,no,yes,presence_absence1,98.96,no,no,no,no,NA,NA,NA,NA'
 ]
