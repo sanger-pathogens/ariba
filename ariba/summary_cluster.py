@@ -201,6 +201,17 @@ class SummaryCluster:
                 return data_dict['ref_ctg_effect']
 
 
+    def _has_resistance(self, assembled_summary):
+        '''assembled_summary should be output of _to_cluster_summary_assembled'''
+        if assembled_summary.startswith('yes'):
+            if self.data[0]['ref_type'] in ['non_coding', 'presabs'] or self._to_cluster_summary_has_known_nonsynonymous(assembled_summary) == 'yes':
+                return 'yes'
+            else:
+                return 'no'
+        else:
+            return 'no'
+
+
     def column_summary_data(self):
         '''Returns a dictionary of column name -> value, for cluster-level results'''
         assembled_summary = self._to_cluster_summary_assembled()

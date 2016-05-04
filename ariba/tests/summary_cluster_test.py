@@ -334,6 +334,32 @@ class TestSummaryCluster(unittest.TestCase):
         self.assertEqual('MULTIPLE', summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
 
+    def test_has_resistance(self):
+        '''Test _has_resistance'''
+        lines = [
+            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tpresabs\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tpresabs\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tpresabs\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tp\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tvariants_only\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tvariants_only\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+            'refname\tvariants_only\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tp\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1_n_A14T_N_ref has wild type, foo bar\tsome free text',
+        ]
+
+        expected = ['yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'no', 'no']
+
+        for i in range(len(lines)):
+            data_dict = summary_cluster.SummaryCluster.line2dict(lines[i])
+            cluster = summary_cluster.SummaryCluster()
+            cluster.add_data_dict(data_dict)
+            for assembled_summary in ['yes', 'yes_nonunique']:
+                self.assertEqual(expected[i], cluster._has_resistance(assembled_summary))
+            for assembled_summary in ['no', 'fragmented']:
+                self.assertEqual('no', cluster._has_resistance(assembled_summary))
+
+
+
     def test_column_summary_data(self):
         '''Test column_summary_data'''
         line1 = 'ref1\tnon_coding\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tfoo bar\tspam eggs'
