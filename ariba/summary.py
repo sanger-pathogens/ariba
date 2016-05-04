@@ -149,10 +149,53 @@ class Summary:
 
 
     @classmethod
+    def _to_matrix(cls, filenames, rows, cluster_cols):
+        '''rows = output from _gather_output_rows().
+           filenames = self.filenames
+           cluster_cols = self.cluster_columns'''
+        matrix = []
+        making_header_lines = True
+        phandango_header = ['name']
+        phandago_suffixes = {'assembled': ':o1', 'has_res': ':o1', 'ref': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': 'o1'}
+        csv_header = ['name']
+        all_cluster_cols_in_order = ['assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
+        all_cluster_cols_in_order_set = set(['assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
+        cluster_cols_in_order = [x for x in all_cluster_cols_in_order if cluster_cols[x]]
+        cluster_cols_set = set(cluster_cols_in_order)
+
+        for filename in filenames:
+            assert filename in rows
+            line = [filename]
+
+            for cluster_name in sorted(rows[filename]):
+                for col in cluster_cols_in_order:
+                    if making_header_lines:
+                        csv_header.append(cluster_name + '.' + col)
+                        phandango_header.append(cluster_name + '.' + col + '.' + phandago_suffixes[col])
+
+                    line.append(rows[filename][cluster_name][col])
+
+                for col in sorted(rows[filename][cluster_name]):
+                    if col in all_cluster_cols_in_order_set:
+                        continue
+
+                    if making_header_lines:
+                        csv_header.append(cluster_name + '.' + col)
+                        phandango_header.append(cluster_name + '.' + col + ':o1')
+
+                    line.append(rows[filename][cluster_name][col])
+
+            making_header_lines = False
+            matrix.append(line)
+
+        return phandango_header, csv_header, matrix
+
+
+    @classmethod
     def _filter_clusters(cls, rows):
-        '''Removes any cluster where every sample has assembled == "no".
+        '''Removes any column where every sample has "no" or "NA".
            Returns tuple: (filtered rows, number of remaining columns)'''
-        found_a_yes = set()
+        columns_to_keep = set()
         first_filename = True
         all_clusters = set()
 
@@ -161,21 +204,21 @@ class Summary:
                 if first_filename:
                     all_clusters.add(cluster)
 
-                if cluster in found_a_yes:
+                if cluster in columns_to_keep:
                     continue
 
                 if rows[filename][cluster]['assembled'] == 'yes':
-                    found_a_yes.add(cluster)
+                    columns_to_keep.add(cluster)
 
             first_filename = False
 
-        to_delete = all_clusters.difference(found_a_yes)
+        to_delete = all_clusters.difference(columns_to_keep)
 
         for filename in rows:
             for cluster in to_delete:
                 del rows[filename][cluster]
 
-        return rows, len(found_a_yes)
+        return rows, len(columns_to_keep)
 
 
     @classmethod
