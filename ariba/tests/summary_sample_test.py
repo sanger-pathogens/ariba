@@ -42,6 +42,7 @@ class TestSummarySample(unittest.TestCase):
         expected = {
             'cluster.n': {
                 'assembled': 'yes',
+                'has_res': 'yes',
                 'ref_seq': 'noncoding1',
                 'known_var': 'yes',
                 'novel_var': 'no',
@@ -49,6 +50,7 @@ class TestSummarySample(unittest.TestCase):
             },
             'cluster.p': {
                 'assembled': 'yes',
+                'has_res': 'yes',
                 'ref_seq': 'presence_absence1',
                 'known_var': 'yes',
                 'novel_var': 'no',
@@ -56,6 +58,7 @@ class TestSummarySample(unittest.TestCase):
             },
             'cluster.v': {
                 'assembled': 'yes',
+                'has_res': 'yes',
                 'ref_seq': 'variants_only1',
                 'known_var': 'yes',
                 'novel_var': 'no',
