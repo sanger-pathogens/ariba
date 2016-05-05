@@ -229,6 +229,15 @@ class Summary:
 
 
     @classmethod
+    def _matrix_to_csv(cls, matrix, header, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
+        print(*header, sep=',', file=f)
+        for line in matrix:
+            print(*line, sep=',', file=f)
+        pyfastaq.utils.close(f)
+
+
+    @classmethod
     def _filter_clusters(cls, rows):
         '''Removes any column where every sample has "no" or "NA".
            Returns tuple: (filtered rows, number of remaining columns)'''

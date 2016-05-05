@@ -287,6 +287,22 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected_matrix, got_matrix)
 
 
+    def test_matrix_to_csv(self):
+        '''Test _matrix_to_csv'''
+        matrix = [
+            ['line1_1', 'line1_2'],
+            ['line2_1', 'line2_2'],
+        ]
+        header = ['head1', 'head2']
+        tmpfile = 'tmp.test.matrxi_to_csv.csv'
+        summary.Summary._matrix_to_csv(matrix, header, tmpfile)
+        with open(tmpfile) as f:
+            got = f.read()
+
+        expected = 'head1,head2\nline1_1,line1_2\nline2_1,line2_2\n'
+        self.assertEqual(expected, got)
+
+
     def test_filter_clusters(self):
         '''Test _filter_clusters'''
         rows = {
