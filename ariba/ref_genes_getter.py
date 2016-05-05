@@ -49,7 +49,7 @@ class RefGenesGetter:
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
 
-        card_version = '1.0.5'
+        card_version = '1.0.6'
         card_tarball_url = 'https://card.mcmaster.ca/download/0/broadsteet-v' + card_version + '.tar.gz'
         card_tarball = 'card.tar.gz'
         print('Working in temporary directory', tmpdir)
@@ -241,23 +241,23 @@ class RefGenesGetter:
         outprefix = os.path.abspath(outprefix)
         tmpdir = outprefix + '.tmp.download'
         current_dir = os.getcwd()
-        
+
         try:
             os.mkdir(tmpdir)
             os.chdir(tmpdir)
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
-        
+
         zipfile = 'VFDB_setA_nt.fas.gz'
         self._download_file('http://www.mgc.ac.cn/VFs/Down/VFDB_setA_nt.fas.gz', zipfile)
         common.syscall('gunzip ' + zipfile)
         os.chdir(current_dir)
         print('Extracted files.')
-        
+
         final_fasta = outprefix + '_VFDB.fa'
         shutil.move(tmpdir+'/VFDB_setA_nt.fas',final_fasta)
         shutil.rmtree(tmpdir)
-        
+
         print('Extracted core DNA sequence dataset. Final file is called', final_fasta, end='\n\n')
         print('You can use it with ARIBA like this:')
         print('ariba prepareref --presabs', final_fasta, 'output_directory\n')
