@@ -17,6 +17,8 @@ class Summary:
       fofn=None,
       include_all_known_variant_columns=True,
       include_all_novel_variant_columns=False,
+      filter_rows=True,
+      filter_columns=True,
       min_id=90.0,
       cluster_cols='assembled,has_res,ref_seq,pct_id,known_var,novel_var',
       verbose=False,
@@ -35,6 +37,8 @@ class Summary:
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
         self.include_all_known_variant_columns = include_all_known_variant_columns
         self.include_all_novel_variant_columns = include_all_novel_variant_columns
+        self.filter_rows = filter_rows
+        self.filter_columns = filter_columns
         self.min_id = min_id
         self.outprefix = outprefix
         self.verbose = verbose
@@ -237,91 +241,6 @@ class Summary:
         pyfastaq.utils.close(f)
 
 
-    @classmethod
-    def _filter_clusters(cls, rows):
-        '''Removes any column where every sample has "no" or "NA".
-           Returns tuple: (filtered rows, number of remaining columns)'''
-        columns_to_keep = set()
-        first_filename = True
-        all_clusters = set()
-
-        for filename in rows:
-            for cluster in rows[filename]:
-                if first_filename:
-                    all_clusters.add(cluster)
-
-                if cluster in columns_to_keep:
-                    continue
-
-                if rows[filename][cluster]['assembled'] == 'yes':
-                    columns_to_keep.add(cluster)
-
-            first_filename = False
-
-        to_delete = all_clusters.difference(columns_to_keep)
-
-        for filename in rows:
-            for cluster in to_delete:
-                del rows[filename][cluster]
-
-        return rows, len(columns_to_keep)
-
-
-    @classmethod
-    def _write_csv(cls, filenames, rows, outfile, phandango=False):
-        lines = []
-        non_var_keys_list = ['assembled', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
-        non_var_keys_set = set(non_var_keys_list)
-        making_header_line = True
-        first_line = ['name']
-
-        # loop over filenames not rows to preserve their order
-        for filename in filenames:
-            assert filename in rows
-            line = [filename]
-
-            for cluster_name in sorted(rows[filename]):
-                if making_header_line:
-                    first_line.extend([
-                        cluster_name + '.assembled',
-                        cluster_name + '.ref',
-                        cluster_name + '.pct_id',
-                        cluster_name + '.known_var',
-                        cluster_name + '.novel_var',
-                    ])
-                    if phandango:
-                        first_line[-5] += ':o1'
-                        first_line[-4] += ':o2'
-                        first_line[-3] += ':c1'
-                        first_line[-2] += ':o1'
-                        first_line[-1] += ':o1'
-
-                d = rows[filename][cluster_name]
-                line.extend([d[x] for x in non_var_keys_list])
-
-                for key, value in sorted(d.items()):
-                    if key in non_var_keys_set:
-                        continue
-
-                    if making_header_line:
-                        if phandango:
-                            first_line.append(cluster_name + '.' + key + ':o1')
-                        else:
-                            first_line.append(cluster_name + '.' + key)
-
-                    line.append(value)
-
-            making_header_line = False
-            lines.append(line)
-
-        f = pyfastaq.utils.open_file_write(outfile)
-        print(','.join(first_line), file=f)
-        for line in lines:
-            print(*line, sep=',', file=f)
-        pyfastaq.utils.close(f)
-        return [first_line] + lines
-
-
     @staticmethod
     def _distance_score_between_values(value1, value2):
         value_set = {value1, value2}
@@ -339,21 +258,20 @@ class Summary:
 
     @classmethod
     def _write_distance_matrix(cls, lines, outfile):
-        if len(lines) < 3:
+        if len(lines) < 2:
             raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
                         'Only one sample present.')
 
         if len(lines[0]) < 2:
-            raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
-                        'No genes present in output')
+            raise Error('Cannot calculate distance matrix to make tree for phandango. Not enough columns')
 
         with open(outfile, 'w') as f:
             sample_names = [x[0] for x in lines]
-            print(*sample_names[1:], sep='\t', file=f)
+            print(*sample_names, sep='\t', file=f)
 
-            for i in range(1,len(lines)):
+            for i in range(len(lines)):
                 scores = []
-                for j in range(2, len(lines)):
+                for j in range(1, len(lines)):
                     scores.append(Summary._distance_score_between_lists(lines[i], lines[j]))
                 print(lines[i][0], *scores, sep='\t', file=f)
 
@@ -382,25 +300,35 @@ class Summary:
         if self.verbose:
             print('Generating output rows', flush=True)
         self.rows = self._gather_output_rows()
+        phandango_header, csv_header, matrix = summary.Summary._to_matrix(self.filenames, self.rows, self.cluster_columns)
 
-        if self.verbose:
-            print('Filtering columns', flush=True)
-        self.rows, remaining_clusters = Summary._filter_clusters(self.rows)
+        if self.filter_rows:
+            if self.verbose:
+                print('Filtering rows', flush=True)
+            matrix = summary.Summary._filter_matrix_rows(matrix)
 
-        if remaining_clusters == 0:
-            print('No clusters found that are present in any sample. Will not write any output files', file=sys.stderr)
+        if len(matrix) == 0:
+            print('No rows left after filtering rows. Cannot continue', file=sys.stderr)
             sys.exit(1)
+
+        if self.filter_columns:
+            if self.verbose:
+                print('Filtering columns', flush=True)
+            phandango_header, csv_header, matrix = summary.Summary._filter_matrix_columns(matrix, phandango_header, csv_header)
+
+        if len(matrix) == 0 or len(matrix[0]) == 0:
+            print('No columns left after filtering columns. Cannot continue', file=sys.stderr)
 
         csv_file = self.outprefix + '.csv'
         if self.verbose:
             print('Writing csv file', csv_file, flush=True)
-        Summary._write_csv(self.filenames, self.rows, csv_file, phandango=False)
+        Summary._matrix_to_csv(matrix, csv_header, csv_file)
 
-        if len(self.samples) > 1:
+        if len(matrix) > 1:
             if self.verbose:
                 print('Making Phandango csv file', csv_file, flush=True)
             csv_file = self.outprefix + '.phandango.csv'
-            lines = Summary._write_csv(self.filenames, self.rows, csv_file, phandango=True)
+            Summary._matrix_to_csv(matrix, phandango_header, csv_file)
             dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
             tree_file = self.outprefix + '.phandango.tre'
 
@@ -413,7 +341,7 @@ class Summary:
             Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
             os.unlink(dist_matrix_file)
         else:
-            print('Made csv file. Not making Phandango files because only one input file given', file=sys.stderr)
+            print('Made csv file. Not making Phandango files because only one sample remains after filtering', file=sys.stderr)
 
         if self.verbose:
             print('Finished', flush=True)

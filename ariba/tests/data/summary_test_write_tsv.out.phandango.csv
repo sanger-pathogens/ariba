@@ -1,3 +1,0 @@
-name,cluster.n.1.assembled:o1,cluster.n.1.ref:o2,cluster.n.1.pct_id:c1,cluster.n.1.known_var:o1,cluster.n.1.novel_var:o1,cluster.n.1.noncoding1.A14T:o1,cluster.p.1.assembled:o1,cluster.p.1.ref:o2,cluster.p.1.pct_id:c1,cluster.p.1.known_var:o1,cluster.p.1.novel_var:o1,cluster.p.1.presence_absence1.I42L:o1,cluster.v.1.assembled:o1,cluster.v.1.ref:o2,cluster.v.1.pct_id:c1,cluster.v.1.known_var:o1,cluster.v.1.novel_var:o1
-file1,yes,noncoding1,98.33,yes,no,yes,yes,presence_absence1,98.96,yes,no,yes,yes,varonly1,99.42,no,no
-file2,yes,noncoding1,98.33,no,no,no,yes,presence_absence1,98.96,no,no,no,no,NA,NA,NA,NA
