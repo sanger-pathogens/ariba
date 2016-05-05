@@ -22,28 +22,28 @@ def use_preset(options):
             'novel_vars': 'no'
         },
         'cluster_all': {
-            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var_novel_var',
+            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
             'col_filter': 'yes',
             'row_filter': 'yes',
             'known_vars': 'no',
             'novel_vars': 'no'
         },
         'cluster_known_vars': {
-            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var_novel_var',
+            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
             'col_filter': 'yes',
             'row_filter': 'yes',
             'known_vars': 'yes',
             'novel_vars': 'no'
         },
         'all': {
-            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var_novel_var',
+            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
             'col_filter': 'yes',
             'row_filter': 'yes',
             'known_vars': 'yes',
             'novel_vars': 'yes'
         },
         'all_no_filter': {
-            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var_novel_var',
+            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
             'col_filter': 'no',
             'row_filter': 'no',
             'known_vars': 'yes',
