@@ -294,13 +294,14 @@ class TestSummary(unittest.TestCase):
             ['line2_1', 'line2_2'],
         ]
         header = ['head1', 'head2']
-        tmpfile = 'tmp.test.matrxi_to_csv.csv'
+        tmpfile = 'tmp.test.matrix_to_csv.csv'
         summary.Summary._matrix_to_csv(matrix, header, tmpfile)
         with open(tmpfile) as f:
             got = f.read()
 
         expected = 'head1,head2\nline1_1,line1_2\nline2_1,line2_2\n'
         self.assertEqual(expected, got)
+        os.unlink(tmpfile)
 
 
     def test_distance_score_bewteen_values(self):
