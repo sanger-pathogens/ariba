@@ -334,7 +334,7 @@ class Summary:
 
             if self.verbose:
                 print('Making Phandango distance matrix', dist_matrix_file, flush=True)
-            Summary._write_distance_matrix(lines, dist_matrix_file)
+            Summary._write_distance_matrix(matrix, dist_matrix_file)
 
             if self.verbose:
                 print('Making Phandango tree file', tree_file, flush=True)
