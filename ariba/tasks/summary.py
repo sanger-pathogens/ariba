@@ -82,7 +82,6 @@ def run():
         options.infiles = None
 
     options = use_preset(options)
-    print(options)
 
     s = ariba.summary.Summary(
         options.outprefix,
