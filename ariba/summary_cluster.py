@@ -115,6 +115,18 @@ class SummaryCluster:
 
 
     @classmethod
+    def _has_known_variant(cls, data_dict):
+        return data_dict['has_known_var'] == '1'
+
+
+    def _has_any_known_variant(self):
+        for d in self.data:
+            if self._has_known_variant(d):
+                return 'yes'
+        return 'no'
+
+
+    @classmethod
     def _has_nonsynonymous(cls, data_dict):
         return data_dict['ref_ctg_effect'] != 'SYN' and \
           (
@@ -128,6 +140,34 @@ class SummaryCluster:
             if self._has_nonsynonymous(d):
                 return 'yes'
         return 'no'
+
+
+    @classmethod
+    def _has_novel_nonsynonymous(cls, data_dict):
+        return SummaryCluster._has_nonsynonymous(data_dict) and not SummaryCluster._has_known_variant(data_dict)
+
+
+    def _has_any_novel_nonsynonymous(self):
+        for d in self.data:
+            if self._has_novel_nonsynonymous(d):
+                return 'yes'
+        return 'no'
+
+
+    def _to_cluster_summary_has_known_nonsynonymous(self, assembled_summary):
+        '''assembled_summary should be output of _to_cluster_summary_assembled'''
+        if assembled_summary == 'no':
+            return 'NA'
+        else:
+            return self._has_any_known_variant()
+
+
+    def _to_cluster_summary_has_novel_nonsynonymous(self, assembled_summary):
+        '''assembled_summary should be output of _to_cluster_summary_assembled'''
+        if assembled_summary == 'no':
+            return 'NA'
+        else:
+            return self._has_any_novel_nonsynonymous()
 
 
     def _to_cluster_summary_has_nonsynonymous(self, assembled_summary):
@@ -161,15 +201,28 @@ class SummaryCluster:
                 return data_dict['ref_ctg_effect']
 
 
+    def _has_resistance(self, assembled_summary):
+        '''assembled_summary should be output of _to_cluster_summary_assembled'''
+        if assembled_summary.startswith('yes'):
+            if self.data[0]['ref_type'] in ['non_coding', 'presence_absence'] or self._to_cluster_summary_has_known_nonsynonymous(assembled_summary) == 'yes':
+                return 'yes'
+            else:
+                return 'no'
+        else:
+            return 'no'
+
+
     def column_summary_data(self):
         '''Returns a dictionary of column name -> value, for cluster-level results'''
         assembled_summary = self._to_cluster_summary_assembled()
 
         columns = {
             'assembled': self._to_cluster_summary_assembled(),
+            'has_res': self._has_resistance(assembled_summary),
             'ref_seq': self.ref_name,
             'pct_id': str(self.pc_id_of_longest()),
-            'any_var': self._to_cluster_summary_has_nonsynonymous(assembled_summary)
+            'known_var': self._to_cluster_summary_has_known_nonsynonymous(assembled_summary),
+            'novel_var': self._to_cluster_summary_has_novel_nonsynonymous(assembled_summary)
         }
 
         return columns

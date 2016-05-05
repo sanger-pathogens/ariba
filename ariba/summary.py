@@ -15,8 +15,12 @@ class Summary:
       outprefix,
       filenames=None,
       fofn=None,
-      include_all_variant_columns=False,
+      include_all_known_variant_columns=True,
+      include_all_novel_variant_columns=False,
+      filter_rows=True,
+      filter_columns=True,
       min_id=90.0,
+      cluster_cols='assembled,has_res,ref_seq,pct_id,known_var,novel_var',
       verbose=False,
     ):
         if filenames is None and fofn is None:
@@ -30,10 +34,25 @@ class Summary:
         if fofn is not None:
             self.filenames.extend(self._load_fofn(fofn))
 
-        self.include_all_variant_columns = include_all_variant_columns
+        self.cluster_columns = self._determine_cluster_cols(cluster_cols)
+        self.include_all_known_variant_columns = include_all_known_variant_columns
+        self.include_all_novel_variant_columns = include_all_novel_variant_columns
+        self.filter_rows = filter_rows
+        self.filter_columns = filter_columns
         self.min_id = min_id
         self.outprefix = outprefix
         self.verbose = verbose
+
+
+    @staticmethod
+    def _determine_cluster_cols(cols_string):
+        allowed_cols = {'assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
+        if cols_string == '' or cols_string is None:
+            return {x: False for x in allowed_cols}
+        wanted_cols = set(cols_string.split(','))
+        if not wanted_cols.issubset(allowed_cols):
+            raise Error('Error in cluster names. Allowed values are: ' + str(','.join(list(allowed_cols))) + '. Got: ' + cols_string)
+        return {x: x in wanted_cols for x in allowed_cols}
 
 
     def _load_fofn(self, fofn):
@@ -100,105 +119,126 @@ class Summary:
                 else:
                     rows[filename][cluster] = {
                         'assembled': 'no',
+                        'has_res': 'NA',
                         'ref_seq': 'NA',
-                        'any_var': 'NA',
+                        'known_var': 'NA',
+                        'novel_var': 'NA',
                         'pct_id': 'NA'
                     }
 
-                if self.include_all_variant_columns and cluster in all_var_columns:
-                    for (ref_name, variant) in all_var_columns[cluster]:
+                wanted_var_types = set()
+                if self.include_all_known_variant_columns:
+                    wanted_var_types.add('known')
+                if self.include_all_novel_variant_columns:
+                    wanted_var_types.add('unknown')
+
+                if len(wanted_var_types) and cluster in all_var_columns:
+                    for (ref_name, variant, known_or_unknown) in all_var_columns[cluster]:
+                        if known_or_unknown not in wanted_var_types:
+                            continue
+
                         key = ref_name + '.' + variant
                         if rows[filename][cluster]['assembled'] == 'no':
                             rows[filename][cluster][key] = 'NA'
-                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant) in sample.variant_column_names_tuples[cluster]:
+                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant, known_or_unknown) in sample.variant_column_names_tuples[cluster]:
                             rows[filename][cluster][key] = 'yes'
                         else:
                             rows[filename][cluster][key] = 'no'
+
+                for key, wanted in self.cluster_columns.items():
+                    if not wanted:
+                        del rows[filename][cluster][key]
 
         return rows
 
 
     @classmethod
-    def _filter_clusters(cls, rows):
-        '''Removes any cluster where every sample has assembled == "no".
-           Returns tuple: (filtered rows, number of remaining columns)'''
-        found_a_yes = set()
-        first_filename = True
-        all_clusters = set()
+    def _to_matrix(cls, filenames, rows, cluster_cols):
+        '''rows = output from _gather_output_rows().
+           filenames = self.filenames
+           cluster_cols = self.cluster_columns'''
+        matrix = []
+        making_header_lines = True
+        phandango_header = ['name']
+        phandago_suffixes = {'assembled': ':o1', 'has_res': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': 'o1'}
+        csv_header = ['name']
+        all_cluster_cols_in_order = ['assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
+        all_cluster_cols_in_order_set = set(['assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
+        cluster_cols_in_order = [x for x in all_cluster_cols_in_order if cluster_cols[x]]
+        cluster_cols_set = set(cluster_cols_in_order)
 
-        for filename in rows:
-            for cluster in rows[filename]:
-                if first_filename:
-                    all_clusters.add(cluster)
-
-                if cluster in found_a_yes:
-                    continue
-
-                if rows[filename][cluster]['assembled'] == 'yes':
-                    found_a_yes.add(cluster)
-
-            first_filename = False
-
-        to_delete = all_clusters.difference(found_a_yes)
-
-        for filename in rows:
-            for cluster in to_delete:
-                del rows[filename][cluster]
-
-        return rows, len(found_a_yes)
-
-
-    @classmethod
-    def _write_csv(cls, filenames, rows, outfile, phandango=False):
-        lines = []
-        non_var_keys_list = ['assembled', 'ref_seq', 'pct_id', 'any_var']
-        non_var_keys_set = set(non_var_keys_list)
-        making_header_line = True
-        first_line = ['name']
-
-        # loop over filenames not rows to preserve their order
         for filename in filenames:
             assert filename in rows
             line = [filename]
 
             for cluster_name in sorted(rows[filename]):
-                if making_header_line:
-                    first_line.extend([
-                        cluster_name,
-                        cluster_name + '.ref',
-                        cluster_name + '.idty',
-                        cluster_name + '.any_var',
-                    ])
-                    if phandango:
-                        first_line[-4] += ':o1'
-                        first_line[-3] += ':o2'
-                        first_line[-2] += ':c1'
-                        first_line[-1] += ':o1'
+                for col in cluster_cols_in_order:
+                    if making_header_lines:
+                        csv_header.append(cluster_name + '.' + col)
+                        phandango_header.append(cluster_name + '.' + col + '.' + phandago_suffixes[col])
 
-                d = rows[filename][cluster_name]
-                line.extend([d[x] for x in non_var_keys_list])
+                    line.append(rows[filename][cluster_name][col])
 
-                for key, value in sorted(d.items()):
-                    if key in non_var_keys_set:
+                for col in sorted(rows[filename][cluster_name]):
+                    if col in all_cluster_cols_in_order_set:
                         continue
 
-                    if making_header_line:
-                        if phandango:
-                            first_line.append(cluster_name + '.' + key + ':o1')
-                        else:
-                            first_line.append(cluster_name + '.' + key)
+                    if making_header_lines:
+                        csv_header.append(cluster_name + '.' + col)
+                        phandango_header.append(cluster_name + '.' + col + ':o1')
 
-                    line.append(value)
+                    line.append(rows[filename][cluster_name][col])
 
-            making_header_line = False
-            lines.append(line)
+            making_header_lines = False
+            matrix.append(line)
 
+        return phandango_header, csv_header, matrix
+
+
+    @classmethod
+    def _filter_matrix_rows(cls, matrix):
+        '''matrix = output from _to_matrix'''
+        indexes_to_keep = []
+
+        for i in range(len(matrix)):
+            keep_row = False
+            for element in matrix[i]:
+                if element not in {'NA', 'no'}:
+                    keep_row = True
+                    break
+            if keep_row:
+                indexes_to_keep.append(i)
+
+        return [matrix[i] for i in indexes_to_keep]
+
+
+    @classmethod
+    def _filter_matrix_columns(cls, matrix, phandango_header, csv_header):
+        '''phandango_header, csv_header, matrix = output from _to_matrix'''
+        indexes_to_keep = set()
+
+        for row in matrix:
+            for i in range(len(row)):
+                if row[i] not in {'NA', 'no'}:
+                    indexes_to_keep.add(i)
+
+        indexes_to_keep = sorted(list(indexes_to_keep))
+
+        for i in range(len(matrix)):
+            matrix[i] = [matrix[i][j] for j in indexes_to_keep]
+
+        phandango_header = [phandango_header[i] for i in indexes_to_keep]
+        csv_header = [csv_header[i] for i in indexes_to_keep]
+        return phandango_header, csv_header, matrix
+
+
+    @classmethod
+    def _matrix_to_csv(cls, matrix, header, outfile):
         f = pyfastaq.utils.open_file_write(outfile)
-        print(','.join(first_line), file=f)
-        for line in lines:
+        print(*header, sep=',', file=f)
+        for line in matrix:
             print(*line, sep=',', file=f)
         pyfastaq.utils.close(f)
-        return [first_line] + lines
 
 
     @staticmethod
@@ -218,21 +258,20 @@ class Summary:
 
     @classmethod
     def _write_distance_matrix(cls, lines, outfile):
-        if len(lines) < 3:
+        if len(lines) < 2:
             raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
                         'Only one sample present.')
 
         if len(lines[0]) < 2:
-            raise Error('Cannot calculate distance matrix to make tree for phandango.\n' +
-                        'No genes present in output')
+            raise Error('Cannot calculate distance matrix to make tree for phandango. Not enough columns')
 
         with open(outfile, 'w') as f:
             sample_names = [x[0] for x in lines]
-            print(*sample_names[1:], sep='\t', file=f)
+            print(*sample_names, sep='\t', file=f)
 
-            for i in range(1,len(lines)):
+            for i in range(len(lines)):
                 scores = []
-                for j in range(2, len(lines)):
+                for j in range(1, len(lines)):
                     scores.append(Summary._distance_score_between_lists(lines[i], lines[j]))
                 print(lines[i][0], *scores, sep='\t', file=f)
 
@@ -261,38 +300,48 @@ class Summary:
         if self.verbose:
             print('Generating output rows', flush=True)
         self.rows = self._gather_output_rows()
+        phandango_header, csv_header, matrix = Summary._to_matrix(self.filenames, self.rows, self.cluster_columns)
 
-        if self.verbose:
-            print('Filtering columns', flush=True)
-        self.rows, remaining_clusters = Summary._filter_clusters(self.rows)
+        if self.filter_rows:
+            if self.verbose:
+                print('Filtering rows', flush=True)
+            matrix = Summary._filter_matrix_rows(matrix)
 
-        if remaining_clusters == 0:
-            print('No clusters found that are present in any sample. Will not write any output files', file=sys.stderr)
+        if len(matrix) == 0:
+            print('No rows left after filtering rows. Cannot continue', file=sys.stderr)
             sys.exit(1)
+
+        if self.filter_columns:
+            if self.verbose:
+                print('Filtering columns', flush=True)
+            phandango_header, csv_header, matrix = Summary._filter_matrix_columns(matrix, phandango_header, csv_header)
+
+        if len(matrix) == 0 or len(matrix[0]) == 0:
+            print('No columns left after filtering columns. Cannot continue', file=sys.stderr)
 
         csv_file = self.outprefix + '.csv'
         if self.verbose:
             print('Writing csv file', csv_file, flush=True)
-        Summary._write_csv(self.filenames, self.rows, csv_file, phandango=False)
+        Summary._matrix_to_csv(matrix, csv_header, csv_file)
 
-        if len(self.samples) > 1:
+        if len(matrix) > 1:
             if self.verbose:
                 print('Making Phandango csv file', csv_file, flush=True)
             csv_file = self.outprefix + '.phandango.csv'
-            lines = Summary._write_csv(self.filenames, self.rows, csv_file, phandango=True)
+            Summary._matrix_to_csv(matrix, phandango_header, csv_file)
             dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
             tree_file = self.outprefix + '.phandango.tre'
 
             if self.verbose:
                 print('Making Phandango distance matrix', dist_matrix_file, flush=True)
-            Summary._write_distance_matrix(lines, dist_matrix_file)
+            Summary._write_distance_matrix(matrix, dist_matrix_file)
 
             if self.verbose:
                 print('Making Phandango tree file', tree_file, flush=True)
             Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
             os.unlink(dist_matrix_file)
         else:
-            print('Made csv file. Not making Phandango files because only one input file given', file=sys.stderr)
+            print('Made csv file. Not making Phandango files because only one sample remains after filtering', file=sys.stderr)
 
         if self.verbose:
             print('Finished', flush=True)

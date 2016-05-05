@@ -42,23 +42,30 @@ class TestSummarySample(unittest.TestCase):
         expected = {
             'cluster.n': {
                 'assembled': 'yes',
+                'has_res': 'yes',
                 'ref_seq': 'noncoding1',
-                'any_var': 'yes',
+                'known_var': 'yes',
+                'novel_var': 'no',
                 'pct_id': '98.33'
             },
             'cluster.p': {
                 'assembled': 'yes',
+                'has_res': 'yes',
                 'ref_seq': 'presence_absence1',
-                'any_var': 'yes',
+                'known_var': 'yes',
+                'novel_var': 'no',
                 'pct_id': '98.96'
             },
             'cluster.v': {
                 'assembled': 'yes',
+                'has_res': 'yes',
                 'ref_seq': 'variants_only1',
-                'any_var': 'yes',
+                'known_var': 'yes',
+                'novel_var': 'no',
                 'pct_id': '100.0'
             }
         }
+        self.maxDiff = None
         got = sample_summary._column_summary_data()
         self.assertEqual(expected, got)
 
@@ -85,9 +92,9 @@ class TestSummarySample(unittest.TestCase):
         sample_summary.column_summary_data = sample_summary._column_summary_data()
         sample_summary.variants = sample_summary._non_synon_variants()
         expected = {
-            'cluster.v': {('variants_only1', 'S5T')},
-            'cluster.n': {('noncoding1', 'A6G'), ('noncoding1', 'A14T')},
-            'cluster.p': {('presence_absence1', 'A10V')}
+            'cluster.v': {('variants_only1', 'S5T', 'known')},
+            'cluster.n': {('noncoding1', 'A6G', 'known'), ('noncoding1', 'A14T', 'known')},
+            'cluster.p': {('presence_absence1', 'A10V', 'unknown')}
         }
         got = sample_summary._variant_column_names_tuples()
         self.assertEqual(expected, got)

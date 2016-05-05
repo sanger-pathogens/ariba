@@ -19,6 +19,31 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(s.filenames, ['file42', 'file1', 'file2'])
 
 
+    def test_determine_cluster_cols(self):
+        col_strings = [
+            'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
+            'ref_seq,pct_id,known_var,novel_var',
+            'assembled,pct_id,known_var,novel_var',
+            'assembled',
+            '',
+            None,
+        ]
+
+        expected = [
+            {'assembled': True, 'has_res': True, 'ref_seq': True, 'pct_id': True, 'known_var': True, 'novel_var': True},
+            {'assembled': False, 'has_res': False, 'ref_seq': True, 'pct_id': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'has_res': False, 'ref_seq': False, 'pct_id': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'has_res': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'has_res': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'has_res': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
+        ]
+
+        assert len(col_strings) == len(expected)
+
+        for i in range(len(col_strings)):
+            self.assertEqual(expected[i], summary.Summary._determine_cluster_cols(col_strings[i]))
+
+
     def test_load_input_files(self):
         '''Test _load_input_files'''
         file1 = os.path.join(data_dir, 'summary_test_load_input_files.1.tsv')
@@ -49,9 +74,9 @@ class TestSummary(unittest.TestCase):
         samples = summary.Summary._load_input_files([file1, file2], 90)
         got = summary.Summary._get_all_variant_columns(samples)
         expected = {
-            'cluster.p.2': {('presence_absence1', 'A10V')},
-            'cluster.n.1': {('noncoding1', 'A6G'), ('noncoding1', 'A14T')},
-            'cluster.p.1': {('presence_absence1', 'A10V')},
+            'cluster.p.2': {('presence_absence1', 'A10V', 'known')},
+            'cluster.n.1': {('noncoding1', 'A6G', 'known'), ('noncoding1', 'A14T', 'known')},
+            'cluster.p.1': {('presence_absence1', 'A10V', 'known')},
         }
         self.assertEqual(expected, got)
 
@@ -62,46 +87,58 @@ class TestSummary(unittest.TestCase):
             os.path.join(data_dir, 'summary_test_gather_output_rows.in.1.tsv'),
             os.path.join(data_dir, 'summary_test_gather_output_rows.in.2.tsv')
         ]
-        s = summary.Summary('out', filenames=infiles)
+        s = summary.Summary('out', filenames=infiles, include_all_known_variant_columns=False)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         expected = {
             infiles[0]: {
                 'noncoding1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'noncoding1',
-                    'any_var': 'yes',
+                    'known_var': 'yes',
+                    'novel_var': 'no',
                     'pct_id': '98.33',
                 },
                 'presence_absence1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'presence_absence1',
-                    'any_var': 'yes',
+                    'known_var': 'no',
+                    'novel_var': 'yes',
                     'pct_id': '98.96',
                 },
                 'variants_only1': {
                     'assembled': 'no',
+                    'has_res': 'NA',
                     'ref_seq': 'NA',
-                    'any_var': 'NA',
+                    'known_var': 'NA',
+                    'novel_var': 'NA',
                     'pct_id': 'NA',
                 }
             },
             infiles[1]: {
                 'noncoding1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'noncoding1',
-                    'any_var': 'yes',
+                    'known_var': 'yes',
+                    'novel_var': 'no',
                     'pct_id': '98.33',
                 },
                 'presence_absence1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'presence_absence1',
                     'pct_id': '98.96',
-                    'any_var': 'yes',
+                    'known_var': 'no',
+                    'novel_var': 'yes',
                 },
                 'variants_only1': {
                     'assembled': 'no',
+                    'has_res': 'NA',
                     'ref_seq': 'NA',
-                    'any_var': 'NA',
+                    'known_var': 'NA',
+                    'novel_var': 'NA',
                     'pct_id': 'NA',
                 }
             },
@@ -109,124 +146,162 @@ class TestSummary(unittest.TestCase):
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 
-        s.include_all_variant_columns = True
+        s.include_all_known_variant_columns = True
         expected[infiles[0]]['noncoding1']['noncoding1.A14T'] = 'yes'
         expected[infiles[0]]['noncoding1']['noncoding1.A6G'] = 'no'
-        expected[infiles[0]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
         expected[infiles[1]]['noncoding1']['noncoding1.A14T'] = 'yes'
         expected[infiles[1]]['noncoding1']['noncoding1.A6G'] = 'yes'
+        got = s._gather_output_rows()
+        self.assertEqual(expected, got)
+
+        s.include_all_novel_variant_columns = True
+        expected[infiles[0]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
         expected[infiles[1]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 
+        for filename in expected:
+            for gene_type in expected[filename]:
+                del expected[filename][gene_type]['ref_seq']
 
-    def test_filter_clusters(self):
-        '''Test _filter_clusters'''
-        rows = {
-            'file1': {
-                'cluster1': {'assembled': 'yes'},
-                'cluster2': {'assembled': 'yes'},
-                'cluster3': {'assembled': 'no'},
-                'cluster4': {'assembled': 'no'},
-            },
-            'file2': {
-                'cluster1': {'assembled': 'yes'},
-                'cluster2': {'assembled': 'no'},
-                'cluster3': {'assembled': 'yes'},
-                'cluster4': {'assembled': 'no'},
-            }
-        }
-
-        expected = {
-            'file1': {
-                'cluster1': {'assembled': 'yes'},
-                'cluster2': {'assembled': 'yes'},
-                'cluster3': {'assembled': 'no'},
-            },
-            'file2': {
-                'cluster1': {'assembled': 'yes'},
-                'cluster2': {'assembled': 'no'},
-                'cluster3': {'assembled': 'yes'},
-            }
-        }
-
-        got = summary.Summary._filter_clusters(rows)
-        self.assertEqual((expected, 3), got)
+        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,has_res,pct_id,known_var,novel_var', include_all_novel_variant_columns=True)
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        s.include_all_variant_columns = True
+        got = s._gather_output_rows()
+        self.assertEqual(expected, got)
 
 
-    def test_write_csv(self):
-        '''Test _write_csv'''
-        tmp_out = 'tmp.out.tsv'
+    def test_to_matrix(self):
+        '''Test _to_matrix'''
         rows = {
             'file1': {
                 'cluster.n.1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'noncoding1',
-                    'any_var': 'yes',
+                    'known_var': 'yes',
+                    'novel_var': 'no',
                     'pct_id': '98.33',
                     'noncoding1.A14T': 'yes'
                 },
                 'cluster.p.1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'presence_absence1',
-                    'any_var': 'yes',
+                    'known_var': 'yes',
+                    'novel_var': 'no',
                     'pct_id': '98.96',
                     'presence_absence1.I42L': 'yes'
                 },
                 'cluster.v.1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'varonly1',
-                    'any_var': 'no',
+                    'known_var': 'no',
+                    'novel_var': 'no',
                     'pct_id': '99.42',
                 }
             },
             'file2': {
                 'cluster.n.1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'noncoding1',
-                    'any_var': 'no',
+                    'known_var': 'no',
+                    'novel_var': 'no',
                     'pct_id': '98.33',
                     'noncoding1.A14T': 'no'
                 },
                 'cluster.p.1': {
                     'assembled': 'yes',
+                    'has_res': 'yes',
                     'ref_seq': 'presence_absence1',
                     'pct_id': '98.96',
-                    'any_var': 'no',
+                    'known_var': 'no',
+                    'novel_var': 'no',
                     'presence_absence1.I42L': 'no'
                 },
                 'cluster.v.1': {
                     'assembled': 'no',
+                    'has_res': 'NA',
                     'ref_seq': 'NA',
-                    'any_var': 'NA',
+                    'known_var': 'NA',
+                    'novel_var': 'NA',
                     'pct_id': 'NA',
                 }
             },
         }
         filenames = ['file1', 'file2']
-        got_lines = summary.Summary._write_csv(filenames, rows, tmp_out, phandango=False)
-        expected_file = os.path.join(data_dir, 'summary_test_write_tsv.out.not_phandango.csv')
-        self.assertTrue(filecmp.cmp(tmp_out, expected_file, shallow=False))
-        os.unlink(tmp_out)
+        cluster_cols = {'assembled': True, 'has_res': True, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False}
+        got_phandago_header, got_csv_header, got_lines  = summary.Summary._to_matrix(filenames, rows, cluster_cols)
+        expected_phandango_header = ['name', 'cluster.n.1.assembled.:o1', 'cluster.n.1.has_res.:o1', 'cluster.n.1.noncoding1.A14T:o1', 'cluster.p.1.assembled.:o1', 'cluster.p.1.has_res.:o1', 'cluster.p.1.presence_absence1.I42L:o1', 'cluster.v.1.assembled.:o1', 'cluster.v.1.has_res.:o1']
+        expected_csv_header = ['name', 'cluster.n.1.assembled', 'cluster.n.1.has_res', 'cluster.n.1.noncoding1.A14T', 'cluster.p.1.assembled', 'cluster.p.1.has_res', 'cluster.p.1.presence_absence1.I42L', 'cluster.v.1.assembled', 'cluster.v.1.has_res']
         expected_lines = [
-            'name,cluster.n.1,cluster.n.1.ref,cluster.n.1.idty,cluster.n.1.any_var,cluster.n.1.noncoding1.A14T,cluster.p.1,cluster.p.1.ref,cluster.p.1.idty,cluster.p.1.any_var,cluster.p.1.presence_absence1.I42L,cluster.v.1,cluster.v.1.ref,cluster.v.1.idty,cluster.v.1.any_var',
-            'file1,yes,noncoding1,98.33,yes,yes,yes,presence_absence1,98.96,yes,yes,yes,varonly1,99.42,no',
-            'file2,yes,noncoding1,98.33,no,no,yes,presence_absence1,98.96,no,no,no,NA,NA,NA'
-]
-        expected_lines = [x.split(',') for x in expected_lines]
+            ['file1', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes'],
+            ['file2', 'yes', 'yes', 'no', 'yes', 'yes', 'no', 'no', 'NA']
+        ]
+        self.assertEqual(expected_phandango_header, got_phandago_header)
+        self.assertEqual(expected_csv_header, got_csv_header)
         self.assertEqual(expected_lines, got_lines)
 
-        got_lines = summary.Summary._write_csv(filenames, rows, tmp_out, phandango=True)
-        expected_lines = [
-            'name,cluster.n.1:o1,cluster.n.1.ref:o2,cluster.n.1.idty:c1,cluster.n.1.any_var:o1,cluster.n.1.noncoding1.A14T:o1,cluster.p.1:o1,cluster.p.1.ref:o2,cluster.p.1.idty:c1,cluster.p.1.any_var:o1,cluster.p.1.presence_absence1.I42L:o1,cluster.v.1:o1,cluster.v.1.ref:o2,cluster.v.1.idty:c1,cluster.v.1.any_var:o1',
-            'file1,yes,noncoding1,98.33,yes,yes,yes,presence_absence1,98.96,yes,yes,yes,varonly1,99.42,no',
-            'file2,yes,noncoding1,98.33,no,no,yes,presence_absence1,98.96,no,no,no,NA,NA,NA'
-]
-        expected_lines = [x.split(',') for x in expected_lines]
-        self.assertEqual(expected_lines, got_lines)
-        expected_file = os.path.join(data_dir, 'summary_test_write_tsv.out.phandango.csv')
-        self.assertTrue(filecmp.cmp(tmp_out, expected_file, shallow=False))
-        os.unlink(tmp_out)
+
+    def test_filter_matrix_rows(self):
+        '''Test _filter_matrix_rows'''
+        matrix = [
+            ['yes', 'yes'],
+            ['yes', 'no'],
+            ['no', 'no'],
+            ['yes_nonunique', 'no'],
+            ['NA', 'no'],
+            ['no', 'NA'],
+            ['NA', 'NA']
+        ]
+
+        expected = [
+            ['yes', 'yes'],
+            ['yes', 'no'],
+            ['yes_nonunique', 'no'],
+        ]
+        got = summary.Summary._filter_matrix_rows(matrix)
+        self.assertEqual(expected, got)
+
+
+    def test_filter_matrix_columns(self):
+        '''Test _filter_matrix_columns'''
+        matrix = [
+            ['yes', 'yes', 'no', 'yes_nonunique', 'NA', 'no', 'NA'],
+            ['yes', 'no', 'no', 'no', 'no', 'NA', 'NA']
+        ]
+        phandango_header = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7']
+        csv_header = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7']
+
+        got_phandago_header, got_csv_header, got_matrix  = summary.Summary._filter_matrix_columns(matrix, phandango_header, csv_header)
+        expected_phandango_header = ['p1', 'p2', 'p4']
+        expected_csv_header = ['h1', 'h2', 'h4']
+        expected_matrix = [
+            ['yes', 'yes', 'yes_nonunique'],
+            ['yes', 'no', 'no'],
+        ]
+        self.assertEqual(expected_phandango_header, got_phandago_header)
+        self.assertEqual(expected_csv_header, got_csv_header)
+        self.assertEqual(expected_matrix, got_matrix)
+
+
+    def test_matrix_to_csv(self):
+        '''Test _matrix_to_csv'''
+        matrix = [
+            ['line1_1', 'line1_2'],
+            ['line2_1', 'line2_2'],
+        ]
+        header = ['head1', 'head2']
+        tmpfile = 'tmp.test.matrix_to_csv.csv'
+        summary.Summary._matrix_to_csv(matrix, header, tmpfile)
+        with open(tmpfile) as f:
+            got = f.read()
+
+        expected = 'head1,head2\nline1_1,line1_2\nline2_1,line2_2\n'
+        self.assertEqual(expected, got)
+        os.unlink(tmpfile)
 
 
     def test_distance_score_bewteen_values(self):
@@ -270,7 +345,6 @@ class TestSummary(unittest.TestCase):
     def test_write_distance_matrix(self):
         '''Test _write_distance_matrix'''
         rows = [
-            ['filename', 'gene1', 'gene2', 'gene3'],
             ['file1', 'no', 'yes', 'no'],
             ['file2', 'yes', 'no', 'yes'],
             ['file3', 'no', 'no', 'yes'],
