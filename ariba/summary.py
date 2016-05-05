@@ -119,7 +119,7 @@ class Summary:
                 else:
                     rows[filename][cluster] = {
                         'assembled': 'no',
-                        'has_res': 'NA',
+                        'has_res': 'no',
                         'ref_seq': 'NA',
                         'known_var': 'NA',
                         'novel_var': 'NA',
