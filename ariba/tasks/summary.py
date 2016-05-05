@@ -9,45 +9,45 @@ def use_preset(options):
     preset_to_vals = {
         'minimal': {
             'cluster_cols': 'has_res',
-            'col_filter': 'yes',
-            'row_filter': 'yes',
-            'known_vars': 'no',
-            'novel_vars': 'no'
+            'col_filter': 'y',
+            'row_filter': 'y',
+            'known_vars': 'n',
+            'novel_vars': 'n'
         },
         'cluster_small': {
             'cluster_cols': 'assembled,has_res,ref_seq,known_var',
-            'col_filter': 'yes',
-            'row_filter': 'yes',
-            'known_vars': 'no',
-            'novel_vars': 'no'
+            'col_filter': 'y',
+            'row_filter': 'y',
+            'known_vars': 'n',
+            'novel_vars': 'n'
         },
         'cluster_all': {
             'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
-            'col_filter': 'yes',
-            'row_filter': 'yes',
-            'known_vars': 'no',
-            'novel_vars': 'no'
+            'col_filter': 'y',
+            'row_filter': 'y',
+            'known_vars': 'n',
+            'novel_vars': 'n'
         },
         'cluster_known_vars': {
             'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
-            'col_filter': 'yes',
-            'row_filter': 'yes',
-            'known_vars': 'yes',
-            'novel_vars': 'no'
+            'col_filter': 'y',
+            'row_filter': 'y',
+            'known_vars': 'y',
+            'novel_vars': 'n'
         },
         'all': {
             'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
-            'col_filter': 'yes',
-            'row_filter': 'yes',
-            'known_vars': 'yes',
-            'novel_vars': 'yes'
+            'col_filter': 'y',
+            'row_filter': 'y',
+            'known_vars': 'y',
+            'novel_vars': 'y'
         },
         'all_no_filter': {
             'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
-            'col_filter': 'no',
-            'row_filter': 'no',
-            'known_vars': 'yes',
-            'novel_vars': 'yes'
+            'col_filter': 'n',
+            'row_filter': 'n',
+            'known_vars': 'y',
+            'novel_vars': 'y'
         },
     }
 
