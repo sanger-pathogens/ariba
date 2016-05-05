@@ -300,12 +300,12 @@ class Summary:
         if self.verbose:
             print('Generating output rows', flush=True)
         self.rows = self._gather_output_rows()
-        phandango_header, csv_header, matrix = summary.Summary._to_matrix(self.filenames, self.rows, self.cluster_columns)
+        phandango_header, csv_header, matrix = Summary._to_matrix(self.filenames, self.rows, self.cluster_columns)
 
         if self.filter_rows:
             if self.verbose:
                 print('Filtering rows', flush=True)
-            matrix = summary.Summary._filter_matrix_rows(matrix)
+            matrix = Summary._filter_matrix_rows(matrix)
 
         if len(matrix) == 0:
             print('No rows left after filtering rows. Cannot continue', file=sys.stderr)
@@ -314,7 +314,7 @@ class Summary:
         if self.filter_columns:
             if self.verbose:
                 print('Filtering columns', flush=True)
-            phandango_header, csv_header, matrix = summary.Summary._filter_matrix_columns(matrix, phandango_header, csv_header)
+            phandango_header, csv_header, matrix = Summary._filter_matrix_columns(matrix, phandango_header, csv_header)
 
         if len(matrix) == 0 or len(matrix[0]) == 0:
             print('No columns left after filtering columns. Cannot continue', file=sys.stderr)
