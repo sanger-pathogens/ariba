@@ -160,7 +160,7 @@ class Summary:
         matrix = []
         making_header_lines = True
         phandango_header = ['name']
-        phandago_suffixes = {'assembled': ':o1', 'has_res': ':o1', 'ref': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': 'o1'}
+        phandago_suffixes = {'assembled': ':o1', 'has_res': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': 'o1'}
         csv_header = ['name']
         all_cluster_cols_in_order = ['assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
         all_cluster_cols_in_order_set = set(['assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
