@@ -132,11 +132,15 @@ class Clusters:
                 raise Error('Error mkdir ' + d)
 
         if tmp_dir is None:
-            self.tmp_dir = tempfile.mkdtemp(prefix='ariba.tmp.', dir=self.outdir)
-        else:
-            if not os.path.exists(tmp_dir):
-                raise Error('Temporary directory ' + tmp_dir + ' not found. Cannot continue')
-            self.tmp_dir = tempfile.mkdtemp(prefix='ariba.tmp.', dir=os.path.abspath(tmp_dir))
+            if 'ARIBA_TMPDIR' in os.environ:
+                tmp_dir = os.path.abspath(os.environ['ARIBA_TMPDIR'])
+            else:
+                tmp_dir = self.outdir
+
+        if not os.path.exists(tmp_dir):
+            raise Error('Temporary directory ' + tmp_dir + ' not found. Cannot continue')
+
+        self.tmp_dir = tempfile.mkdtemp(prefix='ariba.tmp.', dir=os.path.abspath(tmp_dir))
 
         if self.verbose:
             print('Temporary directory:', self.tmp_dir)
