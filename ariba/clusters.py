@@ -132,12 +132,16 @@ class Clusters:
 
     def _receive_signal(self, signum, stack):
         print('Signal received:', signum, file=sys.stderr)
-        if os.path.exists(self.tmp_dir):
-            print('... deleting tmp directory', self.tmp_dir, '(unless it already has been)', file=sys.stderr)
-            try:
-                shutil.rmtree(self.tmp_dir)
-            except:
-                pass
+        if self.clean:
+            if os.path.exists(self.tmp_dir):
+                print('... deleting tmp directory', self.tmp_dir, '(unless it already has been)', file=sys.stderr)
+                try:
+                    shutil.rmtree(self.tmp_dir)
+                except:
+                    pass
+        else:
+            print('--noclean option used, so not deleting tmp directory', self.tmp_dir, file=sys.stderr)
+
         sys.exit(1)
 
 
