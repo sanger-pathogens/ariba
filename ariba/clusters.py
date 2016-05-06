@@ -431,6 +431,8 @@ class Clusters:
 
     def _clean(self):
         if self.clean:
+            shutil.rmtree(self.fails_dir)
+
             if self.verbose:
                 print('Deleting tmp directory', self.tmp_dir)
             shutil.rmtree(self.tmp_dir)
