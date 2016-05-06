@@ -253,14 +253,19 @@ class Cluster:
 
         self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
 
+        original_dir = os.getcwd()
+        os.chdir(self.root_dir)
+
         try:
             self._run()
         except Error as err:
+            os.chdir(original_dir)
             print('Error running cluster! Error was:', err, sep='\n', file=self.log_fh)
             pyfastaq.utils.close(self.log_fh)
             self.log_fh = None
             raise Error('Error running cluster ' + self.name + '!')
 
+        os.chdir(original_dir)
         print('Finished', file=self.log_fh, flush=True)
         print('{:_^79}'.format(' LOG FILE END ' + self.name + ' '), file=self.log_fh, flush=True)
 
