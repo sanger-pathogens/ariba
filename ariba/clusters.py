@@ -1,5 +1,6 @@
 import os
 import copy
+import tempfile
 import pickle
 import itertools
 import sys
@@ -51,6 +52,7 @@ class Clusters:
       unique_threshold=0.03,
       bowtie2_preset='very-sensitive-local',
       clean=True,
+      tmp_dir=None,
     ):
         self.refdata_dir = os.path.abspath(refdata_dir)
         self.refdata, self.cluster_ids = self._load_reference_data_from_dir(refdata_dir)
@@ -64,9 +66,7 @@ class Clusters:
         else:
             self.version_report_lines = version_report_lines
 
-        self.clusters_outdir = os.path.join(self.outdir, 'Clusters')
         self.clean = clean
-
         self.logs_dir = os.path.join(self.outdir, 'Logs')
 
         self.assembler = assembler
@@ -108,11 +108,21 @@ class Clusters:
         self.cluster_read_counts = {} # gene name -> number of reads
         self.cluster_base_counts = {} # gene name -> number of bases
 
-        for d in [self.outdir, self.clusters_outdir, self.logs_dir]:
+        for d in [self.outdir, self.logs_dir]:
             try:
                 os.mkdir(d)
             except:
                 raise Error('Error mkdir ' + d)
+
+        if tmp_dir is None:
+            self.tmp_dir = tempfile.mkdtemp(prefix='ariba.tmp.', dir=self.outdir)
+        else:
+            if not os.path.exists(tmp_dir):
+                raise Error('Temporary directory ' + tmp_dir + ' not found. Cannot continue')
+            self.tmp_dir = tempfile.mkdtemp(prefix='ariba.tmp.', dir=os.path.abspath(tmp_dir))
+
+        if self.verbose:
+            print('Temporary directory:', self.tmp_dir)
 
 
     @classmethod
@@ -208,7 +218,7 @@ class Clusters:
 
             for ref in ref_seqs:
                 if ref not in self.cluster_to_dir:
-                    new_dir = os.path.join(self.clusters_outdir, ref)
+                    new_dir = os.path.join(self.tmp_dir, ref)
                     self.cluster_to_dir[ref] = new_dir
                     if self.verbose:
                         print('New cluster with reads that hit:', ref, flush=True)
@@ -368,8 +378,8 @@ class Clusters:
     def _clean(self):
         if self.clean:
             if self.verbose:
-                print('Deleting clusters directory', self.clusters_outdir)
-            shutil.rmtree(self.clusters_outdir)
+                print('Deleting tmp directory', self.tmp_dir)
+            shutil.rmtree(self.tmp_dir)
 
             if self.verbose:
                 print('Deleting Logs directory', self.logs_dir)
