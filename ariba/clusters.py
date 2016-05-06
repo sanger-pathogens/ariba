@@ -1,3 +1,4 @@
+import signal
 import os
 import copy
 import tempfile
@@ -123,6 +124,21 @@ class Clusters:
 
         if self.verbose:
             print('Temporary directory:', self.tmp_dir)
+
+        wanted_signals = [signal.SIGABRT, signal.SIGINT, signal.SIGSEGV, signal.SIGTERM]
+        for s in wanted_signals:
+            signal.signal(s, self._receive_signal)
+
+
+    def _receive_signal(self, signum, stack):
+        print('Signal received:', signum, file=sys.stderr)
+        if os.path.exists(self.tmp_dir):
+            print('... deleting tmp directory', self.tmp_dir, '(unless it already has been)', file=sys.stderr)
+            try:
+                shutil.rmtree(self.tmp_dir)
+            except:
+                pass
+        sys.exit(1)
 
 
     @classmethod
