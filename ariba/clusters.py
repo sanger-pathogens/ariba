@@ -369,11 +369,15 @@ class Clusters:
         if self.clean:
             if self.verbose:
                 print('Deleting clusters directory', self.clusters_outdir)
-                shutil.rmtree(self.clusters_outdir)
+            shutil.rmtree(self.clusters_outdir)
+
+            if self.verbose:
                 print('Deleting Logs directory', self.logs_dir)
-                shutil.rmtree(self.logs_dir)
+            shutil.rmtree(self.logs_dir)
+
+            if self.verbose:
                 print('Deleting reads store files', self.read_store.outfile + '[.tbi]')
-                self.read_store.clean()
+            self.read_store.clean()
         else:
             if self.verbose:
                 print('Not deleting anything because --noclean used')
