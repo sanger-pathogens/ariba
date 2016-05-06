@@ -1,4 +1,6 @@
 import signal
+import time
+import atexit
 import os
 import copy
 import tempfile
@@ -15,10 +17,22 @@ from ariba import cluster, common, mapping, histogram, read_store, report, repor
 class Error (Exception): pass
 
 
-def _run_cluster(obj, verbose, clean):
+def _run_cluster(obj, verbose, clean, fails_dir):
+    failed_clusters = os.listdir(fails_dir)
+
+    if len(failed_clusters) > 0:
+        print('Other clusters failed. Stopping cluster', obj.name, file=sys.stderr)
+        return obj
+
     if verbose:
         print('Start running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
-    obj.run()
+    try:
+        obj.run()
+    except:
+        print('Failed cluster:', obj.name, file=sys.stderr)
+        with open(os.path.join(fails_dir, obj.name), 'w'):
+            pass
+
     if verbose:
         print('Finished running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
 
@@ -108,8 +122,10 @@ class Clusters:
         self.clusters = {}        # gene name -> Cluster object
         self.cluster_read_counts = {} # gene name -> number of reads
         self.cluster_base_counts = {} # gene name -> number of bases
+        self.pool = None
+        self.fails_dir = os.path.join(self.outdir ,'.fails')
 
-        for d in [self.outdir, self.logs_dir]:
+        for d in [self.outdir, self.logs_dir, self.fails_dir]:
             try:
                 os.mkdir(d)
             except:
@@ -128,20 +144,35 @@ class Clusters:
         wanted_signals = [signal.SIGABRT, signal.SIGINT, signal.SIGSEGV, signal.SIGTERM]
         for s in wanted_signals:
             signal.signal(s, self._receive_signal)
+        self.run_emergency_stop = False
+
+
+    def _stop_pool(self):
+        if self.pool is not None:
+            self.pool.close()
+            self.pool.terminate()
+            print(len(multiprocessing.active_children()), flush=True)
+            while len(multiprocessing.active_children()) > 0:
+                print(len(multiprocessing.active_children()), flush=True)
+                time.sleep(1)
+            self.pool = None
+
+
+    def _emergency_stop(self):
+        if not self.run_emergency_stop:
+            self._stop_pool()
+            if self.clean:
+                if os.path.exists(self.tmp_dir):
+                    try:
+                        shutil.rmtree(self.tmp_dir)
+                    except:
+                        pass
+        self.run_emergency_stop = True
 
 
     def _receive_signal(self, signum, stack):
-        print('Signal received:', signum, file=sys.stderr)
-        if self.clean:
-            if os.path.exists(self.tmp_dir):
-                print('... deleting tmp directory', self.tmp_dir, '(unless it already has been)', file=sys.stderr)
-                try:
-                    shutil.rmtree(self.tmp_dir)
-                except:
-                    pass
-        else:
-            print('--noclean option used, so not deleting tmp directory', self.tmp_dir, file=sys.stderr)
-
+        print('Stopping! Signal received:', signum, file=sys.stderr, flush=True)
+        self._emergency_stop()
         sys.exit(1)
 
 
@@ -306,7 +337,6 @@ class Clusters:
                 if self.verbose:
                     print('Constructing cluster', seq_name + '.', counter, 'of', str(len(self.cluster_to_dir)))
                 new_dir = self.cluster_to_dir[seq_name]
-                #self.refdata.write_seqs_to_fasta(os.path.join(new_dir, 'references.fa'), self.cluster_ids[seq_type][seq_name])
                 self.log_files.append(os.path.join(self.logs_dir, seq_name + '.log'))
 
                 cluster_list.append(cluster.Cluster(
@@ -344,11 +374,15 @@ class Clusters:
 
 
         if self.threads > 1:
-            pool = multiprocessing.Pool(self.threads)
-            cluster_list = pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose), itertools.repeat(self.clean)))
+            self.pool = multiprocessing.Pool(self.threads)
+            try:
+                cluster_list = self.pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose), itertools.repeat(self.clean), itertools.repeat(self.fails_dir)))
+            except:
+                self._emergency_stop()
+                raise Error('At least one cluster failed (using multiprocessing). Cannot continue')
         else:
             for c in cluster_list:
-                _run_cluster(c, self.verbose, self.clean)
+                _run_cluster(c, self.verbose, self.clean, self.fails_dir)
 
         self.clusters = {c.name: c for c in cluster_list}
 
@@ -423,6 +457,14 @@ class Clusters:
 
 
     def run(self):
+        try:
+            self._run()
+        except Error as err:
+            self._emergency_stop()
+            raise Error('Something went wrong during ariba run. Cannot continue. Error was:\n' + str(err))
+
+
+    def _run(self):
         cwd = os.getcwd()
         os.chdir(self.outdir)
         self.write_versions_file(cwd)
@@ -459,21 +501,25 @@ class Clusters:
                 print('No reads mapped. Skipping all assemblies', flush=True)
             print('WARNING: no reads mapped to reference genes. Therefore no local assemblies will be run', file=sys.stderr)
 
-        if self.verbose:
-            print('{:_^79}'.format(' Writing reports '), flush=True)
-            print('Making', self.report_file_all_tsv)
-        self._write_reports(self.clusters, self.report_file_all_tsv)
+        failed_clusters = os.listdir(self.fails_dir)
+        if len(failed_clusters):
+            print('Failed clusters:', ', '.join(failed_clusters), file=sys.stderr)
+        else:
+            if self.verbose:
+                print('{:_^79}'.format(' Writing reports '), flush=True)
+                print('Making', self.report_file_all_tsv)
+            self._write_reports(self.clusters, self.report_file_all_tsv)
 
-        if self.verbose:
-            print('Making', self.report_file_filtered_prefix + '.tsv')
-        rf = report_filter.ReportFilter(infile=self.report_file_all_tsv)
-        rf.run(self.report_file_filtered_prefix)
+            if self.verbose:
+                print('Making', self.report_file_filtered_prefix + '.tsv')
+            rf = report_filter.ReportFilter(infile=self.report_file_all_tsv)
+            rf.run(self.report_file_filtered_prefix)
 
-        if self.verbose:
-            print()
-            print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
-            print(self.catted_assembled_seqs_fasta)
-        self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
+            if self.verbose:
+                print()
+                print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
+                print(self.catted_assembled_seqs_fasta)
+            self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
 
         clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
         if self.verbose:
@@ -489,5 +535,8 @@ class Clusters:
 
         if self.verbose:
             print('\nAll done!\n')
+
+        if len(failed_clusters):
+            raise Error('There were failed clusters: ' + ', '.join(failed_clusters))
 
         os.chdir(cwd)
