@@ -19,6 +19,7 @@ class Cluster:
       refdata,
       total_reads,
       total_reads_bases,
+      fail_file=None,
       read_store=None,
       reference_names=None,
       logfile=None,
@@ -50,6 +51,7 @@ class Cluster:
         self.read_store = read_store
         self.refdata = refdata
         self.name = name
+        self.fail_file = fail_file
         self.reference_fa = os.path.join(self.root_dir, 'reference.fa')
         self.reference_names = reference_names
         self.all_reads1 = os.path.join(self.root_dir, 'reads_1.fq')
@@ -132,7 +134,12 @@ class Cluster:
 
     def _receive_signal(self, signum, stack):
         print('Signal', signum, 'received in cluster', self.name + '. Stopping!', file=sys.stderr, flush=True)
-        sys.exit(1)
+        if self.log_fh is not None:
+            pyfastaq.utils.close(self.log_fh)
+            self.log_fh = None
+        if self.fail_file is not None:
+            with open(self.fail_file, 'w') as f:
+                pass
 
 
     def _input_files_exist(self):

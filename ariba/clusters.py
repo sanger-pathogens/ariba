@@ -39,7 +39,8 @@ def _run_cluster(obj, verbose, clean, fails_dir):
     if clean:
         if verbose:
             print('Deleting cluster dir', obj.root_dir, flush=True)
-        shutil.rmtree(obj.root_dir)
+        if os.path.exists(obj.root_dir):
+            shutil.rmtree(obj.root_dir)
 
     return obj
 
@@ -148,30 +149,25 @@ class Clusters:
         wanted_signals = [signal.SIGABRT, signal.SIGINT, signal.SIGSEGV, signal.SIGTERM]
         for s in wanted_signals:
             signal.signal(s, self._receive_signal)
-        self.run_emergency_stop = False
 
 
     def _stop_pool(self):
-        if self.pool is not None:
-            self.pool.close()
-            self.pool.terminate()
-            print(len(multiprocessing.active_children()), flush=True)
-            while len(multiprocessing.active_children()) > 0:
-                print(len(multiprocessing.active_children()), flush=True)
-                time.sleep(1)
-            self.pool = None
+        if self.pool is None:
+            return
+        self.pool.close()
+        self.pool.terminate()
+        while len(multiprocessing.active_children()) > 0:
+            time.sleep(1)
 
 
     def _emergency_stop(self):
-        if not self.run_emergency_stop:
-            self._stop_pool()
-            if self.clean:
-                if os.path.exists(self.tmp_dir):
-                    try:
-                        shutil.rmtree(self.tmp_dir)
-                    except:
-                        pass
-        self.run_emergency_stop = True
+        self._stop_pool()
+        if self.clean:
+            if os.path.exists(self.tmp_dir):
+                try:
+                    shutil.rmtree(self.tmp_dir)
+                except:
+                    pass
 
 
     def _receive_signal(self, signum, stack):
@@ -349,6 +345,7 @@ class Clusters:
                     self.refdata,
                     self.cluster_read_counts[seq_name],
                     self.cluster_base_counts[seq_name],
+                    fail_file=os.path.join(self.fails_dir, seq_name),
                     read_store=self.read_store,
                     reference_names=self.cluster_ids[seq_type][seq_name],
                     logfile=self.log_files[-1],
@@ -379,11 +376,7 @@ class Clusters:
 
         if self.threads > 1:
             self.pool = multiprocessing.Pool(self.threads)
-            try:
-                cluster_list = self.pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose), itertools.repeat(self.clean), itertools.repeat(self.fails_dir)))
-            except:
-                self._emergency_stop()
-                raise Error('At least one cluster failed (using multiprocessing). Cannot continue')
+            cluster_list = self.pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose), itertools.repeat(self.clean), itertools.repeat(self.fails_dir)))
         else:
             for c in cluster_list:
                 _run_cluster(c, self.verbose, self.clean, self.fails_dir)
@@ -439,7 +432,9 @@ class Clusters:
 
             if self.verbose:
                 print('Deleting tmp directory', self.tmp_dir)
-            shutil.rmtree(self.tmp_dir)
+
+            if os.path.exists(self.tmp_dir):
+                shutil.rmtree(self.tmp_dir)
 
             if self.verbose:
                 print('Deleting Logs directory', self.logs_dir)
