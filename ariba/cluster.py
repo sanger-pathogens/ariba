@@ -1,4 +1,6 @@
+import signal
 import os
+import atexit
 import random
 import math
 import shutil
@@ -17,6 +19,7 @@ class Cluster:
       refdata,
       total_reads,
       total_reads_bases,
+      fail_file=None,
       read_store=None,
       reference_names=None,
       logfile=None,
@@ -48,6 +51,7 @@ class Cluster:
         self.read_store = read_store
         self.refdata = refdata
         self.name = name
+        self.fail_file = fail_file
         self.reference_fa = os.path.join(self.root_dir, 'reference.fa')
         self.reference_names = reference_names
         self.all_reads1 = os.path.join(self.root_dir, 'reads_1.fq')
@@ -114,6 +118,8 @@ class Cluster:
         # Hence the following two lines...
         if unittest:
             self.log_fh = sys.stdout
+        else:
+            self.log_fh = None
 
         if extern_progs is None:
             self.extern_progs = external_progs.ExternalProgs()
@@ -121,6 +127,19 @@ class Cluster:
             self.extern_progs = extern_progs
 
         self.random_seed = random_seed
+        wanted_signals = [signal.SIGABRT, signal.SIGINT, signal.SIGSEGV, signal.SIGTERM]
+        for s in wanted_signals:
+            signal.signal(s, self._receive_signal)
+
+
+    def _receive_signal(self, signum, stack):
+        print('Signal', signum, 'received in cluster', self.name + '. Stopping!', file=sys.stderr, flush=True)
+        if self.log_fh is not None:
+            pyfastaq.utils.close(self.log_fh)
+            self.log_fh = None
+        if self.fail_file is not None:
+            with open(self.fail_file, 'w') as f:
+                pass
 
 
     def _input_files_exist(self):
@@ -230,16 +249,40 @@ class Cluster:
 
 
     def run(self):
-        if self.logfile is None:
-            self.logfile = os.path.join(self.root_dir, 'log.txt')
-
         self._set_up_input_files()
 
         for fname in [self.all_reads1, self.all_reads2, self.references_fa]:
             if not os.path.exists(fname):
                 raise Error('File ' + fname + ' not found. Cannot continue')
 
+        if self.logfile is None:
+            self.logfile = os.path.join(self.root_dir, 'log.txt')
+
         self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
+
+        original_dir = os.getcwd()
+        os.chdir(self.root_dir)
+
+        try:
+            self._run()
+        except Error as err:
+            os.chdir(original_dir)
+            print('Error running cluster! Error was:', err, sep='\n', file=self.log_fh)
+            pyfastaq.utils.close(self.log_fh)
+            self.log_fh = None
+            raise Error('Error running cluster ' + self.name + '!')
+
+        os.chdir(original_dir)
+        print('Finished', file=self.log_fh, flush=True)
+        print('{:_^79}'.format(' LOG FILE END ' + self.name + ' '), file=self.log_fh, flush=True)
+
+        # This stops multiprocessing complaining with the error:
+        # multiprocessing.pool.MaybeEncodingError: Error sending result: '[<ariba.cluster.Cluster object at 0x7ffa50f8bcd0>]'. Reason: 'TypeError("cannot serialize '_io.TextIOWrapper' object",)'
+        pyfastaq.utils.close(self.log_fh)
+        self.log_fh = None
+
+
+    def _run(self):
         print('{:_^79}'.format(' LOG FILE START ' + self.name + ' '), file=self.log_fh, flush=True)
 
         print('Choosing best reference sequence:', file=self.log_fh, flush=True)
@@ -316,12 +359,8 @@ class Cluster:
 
             print('\nMaking and checking scaffold graph', file=self.log_fh, flush=True)
 
-            #bam_parser = bam_parse.Parser(self.final_assembly_bam, self.assembly.sequences)
-            #bam_parser.parse()
             if not self.assembly.scaff_graph_ok:
                 self.status_flag.add('scaffold_graph_bad')
-            #if not bam_parser.scaff_graph_is_consistent(self.min_scaff_depth, self.max_insert):
-            #    self.status_flag.add('scaffold_graph_bad')
 
             print('Comparing assembly against reference sequence', file=self.log_fh, flush=True)
             self.assembly_compare = assembly_compare.AssemblyCompare(
@@ -378,14 +417,7 @@ class Cluster:
             print('\nAssembly failed\n', file=self.log_fh, flush=True)
             self.status_flag.add('assembly_fail')
 
+
         print('\nMaking report lines', file=self.log_fh, flush=True)
         self.report_lines = report.report_lines(self)
         self._clean()
-        print('Finished', file=self.log_fh, flush=True)
-        print('{:_^79}'.format(' LOG FILE END ' + self.name + ' '), file=self.log_fh, flush=True)
-        pyfastaq.utils.close(self.log_fh)
-
-        # This stops multiprocessing complaining with the error:
-        # multiprocessing.pool.MaybeEncodingError: Error sending result: '[<ariba.cluster.Cluster object at 0x7ffa50f8bcd0>]'. Reason: 'TypeError("cannot serialize '_io.TextIOWrapper' object",)'
-        self.log_fh = None
-

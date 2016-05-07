@@ -1,3 +1,4 @@
+import os
 import sys
 import subprocess
 import pyfastaq
@@ -36,9 +37,10 @@ def cat_files(infiles, outfile):
     f_out = pyfastaq.utils.open_file_write(outfile)
 
     for filename in infiles:
-        f_in = pyfastaq.utils.open_file_read(filename)
-        for line in f_in:
-            print(line, end='', file=f_out)
-        pyfastaq.utils.close(f_in)
+        if os.path.exists(filename):
+            f_in = pyfastaq.utils.open_file_read(filename)
+            for line in f_in:
+                print(line, end='', file=f_out)
+            pyfastaq.utils.close(f_in)
 
     pyfastaq.utils.close(f_out)
