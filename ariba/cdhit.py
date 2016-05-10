@@ -101,7 +101,7 @@ class Runner:
                 print(seq, file=f)
 
         pyfastaq.utils.close(f)
-        clusters = self._rename_clusters(clusters, tmp_fa, self.outfile)
+        clusters = self._rename_clusters(clusters, tmp_fa, self.outfile, rename_suffix=self.rename_suffix)
         shutil.rmtree(tmpdir)
         return clusters
 
