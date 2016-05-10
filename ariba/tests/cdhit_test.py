@@ -101,3 +101,18 @@ class TestCdhit(unittest.TestCase):
         with self.assertRaises(cdhit.Error):
             clusters = r.fake_run()
 
+
+    def test_load_user_clusters_file_good_file(self):
+        '''test _load_user_clusters_file'''
+        infile = os.path.join(data_dir, 'cdhit_test_load_user_clusters_file.good')
+        expected  = {
+            'seq1': 'seq1',
+            'seq2': 'seq1',
+            'seq3': 'seq1',
+            'seq4': 'seq4',
+            'seq5': 'seq5',
+            'seq6': 'seq5',
+        }
+
+        got = cdhit.Runner._load_user_clusters_file(infile)
+        self.assertEqual(expected, got)

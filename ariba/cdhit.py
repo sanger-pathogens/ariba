@@ -55,6 +55,24 @@ class Runner:
         return clusters
 
 
+    @staticmethod
+    def _load_user_clusters_file(filename):
+        f = pyfastaq.utils.open_file_read(filename)
+        seq_to_cluster = {}
+        cluster_names = set()
+        for line in f:
+            data = line.rstrip().split()
+            if data[0] in cluster_names:
+                raise Error('Error reading clusters file. The sequence "' + data[0] + '" was found in column1 of more than one line of the file ' + filename)
+
+            cluster_names.add(data[0])
+            for seq_name in data:
+                seq_to_cluster[seq_name] = data[0]
+
+        pyfastaq.utils.close(f)
+        return seq_to_cluster
+
+
     def _get_ids(self, infile):
         seq_reader = pyfastaq.sequences.file_reader(infile)
         return set([seq.id for seq in seq_reader])
