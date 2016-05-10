@@ -21,6 +21,7 @@ class RefPreparer:
         cdhit_min_id=0.9,
         cdhit_min_length=0.9,
         run_cdhit=True,
+        clusters_file=None,
         threads=1,
         verbose=False,
     ):
@@ -42,6 +43,7 @@ class RefPreparer:
         self.cdhit_min_id = cdhit_min_id
         self.cdhit_min_length = cdhit_min_length
         self.run_cdhit = run_cdhit
+        self.clusters_file = clusters_file
         self.threads = threads
         self.verbose = verbose
 
@@ -152,7 +154,8 @@ class RefPreparer:
             length_diff_cutoff=self.cdhit_min_length,
             nocluster=not self.run_cdhit,
             verbose=self.verbose,
-            cd_hit_est=self.extern_progs.exe('cdhit')
+            cd_hit_est=self.extern_progs.exe('cdhit'),
+            clusters_file=self.clusters_file,
         )
 
         if self.verbose:

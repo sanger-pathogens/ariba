@@ -619,6 +619,54 @@ class TestReferenceData(unittest.TestCase):
         os.unlink(outprefix + '.presence_absence.cdhit')
 
 
+    def test_cluster_with_cdhit_clusters_in_file(self):
+        '''Test cluster_with_cd_hit clusters from file'''
+        inprefix = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_nocluster')
+        presence_absence_fa = inprefix + '.presence_absence.fa'
+        non_coding_fa = inprefix + '.non_coding.fa'
+        clusters_file = inprefix + '.clusters'
+
+        refdata = reference_data.ReferenceData(
+            presence_absence_fa=presence_absence_fa,
+            non_coding_fa=non_coding_fa,
+        )
+
+        outprefix = 'tmp.test_cluster_with_cdhit_nocluster'
+
+        expected = {
+            'non_coding': {
+                'noncoding1.n': {'noncoding1'},
+                'noncoding2.n': {'noncoding2'}
+            },
+            'presence_absence': {
+                'presence_absence1.p': {'presence_absence1'},
+                'presence_absence2.p': {'presence_absence2'},
+                'presence_absence3.p': {'presence_absence3'},
+                'presence_absence4.p': {'presence_absence4'},
+            },
+            'variants_only': None,
+        }
+
+        got = refdata.cluster_with_cdhit(inprefix, outprefix, nocluster=True)
+        self.assertEqual(expected, got)
+
+        expected_cluster_reps_fa = inprefix +  '.expected_representatives.fa'
+        expected_seqs = {}
+        pyfastaq.tasks.file_to_dict(expected_cluster_reps_fa, expected_seqs)
+        got_seqs = {}
+        pyfastaq.tasks.file_to_dict(outprefix + '.cluster_representatives.fa', got_seqs)
+        self.assertEqual(expected_seqs, got_seqs)
+
+        expected_clusters_file = inprefix + '.clusters.tsv'
+        got_clusters_file = outprefix + '.clusters.tsv'
+        self.assertTrue(filecmp.cmp(expected_clusters_file, got_clusters_file, shallow=False))
+
+        os.unlink(got_clusters_file)
+        os.unlink(outprefix + '.cluster_representatives.fa')
+        os.unlink(outprefix + '.non_coding.cdhit')
+        os.unlink(outprefix + '.presence_absence.cdhit')
+
+
     def test_write_seqs_to_fasta(self):
         '''Test write_seqs_to_fasta'''
         refdata = reference_data.ReferenceData(presence_absence_fa=os.path.join(data_dir, 'reference_data_test_write_seqs_to_fasta.in.fa'))
