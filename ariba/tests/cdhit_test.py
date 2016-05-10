@@ -103,7 +103,7 @@ class TestCdhit(unittest.TestCase):
 
 
     def test_load_user_clusters_file_good_file(self):
-        '''test _load_user_clusters_file'''
+        '''test _load_user_clusters_file with good input file'''
         infile = os.path.join(data_dir, 'cdhit_test_load_user_clusters_file.good')
         expected  = {
             'seq1': 'seq1',
@@ -116,3 +116,16 @@ class TestCdhit(unittest.TestCase):
 
         got = cdhit.Runner._load_user_clusters_file(infile)
         self.assertEqual(expected, got)
+
+
+    def test_load_user_clusters_file_bad_file(self):
+        '''test _load_user_clusters_file with bad input files'''
+        infiles = [
+            os.path.join(data_dir, 'cdhit_test_load_user_clusters_file.bad1'),
+            os.path.join(data_dir, 'cdhit_test_load_user_clusters_file.bad2'),
+            os.path.join(data_dir, 'cdhit_test_load_user_clusters_file.bad3')
+        ]
+        for filename in infiles:
+            with self.assertRaises(cdhit.Error):
+                cdhit.Runner._load_user_clusters_file(filename)
+

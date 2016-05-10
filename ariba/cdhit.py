@@ -59,14 +59,13 @@ class Runner:
     def _load_user_clusters_file(filename):
         f = pyfastaq.utils.open_file_read(filename)
         seq_to_cluster = {}
-        cluster_names = set()
         for line in f:
             data = line.rstrip().split()
-            if data[0] in cluster_names:
-                raise Error('Error reading clusters file. The sequence "' + data[0] + '" was found in column1 of more than one line of the file ' + filename)
 
-            cluster_names.add(data[0])
             for seq_name in data:
+                if seq_name in seq_to_cluster:
+                    pyfastaq.utils.close(f)
+                    raise Error('Error reading clusters file. The sequence "' + seq_name + '" was found more than once in the file ' + filename)
                 seq_to_cluster[seq_name] = data[0]
 
         pyfastaq.utils.close(f)
