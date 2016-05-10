@@ -21,6 +21,15 @@ class TestAssembly(unittest.TestCase):
         self.assertEqual(got, 42)
 
 
+    def test_check_spades_log_file(self):
+        '''test _check_spades_log_file'''
+        good_file = os.path.join(data_dir, 'assembly_test_check_spades_log_file.log.good')
+        bad_file = os.path.join(data_dir, 'assembly_test_check_spades_log_file.log.bad')
+        self.assertTrue(assembly.Assembly._check_spades_log_file(good_file))
+        with self.assertRaises(assembly.Error):
+            self.assertTrue(assembly.Assembly._check_spades_log_file(bad_file))
+
+
     def test_assemble_with_spades(self):
         '''test _assemble_with_spades'''
         reads1 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_1.fq')
