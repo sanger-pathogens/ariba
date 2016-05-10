@@ -129,3 +129,19 @@ class TestCdhit(unittest.TestCase):
             with self.assertRaises(cdhit.Error):
                 cdhit.Runner._load_user_clusters_file(filename)
 
+
+    def test_run_get_clusters_from_file(self):
+        '''test run_get_clusters_from_file'''
+        fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.in.fa')
+        clusters_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.in.clusters')
+        expected_outfile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.out.fa')
+        tmpfile = 'tmp.cdhit_test_run_get_clusters_from_dict.out.fa'
+        r = cdhit.Runner(fa_infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
+        clusters = r.run_get_clusters_from_file(clusters_infile)
+        expected_clusters = {
+            'seq1.x': {'seq1', 'seq2'},
+            'seq3.x': {'seq3'},
+        }
+        self.assertEqual(clusters, expected_clusters)
+        self.assertTrue(filecmp.cmp(tmpfile, expected_outfile, shallow=False))
+        os.unlink(tmpfile)

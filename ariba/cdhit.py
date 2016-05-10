@@ -72,6 +72,40 @@ class Runner:
         return seq_to_cluster
 
 
+    def run_get_clusters_from_file(self, infile):
+        '''Instead of running cdhit, gets the clusters info from the input dict.
+           Dict expected to be key=sequence name, value=name of cluster'''
+        seq_to_cluster = self._load_user_clusters_file(infile)
+        cluster_names = set(seq_to_cluster.values())
+        tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
+        tmp_fa = os.path.join(tmpdir, 'cdhit.fa')
+        clusters = {}
+        seq_reader = pyfastaq.sequences.file_reader(self.infile)
+        f = pyfastaq.utils.open_file_write(tmp_fa)
+
+        for seq in seq_reader:
+            if seq.id in clusters:
+                pyfastaq.utils.close(f)
+                shutil.rmtree(tmpdir)
+                raise Error('Sequence name "' + seq.id + '" not unique. Cannot continue')
+
+            if seq.id not in seq_to_cluster:
+                raise Error('Error forcing cdhit clustering. Found sequence ' + seq.id + ' in FASTA file, but not in provided clusters info from file ' + infile)
+
+            cluster = seq_to_cluster[seq.id]
+            if cluster not in clusters:
+                clusters[cluster] = set()
+
+            clusters[cluster].add(seq.id)
+            if seq.id in cluster_names:
+                print(seq, file=f)
+
+        pyfastaq.utils.close(f)
+        clusters = self._rename_clusters(clusters, tmp_fa, self.outfile)
+        shutil.rmtree(tmpdir)
+        return clusters
+
+
     def _get_ids(self, infile):
         seq_reader = pyfastaq.sequences.file_reader(infile)
         return set([seq.id for seq in seq_reader])
