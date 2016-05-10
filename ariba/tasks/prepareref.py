@@ -15,6 +15,7 @@ def run():
 
     cdhit_group = parser.add_argument_group('cd-hit options')
     cdhit_group.add_argument('--no_cdhit', action='store_true', help='Do not run cd-hit. Each input sequence is put into its own "cluster"')
+    cdhit_group.add_argument('--cdhit_clusters', help='File specifying how the sequences should be clustered. Will be used instead of running cdhit. Format is one cluster per line. Sequence names separated by whitespace. First name in line is the cluster representative', metavar='FILENAME')
     cdhit_group.add_argument('--cdhit_min_id', type=float, help='Sequence identity threshold (cd-hit option -c) [%(default)s]', default=0.9, metavar='FLOAT')
     cdhit_group.add_argument('--cdhit_min_length', type=float, help='length difference cutoff (cd-hit option -s) [%(default)s]', default=0.9, metavar='FLOAT')
 
@@ -46,6 +47,7 @@ def run():
         cdhit_min_id=options.cdhit_min_id,
         cdhit_min_length=options.cdhit_min_length,
         run_cdhit=not options.no_cdhit,
+        clusters_file=options.cdhit_clusters,
         threads=options.threads,
         verbose=options.verbose,
     )
