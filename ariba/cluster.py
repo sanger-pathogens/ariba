@@ -132,14 +132,28 @@ class Cluster:
             signal.signal(s, self._receive_signal)
 
 
-    def _receive_signal(self, signum, stack):
-        print('Signal', signum, 'received in cluster', self.name + '. Stopping!', file=sys.stderr, flush=True)
+        atexit.register(self._atexit)
+
+    def _atexit(self):
+        print('Error in cluster', self.name, '... Stopping!', file=sys.stderr, flush=True)
         if self.log_fh is not None:
             pyfastaq.utils.close(self.log_fh)
             self.log_fh = None
         if self.fail_file is not None:
             with open(self.fail_file, 'w') as f:
                 pass
+        os._exit(1)
+
+
+    def _receive_signal(self, signum, stack):
+        print('Signal', signum, 'received in cluster', self.name + '... Stopping!', file=sys.stderr, flush=True)
+        if self.log_fh is not None:
+            pyfastaq.utils.close(self.log_fh)
+            self.log_fh = None
+        if self.fail_file is not None:
+            with open(self.fail_file, 'w') as f:
+                pass
+        sys.exit(1)
 
 
     def _input_files_exist(self):
@@ -159,7 +173,7 @@ class Cluster:
             try:
                 os.mkdir(self.root_dir)
             except:
-                raise Error('Error making directory ' + seolf.root_dir)
+                raise Error('Error making directory ' + self.root_dir)
             self.read_store.get_reads(self.name, self.all_reads1, self.all_reads2)
             self.refdata.write_seqs_to_fasta(self.references_fa, self.reference_names)
 
