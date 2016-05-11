@@ -21,7 +21,7 @@ def _run_cluster(obj, verbose, clean, fails_dir):
     failed_clusters = os.listdir(fails_dir)
 
     if len(failed_clusters) > 0:
-        print('Other clusters failed. Stopping cluster', obj.name, file=sys.stderr)
+        print('Other clusters failed. Will not start cluster', obj.name, file=sys.stderr)
         return obj
 
     if verbose:
@@ -125,6 +125,7 @@ class Clusters:
         self.cluster_base_counts = {} # gene name -> number of bases
         self.pool = None
         self.fails_dir = os.path.join(self.outdir ,'.fails')
+        self.clusters_all_ran_ok = True
 
         for d in [self.outdir, self.logs_dir, self.fails_dir]:
             try:
@@ -141,14 +142,26 @@ class Clusters:
         if not os.path.exists(tmp_dir):
             raise Error('Temporary directory ' + tmp_dir + ' not found. Cannot continue')
 
-        self.tmp_dir = tempfile.mkdtemp(prefix='ariba.tmp.', dir=os.path.abspath(tmp_dir))
+        if self.clean:
+            self.tmp_dir_obj = tempfile.TemporaryDirectory(prefix='ariba.tmp.', dir=os.path.abspath(tmp_dir))
+            self.tmp_dir = self.tmp_dir_obj.name
+        else:
+            self.tmp_dir_obj = None
+            self.tmp_dir = os.path.join(self.outdir, 'clusters')
+            try:
+                os.mkdir(self.tmp_dir)
+            except:
+                raise Error('Error making directory ' + self.tmp_dir)
 
         if self.verbose:
             print('Temporary directory:', self.tmp_dir)
 
-        wanted_signals = [signal.SIGABRT, signal.SIGINT, signal.SIGSEGV, signal.SIGTERM]
-        for s in wanted_signals:
-            signal.signal(s, self._receive_signal)
+        for i in [x for x in dir(signal) if x.startswith("SIG") and x not in {'SIGCHLD', 'SIGCLD'}]:
+            try:
+                signum = getattr(signal, i)
+                signal.signal(signum, self._receive_signal)
+            except:
+                pass
 
 
     def _stop_pool(self):
@@ -163,11 +176,10 @@ class Clusters:
     def _emergency_stop(self):
         self._stop_pool()
         if self.clean:
-            if os.path.exists(self.tmp_dir):
-                try:
-                    shutil.rmtree(self.tmp_dir)
-                except:
-                    pass
+            try:
+                self.tmp_dir_obj.cleanup()
+            except:
+                pass
 
 
     def _receive_signal(self, signum, stack):
@@ -373,13 +385,18 @@ class Clusters:
                     extern_progs=self.extern_progs,
                 ))
 
+        try:
+            if self.threads > 1:
+                self.pool = multiprocessing.Pool(self.threads)
+                cluster_list = self.pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose), itertools.repeat(self.clean), itertools.repeat(self.fails_dir)))
+            else:
+                for c in cluster_list:
+                    _run_cluster(c, self.verbose, self.clean, self.fails_dir)
+        except:
+            self.clusters_all_ran_ok = False
 
-        if self.threads > 1:
-            self.pool = multiprocessing.Pool(self.threads)
-            cluster_list = self.pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose), itertools.repeat(self.clean), itertools.repeat(self.fails_dir)))
-        else:
-            for c in cluster_list:
-                _run_cluster(c, self.verbose, self.clean, self.fails_dir)
+        if len(os.listdir(self.fails_dir)) > 0:
+            self.clusters_all_ran_ok = False
 
         self.clusters = {c.name: c for c in cluster_list}
 
@@ -430,19 +447,24 @@ class Clusters:
         if self.clean:
             shutil.rmtree(self.fails_dir)
 
-            if self.verbose:
-                print('Deleting tmp directory', self.tmp_dir)
-
-            if os.path.exists(self.tmp_dir):
-                shutil.rmtree(self.tmp_dir)
+            try:
+                self.tmp_dir_obj.cleanup()
+            except:
+                pass
 
             if self.verbose:
                 print('Deleting Logs directory', self.logs_dir)
-            shutil.rmtree(self.logs_dir)
+            try:
+                shutil.rmtree(self.logs_dir)
+            except:
+                pass
 
             if self.verbose:
                 print('Deleting reads store files', self.read_store.outfile + '[.tbi]')
-            self.read_store.clean()
+            try:
+                self.read_store.clean()
+            except:
+                pass
         else:
             if self.verbose:
                 print('Not deleting anything because --noclean used')
@@ -502,25 +524,24 @@ class Clusters:
                 print('No reads mapped. Skipping all assemblies', flush=True)
             print('WARNING: no reads mapped to reference genes. Therefore no local assemblies will be run', file=sys.stderr)
 
-        failed_clusters = os.listdir(self.fails_dir)
-        if len(failed_clusters):
-            print('Failed clusters:', ', '.join(failed_clusters), file=sys.stderr)
-        else:
-            if self.verbose:
-                print('{:_^79}'.format(' Writing reports '), flush=True)
-                print('Making', self.report_file_all_tsv)
-            self._write_reports(self.clusters, self.report_file_all_tsv)
+        if not self.clusters_all_ran_ok:
+            raise Error('At least one cluster failed! Stopping...')
 
-            if self.verbose:
-                print('Making', self.report_file_filtered_prefix + '.tsv')
-            rf = report_filter.ReportFilter(infile=self.report_file_all_tsv)
-            rf.run(self.report_file_filtered_prefix)
+        if self.verbose:
+            print('{:_^79}'.format(' Writing reports '), flush=True)
+            print('Making', self.report_file_all_tsv)
+        self._write_reports(self.clusters, self.report_file_all_tsv)
 
-            if self.verbose:
-                print()
-                print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
-                print(self.catted_assembled_seqs_fasta)
-            self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
+        if self.verbose:
+            print('Making', self.report_file_filtered_prefix + '.tsv')
+        rf = report_filter.ReportFilter(infile=self.report_file_all_tsv)
+        rf.run(self.report_file_filtered_prefix)
+
+        if self.verbose:
+            print()
+            print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
+            print(self.catted_assembled_seqs_fasta)
+        self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
 
         clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
         if self.verbose:
@@ -534,10 +555,7 @@ class Clusters:
             print('{:_^79}'.format(' Cleaning files '), flush=True)
         self._clean()
 
-        if self.verbose:
+        if self.clusters_all_ran_ok and self.verbose:
             print('\nAll done!\n')
-
-        if len(failed_clusters):
-            raise Error('There were failed clusters: ' + ', '.join(failed_clusters))
 
         os.chdir(cwd)
