@@ -33,7 +33,7 @@ class TestClusters(unittest.TestCase):
 
         reads1 = os.path.join(data_dir, 'clusters_test_dummy_reads_1.fq')
         reads2 = os.path.join(data_dir, 'clusters_test_dummy_reads_2.fq')
-        self.clusters = clusters.Clusters(self.refdata_dir, reads1, reads2, self.cluster_dir, extern_progs)
+        self.clusters = clusters.Clusters(self.refdata_dir, reads1, reads2, self.cluster_dir, extern_progs, clean=False)
 
 
     def tearDown(self):
@@ -86,7 +86,7 @@ class TestClusters(unittest.TestCase):
         reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads_no_reads_map_2.fq')
         ref = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.db.fa')
         refdata = reference_data.ReferenceData(presence_absence_fa = ref)
-        c = clusters.Clusters(self.refdata_dir, reads1, reads2, clusters_dir, extern_progs)
+        c = clusters.Clusters(self.refdata_dir, reads1, reads2, clusters_dir, extern_progs, clean=False)
         shutil.copyfile(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads_no_reads_map.bam'), c.bam)
         c._bam_to_clusters_reads()
 
@@ -105,7 +105,7 @@ class TestClusters(unittest.TestCase):
         reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_2.fq')
         ref = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.db.fa')
         refdata = reference_data.ReferenceData(presence_absence_fa = ref)
-        c = clusters.Clusters(self.refdata_dir, reads1, reads2, clusters_dir, extern_progs)
+        c = clusters.Clusters(self.refdata_dir, reads1, reads2, clusters_dir, extern_progs, clean=False)
         shutil.copyfile(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.bam'), c.bam)
         c._bam_to_clusters_reads()
         expected = [
