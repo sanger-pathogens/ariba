@@ -119,6 +119,7 @@ class Cluster:
         if unittest:
             self.log_fh = sys.stdout
         else:
+            atexit.register(self._atexit)
             self.log_fh = None
 
         if extern_progs is None:
@@ -131,8 +132,6 @@ class Cluster:
         for s in wanted_signals:
             signal.signal(s, self._receive_signal)
 
-
-        atexit.register(self._atexit)
 
     def _atexit(self):
         print('Error in cluster', self.name, '... Stopping!', file=sys.stderr, flush=True)
