@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import pyfastaq
 import pymummer
@@ -90,6 +91,22 @@ class Assembly:
         return assembly_kmer
 
 
+    @staticmethod
+    def _check_spades_log_file(logfile):
+        '''SPAdes can fail with a strange error. Stop everything if this happens'''
+        f = pyfastaq.utils.open_file_read(logfile)
+
+        for line in f:
+            if line.startswith('== Error ==  system call for:') and line.rstrip().endswith('finished abnormally, err code: -7'):
+                pyfastaq.utils.close(f)
+                print('Error running SPAdes. Cannot continue. This is the error from the log file', logfile, '...', file=sys.stderr)
+                print(line, file=sys.stderr)
+                raise Error('Fatal error ("err code: -7") running spades. Cannot continue')
+
+        pyfastaq.utils.close(f)
+        return True
+
+
     def _assemble_with_spades(self, unittest=False):
         cmd = ' '.join([
             self.extern_progs.exe('spades'),
@@ -125,6 +142,8 @@ class Assembly:
 
         spades_log = os.path.join(self.assembler_dir, 'spades.log')
         if os.path.exists(spades_log):
+            self._check_spades_log_file(spades_log)
+
             with open(spades_log) as f:
                 print('\n______________ SPAdes log ___________________\n', file=self.log_fh)
                 for line in f:
