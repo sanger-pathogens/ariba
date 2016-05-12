@@ -429,4 +429,4 @@ class Cluster:
         print('\nMaking report lines', file=self.log_fh, flush=True)
         self.report_lines = report.report_lines(self)
         self._clean()
-        atexit.register(self._atexit)
+        atexit.unregister(self._atexit)
