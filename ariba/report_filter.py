@@ -9,7 +9,7 @@ class ReportFilter:
             infile=None,
             min_pc_ident=90,
             min_ref_base_assembled=1,
-            ignore_not_has_known_variant=True,
+            ignore_not_has_known_variant=False,
             remove_synonymous_snps=True,
             exclude_flags=None,
         ):
