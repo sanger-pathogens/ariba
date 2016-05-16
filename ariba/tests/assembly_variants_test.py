@@ -372,6 +372,7 @@ class TestAssemblyVariants(unittest.TestCase):
 
         expected = {
             'contig1': [
+                (4, 'p', 'A5D', 'NONSYN', [v2, v3], set(), set()),
                 (None, 'p', None, None, None, {meta1}, set()),
                 (None, 'p', None, None, None, {meta3}, set()),
             ],
