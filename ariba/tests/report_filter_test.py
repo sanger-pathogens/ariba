@@ -223,7 +223,7 @@ class TestReportFilter(unittest.TestCase):
 
     def test_filter_list_of_dicts_with_essential(self):
         '''Test _filter_list_of_dicts with an essential line but all others fail'''
-        rf = report_filter.ReportFilter()
+        rf = report_filter.ReportFilter(ignore_not_has_known_variant=True)
         line1 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         line2 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
@@ -237,7 +237,7 @@ class TestReportFilter(unittest.TestCase):
 
     def test_filter_list_of_dicts_with_pass(self):
         '''Test _filter_list_of_dicts with a line that passes'''
-        rf = report_filter.ReportFilter()
+        rf = report_filter.ReportFilter(ignore_not_has_known_variant=True)
         line1 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t500\t12.1\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         line2 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t500\t12.1\t1\tSNP\tn\tC46T\t1\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C46T\tfree text'
         line3 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t500\t12.1\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
@@ -265,7 +265,7 @@ class TestReportFilter(unittest.TestCase):
 
     def test_filter_dicts(self):
         '''Test _filter_dicts'''
-        rf = report_filter.ReportFilter(min_ref_base_assembled=10)
+        rf = report_filter.ReportFilter(min_ref_base_assembled=10, ignore_not_has_known_variant=True)
         ref_2_dict = {x: '.' for x in report.columns}
         ref_2_dict['pc_ident'] = 91.0
         ref_2_dict['ref_base_assembled'] = 10
