@@ -190,6 +190,22 @@ class TestAssemblyCompare(unittest.TestCase):
         self.assertTrue(assembly_compare.AssemblyCompare._ref_has_region_assembled_twice(nucmer_hits, ref_seq, 0.03))
 
 
+    def test_longest_nucmer_hit_in_ref(self):
+        '''test _longest_nucmer_hit_in_ref'''
+        hits = [
+            ['1', '39', '1', '39', '39', '39', '100.00', '39', '39', '1', '1', 'gene', 'contig1'],
+            ['1', '20', '1', '20', '20', '20', '100.00', '39', '39', '1', '1', 'gene', 'contig1'],
+            ['21', '39', '21', '39', '19', '19', '100.00', '39', '39', '1', '1', 'gene', 'contig2'],
+        ]
+        alignments = [pymummer.alignment.Alignment('\t'.join(x)) for x in hits]
+        nucmer_hits = {
+            'contig1': [alignments[0]],
+            'contig2': [alignments[1], alignments[2]],
+        }
+        got = assembly_compare.AssemblyCompare._longest_nucmer_hit_in_ref(nucmer_hits)
+        self.assertEqual(alignments[0], got)
+
+
     def test_ref_covered_by_complete_contig_with_orf(self):
         '''test _ref_covered_by_complete_contig_with_orf'''
         gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')

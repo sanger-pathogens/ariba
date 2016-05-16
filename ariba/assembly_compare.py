@@ -210,6 +210,20 @@ class AssemblyCompare:
         return bases_depth_at_least_two / len(ref_seq) >= threshold
 
 
+    @classmethod
+    def _longest_nucmer_hit_in_ref(cls, nucmer_hits):
+        max_length = None
+        max_hit = None
+
+        for l in nucmer_hits.values():
+            for hit in l:
+                if max_length is None or hit.hit_length_ref > max_length:
+                    max_length = hit.hit_length_ref
+                    max_hit = hit
+
+        return max_hit
+
+
     @staticmethod
     def _ref_covered_by_complete_contig_with_orf(nucmer_hits, contigs):
         '''Returns true iff there is a contig that covers the entire reference,
