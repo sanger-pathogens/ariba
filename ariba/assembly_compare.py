@@ -224,6 +224,20 @@ class AssemblyCompare:
         return max_hit
 
 
+    @classmethod
+    def _find_previous_start_codon(cls, sequence, start_coord, max_nt_to_extend):
+        first_i = max(0, start_coord - max_nt_to_extend)
+        for i in range(start_coord, first_i - 1, -3):
+            codon = pyfastaq.sequences.Fasta('x', sequence[i:i+3])
+            aa = codon.translate()
+            if aa.seq == '*':
+                return None
+            elif codon.seq in pyfastaq.genetic_codes.starts[pyfastaq.sequences.genetic_code]:
+                return i
+
+        return None
+
+
     @staticmethod
     def _ref_covered_by_complete_contig_with_orf(nucmer_hits, contigs):
         '''Returns true iff there is a contig that covers the entire reference,

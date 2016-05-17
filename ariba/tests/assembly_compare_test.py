@@ -206,6 +206,29 @@ class TestAssemblyCompare(unittest.TestCase):
         self.assertEqual(alignments[0], got)
 
 
+    def test_find_previous_start_codon(self):
+        '''test _find_previous_start_codon'''
+        tests = [
+            ('ATGTTTAAA', 0, 10, 0),
+            ('TATGTTTAAA', 0, 10, None),
+            ('TATGTTTAAA', 1, 10, 1),
+            ('ATATGTTTAAA', 2, 10, 2),
+            ('AATGTTTAAA', 7, 1, None),
+            ('AATGTTTAAA', 7, 2, None),
+            ('AATGTTTAAA', 7, 3, None),
+            ('AATGTTTAAA', 7, 4, None),
+            ('AATGTTTAAA', 7, 5, None),
+            ('AATGTTTAAA', 7, 6, 1),
+            ('AATGTTTAAA', 7, 7, 1),
+            ('AGTGTTTAAA', 7, 7, None),
+        ]
+
+        for seq, start_coord, max_nt_to_extend, expected in tests:
+            fa = pyfastaq.sequences.Fasta('x', seq)
+            got = assembly_compare.AssemblyCompare._find_previous_start_codon(fa, start_coord, max_nt_to_extend)
+            self.assertEqual(expected, got)
+
+
     def test_ref_covered_by_complete_contig_with_orf(self):
         '''test _ref_covered_by_complete_contig_with_orf'''
         gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
