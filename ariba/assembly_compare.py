@@ -18,6 +18,7 @@ class AssemblyCompare:
       nucmer_breaklen=200,
       assembled_threshold=0.95,
       unique_threshold=0.03,
+      max_gene_nt_extend=30,
     ):
         self.assembly_fa = os.path.abspath(assembly_fa)
         self.assembly_sequences = assembly_sequences
@@ -31,6 +32,7 @@ class AssemblyCompare:
         self.nucmer_breaklen = nucmer_breaklen
         self.assembled_threshold = assembled_threshold
         self.unique_threshold = unique_threshold
+        self.max_gene_nt_extend = max_gene_nt_extend
 
         self.nucmer_coords_file = self.outprefix + '.nucmer.coords'
         self.nucmer_snps_file = self.nucmer_coords_file + '.snps'
@@ -356,7 +358,7 @@ class AssemblyCompare:
             flag.add('region_assembled_twice')
 
         ref_seq_type = self.refdata.sequence_type(self.ref_sequence.id)
-        if ref_seq_type != 'non_coding' and self._ref_covered_by_complete_contig_with_orf(self.nucmer_hits, self.assembly_sequences):
+        if ref_seq_type != 'non_coding' and self.gene_matching_ref_type == 'GENE_FOUND':
             flag.add('complete_orf')
 
         if len(self.nucmer_hits) == 1:
@@ -383,3 +385,11 @@ class AssemblyCompare:
         self.nucmer_hits = self._parse_nucmer_coords_file(self.nucmer_coords_file, self.ref_sequence.id)
         self.percent_identities = self._nucmer_hits_to_percent_identity(self.nucmer_hits)
         self.assembled_reference_sequences = self._get_assembled_reference_sequences(self.nucmer_hits, self.ref_sequence, self.assembly_sequences)
+        ref_seq_type = self.refdata.sequence_type(self.ref_sequence.id)
+        if ref_seq_type == 'non_coding':
+            self.gene_matching_ref = None
+            self.gene_matching_ref_type = None
+            self.gene_start_bases_added = None
+            self.gene_end_bases_added = None
+        else:
+            self.gene_matching_ref, self.gene_matching_ref_type, self.gene_start_bases_added, self.gene_end_bases_added = self._get_gene_matching_ref(self.nucmer_hits, self.assembly_sequences, self.max_gene_nt_extend)
