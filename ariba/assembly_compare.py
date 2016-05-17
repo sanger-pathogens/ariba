@@ -249,6 +249,54 @@ class AssemblyCompare:
         return None
 
 
+    @classmethod
+    def _gene_from_nucmer_match(cls, nucmer_match, contig, max_end_nt_extend):
+        if nucmer_match.on_same_strand():
+            revcomp = False
+        else:
+            revcomp = True
+            nucmer_match = copy.copy(nucmer_match)
+            nucmer_match.reverse_query()
+            contig = copy.copy(contig)
+            contig.revcomp()
+
+        ref_hit_start = min(nucmer_match.ref_start, nucmer_match.ref_end)
+        contig_hit_start = min(nucmer_match.qry_start, nucmer_match.qry_end)
+        min_allowed_start = max(0, contig_hit_start - max_end_nt_extend)
+        if ref_hit_start % 3 != 0:
+            contig_hit_start += 3 - (ref_hit_start % 3)
+        contig_hit_end = max(nucmer_match.qry_start, nucmer_match.qry_end)
+        max_allowed_end = min(len(contig) - 1, contig_hit_end + max_end_nt_extend)
+        contig_hit_end -= (contig_hit_end - contig_hit_start + 1) % 3
+        assert contig_hit_start < contig_hit_end
+        gene_nt_name = nucmer_match.qry_name + '.' + str(contig_hit_start + 1) + '-' + str(contig_hit_end + 1)
+
+        gene_nt = pyfastaq.sequences.Fasta(gene_nt_name, contig[contig_hit_start:contig_hit_end+1])
+        assert len(gene_nt) % 3 == 0
+        gene_aa = gene_nt.translate()
+        if '*' in gene_aa[:-1]:
+            return gene_nt, 'HAS_STOP', None, None
+
+        extended_start_position = AssemblyCompare._find_previous_start_codon(contig, contig_hit_start, min_allowed_start)
+        extended_end_position = AssemblyCompare._find_next_stop_codon(contig, contig_hit_end - 2, max_allowed_end)
+        start = extended_start_position if extended_start_position is not None else contig_hit_start
+        end = extended_end_position + 2 if extended_end_position is not None else contig_hit_end
+
+        if revcomp:
+            gene_nt_name = nucmer_match.qry_name + '.' + str(end + 1) + '-' + str(start + 1)
+        else:
+            gene_nt_name = nucmer_match.qry_name + '.' + str(start + 1) + '-' + str(end + 1)
+
+        gene_nt = pyfastaq.sequences.Fasta(gene_nt_name, contig[start:end+1])
+        start_nt_added = None if extended_start_position is None else min(nucmer_match.qry_start, nucmer_match.qry_end) - start
+        end_nt_added = None if extended_end_position is None else end - max(nucmer_match.qry_start, nucmer_match.qry_end)
+
+        if None in [extended_start_position, extended_end_position]:
+            return gene_nt, 'START_OR_END_FAIL', start_nt_added, end_nt_added
+        else:
+            return gene_nt, 'GENE_FOUND', start_nt_added, end_nt_added
+
+
     @staticmethod
     def _ref_covered_by_complete_contig_with_orf(nucmer_hits, contigs):
         '''Returns true iff there is a contig that covers the entire reference,

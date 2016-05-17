@@ -250,6 +250,70 @@ class TestAssemblyCompare(unittest.TestCase):
             self.assertEqual(expected, got)
 
 
+    def test_gene_from_nucmer_match(self):
+        '''test _gene_from_nucmer_match'''
+        tests = [
+            (
+             ['1', '15', '2', '16', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGTAGTTTCCCTAGATAT', 5,
+             (pyfastaq.sequences.Fasta('contig.2-16', 'ATGTAGTTTCCCTAG'), 'HAS_STOP', None, None)
+            ),
+            (
+             ['1', '15', '2', '16', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 5,
+             (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 0, 0)
+            ),
+            (
+             ['1', '15', '2', '15', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 5,
+             (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 0, 1)
+            ),
+            (
+             ['1', '15', '2', '14', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 5,
+             (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 0, 2)
+            ),
+            (
+             ['1', '15', '2', '13', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 5,
+             (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 0, 3)
+            ),
+            (
+             ['2', '15', '3', '16', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 5,
+             (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 1, 0)
+            ),
+            (
+             ['3', '15', '4', '16', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 5,
+             (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 2, 0)
+            ),
+            (
+             ['4', '15', '5', '16', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 5,
+             (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 3, 0)
+            ),
+            (
+             ['1', '15', '2', '14', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 0,
+             (pyfastaq.sequences.Fasta('contig.2-13', 'ATGAAATTTCCC'), 'START_OR_END_FAIL', 0, None)
+            ),
+            (
+             ['1', '15', '2', '14', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 1,
+             (pyfastaq.sequences.Fasta('contig.2-13', 'ATGAAATTTCCC'), 'START_OR_END_FAIL', 0, None)
+            ),
+            (
+             ['1', '15', '2', '14', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 2,
+             (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 0, 2)
+            ),
+            (
+             ['2', '15', '3', '14', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'AATGAAATTTCCCTAGATAT', 2,
+             (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 1, 2)
+            ),
+            (
+             ['2', '15', '18', '7', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig'], 'ATATCTAGGGAAATTTCATT', 2,
+             (pyfastaq.sequences.Fasta('contig.16-2', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 1, 2)
+            ),
+        ]
+
+        for hit, seq, max_extend, expected in tests:
+            nucmer_match = pymummer.alignment.Alignment('\t'.join(hit))
+            contig = pyfastaq.sequences.Fasta('contig', seq)
+            got = assembly_compare.AssemblyCompare._gene_from_nucmer_match(nucmer_match, contig, max_extend)
+            self.assertEqual(expected, got)
+
+
     def test_ref_covered_by_complete_contig_with_orf(self):
         '''test _ref_covered_by_complete_contig_with_orf'''
         gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
