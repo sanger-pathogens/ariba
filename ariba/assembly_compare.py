@@ -225,9 +225,8 @@ class AssemblyCompare:
 
 
     @classmethod
-    def _find_previous_start_codon(cls, sequence, start_coord, max_nt_to_extend):
-        first_i = max(0, start_coord - max_nt_to_extend)
-        for i in range(start_coord, first_i - 1, -3):
+    def _find_previous_start_codon(cls, sequence, start_coord, min_start_coord):
+        for i in range(start_coord, min_start_coord - 1, -3):
             codon = pyfastaq.sequences.Fasta('x', sequence[i:i+3])
             aa = codon.translate()
             if aa.seq == '*':
@@ -241,9 +240,7 @@ class AssemblyCompare:
     @classmethod
     def _find_next_stop_codon(cls, sequence, end_coord, max_end_coord):
         final_i = min(len(sequence) - 3, max_end_coord - 2)
-        print('final_i', final_i)
         for i in range(end_coord, final_i + 1, 3):
-            print('i=', i)
             codon = pyfastaq.sequences.Fasta('x', sequence[i:i+3])
             aa = codon.translate()
             if aa.seq == '*':

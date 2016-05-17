@@ -209,24 +209,24 @@ class TestAssemblyCompare(unittest.TestCase):
     def test_find_previous_start_codon(self):
         '''test _find_previous_start_codon'''
         tests = [
-            ('ATGTTTAAA', 0, 10, 0),
-            ('TATGTTTAAA', 0, 10, None),
-            ('TATGTTTAAA', 1, 10, 1),
-            ('ATATGTTTAAA', 2, 10, 2),
-            ('AATGTTTAAA', 7, 1, None),
-            ('AATGTTTAAA', 7, 2, None),
-            ('AATGTTTAAA', 7, 3, None),
-            ('AATGTTTAAA', 7, 4, None),
+            ('ATGTTTAAA', 0, 0, 0),
+            ('TATGTTTAAA', 0, 0, None),
+            ('TATGTTTAAA', 1, 0, 1),
+            ('ATATGTTTAAA', 2, 0, 2),
+            ('AATGTTTAAA', 7, 6, None),
             ('AATGTTTAAA', 7, 5, None),
-            ('AATGTTTAAA', 7, 6, 1),
-            ('AATGTTTAAA', 7, 7, 1),
-            ('AGTGTTTAAA', 7, 7, None),
-            ('AATGTAGAAA', 7, 7, None),
+            ('AATGTTTAAA', 7, 4, None),
+            ('AATGTTTAAA', 7, 3, None),
+            ('AATGTTTAAA', 7, 2, None),
+            ('AATGTTTAAA', 7, 1, 1),
+            ('AATGTTTAAA', 7, 0, 1),
+            ('AGTGTTTAAA', 7, 0, None),
+            ('AATGTAGAAA', 7, 0, None),
         ]
 
-        for seq, start_coord, max_nt_to_extend, expected in tests:
+        for seq, start_coord, min_coord, expected in tests:
             fa = pyfastaq.sequences.Fasta('x', seq)
-            got = assembly_compare.AssemblyCompare._find_previous_start_codon(fa, start_coord, max_nt_to_extend)
+            got = assembly_compare.AssemblyCompare._find_previous_start_codon(fa, start_coord, min_coord)
             self.assertEqual(expected, got)
 
 
@@ -244,9 +244,9 @@ class TestAssemblyCompare(unittest.TestCase):
             ('ATGTTTAGA', 3, 7, None),
         ]
 
-        for seq, end_coord, max_nt_to_extend, expected in tests:
+        for seq, end_coord, max_coord, expected in tests:
             fa = pyfastaq.sequences.Fasta('x', seq)
-            got = assembly_compare.AssemblyCompare._find_next_stop_codon(fa, end_coord, max_nt_to_extend)
+            got = assembly_compare.AssemblyCompare._find_next_stop_codon(fa, end_coord, max_coord)
             self.assertEqual(expected, got)
 
 
