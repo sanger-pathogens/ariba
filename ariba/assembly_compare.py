@@ -336,7 +336,7 @@ class AssemblyCompare:
 
         ref_seq_type = self.refdata.sequence_type(self.ref_sequence.id)
         if ref_seq_type != 'non_coding' and self.gene_matching_ref_type == 'GENE_FOUND':
-            flag.add('complete_orf')
+            flag.add('complete_gene')
 
         if len(self.nucmer_hits) == 1:
             flag.add('unique_contig')

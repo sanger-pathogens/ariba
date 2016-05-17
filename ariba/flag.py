@@ -5,7 +5,7 @@ flags_in_order = [
     'assembled',
     'assembled_into_one_contig',
     'region_assembled_twice',
-    'complete_orf',
+    'complete_gene',
     'unique_contig',
     'scaffold_graph_bad',
     'assembly_fail',

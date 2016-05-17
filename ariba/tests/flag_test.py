@@ -44,7 +44,7 @@ class TestFlag(unittest.TestCase):
             '[X] assembled',
             '[ ] assembled_into_one_contig',
             '[X] region_assembled_twice',
-            '[X] complete_orf',
+            '[X] complete_gene',
             '[ ] unique_contig',
             '[ ] scaffold_graph_bad',
             '[ ] assembly_fail',
