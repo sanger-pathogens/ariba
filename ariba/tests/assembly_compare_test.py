@@ -221,6 +221,7 @@ class TestAssemblyCompare(unittest.TestCase):
             ('AATGTTTAAA', 7, 6, 1),
             ('AATGTTTAAA', 7, 7, 1),
             ('AGTGTTTAAA', 7, 7, None),
+            ('AATGTAGAAA', 7, 7, None),
         ]
 
         for seq, start_coord, max_nt_to_extend, expected in tests:
