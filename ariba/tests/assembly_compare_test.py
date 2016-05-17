@@ -332,31 +332,6 @@ class TestAssemblyCompare(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_ref_covered_by_complete_contig_with_orf(self):
-        '''test _ref_covered_by_complete_contig_with_orf'''
-        gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
-        gene_no_orf = pyfastaq.sequences.Fasta('gene', 'GATTGAGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
-        hit1 = ['1', '39', '1', '39', '39', '39', '100.00', '39', '39', '1', '1', 'gene', 'contig1']
-        hit2 = ['1', '20', '1', '20', '20', '20', '100.00', '39', '39', '1', '1', 'gene', 'contig1']
-        hit3 = ['21', '39', '21', '39', '19', '19', '100.00', '39', '39', '1', '1', 'gene', 'contig2']
-        nucmer_hits = [
-            {'contig1': [pymummer.alignment.Alignment('\t'.join(hit1))]},
-            {'contig1': [pymummer.alignment.Alignment('\t'.join(hit1))]},
-            {'contig2': [pymummer.alignment.Alignment('\t'.join(hit2))]},
-            {'contig2': [pymummer.alignment.Alignment('\t'.join(hit2)), pymummer.alignment.Alignment('\t'.join(hit3))]},
-        ]
-        expected = [True, False, False, False]
-        assemblies = [
-            {'contig1': gene},
-            {'contig1': gene_no_orf},
-            {'contig1': gene},
-            {'contig1': gene, 'contig2': pyfastaq.sequences.Fasta('contig2', 'ACGT')}
-        ]
-        assert len(expected) == len(nucmer_hits) == len(assemblies)
-        for i in range(len(expected)):
-            self.assertEqual(expected[i], assembly_compare.AssemblyCompare._ref_covered_by_complete_contig_with_orf(nucmer_hits[i], assemblies[i]))
-
-
     def test_ref_covered_by_at_least_one_full_length_contig(self):
         '''test _ref_covered_by_at_least_one_full_length_contig'''
         ref = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
@@ -372,6 +347,7 @@ class TestAssemblyCompare(unittest.TestCase):
         assert len(expected) == len(nucmer_hits)
         for i in range(len(expected)):
             self.assertEqual(expected[i], assembly_compare.AssemblyCompare._ref_covered_by_at_least_one_full_length_contig(nucmer_hits[i], 0.95))
+
 
     def test_nucmer_hit_containing_reference_position(self):
         '''test nucmer_hit_containing_reference_position'''

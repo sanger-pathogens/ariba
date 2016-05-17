@@ -309,33 +309,6 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def _ref_covered_by_complete_contig_with_orf(nucmer_hits, contigs):
-        '''Returns true iff there is a contig that covers the entire reference,
-           and that contig has a complete open reading frame.
-           nucmer_hits = hits made by self._parse_nucmer_coords_file.'''
-        for l in nucmer_hits.values():
-            for hit in l:
-                if hit.hit_length_ref == hit.ref_length:
-                    start = min(hit.qry_start, hit.qry_end)
-                    end = max(hit.qry_start, hit.qry_end)
-                    assembled_gene = pyfastaq.sequences.Fasta('x', contigs[hit.qry_name][start:end+1])
-                    if (hit.ref_start < hit.ref_end) != (hit.qry_start < hit.qry_end):
-                        assembled_gene.revcomp()
-                    orfs = assembled_gene.orfs()
-                    if len(orfs) == 0:
-                        continue
-
-                    max_orf = orfs[0]
-                    for o in orfs:
-                        if len(o) > len(max_orf):
-                            max_orf = o
-
-                    if len(max_orf) == len(assembled_gene):
-                        return True
-        return False
-
-
-    @staticmethod
     def _ref_covered_by_at_least_one_full_length_contig(nucmer_hits, threshold):
         '''Returns true iff there exists a contig that completely
            covers the reference sequence
