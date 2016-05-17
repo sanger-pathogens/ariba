@@ -298,6 +298,15 @@ class AssemblyCompare:
 
 
     @staticmethod
+    def _get_ref_gene(nucmer_hits, contigs, max_end_nt_extend):
+        longest_match = AssemblyCompare._longest_nucmer_hit_in_ref(nucmer_hits)
+        if longest_match is None:
+            return None, 'NO_MATCH', None, None
+        else:
+            return AssemblyCompare._gene_from_nucmer_match(longest_match, contigs[longest_match.qry_name], max_end_nt_extend)
+
+
+    @staticmethod
     def _ref_covered_by_complete_contig_with_orf(nucmer_hits, contigs):
         '''Returns true iff there is a contig that covers the entire reference,
            and that contig has a complete open reading frame.

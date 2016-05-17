@@ -314,6 +314,24 @@ class TestAssemblyCompare(unittest.TestCase):
             self.assertEqual(expected, got)
 
 
+    def test_get_ref_gene(self):
+        '''test _get_ref_gene'''
+        hit1 = ['2', '15', '3', '14', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig']
+        hit2 = ['2', '7', '3', '8', '6', '6', '100.00', '20', '20', '1', '1', 'ref', 'contig2']
+        contigs = {
+            'contig': pyfastaq.sequences.Fasta('contig', 'AATGAAATTTCCCTAGATAT'),
+            'contig2': pyfastaq.sequences.Fasta('contig2', 'AATGAAATTTCCCTAGATAT')
+        }
+        nucmer_hits = {
+            'contig': [pymummer.alignment.Alignment('\t'.join(hit1))],
+            'contig2': [pymummer.alignment.Alignment('\t'.join(hit2))],
+        }
+
+        got = assembly_compare.AssemblyCompare._get_ref_gene(nucmer_hits, contigs, 10)
+        expected = (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 1, 2)
+        self.assertEqual(expected, got)
+
+
     def test_ref_covered_by_complete_contig_with_orf(self):
         '''test _ref_covered_by_complete_contig_with_orf'''
         gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
