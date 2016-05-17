@@ -233,13 +233,15 @@ class TestAssemblyCompare(unittest.TestCase):
     def test_find_next_stop_codon(self):
         '''test _find_next_stop_codon'''
         tests = [
-            ('ATGTTTAGA', 5, 0, 5),
-            ('ATGTTTAGA', 2, 0, None),
-            ('ATGTTTAGA', 2, 1, None),
-            ('ATGTTTAGA', 2, 2, None),
-            ('ATGTTTAGA', 2, 3, 5),
-            ('ATGTTTAGA', 2, 4, 5),
+            ('ATGTTTAGA', 2, 5, None),
+            ('ATGTTTAGA', 2, 6, None),
+            ('ATGTTTAGA', 2, 7, 5),
             ('ATGTTTGGA', 2, 4, None),
+            ('ATGTTTAGA', 5, 6, None),
+            ('ATGTTTAGA', 5, 7, 5),
+            ('ATGTTTGGA', 5, 7, None),
+            ('ATGTTTAGA', 4, 7, None),
+            ('ATGTTTAGA', 3, 7, None),
         ]
 
         for seq, end_coord, max_nt_to_extend, expected in tests:
