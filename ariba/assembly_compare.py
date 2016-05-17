@@ -238,6 +238,18 @@ class AssemblyCompare:
         return None
 
 
+    @classmethod
+    def _find_next_stop_codon(cls, sequence, end_coord, max_nt_to_extend):
+        final_i = min(len(sequence) - 3, end_coord + max_nt_to_extend)
+        for i in range(end_coord, final_i + 1, 3):
+            codon = pyfastaq.sequences.Fasta('x', sequence[i:i+3])
+            aa = codon.translate()
+            if aa.seq == '*':
+                return i
+
+        return None
+
+
     @staticmethod
     def _ref_covered_by_complete_contig_with_orf(nucmer_hits, contigs):
         '''Returns true iff there is a contig that covers the entire reference,

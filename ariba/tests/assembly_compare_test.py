@@ -229,6 +229,24 @@ class TestAssemblyCompare(unittest.TestCase):
             self.assertEqual(expected, got)
 
 
+    def test_find_next_stop_codon(self):
+        '''test _find_next_stop_codon'''
+        tests = [
+            ('ATGTTTAGA', 5, 0, 5),
+            ('ATGTTTAGA', 2, 0, None),
+            ('ATGTTTAGA', 2, 1, None),
+            ('ATGTTTAGA', 2, 2, None),
+            ('ATGTTTAGA', 2, 3, 5),
+            ('ATGTTTAGA', 2, 4, 5),
+            ('ATGTTTGGA', 2, 4, None),
+        ]
+
+        for seq, end_coord, max_nt_to_extend, expected in tests:
+            fa = pyfastaq.sequences.Fasta('x', seq)
+            got = assembly_compare.AssemblyCompare._find_next_stop_codon(fa, end_coord, max_nt_to_extend)
+            self.assertEqual(expected, got)
+
+
     def test_ref_covered_by_complete_contig_with_orf(self):
         '''test _ref_covered_by_complete_contig_with_orf'''
         gene = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
