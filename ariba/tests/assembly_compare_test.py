@@ -360,16 +360,18 @@ class TestAssemblyCompare(unittest.TestCase):
     def test_ref_covered_by_at_least_one_full_length_contig(self):
         '''test _ref_covered_by_at_least_one_full_length_contig'''
         ref = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
-        hit1 = ['1', '39', '1', '39', '39', '39', '100.00', '39', '39', '1', '1', 'ref', 'contig1']
-        hit2 = ['1', '20', '1', '20', '20', '20', '100.00', '39', '39', '1', '1', 'ref', 'contig1']
-        nucmer_hits = [
-            {'contig1': [pymummer.alignment.Alignment('\t'.join(hit1))]},
-            {'contig1': [pymummer.alignment.Alignment('\t'.join(hit2))]},
+        hits = [
+            ['1', '100', '1', '100', '100', '100', '100.00', '100', '100', '1', '1', 'ref', 'contig1'],
+            ['1', '99', '1', '99', '99', '99', '100.00', '100', '100', '1', '1', 'ref', 'contig1'],
+            ['1', '96', '1', '96', '96', '96', '100.00', '100', '100', '1', '1', 'ref', 'contig1'],
+            ['1', '95', '1', '95', '95', '95', '100.00', '100', '100', '1', '1', 'ref', 'contig1'],
+            ['1', '94', '1', '94', '94', '94', '100.00', '100', '100', '1', '1', 'ref', 'contig1'],
         ]
-        expected = [True, False]
+        nucmer_hits = [{'contig1': [pymummer.alignment.Alignment('\t'.join(hit))]} for hit in hits]
+        expected = [True, True, True, True, False]
         assert len(expected) == len(nucmer_hits)
         for i in range(len(expected)):
-            self.assertEqual(expected[i], assembly_compare.AssemblyCompare._ref_covered_by_at_least_one_full_length_contig(nucmer_hits[i]))
+            self.assertEqual(expected[i], assembly_compare.AssemblyCompare._ref_covered_by_at_least_one_full_length_contig(nucmer_hits[i], 0.95))
 
     def test_nucmer_hit_containing_reference_position(self):
         '''test nucmer_hit_containing_reference_position'''

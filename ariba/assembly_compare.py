@@ -334,13 +334,13 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def _ref_covered_by_at_least_one_full_length_contig(nucmer_hits):
+    def _ref_covered_by_at_least_one_full_length_contig(nucmer_hits, threshold):
         '''Returns true iff there exists a contig that completely
            covers the reference sequence
            nucmer_hits = hits made by self._parse_nucmer_coords_file.'''
         for l in nucmer_hits.values():
             for hit in l:
-                if len(hit.ref_coords()) == hit.ref_length:
+                if len(hit.ref_coords()) / hit.ref_length >= threshold:
                     return True
         return False
 
@@ -349,7 +349,7 @@ class AssemblyCompare:
         if self._whole_gene_covered_by_nucmer_hits(self.nucmer_hits, self.ref_sequence, self.assembled_threshold):
             flag.add('assembled')
 
-        if self._ref_covered_by_at_least_one_full_length_contig(self.nucmer_hits):
+        if self._ref_covered_by_at_least_one_full_length_contig(self.nucmer_hits, self.assembled_threshold):
             flag.add('assembled_into_one_contig')
 
         if self._ref_has_region_assembled_twice(self.nucmer_hits, self.ref_sequence, self.unique_threshold):
