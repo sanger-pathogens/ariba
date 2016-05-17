@@ -194,3 +194,32 @@ class TestClusters(unittest.TestCase):
         expected = os.path.join(data_dir, 'clusters_test_write_catted_assembled_genes_fasta.expected.out.fa')
         self.assertTrue(filecmp.cmp(expected, tmp_file, shallow=False))
         os.unlink(tmp_file)
+
+
+    def test_write_catted_genes_matching_refs_fasta(self):
+        '''test _write_catted_genes_matching_refs_fasta'''
+        seq1 = pyfastaq.sequences.Fasta('seq1', 'ACGT')
+        seq3 = pyfastaq.sequences.Fasta('seq3', 'AAAA')
+        class FakeAssemblyCompare:
+            def __init__(self, seq, seq_type, start, end):
+                self.gene_matching_ref = seq
+                self.gene_matching_ref_type = seq_type
+                self.gene_start_bases_added = start
+                self.gene_end_bases_added = end
+
+        class FakeCluster:
+            def __init__(self, seq, seq_type, start, end):
+                self.assembly_compare = FakeAssemblyCompare(seq, seq_type, start, end)
+
+        self.clusters.clusters = {
+            'gene1': FakeCluster(seq1, 'TYPE1', 1, 3),
+            'gene2': FakeCluster(None, None, None, None),
+            'gene3': FakeCluster(seq3, 'TYPE3', 4, 5),
+        }
+
+        tmp_file = 'tmp.test_write_catted_genes_matching_refs_fasta.fa'
+        self.clusters._write_catted_genes_matching_refs_fasta(tmp_file)
+        expected = os.path.join(data_dir, 'clusters_test_write_catted_genes_matching_refs_fasta.expected.out.fa')
+        self.assertTrue(filecmp.cmp(expected, tmp_file, shallow=False))
+        os.unlink(tmp_file)
+
