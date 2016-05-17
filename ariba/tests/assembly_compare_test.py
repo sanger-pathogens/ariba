@@ -314,8 +314,8 @@ class TestAssemblyCompare(unittest.TestCase):
             self.assertEqual(expected, got)
 
 
-    def test_get_ref_gene(self):
-        '''test _get_ref_gene'''
+    def test_get_gene_matching_ref(self):
+        '''test _get_gene_matching_ref'''
         hit1 = ['2', '15', '3', '14', '11', '11', '100.00', '20', '20', '1', '1', 'ref', 'contig']
         hit2 = ['2', '7', '3', '8', '6', '6', '100.00', '20', '20', '1', '1', 'ref', 'contig2']
         contigs = {
@@ -327,7 +327,7 @@ class TestAssemblyCompare(unittest.TestCase):
             'contig2': [pymummer.alignment.Alignment('\t'.join(hit2))],
         }
 
-        got = assembly_compare.AssemblyCompare._get_ref_gene(nucmer_hits, contigs, 10)
+        got = assembly_compare.AssemblyCompare._get_gene_matching_ref(nucmer_hits, contigs, 10)
         expected = (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 1, 2)
         self.assertEqual(expected, got)
 

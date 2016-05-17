@@ -298,7 +298,7 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def _get_ref_gene(nucmer_hits, contigs, max_end_nt_extend):
+    def _get_gene_matching_ref(nucmer_hits, contigs, max_end_nt_extend):
         longest_match = AssemblyCompare._longest_nucmer_hit_in_ref(nucmer_hits)
         if longest_match is None:
             return None, 'NO_MATCH', None, None
