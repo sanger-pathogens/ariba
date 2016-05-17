@@ -33,6 +33,10 @@ class AssemblyCompare:
         self.assembled_threshold = assembled_threshold
         self.unique_threshold = unique_threshold
         self.max_gene_nt_extend = max_gene_nt_extend
+        self.gene_matching_ref = None
+        self.gene_matching_ref_type = None
+        self.gene_start_bases_added = None
+        self.gene_end_bases_added = None
 
         self.nucmer_coords_file = self.outprefix + '.nucmer.coords'
         self.nucmer_snps_file = self.nucmer_coords_file + '.snps'
@@ -359,10 +363,5 @@ class AssemblyCompare:
         self.percent_identities = self._nucmer_hits_to_percent_identity(self.nucmer_hits)
         self.assembled_reference_sequences = self._get_assembled_reference_sequences(self.nucmer_hits, self.ref_sequence, self.assembly_sequences)
         ref_seq_type = self.refdata.sequence_type(self.ref_sequence.id)
-        if ref_seq_type == 'non_coding':
-            self.gene_matching_ref = None
-            self.gene_matching_ref_type = None
-            self.gene_start_bases_added = None
-            self.gene_end_bases_added = None
-        else:
+        if ref_seq_type != 'non_coding':
             self.gene_matching_ref, self.gene_matching_ref_type, self.gene_start_bases_added, self.gene_end_bases_added = self._get_gene_matching_ref(self.nucmer_hits, self.assembly_sequences, self.max_gene_nt_extend)
