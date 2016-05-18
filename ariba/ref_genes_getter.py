@@ -8,7 +8,7 @@ import pyfastaq
 import urllib.request
 import time
 import json
-from ariba import common, card_record
+from ariba import common, card_record, vfdb_parser
 
 
 class RefGenesGetter:
@@ -244,23 +244,21 @@ class RefGenesGetter:
 
         try:
             os.mkdir(tmpdir)
-            os.chdir(tmpdir)
         except:
-            raise Error('Error mkdir/chdir ' + tmpdir)
+            raise Error('Error mkdir ' + tmpdir)
 
-        zipfile = 'VFDB_setA_nt.fas.gz'
+        zipfile = os.path.join(tmpdir, 'VFDB_setA_nt.fas.gz')
         self._download_file('http://www.mgc.ac.cn/VFs/Down/VFDB_setA_nt.fas.gz', zipfile)
-        common.syscall('gunzip ' + zipfile)
-        os.chdir(current_dir)
-        print('Extracted files.')
-
-        final_fasta = outprefix + '_VFDB.fa'
-        shutil.move(tmpdir+'/VFDB_setA_nt.fas',final_fasta)
+        vparser = vfdb_parser.VfdbParser(zipfile, outprefix)
+        vparser.run()
         shutil.rmtree(tmpdir)
+        print('Extracted files.')
+        final_fasta = outprefix + '.presence_absence.fa'
+        final_tsv = outprefix + '.metadata.tsv'
 
-        print('Extracted core DNA sequence dataset. Final file is called', final_fasta, end='\n\n')
+        print('Extracted core DNA sequence dataset and metadata. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use it with ARIBA like this:')
-        print('ariba prepareref --presabs', final_fasta, 'output_directory\n')
+        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"VFDB 2016: hierarchical and refined dataset for big data analysis-10 years on",\nChen LH et al 2016, Nucleic Acids Res. 44(Database issue):D694-D697. PMID: 26578559\n')
 
