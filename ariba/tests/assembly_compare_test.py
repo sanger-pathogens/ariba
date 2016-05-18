@@ -175,7 +175,7 @@ class TestAssemblyCompare(unittest.TestCase):
         ]
         expected = [True, False, True]
         for i in range(len(nucmer_hits)):
-            got = assembly_compare.AssemblyCompare._whole_gene_covered_by_nucmer_hits(nucmer_hits[i], ref_seq, 0.95)
+            got = assembly_compare.AssemblyCompare._whole_gene_covered_by_nucmer_hits(nucmer_hits[i], ref_seq, 0.95, 0)
             self.assertEqual(expected[i], got)
 
 
@@ -346,7 +346,7 @@ class TestAssemblyCompare(unittest.TestCase):
         expected = [True, True, True, True, False]
         assert len(expected) == len(nucmer_hits)
         for i in range(len(expected)):
-            self.assertEqual(expected[i], assembly_compare.AssemblyCompare._ref_covered_by_at_least_one_full_length_contig(nucmer_hits[i], 0.95))
+            self.assertEqual(expected[i], assembly_compare.AssemblyCompare._ref_covered_by_at_least_one_full_length_contig(nucmer_hits[i], 0.95, 0))
 
 
     def test_nucmer_hit_containing_reference_position(self):

@@ -179,7 +179,7 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def _whole_gene_covered_by_nucmer_hits(nucmer_hits, ref_seq, threshold):
+    def _whole_gene_covered_by_nucmer_hits(nucmer_hits, ref_seq, percent_threshold, max_nt_extend):
         '''Returns true iff the reference sequence is covered by nucmer hits.
            nucmer_hits = hits made by self._parse_nucmer_coords_file.
            Counts as covered if (total ref bases covered) / len(ref_seq) >= threshold'''
@@ -188,7 +188,7 @@ class AssemblyCompare:
         for coords_list in coords.values():
             covered.extend(coords_list)
         pyfastaq.intervals.merge_overlapping_in_list(covered)
-        return pyfastaq.intervals.length_sum_from_list(covered) / len(ref_seq) >= threshold
+        return (2 * max_nt_extend + pyfastaq.intervals.length_sum_from_list(covered)) / len(ref_seq) >= percent_threshold
 
 
     @staticmethod
@@ -313,22 +313,22 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def _ref_covered_by_at_least_one_full_length_contig(nucmer_hits, threshold):
+    def _ref_covered_by_at_least_one_full_length_contig(nucmer_hits, percent_threshold, max_nt_extend):
         '''Returns true iff there exists a contig that completely
            covers the reference sequence
            nucmer_hits = hits made by self._parse_nucmer_coords_file.'''
         for l in nucmer_hits.values():
             for hit in l:
-                if len(hit.ref_coords()) / hit.ref_length >= threshold:
+                if ( (2 * max_nt_extend) + len(hit.ref_coords()) ) / hit.ref_length >= percent_threshold:
                     return True
         return False
 
 
     def update_flag(self, flag):
-        if self._whole_gene_covered_by_nucmer_hits(self.nucmer_hits, self.ref_sequence, self.assembled_threshold):
+        if self._whole_gene_covered_by_nucmer_hits(self.nucmer_hits, self.ref_sequence, self.assembled_threshold, self.max_gene_nt_extend):
             flag.add('assembled')
 
-        if self._ref_covered_by_at_least_one_full_length_contig(self.nucmer_hits, self.assembled_threshold):
+        if self.assembled_into_one_contig:
             flag.add('assembled_into_one_contig')
 
         if self._ref_has_region_assembled_twice(self.nucmer_hits, self.ref_sequence, self.unique_threshold):
@@ -363,5 +363,9 @@ class AssemblyCompare:
         self.percent_identities = self._nucmer_hits_to_percent_identity(self.nucmer_hits)
         self.assembled_reference_sequences = self._get_assembled_reference_sequences(self.nucmer_hits, self.ref_sequence, self.assembly_sequences)
         ref_seq_type = self.refdata.sequence_type(self.ref_sequence.id)
-        if ref_seq_type != 'non_coding':
-            self.gene_matching_ref, self.gene_matching_ref_type, self.gene_start_bases_added, self.gene_end_bases_added = self._get_gene_matching_ref(self.nucmer_hits, self.assembly_sequences, self.max_gene_nt_extend)
+        if self._ref_covered_by_at_least_one_full_length_contig(self.nucmer_hits, self.assembled_threshold, self.max_gene_nt_extend):
+            self.assembled_into_one_contig = True
+            if ref_seq_type != 'non_coding':
+                self.gene_matching_ref, self.gene_matching_ref_type, self.gene_start_bases_added, self.gene_end_bases_added = self._get_gene_matching_ref(self.nucmer_hits, self.assembly_sequences, self.max_gene_nt_extend)
+        else:
+            self.assembled_into_one_contig = False
