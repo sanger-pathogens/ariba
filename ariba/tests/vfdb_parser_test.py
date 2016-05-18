@@ -50,9 +50,11 @@ class TestVfdbParser(unittest.TestCase):
         expected_tsv = os.path.join(data_dir, 'vfdb_parser_test_run.out.tsv')
         expected_fa = os.path.join(data_dir, 'vfdb_parser_test_run.out.fa')
         outprefix = 'tmp.vfdb_parser_test_run'
+        got_tsv = outprefix + '.metadata.tsv'
+        got_fa = outprefix + '.presence_absence.fa'
         vp = vfdb_parser.VfdbParser(infile, outprefix)
         vp.run()
-        self.assertTrue(filecmp.cmp(expected_tsv, outprefix + '.tsv', shallow=False))
-        self.assertTrue(filecmp.cmp(expected_fa, outprefix + '.fa', shallow=False))
-        os.unlink(outprefix + '.tsv')
-        os.unlink(outprefix + '.fa')
+        self.assertTrue(filecmp.cmp(expected_tsv, got_tsv, shallow=False))
+        self.assertTrue(filecmp.cmp(expected_fa, got_fa, shallow=False))
+        os.unlink(got_tsv)
+        os.unlink(got_fa)

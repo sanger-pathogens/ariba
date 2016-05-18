@@ -32,8 +32,8 @@ class VfdbParser:
 
     def run(self):
         file_reader = pyfastaq.sequences.file_reader(self.infile)
-        fa_out = pyfastaq.utils.open_file_write(self.outprefix + '.fa')
-        tsv_out = pyfastaq.utils.open_file_write(self.outprefix + '.tsv')
+        fa_out = pyfastaq.utils.open_file_write(self.outprefix + '.presence_absence.fa')
+        tsv_out = pyfastaq.utils.open_file_write(self.outprefix + '.metadata.tsv')
 
         for seq in file_reader:
             seq.id, description = self._fa_header_to_name_and_metadata(seq.id)
