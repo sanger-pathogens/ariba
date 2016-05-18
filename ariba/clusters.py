@@ -451,7 +451,7 @@ class Clusters:
         f = pyfastaq.utils.open_file_write(outfile)
 
         for gene in sorted(self.clusters):
-            if self.clusters[gene].assembly_compare.gene_matching_ref is not None:
+            if self.clusters[gene].assembly_compare is not None and self.clusters[gene].assembly_compare.gene_matching_ref is not None:
                 seq = copy.copy(self.clusters[gene].assembly_compare.gene_matching_ref)
                 seq.id += '.' + '.'.join([
                     self.clusters[gene].assembly_compare.gene_matching_ref_type,

@@ -105,6 +105,7 @@ class Cluster:
         self.final_assembly_read_depths = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.read_depths.gz')
         self.final_assembly_vcf = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.vcf')
         self.samtools_vars_prefix = self.final_assembly_bam
+        self.assembly_compare = None
         self.assembly_compare_prefix = os.path.join(self.root_dir, 'assembly_compare')
 
         self.mummer_variants = {}
