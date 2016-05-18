@@ -38,6 +38,7 @@ __all__ = [
     'summary_sample',
     'tasks',
     'versions',
+    'vfdb_parser',
 ]
 
 from ariba import *
