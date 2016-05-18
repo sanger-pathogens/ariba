@@ -18,6 +18,7 @@ class AssemblyCompare:
       nucmer_breaklen=200,
       assembled_threshold=0.95,
       unique_threshold=0.03,
+      max_gene_nt_extend=30,
     ):
         self.assembly_fa = os.path.abspath(assembly_fa)
         self.assembly_sequences = assembly_sequences
@@ -31,6 +32,11 @@ class AssemblyCompare:
         self.nucmer_breaklen = nucmer_breaklen
         self.assembled_threshold = assembled_threshold
         self.unique_threshold = unique_threshold
+        self.max_gene_nt_extend = max_gene_nt_extend
+        self.gene_matching_ref = None
+        self.gene_matching_ref_type = None
+        self.gene_start_bases_added = None
+        self.gene_end_bases_added = None
 
         self.nucmer_coords_file = self.outprefix + '.nucmer.coords'
         self.nucmer_snps_file = self.nucmer_coords_file + '.snps'
@@ -173,7 +179,7 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def _whole_gene_covered_by_nucmer_hits(nucmer_hits, ref_seq, threshold):
+    def _whole_gene_covered_by_nucmer_hits(nucmer_hits, ref_seq, percent_threshold, max_nt_extend):
         '''Returns true iff the reference sequence is covered by nucmer hits.
            nucmer_hits = hits made by self._parse_nucmer_coords_file.
            Counts as covered if (total ref bases covered) / len(ref_seq) >= threshold'''
@@ -182,7 +188,7 @@ class AssemblyCompare:
         for coords_list in coords.values():
             covered.extend(coords_list)
         pyfastaq.intervals.merge_overlapping_in_list(covered)
-        return pyfastaq.intervals.length_sum_from_list(covered) / len(ref_seq) >= threshold
+        return (2 * max_nt_extend + pyfastaq.intervals.length_sum_from_list(covered)) / len(ref_seq) >= percent_threshold
 
 
     @staticmethod
@@ -210,58 +216,127 @@ class AssemblyCompare:
         return bases_depth_at_least_two / len(ref_seq) >= threshold
 
 
-    @staticmethod
-    def _ref_covered_by_complete_contig_with_orf(nucmer_hits, contigs):
-        '''Returns true iff there is a contig that covers the entire reference,
-           and that contig has a complete open reading frame.
-           nucmer_hits = hits made by self._parse_nucmer_coords_file.'''
+    @classmethod
+    def _longest_nucmer_hit_in_ref(cls, nucmer_hits):
+        max_length = None
+        max_hit = None
+
         for l in nucmer_hits.values():
             for hit in l:
-                if hit.hit_length_ref == hit.ref_length:
-                    start = min(hit.qry_start, hit.qry_end)
-                    end = max(hit.qry_start, hit.qry_end)
-                    assembled_gene = pyfastaq.sequences.Fasta('x', contigs[hit.qry_name][start:end+1])
-                    if (hit.ref_start < hit.ref_end) != (hit.qry_start < hit.qry_end):
-                        assembled_gene.revcomp()
-                    orfs = assembled_gene.orfs()
-                    if len(orfs) == 0:
-                        continue
+                if max_length is None or hit.hit_length_ref > max_length:
+                    max_length = hit.hit_length_ref
+                    max_hit = hit
 
-                    max_orf = orfs[0]
-                    for o in orfs:
-                        if len(o) > len(max_orf):
-                            max_orf = o
+        return max_hit
 
-                    if len(max_orf) == len(assembled_gene):
-                        return True
-        return False
+
+    @classmethod
+    def _find_previous_start_codon(cls, sequence, start_coord, min_start_coord):
+        for i in range(start_coord, min_start_coord - 1, -3):
+            codon = pyfastaq.sequences.Fasta('x', sequence[i:i+3])
+            aa = codon.translate()
+            if aa.seq == '*':
+                return None
+            elif codon.seq in pyfastaq.genetic_codes.starts[pyfastaq.sequences.genetic_code]:
+                return i
+
+        return None
+
+
+    @classmethod
+    def _find_next_stop_codon(cls, sequence, end_coord, max_end_coord):
+        final_i = min(len(sequence) - 3, max_end_coord - 2)
+        for i in range(end_coord, final_i + 1, 3):
+            codon = pyfastaq.sequences.Fasta('x', sequence[i:i+3])
+            aa = codon.translate()
+            if aa.seq == '*':
+                return i
+
+        return None
+
+
+    @classmethod
+    def _gene_from_nucmer_match(cls, nucmer_match, contig, max_end_nt_extend):
+        if nucmer_match.on_same_strand():
+            revcomp = False
+        else:
+            revcomp = True
+            nucmer_match = copy.copy(nucmer_match)
+            nucmer_match.reverse_query()
+            contig = copy.copy(contig)
+            contig.revcomp()
+
+        ref_hit_start = min(nucmer_match.ref_start, nucmer_match.ref_end)
+        contig_hit_start = min(nucmer_match.qry_start, nucmer_match.qry_end)
+        min_allowed_start = max(0, contig_hit_start - max_end_nt_extend)
+        if ref_hit_start % 3 != 0:
+            contig_hit_start += 3 - (ref_hit_start % 3)
+        contig_hit_end = max(nucmer_match.qry_start, nucmer_match.qry_end)
+        max_allowed_end = min(len(contig) - 1, contig_hit_end + max_end_nt_extend)
+        contig_hit_end -= (contig_hit_end - contig_hit_start + 1) % 3
+        assert contig_hit_start < contig_hit_end
+        gene_nt_name = nucmer_match.qry_name + '.' + str(contig_hit_start + 1) + '-' + str(contig_hit_end + 1)
+
+        gene_nt = pyfastaq.sequences.Fasta(gene_nt_name, contig[contig_hit_start:contig_hit_end+1])
+        assert len(gene_nt) % 3 == 0
+        gene_aa = gene_nt.translate()
+        if '*' in gene_aa[:-1]:
+            return gene_nt, 'HAS_STOP', None, None
+
+        extended_start_position = AssemblyCompare._find_previous_start_codon(contig, contig_hit_start, min_allowed_start)
+        extended_end_position = AssemblyCompare._find_next_stop_codon(contig, contig_hit_end - 2, max_allowed_end)
+        start = extended_start_position if extended_start_position is not None else contig_hit_start
+        end = extended_end_position + 2 if extended_end_position is not None else contig_hit_end
+
+        if revcomp:
+            gene_nt_name = nucmer_match.qry_name + '.' + str(end + 1) + '-' + str(start + 1)
+        else:
+            gene_nt_name = nucmer_match.qry_name + '.' + str(start + 1) + '-' + str(end + 1)
+
+        gene_nt = pyfastaq.sequences.Fasta(gene_nt_name, contig[start:end+1])
+        start_nt_added = None if extended_start_position is None else min(nucmer_match.qry_start, nucmer_match.qry_end) - start
+        end_nt_added = None if extended_end_position is None else end - max(nucmer_match.qry_start, nucmer_match.qry_end)
+
+        if None in [extended_start_position, extended_end_position]:
+            return gene_nt, 'START_OR_END_FAIL', start_nt_added, end_nt_added
+        else:
+            return gene_nt, 'GENE_FOUND', start_nt_added, end_nt_added
 
 
     @staticmethod
-    def _ref_covered_by_at_least_one_full_length_contig(nucmer_hits):
+    def _get_gene_matching_ref(nucmer_hits, contigs, max_end_nt_extend):
+        longest_match = AssemblyCompare._longest_nucmer_hit_in_ref(nucmer_hits)
+        if longest_match is None:
+            return None, 'NO_MATCH', None, None
+        else:
+            return AssemblyCompare._gene_from_nucmer_match(longest_match, contigs[longest_match.qry_name], max_end_nt_extend)
+
+
+    @staticmethod
+    def _ref_covered_by_at_least_one_full_length_contig(nucmer_hits, percent_threshold, max_nt_extend):
         '''Returns true iff there exists a contig that completely
            covers the reference sequence
            nucmer_hits = hits made by self._parse_nucmer_coords_file.'''
         for l in nucmer_hits.values():
             for hit in l:
-                if len(hit.ref_coords()) == hit.ref_length:
+                if ( (2 * max_nt_extend) + len(hit.ref_coords()) ) / hit.ref_length >= percent_threshold:
                     return True
         return False
 
 
     def update_flag(self, flag):
-        if self._whole_gene_covered_by_nucmer_hits(self.nucmer_hits, self.ref_sequence, self.assembled_threshold):
+        if self._whole_gene_covered_by_nucmer_hits(self.nucmer_hits, self.ref_sequence, self.assembled_threshold, self.max_gene_nt_extend):
             flag.add('assembled')
 
-        if self._ref_covered_by_at_least_one_full_length_contig(self.nucmer_hits):
+        if self.assembled_into_one_contig:
             flag.add('assembled_into_one_contig')
 
         if self._ref_has_region_assembled_twice(self.nucmer_hits, self.ref_sequence, self.unique_threshold):
             flag.add('region_assembled_twice')
 
         ref_seq_type = self.refdata.sequence_type(self.ref_sequence.id)
-        if ref_seq_type != 'non_coding' and self._ref_covered_by_complete_contig_with_orf(self.nucmer_hits, self.assembly_sequences):
-            flag.add('complete_orf')
+        if ref_seq_type != 'non_coding' and self.gene_matching_ref_type == 'GENE_FOUND':
+            flag.add('complete_gene')
 
         if len(self.nucmer_hits) == 1:
             flag.add('unique_contig')
@@ -287,3 +362,10 @@ class AssemblyCompare:
         self.nucmer_hits = self._parse_nucmer_coords_file(self.nucmer_coords_file, self.ref_sequence.id)
         self.percent_identities = self._nucmer_hits_to_percent_identity(self.nucmer_hits)
         self.assembled_reference_sequences = self._get_assembled_reference_sequences(self.nucmer_hits, self.ref_sequence, self.assembly_sequences)
+        ref_seq_type = self.refdata.sequence_type(self.ref_sequence.id)
+        if self._ref_covered_by_at_least_one_full_length_contig(self.nucmer_hits, self.assembled_threshold, self.max_gene_nt_extend):
+            self.assembled_into_one_contig = True
+            if ref_seq_type != 'non_coding':
+                self.gene_matching_ref, self.gene_matching_ref_type, self.gene_start_bases_added, self.gene_end_bases_added = self._get_gene_matching_ref(self.nucmer_hits, self.assembly_sequences, self.max_gene_nt_extend)
+        else:
+            self.assembled_into_one_contig = False

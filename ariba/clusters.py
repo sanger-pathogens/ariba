@@ -66,6 +66,7 @@ class Clusters:
       nucmer_breaklen=200,
       assembled_threshold=0.95,
       unique_threshold=0.03,
+      max_gene_nt_extend=30,
       bowtie2_preset='very-sensitive-local',
       clean=True,
       tmp_dir=None,
@@ -99,6 +100,7 @@ class Clusters:
         self.report_file_all_xls = os.path.join(self.outdir, 'report.all.xls')
         self.report_file_filtered_prefix = os.path.join(self.outdir, 'report')
         self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa.gz')
+        self.catted_genes_matching_refs_fasta = os.path.join(self.outdir, 'assembled_genes.fa.gz')
         self.threads = threads
         self.verbose = verbose
 
@@ -118,6 +120,7 @@ class Clusters:
 
         self.assembled_threshold = assembled_threshold
         self.unique_threshold = unique_threshold
+        self.max_gene_nt_extend = max_gene_nt_extend
 
         self.cluster_to_dir = {}  # gene name -> abs path of cluster directory
         self.clusters = {}        # gene name -> Cluster object
@@ -379,6 +382,7 @@ class Clusters:
                     bcf_min_qual=20,          # let the user change this in a future version?
                     assembled_threshold=self.assembled_threshold,
                     unique_threshold=self.unique_threshold,
+                    max_gene_nt_extend=self.max_gene_nt_extend,
                     bowtie2_preset=self.bowtie2_preset,
                     spades_other_options=self.spades_other,
                     clean=self.clean,
@@ -439,6 +443,22 @@ class Clusters:
 
             for seq_name in sorted(seq_dict):
                 print(seq_dict[seq_name], file=f)
+
+        pyfastaq.utils.close(f)
+
+
+    def _write_catted_genes_matching_refs_fasta(self, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
+
+        for gene in sorted(self.clusters):
+            if self.clusters[gene].assembly_compare.gene_matching_ref is not None:
+                seq = copy.copy(self.clusters[gene].assembly_compare.gene_matching_ref)
+                seq.id += '.' + '.'.join([
+                    self.clusters[gene].assembly_compare.gene_matching_ref_type,
+                    str(self.clusters[gene].assembly_compare.gene_start_bases_added),
+                    str(self.clusters[gene].assembly_compare.gene_end_bases_added)
+                ])
+                print(seq, file=f)
 
         pyfastaq.utils.close(f)
 
@@ -540,8 +560,9 @@ class Clusters:
         if self.verbose:
             print()
             print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
-            print(self.catted_assembled_seqs_fasta)
+            print(self.catted_assembled_seqs_fasta, 'and', self.catted_genes_matching_refs_fasta, flush=True)
         self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
+        self._write_catted_genes_matching_refs_fasta(self.catted_genes_matching_refs_fasta)
 
         clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
         if self.verbose:

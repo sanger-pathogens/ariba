@@ -93,15 +93,15 @@ class SummaryCluster:
             return 'no'
 
         if self.data[0]['ref_type'] == 'non_coding':
-            has_complete_orf = True
+            has_complete_gene = True
         else:
-            has_complete_orf = self.flag.has('complete_orf')
+            has_complete_gene = self.flag.has('complete_gene')
 
         if self.flag.has('assembly_fail') or \
           (not self.flag.has('assembled')) or \
           self.flag.has('ref_seq_choose_fail'):
             return 'no'
-        elif self.flag.has('assembled_into_one_contig') and has_complete_orf:
+        elif self.flag.has('assembled_into_one_contig') and has_complete_gene:
             if self.flag.has('unique_contig') and \
               (not self.flag.has('scaffold_graph_bad')) and \
               (not self.flag.has('variants_suggest_collapsed_repeat')) and \
