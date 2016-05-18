@@ -41,6 +41,7 @@ class Cluster:
       bcf_min_qual=20,
       assembled_threshold=0.95,
       unique_threshold=0.03,
+      max_gene_nt_extend=30,
       bowtie2_preset='very-sensitive-local',
       spades_other_options=None,
       clean=True,
@@ -94,6 +95,7 @@ class Cluster:
         self.threads = threads
         self.assembled_threshold = assembled_threshold
         self.unique_threshold = unique_threshold
+        self.max_gene_nt_extend = max_gene_nt_extend
         self.status_flag = flag.Flag()
         self.clean = clean
 
@@ -383,6 +385,7 @@ class Cluster:
               nucmer_breaklen=self.nucmer_breaklen,
               assembled_threshold=self.assembled_threshold,
               unique_threshold=self.unique_threshold,
+              max_gene_nt_extend=self.max_gene_nt_extend,
             )
             self.assembly_compare.run()
             self.status_flag = self.assembly_compare.update_flag(self.status_flag)

@@ -66,6 +66,7 @@ class Clusters:
       nucmer_breaklen=200,
       assembled_threshold=0.95,
       unique_threshold=0.03,
+      max_gene_nt_extend=30,
       bowtie2_preset='very-sensitive-local',
       clean=True,
       tmp_dir=None,
@@ -119,6 +120,7 @@ class Clusters:
 
         self.assembled_threshold = assembled_threshold
         self.unique_threshold = unique_threshold
+        self.max_gene_nt_extend = max_gene_nt_extend
 
         self.cluster_to_dir = {}  # gene name -> abs path of cluster directory
         self.clusters = {}        # gene name -> Cluster object
@@ -380,6 +382,7 @@ class Clusters:
                     bcf_min_qual=20,          # let the user change this in a future version?
                     assembled_threshold=self.assembled_threshold,
                     unique_threshold=self.unique_threshold,
+                    max_gene_nt_extend=self.max_gene_nt_extend,
                     bowtie2_preset=self.bowtie2_preset,
                     spades_other_options=self.spades_other,
                     clean=self.clean,
