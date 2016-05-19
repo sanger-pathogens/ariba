@@ -265,15 +265,18 @@ class Summary:
         if len(lines[0]) < 2:
             raise Error('Cannot calculate distance matrix to make tree for phandango. Not enough columns')
 
+        scores = [[0 for i in range(len(lines))] for j in range(len(lines))]
+
+        for i in range(len(lines)):
+            for j in range(i + 1, len(lines), 1):
+                scores[i][j] = Summary._distance_score_between_lists(lines[i], lines[j])
+                scores[j][i] = scores[i][j]
+
         with open(outfile, 'w') as f:
             sample_names = [x[0] for x in lines]
             print(*sample_names, sep='\t', file=f)
-
-            for i in range(len(lines)):
-                scores = []
-                for j in range(1, len(lines)):
-                    scores.append(Summary._distance_score_between_lists(lines[i], lines[j]))
-                print(lines[i][0], *scores, sep='\t', file=f)
+            for i in range(len(scores)):
+                print(lines[i][0], *scores[i][1:], sep='\t', file=f)
 
 
     @classmethod
