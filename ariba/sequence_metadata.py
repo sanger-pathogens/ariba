@@ -6,7 +6,7 @@ class Error (Exception): pass
 class SequenceMetadata:
     def __init__(self, line):
         try:
-            self.name, variant_type, variant_string, *extra_columns = line.rstrip().split('\t')
+            self.name, variant_type, variant_string, identifier, *extra_columns = line.rstrip().split('\t')
         except:
             raise Error('Error parsing line of file:\n' + line)
 
@@ -22,7 +22,7 @@ class SequenceMetadata:
         if self.variant_type == '.':
             self.variant = None
         else:
-            self.variant = sequence_variant.Variant(self.variant_type, variant_string)
+            self.variant = sequence_variant.Variant(self.variant_type, variant_string, identifier)
 
 
     def __eq__(self, other):
@@ -42,11 +42,12 @@ class SequenceMetadata:
 
 
     def to_string(self, separator='\t'):
-        fields = [self.name, self.variant_type]
-        if self.variant is None:
-            fields.append('.')
-        else:
-            fields.append(str(self.variant))
+        fields = [
+            self.name,
+            self.variant_type,
+            '.' if self.variant is None else str(self.variant),
+            '.' if (self.variant is None or self.variant.identifier is None) else self.variant.identifier
+        ]
 
         if self.free_text:
             return separator.join(fields + [self.free_text])
