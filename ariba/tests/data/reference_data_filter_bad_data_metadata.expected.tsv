@@ -1,8 +1,8 @@
-non_coding_1	.	.	should be in output because this field is here
-non_coding_1	n	C5A	dna variant ok
-presence_absence_1	.	.	should be in output because this field is here
-presence_absence_2	n	T4G	dna variant ok
-presence_absence_3	p	R3S	amino acid variant ok
-variants_only_1	.	.	should be kept as a generic description of variants_only_1
-variants_only_1	p	S2T	amino acid variant ok
-variants_only_1	n	T4A	dna variant ok
+non_coding_1	.	.	.	should be in output because this field is here
+non_coding_1	n	C5A	id1	dna variant ok
+presence_absence_1	.	.	.	should be in output because this field is here
+presence_absence_2	n	T4G	id2	dna variant ok
+presence_absence_3	p	R3S	.	amino acid variant ok
+variants_only_1	.	.	.	should be kept as a generic description of variants_only_1
+variants_only_1	p	S2T	.	amino acid variant ok
+variants_only_1	n	T4A	.	dna variant ok

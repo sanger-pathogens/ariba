@@ -30,10 +30,10 @@ class TestReferenceData(unittest.TestCase):
         '''Test init with good input'''
         tsv_file = os.path.join(data_dir, 'reference_data_init.tsv')
         presence_absence_fa = os.path.join(data_dir, 'reference_data_init_presence_absence.fa')
-        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\tfree text')
-        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tA42T\tfree text2')
-        meta3 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\tconfers killer rabbit resistance')
-        meta4 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\tremoves tardigrade's space-living capability")
+        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\t.\tfree text')
+        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tA42T\t.\tfree text2')
+        meta3 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\t.\tconfers killer rabbit resistance')
+        meta4 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\t.\tremoves tardigrade's space-living capability")
 
         expected_metadata = {
             'gene1': {
