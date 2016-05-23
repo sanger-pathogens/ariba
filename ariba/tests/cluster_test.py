@@ -151,12 +151,12 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'noncoding1\tnon_coding\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t73\t73\tT\t19\t.\t19\tnoncoding1_n_A14T_ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t73\t73\tT\t19\t.\t19\tnoncoding1_n_A14T_._ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
             'noncoding1\tnon_coding\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tG61T\tSNP\t60\t60\tG\t120\t120\tT\t24\t.\t24\t.\tgeneric description of noncoding1',
             'noncoding1\tnon_coding\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\t.82C\tINS\t81\t81\t.\t142\t142\tC\t23\t.\t23\t.\tgeneric description of noncoding1',
             'noncoding1\tnon_coding\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tT108.\tDEL\t107\t107\tT\t167\t167\t.\t17\t.\t17\t.\tgeneric description of noncoding1',
-            'noncoding1\tnon_coding\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tA6G\t1\t.\t.\t6\t6\tG\t66\t66\tG\t19\t.\t19\tnoncoding1_n_A6G_variant in ref and reads so should report\tgeneric description of noncoding1',
-            'noncoding1\tnon_coding\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tG9T\t0\t.\t.\t9\t9\tG\t69\t69\tG\t19\t.\t19\tnoncoding1_n_G9T_wild type in ref and reads\tgeneric description of noncoding1'
+            'noncoding1\tnon_coding\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tA6G\t1\t.\t.\t6\t6\tG\t66\t66\tG\t19\t.\t19\tnoncoding1_n_A6G_._variant in ref and reads so should report\tgeneric description of noncoding1',
+            'noncoding1\tnon_coding\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tG9T\t0\t.\t.\t9\t9\tG\t69\t69\tG\t19\t.\t19\tnoncoding1_n_G9T_._wild type in ref and reads\tgeneric description of noncoding1'
         ]
 
         self.assertEqual(expected, c.report_lines)
@@ -177,12 +177,12 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t28\tC\t83\t83\tT\t22\t.\t22\tpresence_absence1_p_A10V_Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t28\tC\t83\t83\tT\t22\t.\t22\tpresence_absence1_p_A10V_._Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
             'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t0\t.\tp\t.\t0\t.\tSYN\t53\t53\tT\t108\t108\tC\t32\t.\t32\t.\tGeneric description of presence_absence1',
 
-            'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t62\t64\tC;G;C\t18;17;17\t.;.;.\t18;17;17\tpresence_absence1_p_R3S_Ref and assembly have wild type\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t62\t64\tC;G;C\t18;17;17\t.;.;.\t18;17;17\tpresence_absence1_p_R3S_._Ref and assembly have wild type\tGeneric description of presence_absence1',
 
-            'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tG;C;G\t68\t70\tG;C;G\t18;20;20\t.;.;.\t18;20;20\tpresence_absence1_p_I5A_Ref and reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tG;C;G\t68\t70\tG;C;G\t18;20;20\t.;.;.\t18;20;20\tpresence_absence1_p_I5A_._Ref and reads have variant so report\tGeneric description of presence_absence1',
         ]
 
         self.assertEqual(expected, c.report_lines)
@@ -202,7 +202,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
         c.run()
         expected = [
-            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t65\t67\tC;G;C\t18;18;19\t.;.;.\t18;18;19\tvariants_only1_p_R3S_Ref and assembly have wild type, so do not report\tGeneric description of variants_only1'
+            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t65\t67\tC;G;C\t18;18;19\t.;.;.\t18;18;19\tvariants_only1_p_R3S_._Ref and assembly have wild type, so do not report\tGeneric description of variants_only1'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -221,7 +221,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
         c.run()
         expected = [
-            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t65\t67\tC;G;C\t18;18;19\t.;.;.\t18;18;19\tvariants_only1_p_R3S_Ref and assembly have wild type, but always report anyway\tGeneric description of variants_only1'
+            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t65\t67\tC;G;C\t18;18;19\t.;.;.\t18;18;19\tvariants_only1_p_R3S_._Ref and assembly have wild type, but always report anyway\tGeneric description of variants_only1'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -241,8 +241,8 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t65\t67\tC;G;C\t18;18;19\t.;.;.\t18;18;19\tvariants_only1_p_R3S_Ref and assembly have wild type\tGeneric description of variants_only1',
-            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tG;C;G\t71\t73\tG;C;G\t17;17;17\t.;.;.\t17;17;17\tvariants_only1_p_I5A_Ref and reads have variant so report\tGeneric description of variants_only1',
+            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t65\t67\tC;G;C\t18;18;19\t.;.;.\t18;18;19\tvariants_only1_p_R3S_._Ref and assembly have wild type\tGeneric description of variants_only1',
+            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tG;C;G\t71\t73\tG;C;G\t17;17;17\t.;.;.\t17;17;17\tvariants_only1_p_I5A_._Ref and reads have variant so report\tGeneric description of variants_only1',
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
