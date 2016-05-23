@@ -7,6 +7,7 @@ except:
 
 
 __all__ = [
+    'aln_to_metadata',
     'assembly',
     'assembly_compare',
     'assembly_variants',
