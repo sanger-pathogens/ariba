@@ -7,12 +7,13 @@ class Error (Exception): pass
 allowed_variant_types = {'n', 'p'}
 
 class Variant:
-    def __init__(self, variant_type, variant_string):
+    def __init__(self, variant_type, variant_string, identifier):
         if variant_type not in allowed_variant_types:
             raise Error('Error! Variant type "' + variant_type + '" not recognised.\n' + \
                         'Must be one of:' + ', '.join(allowed_variant_types))
 
         self.variant_type = variant_type
+        self.identifier = None if identifier == '.' else identifier
 
 
         m = re.match('^([A-Z])([0-9]+)([A-Z])$', variant_string.upper())
