@@ -115,5 +115,16 @@ class AlnToMetadata:
         return True
 
 
+    @classmethod
+    def _check_variants_match_sequences(cls, unpadded_sequences, variants, seqs_are_coding, genetic_code=11):
+        pyfastaq.sequences.genetic_code = genetic_code
+        for seqname, variants in variants.items():
+            if seqname not in unpadded_sequences:
+                raise Error('Sequence name "' + seqname + '" given in variants file, but sequence not found')
+            for variant, description in variants:
+                if not variant.sanity_check_against_seq(unpadded_sequences[seqname], translate_seq=seqs_are_coding):
+                    raise Error('Variant "' + str(variant) + '" for sequence "' + seqname + '" does not match sequence. cannot continue')
+        return True
+
     def run(self, outprefix):
         pass

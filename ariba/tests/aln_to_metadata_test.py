@@ -165,3 +165,25 @@ class TestAlnToMetadata(unittest.TestCase):
             unpadded_sequences = aln_to_metadata.AlnToMetadata._make_unpadded_seqs(padded_sequences)
             with self.assertRaises(aln_to_metadata.Error):
                 aln_to_metadata.AlnToMetadata._check_sequences(padded_sequences, unpadded_sequences, True)
+
+
+    def test_check_variants_match_sequences(self):
+        '''test _check_variants_match_sequences'''
+        seqs = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'ATGCTTTAG'),
+            'seq2': pyfastaq.sequences.Fasta('seq2', 'ATGCTTCTTTAG'),
+            'seq3': pyfastaq.sequences.Fasta('seq3', 'ATG---TAG')
+        }
+
+        variants = {'seq1': [(sequence_variant.Variant('p', 'L2M', 'id1'), 'description1')]}
+        self.assertTrue(aln_to_metadata.AlnToMetadata._check_variants_match_sequences(seqs, variants, True))
+        variants = {'seq1': [(sequence_variant.Variant('p', 'M2L', 'id1'), 'description1')]}
+        self.assertTrue(aln_to_metadata.AlnToMetadata._check_variants_match_sequences(seqs, variants, True))
+
+        variants = {'seq1': [(sequence_variant.Variant('p', 'A2M', 'id1'), 'description1')]}
+        with self.assertRaises(aln_to_metadata.Error):
+            self.assertTrue(aln_to_metadata.AlnToMetadata._check_variants_match_sequences(seqs, variants, True))
+
+        variants = {'seq4': [(sequence_variant.Variant('p', 'A2M', 'id1'), 'description1')]}
+        with self.assertRaises(aln_to_metadata.Error):
+            self.assertTrue(aln_to_metadata.AlnToMetadata._check_variants_match_sequences(seqs, variants, True))
