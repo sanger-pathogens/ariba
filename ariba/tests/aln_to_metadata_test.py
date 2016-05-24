@@ -218,3 +218,34 @@ class TestAlnToMetadata(unittest.TestCase):
         variants['seq2'].append((sequence_variant.Variant('p', 'I3K', 'id1'), 'description3'))
         with self.assertRaises(aln_to_metadata.Error):
             self.assertTrue(aln_to_metadata.AlnToMetadata._variant_ids_are_unique(variants))
+
+
+    def test_unpadded_to_padded_nt_position(self):
+        '''test _unpadded_to_padded_nt_position'''
+        ivl = pyfastaq.intervals.Interval
+
+        tests = [
+            (0, [], 0),
+            (1, [], 1),
+            (2, [], 2),
+            (0, [ivl(3, 5)], 0),
+            (1, [ivl(3, 5)], 1),
+            (2, [ivl(3, 5)], 2),
+            (3, [ivl(3, 5)], 6),
+            (4, [ivl(3, 5)], 7),
+            (5, [ivl(3, 5)], 8),
+            (0, [ivl(3, 5), ivl(9,14)], 0),
+            (1, [ivl(3, 5), ivl(9,14)], 1),
+            (2, [ivl(3, 5), ivl(9,14)], 2),
+            (3, [ivl(3, 5), ivl(9,14)], 6),
+            (4, [ivl(3, 5), ivl(9,14)], 7),
+            (5, [ivl(3, 5), ivl(9,14)], 8),
+            (6, [ivl(3, 5), ivl(9,14)], 15),
+            (7, [ivl(3, 5), ivl(9,14)], 16),
+            (8, [ivl(3, 5), ivl(9,14)], 17),
+        ]
+
+        for position, insertions, expected in tests:
+            got = aln_to_metadata.AlnToMetadata._unpadded_to_padded_nt_position(position, insertions)
+            self.assertEqual(expected, got)
+
