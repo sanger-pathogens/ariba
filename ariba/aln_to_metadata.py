@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import shutil
 import pyfastaq
@@ -61,6 +62,15 @@ class AlnToMetadata:
         if len(sequence_lengths) > 1:
             raise Error('Input sequences must all be the same length. Cannot continue. Lengths found: ' + ','.join([str(x) for x in sequence_lengths]))
         return len(sequence_lengths) == 1
+
+
+    @classmethod
+    def _insertion_coords(cls, sequence):
+        insertions = []
+        regex = re.compile('-+')
+        for m in regex.finditer(sequence.seq):
+             insertions.append(pyfastaq.intervals.Interval(m.span()[0], m.span()[1] - 1))
+        return insertions
 
 
     def run(self, outprefix):

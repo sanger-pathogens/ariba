@@ -75,3 +75,16 @@ class TestAlnToMetadata(unittest.TestCase):
             aln_to_metadata.AlnToMetadata._check_seq_lengths_same(seqs)
 
 
+    def test_insertion_coords(self):
+        '''test _insertion_coords'''
+        ivl = pyfastaq.intervals.Interval
+        tests = [
+            ('acgt', []),
+            ('-a', [pyfastaq.intervals.Interval(0, 0)]),
+            ('a---cgt--', [pyfastaq.intervals.Interval(1, 3), pyfastaq.intervals.Interval(7, 8)]),
+        ]
+
+        for seq, expected in tests:
+            fa = pyfastaq.sequences.Fasta('x', seq)
+            got = aln_to_metadata.AlnToMetadata._insertion_coords(fa)
+            self.assertEqual(expected, got)
