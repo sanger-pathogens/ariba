@@ -73,5 +73,23 @@ class AlnToMetadata:
         return insertions
 
 
+    @classmethod
+    def _check_coding_seq(cls, sequence, genetic_code=11):
+        if len(sequence) % 3 != 0:
+            raise Error('Length of sequence ' + sequence.id + ' is ' + str(len(sequence)) + ', which is not a multiple of 3. Cannot continue')
+
+        pyfastaq.sequences.genetic_code = genetic_code
+        protein_seq = sequence.translate()
+
+        if sequence.seq[0:3].upper() not in pyfastaq.genetic_codes.starts[genetic_code]:
+            raise Error('Sequence "' + sequence.id + '" does not start with a start codon. Cannot continue')
+        elif protein_seq[-1] != '*':
+            raise Error('Sequence "' + sequence.id + '" does not end with a stop codon. Cannot continue')
+        elif '*' in protein_seq[:-1]:
+            raise Error('Sequence "' + sequence.id + '" has an internal stop codon. Cannot continue')
+
+        return True
+
+
     def run(self, outprefix):
         pass

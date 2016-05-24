@@ -88,3 +88,21 @@ class TestAlnToMetadata(unittest.TestCase):
             fa = pyfastaq.sequences.Fasta('x', seq)
             got = aln_to_metadata.AlnToMetadata._insertion_coords(fa)
             self.assertEqual(expected, got)
+
+
+    def test_check_coding_seq(self):
+        '''test _check_coding_seq'''
+        seq = pyfastaq.sequences.Fasta('name', 'ATGCTTTAG')
+        self.assertTrue(aln_to_metadata.AlnToMetadata._check_coding_seq(seq))
+
+        bad_seqs = [
+            pyfastaq.sequences.Fasta('name', 'TTGCTTAG'), # length not a mutliple of 3
+            pyfastaq.sequences.Fasta('name', 'TTTCTTTAG'), # no start codon
+            pyfastaq.sequences.Fasta('name', 'ATGTAGCTTTAG'), # stop codon in middle
+            pyfastaq.sequences.Fasta('name', 'TTGCTTTTT'), # no stop at end
+        ]
+
+        for seq in bad_seqs:
+            with self.assertRaises(aln_to_metadata.Error):
+                aln_to_metadata.AlnToMetadata._check_coding_seq(seq)
+
