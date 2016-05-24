@@ -74,6 +74,11 @@ class AlnToMetadata:
 
 
     @classmethod
+    def _make_unpadded_insertion_coords(cls, unpadded_sequences):
+        return {x.id: AlnToMetadata._insertion_coords(x) for x in unpadded_sequences.values()}
+
+
+    @classmethod
     def _check_insertion_coords(cls, sequence):
         insertions = AlnToMetadata._insertion_coords(sequence)
         for coords in insertions:

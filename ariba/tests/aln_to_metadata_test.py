@@ -90,6 +90,24 @@ class TestAlnToMetadata(unittest.TestCase):
             self.assertEqual(expected, got)
 
 
+    def test_make_unpadded_insertion_coords(self):
+        '''test _make_unpadded_insertion_coords'''
+        seqs = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'acgt'),
+            'seq2': pyfastaq.sequences.Fasta('seq2', 'ac-gt'),
+            'seq3': pyfastaq.sequences.Fasta('seq3', '--acg-t'),
+        }
+
+        expected = {
+            'seq1': [],
+            'seq2': [pyfastaq.intervals.Interval(2, 2)],
+            'seq3': [pyfastaq.intervals.Interval(0, 1), pyfastaq.intervals.Interval(5, 5)],
+
+        }
+        got = aln_to_metadata.AlnToMetadata._make_unpadded_insertion_coords(seqs)
+        self.assertEqual(expected, got)
+
+
     def test_check_insertion_coords(self):
         '''test _check_insertion_coords'''
         seq = pyfastaq.sequences.Fasta('name', 'AAA---GGG------TTT---')
