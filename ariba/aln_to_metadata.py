@@ -74,6 +74,18 @@ class AlnToMetadata:
 
 
     @classmethod
+    def _check_insertion_coords(cls, sequence):
+        insertions = AlnToMetadata._insertion_coords(sequence)
+        for coords in insertions:
+            if coords.start % 3 !=0:
+                raise Error('Insertion does not start in frame in sequence "' + sequence.id + '". Cannot continue')
+            elif len(insertions) % 3 != 0:
+                raise Error('Insertion of length not a mulitple of 3 in sequence "' + sequence.id + '". Cannot continue')
+
+        return True
+
+
+    @classmethod
     def _check_coding_seq(cls, sequence, genetic_code=11):
         if len(sequence) % 3 != 0:
             raise Error('Length of sequence ' + sequence.id + ' is ' + str(len(sequence)) + ', which is not a multiple of 3. Cannot continue')
