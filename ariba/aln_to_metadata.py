@@ -48,6 +48,14 @@ class AlnToMetadata:
 
 
     @classmethod
+    def _make_unpadded_seqs(cls, padded_seqs):
+        unpadded_seqs = {}
+        for seq in padded_seqs.values():
+            unpadded_seqs[seq.id] = pyfastaq.sequences.Fasta(seq.id, seq.seq.replace('-', ''))
+        return unpadded_seqs
+
+
+    @classmethod
     def _check_seq_lengths_same(cls, seqs):
         sequence_lengths = set([len(x) for x in seqs.values()])
         if len(sequence_lengths) > 1:

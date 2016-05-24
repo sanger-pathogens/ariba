@@ -48,6 +48,20 @@ class TestAlnToMetadata(unittest.TestCase):
                 aln_to_metadata.AlnToMetadata._load_vars_file(infile, True)
 
 
+    def test_make_unpadded_seqs(self):
+        '''test _make_unpadded_seqs'''
+        padded = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'acg---t'),
+            'seq2': pyfastaq.sequences.Fasta('seq2', '---a-cgt-'),
+        }
+        expected = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'acgt'),
+            'seq2': pyfastaq.sequences.Fasta('seq2', 'acgt'),
+        }
+        got = aln_to_metadata.AlnToMetadata._make_unpadded_seqs(padded)
+        self.assertEqual(expected, got)
+
+
     def test_check_seq_lengths_same(self):
         '''test _check_seq_lengths_same'''
         seqs = {
@@ -59,4 +73,5 @@ class TestAlnToMetadata(unittest.TestCase):
         seqs['seq1'].seq = 'a'
         with self.assertRaises(aln_to_metadata.Error):
             aln_to_metadata.AlnToMetadata._check_seq_lengths_same(seqs)
+
 
