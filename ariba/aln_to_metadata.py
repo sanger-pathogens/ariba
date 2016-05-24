@@ -181,7 +181,7 @@ class AlnToMetadata:
             assert unpadded_aa_sequences is not None
 
         lines = []
-        for refname in variants:
+        for refname in sorted(variants):
             for variant, description in variants[refname]:
                 if seqs_are_coding:
                     ref_unpadded_nt_position = 3 * variant.position
@@ -223,6 +223,3 @@ class AlnToMetadata:
 
         return lines
 
-
-    def run(self, outprefix):
-        pass
