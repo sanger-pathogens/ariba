@@ -187,3 +187,16 @@ class TestAlnToMetadata(unittest.TestCase):
         variants = {'seq4': [(sequence_variant.Variant('p', 'A2M', 'id1'), 'description1')]}
         with self.assertRaises(aln_to_metadata.Error):
             self.assertTrue(aln_to_metadata.AlnToMetadata._check_variants_match_sequences(seqs, variants, True))
+
+
+    def test_variant_ids_are_unique(self):
+        '''test variant_ids_are_unique'''
+        variants = {
+            'seq1': [(sequence_variant.Variant('p', 'L2M', 'id1'), 'description1')],
+            'seq2': [(sequence_variant.Variant('p', 'L2M', 'id2'), 'description2')]
+        }
+
+        self.assertTrue(aln_to_metadata.AlnToMetadata._variant_ids_are_unique(variants))
+        variants['seq2'].append((sequence_variant.Variant('p', 'I3K', 'id1'), 'description3'))
+        with self.assertRaises(aln_to_metadata.Error):
+            self.assertTrue(aln_to_metadata.AlnToMetadata._variant_ids_are_unique(variants))

@@ -118,13 +118,27 @@ class AlnToMetadata:
     @classmethod
     def _check_variants_match_sequences(cls, unpadded_sequences, variants, seqs_are_coding, genetic_code=11):
         pyfastaq.sequences.genetic_code = genetic_code
-        for seqname, variants in variants.items():
+        for seqname, variant_list in variants.items():
             if seqname not in unpadded_sequences:
                 raise Error('Sequence name "' + seqname + '" given in variants file, but sequence not found')
-            for variant, description in variants:
+            for variant, description in variant_list:
                 if not variant.sanity_check_against_seq(unpadded_sequences[seqname], translate_seq=seqs_are_coding):
                     raise Error('Variant "' + str(variant) + '" for sequence "' + seqname + '" does not match sequence. cannot continue')
         return True
+
+
+    @classmethod
+    def _variant_ids_are_unique(cls, variants):
+        seen_variants = set()
+        for variants_list in variants.values():
+            for variant, description in variants_list:
+                if variant.identifier in seen_variants:
+                    raise Error('Variant identifier "' + variant.identifier + '" found more than once. Cannot continue')
+                else:
+                    seen_variants.add(variant.identifier)
+
+        return True
+
 
     def run(self, outprefix):
         pass
