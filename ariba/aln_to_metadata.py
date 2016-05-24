@@ -157,10 +157,22 @@ class AlnToMetadata:
 
         return position
 
-        #if i < len(insertions) and insertions[i].distance_to_point(position) == 0:
-        #    return None
-        #else:
-        #    return position + total_gap_length
+
+    @classmethod
+    def _padded_to_unpadded_nt_position(cls, position, insertions):
+        if len(insertions) == 0:
+            return position
+
+        i = 0
+        total_gap_length = 0
+        while i < len(insertions) and insertions[i].end < position:
+            total_gap_length += len(insertions[i])
+            i += 1
+
+        if i < len(insertions) and insertions[i].distance_to_point(position) == 0:
+            return None
+        else:
+            return position - total_gap_length
 
 
     def run(self, outprefix):

@@ -249,3 +249,40 @@ class TestAlnToMetadata(unittest.TestCase):
             got = aln_to_metadata.AlnToMetadata._unpadded_to_padded_nt_position(position, insertions)
             self.assertEqual(expected, got)
 
+
+    def test_padded_to_unpadded_nt_position(self):
+        '''test _padded_to_unpadded_nt_position'''
+        ivl = pyfastaq.intervals.Interval
+
+        tests = [
+            (0, [], 0),
+            (1, [], 1),
+            (2, [], 2),
+            (0, [ivl(3, 5)], 0),
+            (1, [ivl(3, 5)], 1),
+            (2, [ivl(3, 5)], 2),
+            (3, [ivl(3, 5)], None),
+            (4, [ivl(3, 5)], None),
+            (5, [ivl(3, 5)], None),
+            (6, [ivl(3, 5)], 3),
+            (7, [ivl(3, 5)], 4),
+            (8, [ivl(3, 5)], 5),
+            (0, [ivl(3, 5), ivl(7,10)], 0),
+            (1, [ivl(3, 5), ivl(7,10)], 1),
+            (2, [ivl(3, 5), ivl(7,10)], 2),
+            (3, [ivl(3, 5), ivl(7,10)], None),
+            (4, [ivl(3, 5), ivl(7,10)], None),
+            (5, [ivl(3, 5), ivl(7,10)], None),
+            (6, [ivl(3, 5), ivl(7,10)], 3),
+            (7, [ivl(3, 5), ivl(7,10)], None),
+            (8, [ivl(3, 5), ivl(7,10)], None),
+            (9, [ivl(3, 5), ivl(7,10)], None),
+            (10, [ivl(3, 5), ivl(7,10)], None),
+            (11, [ivl(3, 5), ivl(7,10)], 4),
+            (12, [ivl(3, 5), ivl(7,10)], 5),
+        ]
+
+        for position, insertions, expected in tests:
+            got = aln_to_metadata.AlnToMetadata._padded_to_unpadded_nt_position(position, insertions)
+            self.assertEqual(expected, got)
+
