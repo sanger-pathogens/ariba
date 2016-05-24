@@ -122,3 +122,46 @@ class TestAlnToMetadata(unittest.TestCase):
             with self.assertRaises(aln_to_metadata.Error):
                 aln_to_metadata.AlnToMetadata._check_coding_seq(seq)
 
+
+    def test_check_sequences_non_coding(self):
+        '''test _check_sequences with noncoding seqs'''
+        padded_sequences = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'AC-T')
+        }
+
+        unpadded_sequences = aln_to_metadata.AlnToMetadata._make_unpadded_seqs(padded_sequences)
+        self.assertTrue(aln_to_metadata.AlnToMetadata._check_sequences(padded_sequences, unpadded_sequences, False))
+        padded_sequences['seq2'] = pyfastaq.sequences.Fasta('seq2', 'AC-')
+        unpadded_sequences = aln_to_metadata.AlnToMetadata._make_unpadded_seqs(padded_sequences)
+        with self.assertRaises(aln_to_metadata.Error):
+            aln_to_metadata.AlnToMetadata._check_sequences(padded_sequences, unpadded_sequences, False)
+
+
+    def test_check_sequences_coding(self):
+        '''test _check_sequences with coding seqs'''
+        padded_sequences = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'ATGCTTTAG'),
+            'seq2': pyfastaq.sequences.Fasta('seq2', 'ATG---TAG')
+        }
+
+        unpadded_sequences = aln_to_metadata.AlnToMetadata._make_unpadded_seqs(padded_sequences)
+
+        self.assertTrue(aln_to_metadata.AlnToMetadata._check_sequences(padded_sequences, unpadded_sequences, True))
+
+        bad_seqs = [
+            'ATGCTTAG', # length not a mutliple of 3
+            'TTTCTTTAG', # no start codon
+            'ATGTAGCTTTAG', # stop codon in middle
+            'ATGTTTTTT', # no stop at end
+            'ATGC---TTTAG', # bad insertion
+            'ATGCT---TTAG', # bad insertion
+            'ATG-CTTTAG', # bad insertion
+            'ATG--CTTTAG', # bad insertion
+            'ATG----CTTTAG', # bad insertion
+        ]
+
+        for seq in bad_seqs:
+            padded_sequences['seq2'] = pyfastaq.sequences.Fasta('seq2', seq)
+            unpadded_sequences = aln_to_metadata.AlnToMetadata._make_unpadded_seqs(padded_sequences)
+            with self.assertRaises(aln_to_metadata.Error):
+                aln_to_metadata.AlnToMetadata._check_sequences(padded_sequences, unpadded_sequences, True)

@@ -79,7 +79,7 @@ class AlnToMetadata:
         for coords in insertions:
             if coords.start % 3 !=0:
                 raise Error('Insertion does not start in frame in sequence "' + sequence.id + '". Cannot continue')
-            elif len(insertions) % 3 != 0:
+            elif len(coords) % 3 != 0:
                 raise Error('Insertion of length not a mulitple of 3 in sequence "' + sequence.id + '". Cannot continue')
 
         return True
@@ -99,6 +99,18 @@ class AlnToMetadata:
             raise Error('Sequence "' + sequence.id + '" does not end with a stop codon. Cannot continue')
         elif '*' in protein_seq[:-1]:
             raise Error('Sequence "' + sequence.id + '" has an internal stop codon. Cannot continue')
+
+        return True
+
+
+    @classmethod
+    def _check_sequences(cls, padded_sequences, unpadded_sequences, seqs_are_coding, genetic_code=11):
+        AlnToMetadata._check_seq_lengths_same(padded_sequences)
+
+        if seqs_are_coding:
+            for sequence in unpadded_sequences.values():
+                AlnToMetadata._check_insertion_coords(sequence)
+                AlnToMetadata._check_coding_seq(sequence, genetic_code=genetic_code)
 
         return True
 
