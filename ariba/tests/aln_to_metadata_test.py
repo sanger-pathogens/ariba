@@ -47,3 +47,16 @@ class TestAlnToMetadata(unittest.TestCase):
             with self.assertRaises(aln_to_metadata.Error):
                 aln_to_metadata.AlnToMetadata._load_vars_file(infile, True)
 
+
+    def test_check_seq_lengths_same(self):
+        '''test _check_seq_lengths_same'''
+        seqs = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'acgt'),
+            'seq2': pyfastaq.sequences.Fasta('seq2', 'acgt'),
+        }
+
+        self.assertTrue(aln_to_metadata.AlnToMetadata._check_seq_lengths_same(seqs))
+        seqs['seq1'].seq = 'a'
+        with self.assertRaises(aln_to_metadata.Error):
+            aln_to_metadata.AlnToMetadata._check_seq_lengths_same(seqs)
+

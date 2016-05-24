@@ -47,5 +47,13 @@ class AlnToMetadata:
         return variants
 
 
+    @classmethod
+    def _check_seq_lengths_same(cls, seqs):
+        sequence_lengths = set([len(x) for x in seqs.values()])
+        if len(sequence_lengths) > 1:
+            raise Error('Input sequences must all be the same length. Cannot continue. Lengths found: ' + ','.join([str(x) for x in sequence_lengths]))
+        return len(sequence_lengths) == 1
+
+
     def run(self, outprefix):
         pass
