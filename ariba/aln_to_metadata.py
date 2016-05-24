@@ -175,5 +175,54 @@ class AlnToMetadata:
             return position - total_gap_length
 
 
+    @classmethod
+    def _variants_to_tsv_lines(cls, variants, unpadded_sequences, padded_sequences, insertions, seqs_are_coding, unpadded_aa_sequences = None):
+        if seqs_are_coding:
+            assert unpadded_aa_sequences is not None
+
+        lines = []
+        for refname in variants:
+            for variant, description in variants[refname]:
+                if seqs_are_coding:
+                    ref_unpadded_nt_position = 3 * variant.position
+                else:
+                    ref_unpadded_nt_position = variant.position
+
+                padded_nt_position = AlnToMetadata._unpadded_to_padded_nt_position(ref_unpadded_nt_position, insertions[refname])
+                lines.append('\t'.join([refname, variant.variant_type, str(variant), variant.identifier, description]))
+
+                for seqname, seq in sorted(padded_sequences.items()):
+                    if seqname == refname:
+                        continue
+
+                    if seq[padded_nt_position] == '-':
+                        print('Warning: position has a gap in sequence ', seqname, 'corresponding to variant', variant, '(' + variant.identifier + ') in sequence ', refname, '... Ignoring for ' + seqname, file=sys.stderr)
+                        continue
+
+                    unpadded_nt_position = AlnToMetadata._padded_to_unpadded_nt_position(padded_nt_position, insertions[seqname])
+                    assert unpadded_nt_position is not None
+
+                    if seqs_are_coding:
+                        assert unpadded_nt_position % 3 == 0
+                        unpadded_aa_position = unpadded_nt_position // 3
+                        pos_string = str(unpadded_aa_position)
+                        if unpadded_aa_sequences[seqname][unpadded_aa_position] in {variant.wild_value, variant.variant_value}:
+                            variant_string = variant.wild_value
+                        else:
+                            variant_string = unpadded_aa_sequences[seqname][unpadded_aa_position]
+                        variant_string += str(unpadded_aa_position + 1) + variant.variant_value
+                    else:
+                        pos_string = str(unpadded_nt_position)
+                        if unpadded_sequences[seqname][unpadded_nt_position] in {variant.wild_value, variant.variant_value}:
+                            variant_string = variant.wild_value
+                        else:
+                            variant_string = unpadded_sequences[seqname][unpadded_nt_position]
+                        variant_string += str(unpadded_nt_position + 1) + variant.variant_value
+
+                    lines.append('\t'.join([seqname, variant.variant_type, variant_string, variant.identifier, description]))
+
+        return lines
+
+
     def run(self, outprefix):
         pass

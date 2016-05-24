@@ -286,3 +286,37 @@ class TestAlnToMetadata(unittest.TestCase):
             got = aln_to_metadata.AlnToMetadata._padded_to_unpadded_nt_position(position, insertions)
             self.assertEqual(expected, got)
 
+
+    def test_variants_to_tsv_ilnes_coding(self):
+        '''test _variants_to_tsv_lines coding sequences'''
+        padded_seqs = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'ATG---GCTAATTAG'), # M-AN*
+            'seq2': pyfastaq.sequences.Fasta('seq2', 'ATG---GCTAATTAG'), # MFAN*
+            'seq3': pyfastaq.sequences.Fasta('seq3', 'ATGTTT---AATTAG'), # MF-N*
+            'seq4': pyfastaq.sequences.Fasta('seq4', 'ATGTTTTGTAATTAG'), # MFCN*
+            'seq5': pyfastaq.sequences.Fasta('seq5', 'ATGTTTGATAATTAG'), # MFDN*
+        }
+
+        unpadded_seqs = aln_to_metadata.AlnToMetadata._make_unpadded_seqs(padded_seqs)
+        unpadded_aa_seqs = {x: unpadded_seqs[x].translate() for x in unpadded_seqs}
+        insertions = aln_to_metadata.AlnToMetadata._make_unpadded_insertion_coords(padded_seqs)
+
+        variant1 = sequence_variant.Variant('p', 'A2D', 'id1')
+        variant2 = sequence_variant.Variant('p', 'F2E', 'id2')
+        variants = {
+            'seq1': [(variant1, 'description 1')],
+            'seq5': [(variant2, 'description 2')],
+        }
+
+        expected = [
+            'seq1\tp\tA2D\tid1\tdescription 1',
+            'seq2\tp\tA2D\tid1\tdescription 1',
+            'seq4\tp\tC3D\tid1\tdescription 1',
+            'seq5\tp\tA3D\tid1\tdescription 1',
+            'seq5\tp\tF2E\tid2\tdescription 2',
+            'seq3\tp\tF2E\tid2\tdescription 2',
+            'seq4\tp\tF2E\tid2\tdescription 2',
+        ]
+
+        got = aln_to_metadata.AlnToMetadata._variants_to_tsv_lines(variants, unpadded_seqs, padded_seqs, insertions, True, unpadded_aa_sequences=unpadded_aa_seqs)
+        self.assertEqual(expected, got)
