@@ -12,13 +12,15 @@ class AlnToMetadata:
       aln_file,
       vars_file,
       refs_are_coding,
-      genetic_code=11
+      cluster_rep_name,
+      genetic_code=11,
     ):
         self.padded_seqs = AlnToMetadata._load_aln_file(aln_file)
         self.refs_are_coding = refs_are_coding
         self.variants = AlnToMetadata._load_vars_file(vars_file, self.refs_are_coding)
         self.genetic_code = genetic_code
         pyfastaq.sequences.genetic_code = genetic_code
+        self.cluster_rep_name = cluster_rep_name
 
 
     @classmethod
@@ -227,7 +229,19 @@ class AlnToMetadata:
         return lines
 
 
+    @classmethod
+    def _make_cluster_file(cls, cluster_name, sequences, filename):
+        if cluster_name not in sequences:
+            raise Error('Sequence name "' + cluster_name + '" to be used as cluster representative not found. Cannot continue')
+        names = [x for x in sequences.keys() if x != cluster_name]
+        names.sort()
+        with open(filename, 'w') as f:
+            print(cluster_name, *names, sep='\t', file=f)
+
+
     def run(self, outprefix):
+        if self.cluster_rep_name not in self.padded_seqs:
+            raise Error('Sequence name "' + self.cluster_rep_name + '" to be used as cluster representative not found. Cannot continue')
         unpadded_seqs = AlnToMetadata._make_unpadded_seqs(self.padded_seqs)
         insertions = AlnToMetadata._make_unpadded_insertion_coords(unpadded_seqs)
         AlnToMetadata._check_sequences(self.padded_seqs, unpadded_seqs, self.refs_are_coding, genetic_code=self.genetic_code)
@@ -241,3 +255,5 @@ class AlnToMetadata:
         with open(outprefix + '.fa', 'w') as f:
             for seqname in sorted(unpadded_seqs):
                 print(unpadded_seqs[seqname], sep='\n', file=f)
+
+        AlnToMetadata._make_cluster_file(self.cluster_rep_name, unpadded_seqs, outprefix + '.cluster')

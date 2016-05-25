@@ -356,19 +356,40 @@ class TestAlnToMetadata(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_make_cluster_file(self):
+        '''test _make_cluster_file'''
+        seqs = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'a'),
+            'seq2': pyfastaq.sequences.Fasta('seq2', 'c'),
+            'seq3': pyfastaq.sequences.Fasta('seq3', 'g'),
+        }
+        tmpfile = 'tmp.aln_to_meta_test_make_cluster_file.out'
+        expected_file = os.path.join(data_dir, 'aln_to_metadata_make_cluster_file.out')
+
+        with self.assertRaises(aln_to_metadata.Error):
+            aln_to_metadata.AlnToMetadata._make_cluster_file('not_found', seqs, tmpfile)
+
+        aln_to_metadata.AlnToMetadata._make_cluster_file('seq2', seqs, tmpfile)
+        self.assertTrue(filecmp.cmp(expected_file, tmpfile, shallow=False))
+        os.unlink(tmpfile)
+
+
     def test_run_coding(self):
         '''test run coding sequences'''
         fa_in = os.path.join(data_dir, 'aln_to_metadata_run_coding.in.fa')
         fa_expected = os.path.join(data_dir, 'aln_to_metadata_run_coding.out.fa')
         tsv_in = os.path.join(data_dir, 'aln_to_metadata_run_coding.in.tsv')
         tsv_expected = os.path.join(data_dir, 'aln_to_metadata_run_coding.out.tsv')
-        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, True)
+        cluster_expected = os.path.join(data_dir, 'aln_to_metadata_run_coding.out.cluster')
+        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, True, 'seq3')
         outprefix = 'tmp.test.aln_to_metadata.run_coding'
         a_to_m.run(outprefix)
         self.assertTrue(filecmp.cmp(tsv_expected, outprefix + '.tsv', shallow=False))
         self.assertTrue(filecmp.cmp(fa_expected, outprefix + '.fa', shallow=False))
+        self.assertTrue(filecmp.cmp(cluster_expected, outprefix + '.cluster', shallow=False))
         os.unlink(outprefix + '.tsv')
         os.unlink(outprefix + '.fa')
+        os.unlink(outprefix + '.cluster')
 
 
     def test_run_noncoding(self):
@@ -377,11 +398,14 @@ class TestAlnToMetadata(unittest.TestCase):
         fa_expected = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.out.fa')
         tsv_in = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.in.tsv')
         tsv_expected = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.out.tsv')
-        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, False)
+        cluster_expected = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.out.cluster')
+        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, False, 'seq2')
         outprefix = 'tmp.test.aln_to_metadata.run_noncoding'
         a_to_m.run(outprefix)
         self.assertTrue(filecmp.cmp(tsv_expected, outprefix + '.tsv', shallow=False))
         self.assertTrue(filecmp.cmp(fa_expected, outprefix + '.fa', shallow=False))
+        self.assertTrue(filecmp.cmp(cluster_expected, outprefix + '.cluster', shallow=False))
         os.unlink(outprefix + '.tsv')
         os.unlink(outprefix + '.fa')
+        os.unlink(outprefix + '.cluster')
 
