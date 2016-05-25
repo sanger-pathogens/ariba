@@ -63,14 +63,14 @@ class TestClusters(unittest.TestCase):
 
         expected_metadata = {
             'presabs1': {
-                '.': {sequence_metadata.SequenceMetadata('presabs1\t.\t.\tpresabs1 description')},
+                '.': {sequence_metadata.SequenceMetadata('presabs1\t.\t.\t.\tpresabs1 description')},
                 'n': {},
                 'p': {}
             },
             'variants_only1': {
                 '.': set(),
                 'n': {},
-                'p': {1: {sequence_metadata.SequenceMetadata('variants_only1\tp\tC2I\tdescription of variants_only1 C2I')}}
+                'p': {1: {sequence_metadata.SequenceMetadata('variants_only1\tp\tC2I\t.\tdescription of variants_only1 C2I')}}
             }
         }
         self.assertEqual(expected_metadata, got_refdata.metadata)
