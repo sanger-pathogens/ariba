@@ -255,8 +255,10 @@ def report_lines(cluster):
 
     for line in lines:
         if len(line.split('\t')) != len(columns):
-            print('Error making report - wrong number of columns. Expected', len(columns), 'but got', len(line.split('\t')), file=sys.stderr)
-            print(line, file=sys.stderr)
+            cols = line.split('\t')
+            print('Error making report - wrong number of columns. Expected', len(columns), 'but got', len(cols), file=sys.stderr)
+            for i in range(len(cols)):
+                print(i, cols[i], sep='\t', file=sys.stderr)
             lines_ok = False
 
     if not lines_ok:
