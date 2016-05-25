@@ -243,7 +243,7 @@ class AlnToMetadata:
         if self.cluster_rep_name not in self.padded_seqs:
             raise Error('Sequence name "' + self.cluster_rep_name + '" to be used as cluster representative not found. Cannot continue')
         unpadded_seqs = AlnToMetadata._make_unpadded_seqs(self.padded_seqs)
-        insertions = AlnToMetadata._make_unpadded_insertion_coords(unpadded_seqs)
+        insertions = AlnToMetadata._make_unpadded_insertion_coords(self.padded_seqs)
         AlnToMetadata._check_sequences(self.padded_seqs, unpadded_seqs, self.refs_are_coding, genetic_code=self.genetic_code)
         AlnToMetadata._variant_ids_are_unique(self.variants)
         AlnToMetadata._check_variants_match_sequences(unpadded_seqs, self.variants, self.refs_are_coding, genetic_code=self.genetic_code)
