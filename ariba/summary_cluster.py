@@ -220,6 +220,15 @@ class SummaryCluster:
             return 'no'
 
 
+    def has_var_groups(self):
+        '''Returns a set of the variant group ids that this cluster has'''
+        ids = set()
+        for d in self.data:
+            if self._has_known_variant(d) and d['var_group'] != '.':
+                ids.add(d['var_group'])
+        return ids
+
+
     def column_summary_data(self):
         '''Returns a dictionary of column name -> value, for cluster-level results'''
         assembled_summary = self._to_cluster_summary_assembled()
