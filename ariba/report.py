@@ -1,6 +1,8 @@
 import sys
 import pymummer
 
+class Error (Exception): pass
+
 columns = [
     'ref_name',              # 0  name of reference sequence
     'ref_type',              # 1  type of reference sequence (presence/absence, variants only, noncoding)
