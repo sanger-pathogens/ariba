@@ -167,7 +167,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 known_var_change = 'unknown'
                 var_type = 'SNP'
                 has_known_var = '1'
-                matching_vars_column = ';;;'.join([x.to_string(separator='_') for x in matching_vars_set])
+                matching_vars_column = ';;;'.join([x.to_string(separator=':') for x in matching_vars_set])
             else:
                 is_known_var = '0'
                 known_var_change = '.'
