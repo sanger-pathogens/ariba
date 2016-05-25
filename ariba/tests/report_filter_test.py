@@ -13,10 +13,10 @@ class TestReportFilter(unittest.TestCase):
         '''test __init__ on good input file'''
         infile = os.path.join(data_dir, 'report_filter_test_init_good.tsv')
         rf = report_filter.ReportFilter(infile=infile)
-        line1 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', '.', '500', 'Description_of_variant.C42T', 'free_text'])
-        line2 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'Description_of_variant.A51G', 'free_text2'])
-        line3 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '12.4', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'Description_of_variant.A51G', 'free_text3'])
-        line4 = '\t'.join(['cluster2', 'variants_only', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '20.2', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', '.', '290', 'Description_of_variant.I42L', 'free_text3'])
+        line1 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', '.', '500', 'a:n:C42T:id1:foo', 'free_text'])
+        line2 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'a:n:A51G:id2:bar', 'free_text2'])
+        line3 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '12.4', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'a:n:A51G:id3:spam', 'free_text3'])
+        line4 = '\t'.join(['cluster2', 'variants_only', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '20.2', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', '.', '290', 'a:v:I42L:id4:eggs', 'free_text3'])
 
         expected = {
             'cluster1': {
@@ -39,7 +39,7 @@ class TestReportFilter(unittest.TestCase):
 
 
     def test_report_line_to_dict(self):
-        line = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t999\t23.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t999\t23.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\ta:n:C42T:id1:foo\tfree text'
         expected = {
             'ref_name':           'cluster1',
             'ref_type':           'non_coding',
@@ -68,7 +68,7 @@ class TestReportFilter(unittest.TestCase):
             'smtls_total_depth':  '500',
             'smtls_alt_nt':       '.',
             'smtls_alt_depth':    '500',
-            'var_description':    'Description_of_variant C42T',
+            'var_description':    'a:n:C42T:id1:foo',
             'free_text':          'free text',
         }
 
@@ -108,11 +108,11 @@ class TestReportFilter(unittest.TestCase):
             'smtls_total_depth':  '500',
             'smtls_alt_nt':       '.',
             'smtls_alt_depth':    '500',
-            'var_description':    'Description_of_variant C42T',
+            'var_description':    'a:n:C42T:id1:foo',
             'free_text':          'free text',
         }
 
-        expected = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t1300\t42.4\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        expected = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t1300\t42.4\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\ta:n:C42T:id1:foo\tfree text'
         self.assertEqual(expected, report_filter.ReportFilter._dict_to_report_line(report_dict))
 
 
@@ -120,10 +120,10 @@ class TestReportFilter(unittest.TestCase):
         good_infile = os.path.join(data_dir, 'report_filter_test_load_report_good.tsv')
         bad_infile = os.path.join(data_dir, 'report_filter_test_load_report_bad.tsv')
 
-        line1 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '12.2', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', '.', '500', 'Description_of_variant.C42T', 'free_text'])
-        line2 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '12.2', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'Description_of_variant.A51G', 'free_text2'])
-        line3 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '22.2', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'Description_of_variant.A51G', 'free_text3'])
-        line4 = '\t'.join(['cluster2', 'variants_only', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '33.3', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', '.', '290', 'Description_of_variant.I42L', 'free_text3'])
+        line1 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '12.2', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', '.', '500', 'a:n:C42T:id1:foo', 'free_text'])
+        line2 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '12.2', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'a:n:A51G:id2:bar', 'free_text2'])
+        line3 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '22.2', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'a:n:A51G:id3:spam', 'free_text3'])
+        line4 = '\t'.join(['cluster2', 'variants_only', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '33.3', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', '.', '290', 'a:v:I42L:id4:eggs', 'free_text3'])
 
         expected = {
             'cluster1': {
