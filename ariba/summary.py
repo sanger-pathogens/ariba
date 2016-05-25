@@ -146,9 +146,9 @@ class Summary:
                 if self.include_var_group_columns:
                     for group_name in var_groups[cluster]:
                         if cluster in sample.var_groups and group_name in sample.var_groups[cluster]:
-                            rows[filename][cluster]['vgroup:' + group_name] = 'yes'
+                            rows[filename][cluster]['vgroup.' + group_name] = 'yes'
                         else:
-                            rows[filename][cluster]['vgroup:' + group_name] = 'no'
+                            rows[filename][cluster]['vgroup.' + group_name] = 'no'
 
                 wanted_var_types = set()
                 if self.include_all_known_variant_columns:
