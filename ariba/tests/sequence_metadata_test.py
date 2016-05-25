@@ -14,6 +14,7 @@ class TestSequenceMetadata(unittest.TestCase):
             'only one column. There can NOT be only one\n',
             'two\tcolumns is not enough\n',
             'three\tcolumns\tis still not enough\n',
+            'four\tcolumns\tis\tis also not enough\n',
             'six\tcolumns\tis\tone\ttoo\tmany\n',
         ]
 
@@ -22,7 +23,7 @@ class TestSequenceMetadata(unittest.TestCase):
                 sequence_metadata.SequenceMetadata(line)
 
         lines = [
-            'gene\tx\tI42L\t.\n',
+            'gene\tx\tI42L\tid\tfoo\n',
         ]
 
         for line in lines:
@@ -57,11 +58,11 @@ class TestSequenceMetadata(unittest.TestCase):
     def test_has_variant(self):
         '''test has_variant'''
         tests = [
-            ('gene1\t.\t.\t.', False),
-            ('gene1\tn\tA2T\t.', True),
-            ('gene1\tn\tT2A\t.', False),
-            ('gene1\tp\tI2Y\t.', True),
-            ('gene1\tp\tY2I\t.', False),
+            ('gene1\t.\t.\t.\t.', False),
+            ('gene1\tn\tA2T\t.\t,', True),
+            ('gene1\tn\tT2A\t.\t.', False),
+            ('gene1\tp\tI2Y\t.\t.', True),
+            ('gene1\tp\tY2I\t.\t.', False),
         ]
 
         seq = pyfastaq.sequences.Fasta('name', 'ATGTATTGCTGA') # translation: MYC*
