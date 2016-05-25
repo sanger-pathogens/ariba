@@ -84,7 +84,7 @@ class Runner:
         f = pyfastaq.utils.open_file_write(tmp_fa)
 
         for seq in seq_reader:
-            if seq.id in clusters:
+            if seq.id in clusters and seq.id in clusters[seq.id]:
                 pyfastaq.utils.close(f)
                 shutil.rmtree(tmpdir)
                 raise Error('Sequence name "' + seq.id + '" not unique. Cannot continue')
