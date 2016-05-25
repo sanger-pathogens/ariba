@@ -126,15 +126,15 @@ class RefGenesGetter:
                 else:
                     fasta_filehandle = f_out_var_only
 
-                print(fasta.id, '.', '.', data['ARO_name'], sep='\t', file=f_out_tsv)
+                print(fasta.id, '.', '.', '.', data['ARO_name'], sep='\t', file=f_out_tsv)
 
                 if len(data['snps']) == 0:
                     print(fasta, file=fasta_filehandle)
-                    print(fasta.id, '.', '.', data['ARO_description'], sep='\t', file=f_out_tsv)
+                    print(fasta.id, '.', '.', '.', data['ARO_description'], sep='\t', file=f_out_tsv)
                 else:
                     print(fasta, file=fasta_filehandle)
                     for snp in data['snps']:
-                        print(fasta.id, variant_type, snp, data['ARO_description'], sep='\t', file=f_out_tsv)
+                        print(fasta.id, variant_type, snp, '.', data['ARO_description'], sep='\t', file=f_out_tsv)
 
 
         pyfastaq.utils.close(f_out_tsv)
