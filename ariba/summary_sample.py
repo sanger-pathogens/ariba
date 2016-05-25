@@ -74,4 +74,5 @@ class SummarySample:
         self.column_summary_data = self._column_summary_data()
         self.variants = self._non_synon_variants()
         self.variant_column_names_tuples = self._variant_column_names_tuples()
+        self.var_groups = self._var_groups()
 
