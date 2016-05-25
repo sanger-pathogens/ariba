@@ -19,7 +19,6 @@ class AlnToMetadata:
         self.refs_are_coding = refs_are_coding
         self.variants = AlnToMetadata._load_vars_file(vars_file, self.refs_are_coding)
         self.genetic_code = genetic_code
-        pyfastaq.sequences.genetic_code = genetic_code
         self.cluster_rep_name = cluster_rep_name
 
 
@@ -100,6 +99,7 @@ class AlnToMetadata:
         if len(sequence) % 3 != 0:
             raise Error('Length of sequence ' + sequence.id + ' is ' + str(len(sequence)) + ', which is not a multiple of 3. Cannot continue')
 
+        original_code = pyfastaq.sequences.genetic_code
         pyfastaq.sequences.genetic_code = genetic_code
         protein_seq = sequence.translate()
 
@@ -110,6 +110,7 @@ class AlnToMetadata:
         elif '*' in protein_seq[:-1]:
             raise Error('Sequence "' + sequence.id + '" has an internal stop codon. Cannot continue')
 
+        pyfastaq.sequences.genetic_code = original_code
         return True
 
 
@@ -127,6 +128,7 @@ class AlnToMetadata:
 
     @classmethod
     def _check_variants_match_sequences(cls, unpadded_sequences, variants, seqs_are_coding, genetic_code=11):
+        original_code = pyfastaq.sequences.genetic_code
         pyfastaq.sequences.genetic_code = genetic_code
         for seqname, variant_list in variants.items():
             if seqname not in unpadded_sequences:
@@ -134,6 +136,8 @@ class AlnToMetadata:
             for variant, description in variant_list:
                 if not variant.sanity_check_against_seq(unpadded_sequences[seqname], translate_seq=seqs_are_coding):
                     raise Error('Variant "' + str(variant) + '" for sequence "' + seqname + '" does not match sequence. cannot continue')
+
+        pyfastaq.sequences.genetic_code = original_code
         return True
 
 
@@ -240,6 +244,8 @@ class AlnToMetadata:
 
 
     def run(self, outprefix):
+        original_code = pyfastaq.sequences.genetic_code
+        pyfastaq.sequences.genetic_code = self.genetic_code
         if self.cluster_rep_name not in self.padded_seqs:
             raise Error('Sequence name "' + self.cluster_rep_name + '" to be used as cluster representative not found. Cannot continue')
         unpadded_seqs = AlnToMetadata._make_unpadded_seqs(self.padded_seqs)
@@ -257,3 +263,4 @@ class AlnToMetadata:
                 print(unpadded_seqs[seqname], sep='\n', file=f)
 
         AlnToMetadata._make_cluster_file(self.cluster_rep_name, unpadded_seqs, outprefix + '.cluster')
+        pyfastaq.sequences.genetic_code = original_code
