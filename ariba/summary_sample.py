@@ -40,6 +40,10 @@ class SummarySample:
         return {c: self.clusters[c].column_summary_data() for c in self.clusters}
 
 
+    def _var_groups(self):
+        return {c: self.clusters[c].has_var_groups() for c in self.clusters}
+
+
     def _non_synon_variants(self):
         variants = {}
         for cluster_name, cluster in self.clusters.items():

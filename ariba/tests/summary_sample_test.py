@@ -70,6 +70,20 @@ class TestSummarySample(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_var_groups(self):
+        '''test _var_groups'''
+        infile = os.path.join(data_dir, 'summary_sample_test_var_groups.tsv')
+        sample_summary = summary_sample.SummarySample(infile)
+        sample_summary.clusters = sample_summary._load_file(infile, 90)
+        got = sample_summary._var_groups()
+        expected = {
+            'cluster.n': {'id1', 'id2'},
+            'cluster.p': {'id3'},
+            'cluster.v': {'id4'}
+        }
+        self.assertEqual(expected, got)
+
+
     def test_non_synon_variants(self):
         '''Test _non_synon_variants'''
         infile = os.path.join(data_dir, 'summary_sample_test_non_synon_variants.tsv')
