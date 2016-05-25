@@ -35,7 +35,7 @@ class SequenceMetadata:
 
 
     def to_string(self, separator='\t'):
-        return '\t'.join([
+        return separator.join([
             self.name,
             self.variant_type,
             '.' if self.variant is None else str(self.variant),

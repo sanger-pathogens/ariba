@@ -70,3 +70,20 @@ class TestSequenceMetadata(unittest.TestCase):
         for line, expected in tests:
             metadata = sequence_metadata.SequenceMetadata(line)
             self.assertEqual(expected, metadata.has_variant(seq))
+
+
+    def test_to_string(self):
+        '''test to_string'''
+        lines = [
+            ('gene1', 'n', 'A42G', 'id1', 'spam'),
+            ('gene2', '.', '.', '.', '.'),
+            ('gene3', '.', '.', '.', 'eggs'),
+            ('gene4', 'p', 'I42K', 'id', 'this mutation kills tardigrades'),
+        ]
+
+        for line in lines:
+            m = sequence_metadata.SequenceMetadata('\t'.join(line))
+            for separator in ('_', '\t'):
+                expected = separator.join(line)
+                self.assertEqual(expected, m.to_string(separator=separator))
+
