@@ -132,7 +132,7 @@ class ReferenceData:
         f = pyfastaq.utils.open_file_write(filename)
 
         for gene_name, data_dict in sorted(metadata.items()):
-            for meta in data_dict['.']:
+            for meta in sorted([str(x) for x in data_dict['.']]):
                 print(meta, file=f)
 
             variants = []
