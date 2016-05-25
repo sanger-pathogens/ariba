@@ -354,3 +354,34 @@ class TestAlnToMetadata(unittest.TestCase):
 
         got = aln_to_metadata.AlnToMetadata._variants_to_tsv_lines(variants, unpadded_seqs, padded_seqs, insertions, False)
         self.assertEqual(expected, got)
+
+
+    def test_run_coding(self):
+        '''test run coding sequences'''
+        fa_in = os.path.join(data_dir, 'aln_to_metadata_run_coding.in.fa')
+        fa_expected = os.path.join(data_dir, 'aln_to_metadata_run_coding.out.fa')
+        tsv_in = os.path.join(data_dir, 'aln_to_metadata_run_coding.in.tsv')
+        tsv_expected = os.path.join(data_dir, 'aln_to_metadata_run_coding.out.tsv')
+        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, True)
+        outprefix = 'tmp.test.aln_to_metadata.run_coding'
+        a_to_m.run(outprefix)
+        self.assertTrue(filecmp.cmp(tsv_expected, outprefix + '.tsv', shallow=False))
+        self.assertTrue(filecmp.cmp(fa_expected, outprefix + '.fa', shallow=False))
+        os.unlink(outprefix + '.tsv')
+        os.unlink(outprefix + '.fa')
+
+
+    def test_run_noncoding(self):
+        '''test run noncoding sequences'''
+        fa_in = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.in.fa')
+        fa_expected = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.out.fa')
+        tsv_in = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.in.tsv')
+        tsv_expected = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.out.tsv')
+        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, False)
+        outprefix = 'tmp.test.aln_to_metadata.run_noncoding'
+        a_to_m.run(outprefix)
+        self.assertTrue(filecmp.cmp(tsv_expected, outprefix + '.tsv', shallow=False))
+        self.assertTrue(filecmp.cmp(fa_expected, outprefix + '.fa', shallow=False))
+        os.unlink(outprefix + '.tsv')
+        os.unlink(outprefix + '.fa')
+

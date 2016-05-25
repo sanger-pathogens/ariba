@@ -11,11 +11,14 @@ class AlnToMetadata:
     def __init__(self,
       aln_file,
       vars_file,
-      refs_are_coding
+      refs_are_coding,
+      genetic_code=11
     ):
         self.padded_seqs = AlnToMetadata._load_aln_file(aln_file)
-        self.variants = AlnToMetadata._load_vars_file(vars_file)
         self.refs_are_coding = refs_are_coding
+        self.variants = AlnToMetadata._load_vars_file(vars_file, self.refs_are_coding)
+        self.genetic_code = genetic_code
+        pyfastaq.sequences.genetic_code = genetic_code
 
 
     @classmethod
@@ -223,3 +226,18 @@ class AlnToMetadata:
 
         return lines
 
+
+    def run(self, outprefix):
+        unpadded_seqs = AlnToMetadata._make_unpadded_seqs(self.padded_seqs)
+        insertions = AlnToMetadata._make_unpadded_insertion_coords(unpadded_seqs)
+        AlnToMetadata._check_sequences(self.padded_seqs, unpadded_seqs, self.refs_are_coding, genetic_code=self.genetic_code)
+        AlnToMetadata._variant_ids_are_unique(self.variants)
+        AlnToMetadata._check_variants_match_sequences(unpadded_seqs, self.variants, self.refs_are_coding, genetic_code=self.genetic_code)
+
+        tsv_lines = AlnToMetadata._variants_to_tsv_lines(self.variants, unpadded_seqs, self.padded_seqs, insertions, self.refs_are_coding)
+        with open(outprefix + '.tsv', 'w') as f:
+            print(*tsv_lines, sep='\n', file=f)
+
+        with open(outprefix + '.fa', 'w') as f:
+            for seqname in sorted(unpadded_seqs):
+                print(unpadded_seqs[seqname], sep='\n', file=f)

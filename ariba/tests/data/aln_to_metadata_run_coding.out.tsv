@@ -1,0 +1,7 @@
+seq1	p	A2D	id1	description 1
+seq3	p	F2D	id1	description 1
+seq4	p	F2D	id1	description 1
+seq5	p	F2D	id1	description 1
+seq5	p	F2E	id2	description 2
+seq3	p	F2E	id2	description 2
+seq4	p	F2E	id2	description 2
