@@ -121,7 +121,6 @@ class Summary:
         all_var_columns = Summary._get_all_variant_columns(self.samples)
         if self.include_var_group_columns:
             var_groups = Summary._get_all_var_groups(self.samples)
-            print(var_groups)
         else:
             var_groups = set()
         rows = {}
