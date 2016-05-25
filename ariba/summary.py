@@ -17,6 +17,7 @@ class Summary:
       fofn=None,
       include_all_known_variant_columns=True,
       include_all_novel_variant_columns=False,
+      include_var_group_columns=False,
       filter_rows=True,
       filter_columns=True,
       min_id=90.0,
@@ -37,6 +38,7 @@ class Summary:
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
         self.include_all_known_variant_columns = include_all_known_variant_columns
         self.include_all_novel_variant_columns = include_all_novel_variant_columns
+        self.include_var_group_columns = include_var_group_columns
         self.filter_rows = filter_rows
         self.filter_columns = filter_columns
         self.min_id = min_id
@@ -101,6 +103,17 @@ class Summary:
                                 columns[key] = set()
                             columns[key].add(t)
         return columns
+
+
+    @classmethod
+    def _get_all_var_groups(cls, samples_dict):
+        groups = {}
+        for filename, sample in samples_dict.items():
+            for name, name_set in sample.var_groups.items():
+                if name not in groups:
+                    groups[name] = set()
+                groups[name].update(name_set)
+        return groups
 
 
     def _gather_output_rows(self):
