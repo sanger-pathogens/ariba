@@ -1,9 +1,9 @@
-non_coding_1	.	.	.
+non_coding_1	.	.	.	non_coding_1 description1
 non_coding_1	.	.	.	should be in output because this field is here
 non_coding_1	p	L2K	.	should be removed because this is non-coding, but variant is protein
 non_coding_1	n	C5A	id1	dna variant ok
-non_coding_not_in_fasta	.	.	. should be removed from tsv because not in fasta
-presence_absence_1	.	.	.
+non_coding_not_in_fasta	.	.	.	should be removed from tsv because not in fasta
+presence_absence_1	.	.	.	.
 presence_absence_1	.	.	.	should be in output because this field is here
 presence_absence_2	n	T4G	id2	dna variant ok
 presence_absence_2	n	A4G	.	dna variant not ok
@@ -15,6 +15,6 @@ variants_only_1	n	C4G	.	dna variant not ok
 variants_only_1	p	S2T	.	amino acid variant ok
 variants_only_1	p	I2L	.	amin acid variant not ok
 variants_only_1	.	.	.	should be kept as a generic description of variants_only_1
-variants_only_1	.	.	.
+variants_only_1	.	.	.	.
 variants_only_not_in_fasta	.	.	.	should be removed from tsv because not in fasta
 variants_only_no_good_variants	n	A4G	.	dna variant not ok

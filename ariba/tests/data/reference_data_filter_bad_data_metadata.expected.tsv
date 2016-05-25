@@ -1,3 +1,4 @@
+non_coding_1	.	.	.	non_coding_1 description1
 non_coding_1	.	.	.	should be in output because this field is here
 non_coding_1	n	C5A	id1	dna variant ok
 presence_absence_1	.	.	.	should be in output because this field is here
