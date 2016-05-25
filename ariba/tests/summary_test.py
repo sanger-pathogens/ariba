@@ -161,6 +161,15 @@ class TestSummary(unittest.TestCase):
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 
+        s.include_var_group_columns = True
+        expected[infiles[0]]['noncoding1']['id1'] = 'yes'
+        expected[infiles[0]]['noncoding1']['id3'] = 'no'
+        expected[infiles[1]]['noncoding1']['id1'] = 'yes'
+        expected[infiles[1]]['noncoding1']['id3'] = 'yes'
+        got = s._gather_output_rows()
+        self.assertEqual(expected, got)
+
+
         s.include_all_known_variant_columns = True
         expected[infiles[0]]['noncoding1']['noncoding1.A14T'] = 'yes'
         expected[infiles[0]]['noncoding1']['noncoding1.A6G'] = 'no'
@@ -176,6 +185,8 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
         for filename in expected:
+            del expected[filename]['noncoding1']['id1']
+            del expected[filename]['noncoding1']['id3']
             for gene_type in expected[filename]:
                 del expected[filename][gene_type]['ref_seq']
 

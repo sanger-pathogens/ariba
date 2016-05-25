@@ -119,6 +119,11 @@ class Summary:
     def _gather_output_rows(self):
         all_cluster_names = Summary._get_all_cluster_names(self.samples)
         all_var_columns = Summary._get_all_variant_columns(self.samples)
+        if self.include_var_group_columns:
+            var_groups = Summary._get_all_var_groups(self.samples)
+            print(var_groups)
+        else:
+            var_groups = set()
         rows = {}
 
         for filename, sample in self.samples.items():
@@ -138,6 +143,13 @@ class Summary:
                         'novel_var': 'NA',
                         'pct_id': 'NA'
                     }
+
+                if self.include_var_group_columns:
+                    for group_name in var_groups[cluster]:
+                        if cluster in sample.var_groups and group_name in sample.var_groups[cluster]:
+                            rows[filename][cluster][group_name] = 'yes'
+                        else:
+                            rows[filename][cluster][group_name] = 'no'
 
                 wanted_var_types = set()
                 if self.include_all_known_variant_columns:
