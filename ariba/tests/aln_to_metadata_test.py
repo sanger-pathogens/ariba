@@ -298,7 +298,6 @@ class TestAlnToMetadata(unittest.TestCase):
         }
 
         unpadded_seqs = aln_to_metadata.AlnToMetadata._make_unpadded_seqs(padded_seqs)
-        unpadded_aa_seqs = {x: unpadded_seqs[x].translate() for x in unpadded_seqs}
         insertions = aln_to_metadata.AlnToMetadata._make_unpadded_insertion_coords(padded_seqs)
 
         variant1 = sequence_variant.Variant('p', 'A2D', 'id1')
@@ -318,7 +317,7 @@ class TestAlnToMetadata(unittest.TestCase):
             'seq4\tp\tF2E\tid2\tdescription 2',
         ]
 
-        got = aln_to_metadata.AlnToMetadata._variants_to_tsv_lines(variants, unpadded_seqs, padded_seqs, insertions, True, unpadded_aa_sequences=unpadded_aa_seqs)
+        got = aln_to_metadata.AlnToMetadata._variants_to_tsv_lines(variants, unpadded_seqs, padded_seqs, insertions, True)
         self.assertEqual(expected, got)
 
 

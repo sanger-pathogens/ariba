@@ -176,9 +176,9 @@ class AlnToMetadata:
 
 
     @classmethod
-    def _variants_to_tsv_lines(cls, variants, unpadded_sequences, padded_sequences, insertions, seqs_are_coding, unpadded_aa_sequences = None):
+    def _variants_to_tsv_lines(cls, variants, unpadded_sequences, padded_sequences, insertions, seqs_are_coding):
         if seqs_are_coding:
-            assert unpadded_aa_sequences is not None
+            unpadded_aa_sequences = {x: unpadded_sequences[x].translate() for x in unpadded_sequences}
 
         lines = []
         for refname in sorted(variants):
