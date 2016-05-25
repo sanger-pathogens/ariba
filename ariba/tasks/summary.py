@@ -11,6 +11,7 @@ def use_preset(options):
             'cluster_cols': 'has_res',
             'col_filter': 'y',
             'row_filter': 'y',
+            'var_groups': 'n',
             'known_vars': 'n',
             'novel_vars': 'n'
         },
@@ -18,6 +19,7 @@ def use_preset(options):
             'cluster_cols': 'assembled,has_res,ref_seq,known_var',
             'col_filter': 'y',
             'row_filter': 'y',
+            'var_groups': 'n',
             'known_vars': 'n',
             'novel_vars': 'n'
         },
@@ -25,6 +27,15 @@ def use_preset(options):
             'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
             'col_filter': 'y',
             'row_filter': 'y',
+            'var_groups': 'n',
+            'known_vars': 'n',
+            'novel_vars': 'n'
+        },
+        'cluster_var_groups': {
+            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
+            'col_filter': 'y',
+            'row_filter': 'y',
+            'var_groups': 'y',
             'known_vars': 'n',
             'novel_vars': 'n'
         },
@@ -32,6 +43,7 @@ def use_preset(options):
             'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
             'col_filter': 'y',
             'row_filter': 'y',
+            'var_groups': 'y',
             'known_vars': 'y',
             'novel_vars': 'n'
         },
@@ -39,6 +51,7 @@ def use_preset(options):
             'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
             'col_filter': 'y',
             'row_filter': 'y',
+            'var_groups': 'y',
             'known_vars': 'y',
             'novel_vars': 'y'
         },
@@ -46,6 +59,7 @@ def use_preset(options):
             'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
             'col_filter': 'n',
             'row_filter': 'n',
+            'var_groups': 'y',
             'known_vars': 'y',
             'novel_vars': 'y'
         },
@@ -60,7 +74,7 @@ def use_preset(options):
 
 
 def run():
-    presets = ['minimal', 'cluster_small', 'cluster_all', 'cluster_known_vars', 'all', 'all_no_filter']
+    presets = ['minimal', 'cluster_small', 'cluster_all', 'cluster_var_groups', 'cluster_known_vars', 'all', 'all_no_filter']
 
     parser = argparse.ArgumentParser(
         description = 'Make a summary of ARIBA report files, and Phandango files',
@@ -73,6 +87,7 @@ def run():
     parser.add_argument('--row_filter', choices=['y', 'n'], default='y', help='Choose whether rows where all values are "no" or "NA" are removed [%(default)s]', metavar='y|n')
     parser.add_argument('--known_vars', choices=['y', 'n'], default='n', help='Output a column for every known variant [%(default)s]', metavar='y|n')
     parser.add_argument('--novel_vars', choices=['y', 'n'], default='n', help='Output a column for every novel variant [%(default)s]', metavar='y|n')
+    parser.add_argument('--var_groups', choices=['y', 'n'], default='n', help='Output variant group columns [%(default)s]', metavar='y|n')
     parser.add_argument('--min_id', type=float, help='Minimum percent identity cutoff to count as assembled [%(default)s]', default=90, metavar='FLOAT')
     parser.add_argument('--verbose', action='store_true', help='Be verbose')
     parser.add_argument('outprefix', help='Prefix of output files')
@@ -89,6 +104,7 @@ def run():
         filenames=options.infiles,
         include_all_known_variant_columns=options.known_vars == 'y',
         include_all_novel_variant_columns=options.novel_vars == 'y',
+        include_var_group_columns=options.var_groups == 'y',
         filter_rows=options.col_filter == 'y',
         filter_columns=options.row_filter == 'y',
         min_id=options.min_id,
