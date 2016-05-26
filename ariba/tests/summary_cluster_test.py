@@ -319,10 +319,10 @@ class TestSummaryCluster(unittest.TestCase):
             summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
 
         d['known_var_change'] = 'I42L'
-        self.assertEqual(('ref', 'I42L', 'ungrouped'), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+        self.assertEqual(('ref', 'I42L', 'ungrouped', None), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
         d['var_group'] = 'vgroup'
-        self.assertEqual(('ref', 'I42L', 'grouped'), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+        self.assertEqual(('ref', 'I42L', 'grouped', 'vgroup'), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
         d['var_group'] = '.'
 
         d['ref_ctg_change'] = 'P43Q'
@@ -330,14 +330,14 @@ class TestSummaryCluster(unittest.TestCase):
             summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
 
         d['known_var_change'] = '.'
-        self.assertEqual(('ref', 'P43Q', 'novel'), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+        self.assertEqual(('ref', 'P43Q', 'novel', None), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
         d['ref_ctg_change'] = '.'
         with self.assertRaises(summary_cluster.Error):
             summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
 
         d['ref_ctg_effect'] = 'MULTIPLE'
-        self.assertEqual(('ref', 'MULTIPLE', 'novel'), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+        self.assertEqual(('ref', 'MULTIPLE', 'novel', None), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
 
     def test_has_resistance(self):
@@ -419,5 +419,5 @@ class TestSummaryCluster(unittest.TestCase):
         cluster.add_data_dict(data_dict1)
         cluster.add_data_dict(data_dict2)
         got = cluster.non_synon_variants()
-        expected = {('ref1', 'A14T', 'grouped')}
+        expected = {('ref1', 'A14T', 'grouped', 'id1')}
         self.assertEqual(expected, got)

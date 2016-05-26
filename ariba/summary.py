@@ -15,9 +15,6 @@ class Summary:
       outprefix,
       filenames=None,
       fofn=None,
-      include_all_known_variant_columns=True,
-      include_all_novel_variant_columns=False,
-      include_var_group_columns=False,
       filter_rows=True,
       filter_columns=True,
       min_id=90.0,
@@ -37,9 +34,6 @@ class Summary:
             self.filenames.extend(self._load_fofn(fofn))
 
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
-        self.include_all_known_variant_columns = include_all_known_variant_columns
-        self.include_all_novel_variant_columns = include_all_novel_variant_columns
-        self.include_var_group_columns = include_var_group_columns
         self.filter_rows = filter_rows
         self.filter_columns = filter_columns
         self.min_id = min_id
