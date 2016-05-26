@@ -314,6 +314,7 @@ class TestSummaryCluster(unittest.TestCase):
         self.assertEqual(None, summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
         d['var_type'] = 'p'
+        d['known_var'] = '1'
         d['has_known_var'] = '1'
         with self.assertRaises(summary_cluster.Error):
             summary_cluster.SummaryCluster._get_nonsynonymous_var(d)

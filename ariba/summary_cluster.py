@@ -203,7 +203,7 @@ class SummaryCluster:
 
             var_group = 'novel', None
 
-            if data_dict['known_var_change'] != '.':
+            if data_dict['known_var'] == '1' and data_dict['known_var_change'] != '.':
                 var_change = data_dict['known_var_change']
                 if data_dict['var_group'] == '.':
                     var_group = 'ungrouped', None
