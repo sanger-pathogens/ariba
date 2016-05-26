@@ -307,7 +307,8 @@ class TestSummaryCluster(unittest.TestCase):
             'known_var': '0',
             'ref_ctg_change': '.',
             'ref_ctg_effect': '.',
-            'var_seq_type': '.'
+            'var_seq_type': '.',
+            'var_group': '.',
         }
 
         self.assertEqual(None, summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
@@ -318,21 +319,25 @@ class TestSummaryCluster(unittest.TestCase):
             summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
 
         d['known_var_change'] = 'I42L'
-        self.assertEqual('I42L', summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+        self.assertEqual(('ref', 'I42L', 'ungrouped'), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+
+        d['var_group'] = 'vgroup'
+        self.assertEqual(('ref', 'I42L', 'grouped'), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+        d['var_group'] = '.'
 
         d['ref_ctg_change'] = 'P43Q'
         with self.assertRaises(summary_cluster.Error):
             summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
 
         d['known_var_change'] = '.'
-        self.assertEqual('P43Q', summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+        self.assertEqual(('ref', 'P43Q', 'novel'), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
         d['ref_ctg_change'] = '.'
         with self.assertRaises(summary_cluster.Error):
             summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
 
         d['ref_ctg_effect'] = 'MULTIPLE'
-        self.assertEqual('MULTIPLE', summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
+        self.assertEqual(('ref', 'MULTIPLE', 'novel'), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
 
     def test_has_resistance(self):
@@ -414,5 +419,5 @@ class TestSummaryCluster(unittest.TestCase):
         cluster.add_data_dict(data_dict1)
         cluster.add_data_dict(data_dict2)
         got = cluster.non_synon_variants()
-        expected = {'A14T'}
+        expected = {('ref1', 'A14T', 'grouped')}
         self.assertEqual(expected, got)
