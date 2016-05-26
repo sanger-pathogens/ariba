@@ -19,7 +19,7 @@ class Summary:
       filter_columns=True,
       min_id=90.0,
       cluster_cols='assembled,has_res,ref_seq,pct_id,known_var,novel_var',
-      var_cols='grouped,ungrouped,novel',
+      variant_cols='groups,grouped,ungrouped,novel',
       verbose=False,
     ):
         if filenames is None and fofn is None:
@@ -34,6 +34,7 @@ class Summary:
             self.filenames.extend(self._load_fofn(fofn))
 
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
+        self.var_columns = self._determine_var_cols(variant_cols)
         self.filter_rows = filter_rows
         self.filter_columns = filter_columns
         self.min_id = min_id
@@ -59,7 +60,7 @@ class Summary:
 
     @staticmethod
     def _determine_var_cols(cols_string):
-        allowed_cols = {'grouped', 'ungrouped', 'novel'}
+        allowed_cols = {'groups', 'grouped', 'ungrouped', 'novel'}
         return Summary._determine_cols(cols_string, allowed_cols, 'variant columns')
 
 
@@ -125,7 +126,7 @@ class Summary:
     def _gather_output_rows(self):
         all_cluster_names = Summary._get_all_cluster_names(self.samples)
         all_var_columns = Summary._get_all_variant_columns(self.samples)
-        if self.include_var_group_columns:
+        if self.var_columns['groups']:
             var_groups = Summary._get_all_var_groups(self.samples)
         else:
             var_groups = set()
@@ -149,28 +150,22 @@ class Summary:
                         'pct_id': 'NA'
                     }
 
-                if self.include_var_group_columns:
+                if self.var_columns['groups']:
                     for group_name in var_groups[cluster]:
                         if cluster in sample.var_groups and group_name in sample.var_groups[cluster]:
                             rows[filename][cluster]['vgroup.' + group_name] = 'yes'
                         else:
                             rows[filename][cluster]['vgroup.' + group_name] = 'no'
 
-                wanted_var_types = set()
-                if self.include_all_known_variant_columns:
-                    wanted_var_types.add('known')
-                if self.include_all_novel_variant_columns:
-                    wanted_var_types.add('unknown')
-
-                if len(wanted_var_types) and cluster in all_var_columns:
-                    for (ref_name, variant, known_or_unknown) in all_var_columns[cluster]:
-                        if known_or_unknown not in wanted_var_types:
+                if cluster in all_var_columns:
+                    for (ref_name, variant, grouped_or_novel, group_name) in all_var_columns[cluster]:
+                        if not self.var_columns[grouped_or_novel]:
                             continue
 
                         key = ref_name + '.' + variant
                         if rows[filename][cluster]['assembled'] == 'no':
                             rows[filename][cluster][key] = 'NA'
-                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant, known_or_unknown) in sample.variant_column_names_tuples[cluster]:
+                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant, grouped_or_novel, group_name) in sample.variant_column_names_tuples[cluster]:
                             rows[filename][cluster][key] = 'yes'
                         else:
                             rows[filename][cluster][key] = 'no'

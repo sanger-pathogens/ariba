@@ -46,8 +46,8 @@ class TestSummary(unittest.TestCase):
 
     def test_determine_var_cols(self):
         col_strings = [
-            'grouped,ungrouped,novel',
-            'grouped,ungrouped',
+            'groups,grouped,ungrouped,novel',
+            'groups,grouped,ungrouped',
             'grouped,novel',
             'ungrouped,novel',
             'grouped',
@@ -57,14 +57,14 @@ class TestSummary(unittest.TestCase):
         ]
 
         expected = [
-            {'grouped': True, 'ungrouped': True, 'novel': True},
-            {'grouped': True, 'ungrouped': True, 'novel': False},
-            {'grouped': True, 'ungrouped': False, 'novel': True},
-            {'grouped': False, 'ungrouped': True, 'novel': True},
-            {'grouped': True, 'ungrouped': False, 'novel': False},
-            {'grouped': False, 'ungrouped': True, 'novel': False},
-            {'grouped': False, 'ungrouped': False, 'novel': True},
-            {'grouped': False, 'ungrouped': False, 'novel': False},
+            {'groups': True, 'grouped': True, 'ungrouped': True, 'novel': True},
+            {'groups': True, 'grouped': True, 'ungrouped': True, 'novel': False},
+            {'groups': False, 'grouped': True, 'ungrouped': False, 'novel': True},
+            {'groups': False, 'grouped': False, 'ungrouped': True, 'novel': True},
+            {'groups': False, 'grouped': True, 'ungrouped': False, 'novel': False},
+            {'groups': False, 'grouped': False, 'ungrouped': True, 'novel': False},
+            {'groups': False, 'grouped': False, 'ungrouped': False, 'novel': True},
+            {'groups': False, 'grouped': False, 'ungrouped': False, 'novel': False},
         ]
 
         assert len(col_strings) == len(expected)
@@ -103,9 +103,9 @@ class TestSummary(unittest.TestCase):
         samples = summary.Summary._load_input_files([file1, file2], 90)
         got = summary.Summary._get_all_variant_columns(samples)
         expected = {
-            'cluster.p.2': {('presence_absence1', 'A10V', 'known')},
-            'cluster.n.1': {('noncoding1', 'A6G', 'known'), ('noncoding1', 'A14T', 'known')},
-            'cluster.p.1': {('presence_absence1', 'A10V', 'known')},
+            'cluster.p.2': {('presence_absence1', 'A10V', 'grouped', 'id3')},
+            'cluster.n.1': {('noncoding1', 'A6G', 'grouped', 'id2'), ('noncoding1', 'A14T', 'grouped', 'id1')},
+            'cluster.p.1': {('presence_absence1', 'A10V', 'grouped', 'id2')},
         }
         self.assertEqual(expected, got)
 
@@ -131,7 +131,7 @@ class TestSummary(unittest.TestCase):
             os.path.join(data_dir, 'summary_test_gather_output_rows.in.1.tsv'),
             os.path.join(data_dir, 'summary_test_gather_output_rows.in.2.tsv')
         ]
-        s = summary.Summary('out', filenames=infiles, include_all_known_variant_columns=False)
+        s = summary.Summary('out', filenames=infiles, variant_cols=None)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         expected = {
             infiles[0]: {
@@ -190,7 +190,7 @@ class TestSummary(unittest.TestCase):
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 
-        s.include_var_group_columns = True
+        s.var_columns['groups'] = True
         expected[infiles[0]]['noncoding1']['vgroup.id1'] = 'yes'
         expected[infiles[0]]['noncoding1']['vgroup.id3'] = 'no'
         expected[infiles[1]]['noncoding1']['vgroup.id1'] = 'yes'
@@ -199,7 +199,8 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-        s.include_all_known_variant_columns = True
+        s.var_columns['grouped'] = True
+        s.var_columns['ungrouped'] = True
         expected[infiles[0]]['noncoding1']['noncoding1.A14T'] = 'yes'
         expected[infiles[0]]['noncoding1']['noncoding1.A6G'] = 'no'
         expected[infiles[1]]['noncoding1']['noncoding1.A14T'] = 'yes'
@@ -207,7 +208,7 @@ class TestSummary(unittest.TestCase):
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 
-        s.include_all_novel_variant_columns = True
+        s.var_columns['novel'] = True
         expected[infiles[0]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
         expected[infiles[1]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
         got = s._gather_output_rows()
@@ -219,7 +220,7 @@ class TestSummary(unittest.TestCase):
             for gene_type in expected[filename]:
                 del expected[filename][gene_type]['ref_seq']
 
-        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,has_res,pct_id,known_var,novel_var', include_all_novel_variant_columns=True)
+        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,has_res,pct_id,known_var,novel_var', variant_cols='ungrouped,grouped,novel')
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s.include_all_variant_columns = True
         got = s._gather_output_rows()
