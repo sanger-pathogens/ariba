@@ -22,6 +22,7 @@ class Summary:
       filter_columns=True,
       min_id=90.0,
       cluster_cols='assembled,has_res,ref_seq,pct_id,known_var,novel_var',
+      var_cols='grouped,ungrouped,novel',
       verbose=False,
     ):
         if filenames is None and fofn is None:
@@ -46,15 +47,26 @@ class Summary:
         self.verbose = verbose
 
 
-    @staticmethod
-    def _determine_cluster_cols(cols_string):
-        allowed_cols = {'assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
+    @classmethod
+    def _determine_cols(cls, cols_string, allowed_cols, error_string):
         if cols_string == '' or cols_string is None:
             return {x: False for x in allowed_cols}
         wanted_cols = set(cols_string.split(','))
         if not wanted_cols.issubset(allowed_cols):
-            raise Error('Error in cluster names. Allowed values are: ' + str(','.join(list(allowed_cols))) + '. Got: ' + cols_string)
+            raise Error('Error in ' + error_string + '. Allowed values are: ' + str(','.join(list(allowed_cols))) + '. Got: ' + cols_string)
         return {x: x in wanted_cols for x in allowed_cols}
+
+
+    @staticmethod
+    def _determine_cluster_cols(cols_string):
+        allowed_cols = {'assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
+        return Summary._determine_cols(cols_string, allowed_cols, 'cluster columns')
+
+
+    @staticmethod
+    def _determine_var_cols(cols_string):
+        allowed_cols = {'grouped', 'ungrouped', 'novel'}
+        return Summary._determine_cols(cols_string, allowed_cols, 'variant columns')
 
 
     def _load_fofn(self, fofn):

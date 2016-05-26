@@ -44,6 +44,35 @@ class TestSummary(unittest.TestCase):
             self.assertEqual(expected[i], summary.Summary._determine_cluster_cols(col_strings[i]))
 
 
+    def test_determine_var_cols(self):
+        col_strings = [
+            'grouped,ungrouped,novel',
+            'grouped,ungrouped',
+            'grouped,novel',
+            'ungrouped,novel',
+            'grouped',
+            'ungrouped',
+            'novel',
+            ''
+        ]
+
+        expected = [
+            {'grouped': True, 'ungrouped': True, 'novel': True},
+            {'grouped': True, 'ungrouped': True, 'novel': False},
+            {'grouped': True, 'ungrouped': False, 'novel': True},
+            {'grouped': False, 'ungrouped': True, 'novel': True},
+            {'grouped': True, 'ungrouped': False, 'novel': False},
+            {'grouped': False, 'ungrouped': True, 'novel': False},
+            {'grouped': False, 'ungrouped': False, 'novel': True},
+            {'grouped': False, 'ungrouped': False, 'novel': False},
+        ]
+
+        assert len(col_strings) == len(expected)
+
+        for i in range(len(col_strings)):
+            self.assertEqual(expected[i], summary.Summary._determine_var_cols(col_strings[i]))
+
+
     def test_load_input_files(self):
         '''Test _load_input_files'''
         file1 = os.path.join(data_dir, 'summary_test_load_input_files.1.tsv')
