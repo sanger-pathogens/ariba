@@ -1,6 +1,8 @@
 import sys
 import pymummer
 
+class Error (Exception): pass
+
 columns = [
     'ref_name',              # 0  name of reference sequence
     'ref_type',              # 1  type of reference sequence (presence/absence, variants only, noncoding)
@@ -165,7 +167,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 known_var_change = 'unknown'
                 var_type = 'SNP'
                 has_known_var = '1'
-                matching_vars_column = ';;;'.join([x.to_string(separator='_') for x in matching_vars_set])
+                matching_vars_column = ';;;'.join([x.to_string(separator=':') for x in matching_vars_set])
             else:
                 is_known_var = '0'
                 known_var_change = '.'
@@ -253,8 +255,10 @@ def report_lines(cluster):
 
     for line in lines:
         if len(line.split('\t')) != len(columns):
-            print('Error making report - wrong number of columns. Expected', len(columns), 'but got', len(line.split('\t')), file=sys.stderr)
-            print(line, file=sys.stderr)
+            cols = line.split('\t')
+            print('Error making report - wrong number of columns. Expected', len(columns), 'but got', len(cols), file=sys.stderr)
+            for i in range(len(cols)):
+                print(i, cols[i], sep='\t', file=sys.stderr)
             lines_ok = False
 
     if not lines_ok:

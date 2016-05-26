@@ -38,7 +38,7 @@ class VfdbParser:
         for seq in file_reader:
             seq.id, description = self._fa_header_to_name_and_metadata(seq.id)
             if description is not None:
-                print(seq.id, '.', '.', description, sep='\t', file=tsv_out)
+                print(seq.id, '.', '.', '.', description, sep='\t', file=tsv_out)
             print(seq, file=fa_out)
 
         pyfastaq.utils.close(fa_out)

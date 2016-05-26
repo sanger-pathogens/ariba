@@ -21,18 +21,22 @@ class TestSequenceVariant(unittest.TestCase):
 
         for var in bad_variants:
             with self.assertRaises(sequence_variant.Error):
-                v = sequence_variant.Variant('p', var)
+                v = sequence_variant.Variant('p', var, '.')
 
 
     def test_init_ok(self):
         '''Test init ok'''
-        variants = ['I42K', 'i42k', 'I42k', 'i42K']
+        variants = [('I42K', '.'), ('i42k', 'id1'), ('I42k', 'id2'), ('i42K', 'id3')]
 
-        for var in variants:
-            aa_var = sequence_variant.Variant('p', var)
+        for var, identifier in variants:
+            aa_var = sequence_variant.Variant('p', var, identifier)
             self.assertEqual(41, aa_var.position)
             self.assertEqual('I', aa_var.wild_value)
             self.assertEqual('K', aa_var.variant_value)
+            if identifier == '.':
+                self.assertIsNone(aa_var.identifier)
+            else:
+                self.assertEqual(identifier, aa_var.identifier)
 
 
     def test_init_str(self):
@@ -41,7 +45,7 @@ class TestSequenceVariant(unittest.TestCase):
         expected = 'I42K'
 
         for var in variants:
-            self.assertEqual(expected, str(sequence_variant.Variant('p', var)))
+            self.assertEqual(expected, str(sequence_variant.Variant('p', var, '.')))
 
 
     def test_sanity_check_against_seq_no_translate(self):
@@ -55,7 +59,7 @@ class TestSequenceVariant(unittest.TestCase):
         ]
 
         for var, expected in tests:
-            variant = sequence_variant.Variant('p', var)
+            variant = sequence_variant.Variant('p', var, '.')
             self.assertEqual(expected, variant.sanity_check_against_seq(seq))
 
 
@@ -70,7 +74,7 @@ class TestSequenceVariant(unittest.TestCase):
         ]
 
         for var, expected in tests:
-            variant = sequence_variant.Variant('p', var)
+            variant = sequence_variant.Variant('p', var, '.')
             self.assertEqual(expected, variant.sanity_check_against_seq(seq, translate_seq=True))
 
 
@@ -78,10 +82,10 @@ class TestSequenceVariant(unittest.TestCase):
         '''test has_variant'''
         seq = pyfastaq.sequences.Fasta('name', 'ATGTATTGCTGA') # translation: MYC*
         tests = [
-            (sequence_variant.Variant('n', 'A2T'), True),
-            (sequence_variant.Variant('n', 'T2A'), False),
-            (sequence_variant.Variant('p', 'I2Y'), True),
-            (sequence_variant.Variant('p', 'Y2I'), False),
+            (sequence_variant.Variant('n', 'A2T', '.'), True),
+            (sequence_variant.Variant('n', 'T2A', '.'), False),
+            (sequence_variant.Variant('p', 'I2Y', '.'), True),
+            (sequence_variant.Variant('p', 'Y2I', '.'), False),
         ]
 
         for var, expected in tests:
@@ -90,7 +94,7 @@ class TestSequenceVariant(unittest.TestCase):
 
     def test_nucleotide_range(self):
         '''test nucleotide_range'''
-        sv = sequence_variant.Variant('n', 'A2T')
+        sv = sequence_variant.Variant('n', 'A2T', '.')
         self.assertEqual((1, 1), sv.nucleotide_range())
-        sv = sequence_variant.Variant('p', 'I42L')
+        sv = sequence_variant.Variant('p', 'I42L', '.')
         self.assertEqual((123, 125), sv.nucleotide_range())

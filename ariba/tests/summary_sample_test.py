@@ -45,7 +45,7 @@ class TestSummarySample(unittest.TestCase):
                 'has_res': 'yes',
                 'ref_seq': 'noncoding1',
                 'known_var': 'yes',
-                'novel_var': 'no',
+                'novel_var': 'yes',
                 'pct_id': '98.33'
             },
             'cluster.p': {
@@ -70,17 +70,17 @@ class TestSummarySample(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_non_synon_variants(self):
-        '''Test _non_synon_variants'''
-        infile = os.path.join(data_dir, 'summary_sample_test_non_synon_variants.tsv')
+    def test_var_groups(self):
+        '''test _var_groups'''
+        infile = os.path.join(data_dir, 'summary_sample_test_var_groups.tsv')
         sample_summary = summary_sample.SummarySample(infile)
         sample_summary.clusters = sample_summary._load_file(infile, 90)
+        got = sample_summary._var_groups()
         expected = {
-            'cluster.n': {'A14T', 'A6G'},
-            'cluster.p': {'A10V'},
-            'cluster.v': {'S5T'}
+            'cluster.n': {'id1', 'id2'},
+            'cluster.p': {'id3'},
+            'cluster.v': {'id4'}
         }
-        got = sample_summary._non_synon_variants()
         self.assertEqual(expected, got)
 
 
@@ -90,11 +90,14 @@ class TestSummarySample(unittest.TestCase):
         sample_summary = summary_sample.SummarySample(infile)
         sample_summary.clusters = sample_summary._load_file(infile, 90)
         sample_summary.column_summary_data = sample_summary._column_summary_data()
-        sample_summary.variants = sample_summary._non_synon_variants()
         expected = {
-            'cluster.v': {('variants_only1', 'S5T', 'known')},
-            'cluster.n': {('noncoding1', 'A6G', 'known'), ('noncoding1', 'A14T', 'known')},
-            'cluster.p': {('presence_absence1', 'A10V', 'unknown')}
+            'cluster.v': {('variants_only1', 'S5T', 'ungrouped', None)},
+            'cluster.n': {
+                ('noncoding1', 'A6G', 'grouped', 'id2'),
+                ('noncoding1', 'A14T', 'ungrouped', None),
+                ('noncoding1', 'G15T', 'novel', None)
+             },
+            'cluster.p': {('presence_absence1', 'A10V', 'grouped', 'id3')}
         }
         got = sample_summary._variant_column_names_tuples()
         self.assertEqual(expected, got)

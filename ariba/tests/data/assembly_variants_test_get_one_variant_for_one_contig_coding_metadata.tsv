@@ -1,11 +1,11 @@
-presence_absence	p	D2E	ref has wild type D (GAT=D, GAA=E)
-presence_absence	p	S3R	ref has variant type R (AGA=R, AGT=S)
-presence_absence	p	D4E	ref has variant type E (GAA=E, GAC=D)
-presence_absence	p	A5D	ref has wild type A (GCG=A)
-variants_only	p	D2E	ref has wild type D (GAT=D, GAA=E)
-variants_only	p	S3R	ref has variant type R (AGA=R, AGT=S)
-variants_only	p	D4E	ref has variant type E (GAA=E, GAC=D)
-variants_only	p	A5D	ref has wild type A (GCG=A)
-non_coding	n	C3A	ref has variant type A
-non_coding	n	T5A	ref has wild type T
-non_coding	n	C6G	ref has variant type G
+presence_absence	p	D2E	id1	ref has wild type D (GAT=D, GAA=E)
+presence_absence	p	S3R	id1	ref has variant type R (AGA=R, AGT=S)
+presence_absence	p	D4E	id1	ref has variant type E (GAA=E, GAC=D)
+presence_absence	p	A5D	id1	ref has wild type A (GCG=A)
+variants_only	p	D2E	id1	ref has wild type D (GAT=D, GAA=E)
+variants_only	p	S3R	id1	ref has variant type R (AGA=R, AGT=S)
+variants_only	p	D4E	id1	ref has variant type E (GAA=E, GAC=D)
+variants_only	p	A5D	id1	ref has wild type A (GCG=A)
+non_coding	n	C3A	id1	ref has variant type A
+non_coding	n	T5A	id1	ref has wild type T
+non_coding	n	C6G	id1	ref has variant type G

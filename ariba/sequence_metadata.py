@@ -6,23 +6,16 @@ class Error (Exception): pass
 class SequenceMetadata:
     def __init__(self, line):
         try:
-            self.name, variant_type, variant_string, *extra_columns = line.rstrip().split('\t')
+            self.name, variant_type, variant_string, identifier, self.free_text = line.rstrip().split('\t')
         except:
             raise Error('Error parsing line of file:\n' + line)
-
-        if len(extra_columns) == 0:
-            self.free_text = None
-        elif len(extra_columns) == 1:
-            self.free_text = extra_columns[0]
-        else:
-            raise Error('Too many columns in this line:\n' + line)
 
         self.variant_type = variant_type
 
         if self.variant_type == '.':
             self.variant = None
         else:
-            self.variant = sequence_variant.Variant(self.variant_type, variant_string)
+            self.variant = sequence_variant.Variant(self.variant_type, variant_string, identifier)
 
 
     def __eq__(self, other):
@@ -42,16 +35,13 @@ class SequenceMetadata:
 
 
     def to_string(self, separator='\t'):
-        fields = [self.name, self.variant_type]
-        if self.variant is None:
-            fields.append('.')
-        else:
-            fields.append(str(self.variant))
-
-        if self.free_text:
-            return separator.join(fields + [self.free_text])
-        else:
-            return separator.join(fields)
+        return separator.join([
+            self.name,
+            self.variant_type,
+            '.' if self.variant is None else str(self.variant),
+            '.' if (self.variant is None or self.variant.identifier is None) else self.variant.identifier,
+            self.free_text
+        ])
 
 
     def has_variant(self, seq):

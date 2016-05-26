@@ -40,7 +40,11 @@ class SummarySample:
         return {c: self.clusters[c].column_summary_data() for c in self.clusters}
 
 
-    def _non_synon_variants(self):
+    def _var_groups(self):
+        return {c: self.clusters[c].has_var_groups() for c in self.clusters}
+
+
+    def _variant_column_names_tuples(self):
         variants = {}
         for cluster_name, cluster in self.clusters.items():
             cluster_vars = cluster.non_synon_variants()
@@ -49,25 +53,9 @@ class SummarySample:
         return variants
 
 
-    def _variant_column_names_tuples(self):
-        # assumes this has been run:
-        # self.column_summary_data = self._column_summary_data()
-        # self.variants = self._non_synon_variants()
-        columns = {}
-        for cluster_name, variants in self.variants.items():
-           ref_name = self.column_summary_data[cluster_name]['ref_seq']
-           columns[cluster_name] = set()
-           for var in variants:
-               if self.column_summary_data[cluster_name]['known_var'] == 'yes':
-                   columns[cluster_name].add((ref_name, var, 'known'))
-               else:
-                   columns[cluster_name].add((ref_name, var, 'unknown'))
-        return columns
-
-
     def run(self):
         self.clusters = self._load_file(self.report_tsv, self.min_pc_id)
         self.column_summary_data = self._column_summary_data()
-        self.variants = self._non_synon_variants()
         self.variant_column_names_tuples = self._variant_column_names_tuples()
+        self.var_groups = self._var_groups()
 

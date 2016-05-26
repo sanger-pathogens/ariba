@@ -52,6 +52,14 @@ class SummaryCluster:
             except:
                 assert d[key] == '.'
 
+        if d['var_description'] == '.':
+            d['var_group'] = '.'
+        else:
+            try:
+                d['var_group'] = d['var_description'].split(':')[3]
+            except:
+                raise Error('Error getting variant group from the following line:\n' + line)
+
         return d
 
 
@@ -193,13 +201,20 @@ class SummaryCluster:
               data_dict['known_var_change'] != data_dict['ref_ctg_change']:
                 raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change != ref_ctg_change. Cannot continue')
 
-            if data_dict['known_var_change'] != '.':
-                return data_dict['known_var_change']
-            elif data_dict['ref_ctg_change'] != '.':
-                return data_dict['ref_ctg_change']
-            else:
-                return data_dict['ref_ctg_effect']
+            var_group = 'novel', None
 
+            if data_dict['known_var'] == '1' and data_dict['known_var_change'] != '.':
+                var_change = data_dict['known_var_change']
+                if data_dict['var_group'] == '.':
+                    var_group = 'ungrouped', None
+                else:
+                    var_group = 'grouped', data_dict['var_group']
+            elif data_dict['ref_ctg_change'] != '.':
+                var_change = data_dict['ref_ctg_change']
+            else:
+                var_change = data_dict['ref_ctg_effect']
+
+            return (data_dict['ref_name'], var_change) + var_group
 
     def _has_resistance(self, assembled_summary):
         '''assembled_summary should be output of _to_cluster_summary_assembled'''
@@ -210,6 +225,15 @@ class SummaryCluster:
                 return 'no'
         else:
             return 'no'
+
+
+    def has_var_groups(self):
+        '''Returns a set of the variant group ids that this cluster has'''
+        ids = set()
+        for d in self.data:
+            if self._has_known_variant(d) and d['var_group'] != '.':
+                ids.add(d['var_group'])
+        return ids
 
 
     def column_summary_data(self):

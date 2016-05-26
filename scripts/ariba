@@ -9,6 +9,7 @@ tasks = {
     'run': 'Run the ARIBA local assembly pipeline',
     'summary': 'Summarise multiple reports made by "run"',
     'flag': 'Translate the meaning of a flag output by the pipeline',
+    'aln2meta': 'Make metadata input to preparef, using multialignment and SNPs',
     'test': 'Run on small test dataset',
     'version': 'Print version and exit',
 }
@@ -21,6 +22,7 @@ ordered_tasks = [
     'reportfilter',
     'summary',
     'flag',
+    'aln2meta',
     'test',
     'version',
 ]

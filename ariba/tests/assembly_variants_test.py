@@ -120,8 +120,8 @@ class TestAssemblyVariants(unittest.TestCase):
         # ref has T at position 5, which is wild type. This gives contig variant type A. Should report
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('5\tT\tA\t5\tx\tx\t42\t42\tx\tx\tnon_coding\tcontig'))
 
-        meta0 = sequence_metadata.SequenceMetadata('non_coding\tn\tC3A\tref has variant type A')
-        meta2 = sequence_metadata.SequenceMetadata('non_coding\tn\tT5A\tref has wild type T')
+        meta0 = sequence_metadata.SequenceMetadata('non_coding\tn\tC3A\tid1\tref has variant type A')
+        meta2 = sequence_metadata.SequenceMetadata('non_coding\tn\tT5A\tid1\tref has wild type T')
 
         mummer_variants = [v0, v1, v2]
 
@@ -188,8 +188,8 @@ class TestAssemblyVariants(unittest.TestCase):
 
         mummer_variants = [[v0], [v1], [v2], [v3], [v4], [v5], [v6], [v7], [v8], [v9], [v10]]
 
-        meta0 = sequence_metadata.SequenceMetadata('presence_absence\tp\tD2E\tref has wild type D (GAT=D, GAA=E)')
-        meta4 = sequence_metadata.SequenceMetadata('presence_absence\tp\tS3R\tref has variant type R (AGA=R, AGT=S)')
+        meta0 = sequence_metadata.SequenceMetadata('presence_absence\tp\tD2E\tid1\tref has wild type D (GAT=D, GAA=E)')
+        meta4 = sequence_metadata.SequenceMetadata('presence_absence\tp\tS3R\tid1\tref has variant type R (AGA=R, AGT=S)')
 
         expected_tuples = [
             (1, 'p', 'D2E', 'NONSYN', [v0], {meta0}, set()),    #0
@@ -230,13 +230,13 @@ class TestAssemblyVariants(unittest.TestCase):
 
     def test_get_remaining_known_ref_variants_amino_acids(self):
         '''test _get_remaining_known_ref_variants with amino acids'''
-        ref_var1 = sequence_metadata.SequenceMetadata('gene1\tp\tD2E\tfoo bar')
-        ref_var2 = sequence_metadata.SequenceMetadata('gene1\tp\tD3E\tfoo bar baz')
-        ref_var3 = sequence_metadata.SequenceMetadata('gene1\tp\tD3I\tfoo bar baz spam')
-        ref_var4 = sequence_metadata.SequenceMetadata('gene1\tp\tD10E\tfoo bar baz spam egg')
-        ref_var5 = sequence_metadata.SequenceMetadata('gene1\tp\tD14E\tfoo bar baz spam egg chips')
-        ref_var6 = sequence_metadata.SequenceMetadata('gene1\tp\tD15E\tfoo bar baz spam egg chips')
-        ref_var7 = sequence_metadata.SequenceMetadata('gene1\tp\tD40E\tfoo bar baz spam egg chips')
+        ref_var1 = sequence_metadata.SequenceMetadata('gene1\tp\tD2E\tid1\tfoo bar')
+        ref_var2 = sequence_metadata.SequenceMetadata('gene1\tp\tD3E\tid1\tfoo bar baz')
+        ref_var3 = sequence_metadata.SequenceMetadata('gene1\tp\tD3I\tid1\tfoo bar baz spam')
+        ref_var4 = sequence_metadata.SequenceMetadata('gene1\tp\tD10E\tid1\tfoo bar baz spam egg')
+        ref_var5 = sequence_metadata.SequenceMetadata('gene1\tp\tD14E\tid1\tfoo bar baz spam egg chips')
+        ref_var6 = sequence_metadata.SequenceMetadata('gene1\tp\tD15E\tid1\tfoo bar baz spam egg chips')
+        ref_var7 = sequence_metadata.SequenceMetadata('gene1\tp\tD40E\tid1\tfoo bar baz spam egg chips')
 
         known_ref_variants = {
             1: {ref_var1},
@@ -261,13 +261,13 @@ class TestAssemblyVariants(unittest.TestCase):
 
     def test_get_remaining_known_ref_variants_nucleotides(self):
         '''test _get_remaining_known_ref_variants with nucleotides'''
-        ref_var1 = sequence_metadata.SequenceMetadata('gene1\tn\tA2C\tfoo bar')
-        ref_var2 = sequence_metadata.SequenceMetadata('gene1\tn\tA3C\tfoo bar baz')
-        ref_var3 = sequence_metadata.SequenceMetadata('gene1\tn\tA3T\tfoo bar baz spam')
-        ref_var4 = sequence_metadata.SequenceMetadata('gene1\tn\tA10C\tfoo bar baz spam egg')
-        ref_var5 = sequence_metadata.SequenceMetadata('gene1\tn\tA14C\tfoo bar baz spam egg chips')
-        ref_var6 = sequence_metadata.SequenceMetadata('gene1\tn\tA15C\tfoo bar baz spam egg chips')
-        ref_var7 = sequence_metadata.SequenceMetadata('gene1\tn\tA40C\tfoo bar baz spam egg chips')
+        ref_var1 = sequence_metadata.SequenceMetadata('gene1\tn\tA2C\tid1\tfoo bar')
+        ref_var2 = sequence_metadata.SequenceMetadata('gene1\tn\tA3C\tid1\tfoo bar baz')
+        ref_var3 = sequence_metadata.SequenceMetadata('gene1\tn\tA3T\tid1\tfoo bar baz spam')
+        ref_var4 = sequence_metadata.SequenceMetadata('gene1\tn\tA10C\tid1\tfoo bar baz spam egg')
+        ref_var5 = sequence_metadata.SequenceMetadata('gene1\tn\tA14C\tid1\tfoo bar baz spam egg chips')
+        ref_var6 = sequence_metadata.SequenceMetadata('gene1\tn\tA15C\tid1\tfoo bar baz spam egg chips')
+        ref_var7 = sequence_metadata.SequenceMetadata('gene1\tn\tA40C\tid1\tfoo bar baz spam egg chips')
 
         known_ref_variants = {
             1: {ref_var1},
@@ -292,11 +292,11 @@ class TestAssemblyVariants(unittest.TestCase):
 
     def test_get_variants_presence_absence(self):
         '''test get_variants presence absence genes'''
-        meta1 = sequence_metadata.SequenceMetadata('presence_absence\tp\tD2E\tref has wild type D, contig has var (GAT=D, GAA=E)')
-        meta2 = sequence_metadata.SequenceMetadata('presence_absence\tp\tS3R\tref has variant type R, contig has wild (AGA=R, AGT=S)')
-        meta3 = sequence_metadata.SequenceMetadata('presence_absence\tp\tD4E\tref has variant type E, contig has var (GAA=E, GAC=D)')
-        meta4 = sequence_metadata.SequenceMetadata('presence_absence\tp\tA5D\tref has wild type A, contig has var (GCG=A, GAC=D)')
-        meta5 = sequence_metadata.SequenceMetadata('presence_absence\tp\tR13S\tref and qry have wild type')
+        meta1 = sequence_metadata.SequenceMetadata('presence_absence\tp\tD2E\tid1\tref has wild type D, contig has var (GAT=D, GAA=E)')
+        meta2 = sequence_metadata.SequenceMetadata('presence_absence\tp\tS3R\tid1\tref has variant type R, contig has wild (AGA=R, AGT=S)')
+        meta3 = sequence_metadata.SequenceMetadata('presence_absence\tp\tD4E\tid1\tref has variant type E, contig has var (GAA=E, GAC=D)')
+        meta4 = sequence_metadata.SequenceMetadata('presence_absence\tp\tA5D\tid1\tref has wild type A, contig has var (GCG=A, GAC=D)')
+        meta5 = sequence_metadata.SequenceMetadata('presence_absence\tp\tR13S\tid1\tref and qry have wild type')
 
         metadata_tsv = 'tmp.test_get_variants_presence_absence.metadata.tsv'
         with open(metadata_tsv, 'w') as f:
@@ -343,9 +343,9 @@ class TestAssemblyVariants(unittest.TestCase):
 
     def test_get_variants_variants_only(self):
         '''test get_variants variants only'''
-        meta1 = sequence_metadata.SequenceMetadata('variants_only\tp\tD2E\tref has wild type D (GAT=D, GAA=E)')
-        meta2 = sequence_metadata.SequenceMetadata('variants_only\tp\tS3R\tref has variant type R (AGA=R, AGT=S)')
-        meta3 = sequence_metadata.SequenceMetadata('variants_only\tp\tD4E\tref has variant type E (GAA=E, GAC=D)')
+        meta1 = sequence_metadata.SequenceMetadata('variants_only\tp\tD2E\tid1\tref has wild type D (GAT=D, GAA=E)')
+        meta2 = sequence_metadata.SequenceMetadata('variants_only\tp\tS3R\tid1\tref has variant type R (AGA=R, AGT=S)')
+        meta3 = sequence_metadata.SequenceMetadata('variants_only\tp\tD4E\tid1\tref has variant type E (GAA=E, GAC=D)')
 
         metadata_tsv = 'tmp.test_get_variants_variants_only.metadata.tsv'
         with open(metadata_tsv, 'w') as f:

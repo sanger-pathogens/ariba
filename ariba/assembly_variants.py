@@ -193,7 +193,7 @@ class AssemblyVariants:
         # if this variant is at the same position as a known variant in the reference
         if refdata_var_dict is not None and aa_var_position in refdata_var_dict['p']:
             if aa_var_effect == 'NONSYN':
-                aa_variant = sequence_variant.Variant('p', aa_var_string)
+                aa_variant = sequence_variant.Variant('p', aa_var_string, '.')
                 variants_at_this_position = {x for x in refdata_var_dict['p'][aa_variant.position]}
                 matching_variants = {x for x in variants_at_this_position if aa_variant.variant_value == x.variant.variant_value}
                 not_interesting_variants = {x for x in variants_at_this_position if aa_variant.variant_value == x.variant.wild_value}
