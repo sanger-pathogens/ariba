@@ -14,9 +14,9 @@ ARIBA has the following dependencies, which need to be installed:
   * [Python3][python] version >= 3.4
   * [R][r] version >= 2.14.0
   * The R package [ape][ape] version >= 3.1
-  * [bowtie2][Bowtie2] version >= 2.1.0
-  * [cd-hit][cdhit] version >= 4.6
-  * [samtools and bcftools][samtools]  version >= 1.2
+  * [Bowtie2][bowtie2] version >= 2.1.0
+  * [CD-HIT][cdhit] version >= 4.6
+  * [Samtools and BCFtools][samtools]  version >= 1.2
   * [MUMmer][mummer] version >= 3.23
   * [SPAdes][spades] version >= 3.5.0
   * [Python2][python] version >= 2.7 (SPAdes needs python2)
