@@ -68,6 +68,46 @@ that you compiled and downloaded in your home directory (assuming BASH):
 
     export ARIBA_SAMTOOLS=$HOME/samtools-1.2/samtools
 
+### Temporary files
+
+ARIBA can temporarily make a large number of files whilst running, which
+are put in a temporary directory made by ARIBA.  The total size of these
+files is small, but there can be a many of them. This can be a
+problem when running large numbers (100s or 1000s) of jobs simultaneously
+on the same file system.
+By default, ARIBA creates a temporary directory for these files
+inside the output directory of each run.
+
+Each temporary directory
+is unique to one run of ARIBA, and is automatically deleted at the end
+of the run (even if ARIBA was killed by the user or crashed).
+The parent directory of the temporary
+directory can be changed using the environment variable
+`$ARIBA_TMPDIR`. The temporary directory for each run will be made
+inside `$ARIBA_TMPDIR`. For example,
+
+    export $ARIBA_TMPDIR=/tmp
+
+will result in the creation of a new directory inside `/tmp`, which
+will have a name of the form
+
+    /tmp/ariba.tmp.abcdef
+
+where the suffix `abcdef` is a random string of characters, chosen
+such that `/tmp/ariba.tmp.abcdef` does not already exist.
+
+The temporary directory can also be changed using the option
+`--tmp_dir` when running `ariba run`. Using this option takes precedence
+over the environment variable `$ARIBA_TMPDIR`. If neither are
+set, then ARIBA creates the temporary directory inside
+the output directory given to `ariba run`.
+
+The exception to the above is if the option `--noclean` is used.
+This forces the temporary directory to be placed in the output
+directory, and temporary files are kept. It is intended for
+debugging.
+
+
 
 Usage
 -----
