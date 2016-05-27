@@ -51,7 +51,7 @@ The environment variable is checked first and is used if it is set.
 Otherwise ARIBA looks in your `$PATH` for the default name. This applies
 to the following dependencies.
 
-| Dependency     |  Default               | Environment variable name |
+| Dependency     |  Default executable    | Environment variable name |
 |----------------|------------------------|---------------------------|
 | BCFtools       | `bcftools`             | `$ARIBA_BCFTOOLS`         |
 | Bowtie2        | `bowtie2`              | `$ARIBA_BOWTIE2`          |
@@ -63,18 +63,10 @@ to the following dependencies.
 | SSPACE         | `SSPACE_Basic_v2.0.pl` | `$ARIBA_SSPACE`           |
 
 
-For example, you could specify an exact version of Samtools using
-(assuming BASH):
+For example, you could specify an exact version of a Samtools executable
+(assuming BASH) that you compiled and downloaded in your home directory:
 
-    export ARIBA_SAMTOOLS=/path/to/samtools
-
-The path need not be absolute. ARIBA looks for the value of the variable
-in your $PATH. For example, suppose you have `samtools-0.1.19` and
-`samtools-1.3` installed. You could use this:
-
-    export ARIBA_SAMTOOLS=samtools-1.3
-
-
+    export ARIBA_SAMTOOLS=$HOME/samtools-1.2/samtools
 
 
 Usage
