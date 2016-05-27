@@ -382,7 +382,8 @@ class Summary:
             if self.verbose:
                 print('Making Phandango csv file', csv_file, flush=True)
             csv_file = self.outprefix + '.phandango.csv'
-            Summary._matrix_to_csv(matrix, phandango_header, csv_file)
+            phandango_header, phandango_matrix = Summary._add_phandango_colour_columns(phandango_header, matrix)
+            Summary._matrix_to_csv(phandango_matrix, phandango_header, csv_file)
             dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
             tree_file = self.outprefix + '.phandango.tre'
 
