@@ -11,22 +11,22 @@ Installation
 ------------
 
 ARIBA has the following dependencies, which need to be installed:
-  * [Python3] [python] version >= 3.4
-  * [r] [R] version >= 2.14.0
-  * The R package [ape] [ape] version >= 3.1
-  * [bowtie2] [Bowtie2] version >= 2.1.0
-  * [cd-hit] [cdhit] version >= 4.6
-  * [samtools and bcftools] [samtools]  version >= 1.2
-  * [MUMmer] [mummer] version >= 3.23
-  * [SPAdes] [spades] version >= 3.5.0
-  * [Python2] [python] version >= 2.7 (SPAdes needs python2)
+  * [Python3][python] version >= 3.4
+  * [R][r] version >= 2.14.0
+  * The R package [ape][ape] version >= 3.1
+  * [bowtie2][Bowtie2] version >= 2.1.0
+  * [cd-hit][cdhit] version >= 4.6
+  * [samtools and bcftools][samtools]  version >= 1.2
+  * [MUMmer][mummer] version >= 3.23
+  * [SPAdes][spades] version >= 3.5.0
+  * [Python2][python] version >= 2.7 (SPAdes needs python2)
 
 
 ARIBA has the following optional dependencies. If they are installed,
 they will be used. Otherwise scaffolding and gap filling will be
 skipped.
-  * [SSPACE-basic scaffolder] [sspace]
-  * [GapFiller] [gapfiller]
+  * [SSPACE-basic scaffolder][sspace]
+  * [GapFiller][gapfiller]
 
 Once the dependencies are installed, install ARIBA using pip:
 
@@ -45,7 +45,7 @@ If the tests all pass, install:
 Usage
 -----
 
-Please read the [ARIBA wiki page] [ARIBA wiki] for usage instructions.
+Please read the [ARIBA wiki page][ARIBA wiki] for usage instructions.
 
 
 
