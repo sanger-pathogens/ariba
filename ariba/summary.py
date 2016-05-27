@@ -1,4 +1,5 @@
 import os
+import copy
 import re
 import sys
 import openpyxl
@@ -259,6 +260,8 @@ class Summary:
 
     @classmethod
     def _add_phandango_colour_columns(cls, header, matrix):
+        header = copy.deepcopy(header)
+        matrix = copy.deepcopy(matrix)
         cols_to_add_colour_col = [i for i in range(len(header)) if header[i].endswith(':o1')]
         field_to_col = {
             'yes': '#1f78b4',
