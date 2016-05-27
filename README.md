@@ -64,7 +64,7 @@ to the following dependencies.
 
 
 For example, you could specify an exact version of a Samtools executable
-(assuming BASH) that you compiled and downloaded in your home directory:
+that you compiled and downloaded in your home directory (assuming BASH):
 
     export ARIBA_SAMTOOLS=$HOME/samtools-1.2/samtools
 
