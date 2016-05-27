@@ -343,6 +343,28 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected_matrix, got_matrix)
 
 
+    def test_add_phandango_colour_columns(self):
+        '''Test _add_phandango_colour_columns'''
+        header = ['head1', 'head2:o1', 'head3:o1', 'head4', 'head5:o1']
+        matrix = [
+            ['yes', 'yes', 'yes_nonunique', 'yes', 'no'],
+            ['yes', 'yes_nonunique', 'no', 'yes', 'NA'],
+            ['yes', 'no', 'NA', 'yes', 'yes'],
+            ['yes', 'NA', 'yes', 'yes', 'yes_nonunique'],
+        ]
+
+        expected_header = ['head1', 'head2', 'head2:colour', 'head3', 'head3:colour', 'head4', 'head5', 'head5:colour']
+        expected_matrix = [
+            ['yes', 'yes', '#1f78b4', 'yes_nonunique', '#a6cee3', 'yes', 'no', '#33a02c'],
+            ['yes', 'yes_nonunique', '#a6cee3', 'no', '#33a02c', 'yes', 'NA', '#b2df8a'],
+            ['yes', 'no', '#33a02c', 'NA', '#b2df8a', 'yes', 'yes', '#1f78b4'],
+            ['yes', 'NA', '#b2df8a', 'yes', '#1f78b4', 'yes', 'yes_nonunique', '#a6cee3'],
+        ]
+        got_header, got_matrix = summary.Summary._add_phandango_colour_columns(header, matrix)
+        self.assertEqual(expected_header, got_header)
+        self.assertEqual(expected_matrix, got_matrix)
+
+
     def test_matrix_to_csv(self):
         '''Test _matrix_to_csv'''
         matrix = [

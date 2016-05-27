@@ -258,6 +258,29 @@ class Summary:
 
 
     @classmethod
+    def _add_phandango_colour_columns(cls, header, matrix):
+        cols_to_add_colour_col = [i for i in range(len(header)) if header[i].endswith(':o1')]
+        field_to_col = {
+            'yes': '#1f78b4',
+            'yes_nonunique': '#a6cee3',
+            'no': '#33a02c',
+            'NA': '#b2df8a',
+        }
+
+        cols_to_add_colour_col.reverse()
+
+        for col_index in cols_to_add_colour_col:
+            header[col_index] = header[col_index][:-3]
+            header.insert(col_index + 1, header[col_index] + ':colour')
+
+            for row_index in range(len(matrix)):
+                colour = field_to_col[matrix[row_index][col_index]]
+                matrix[row_index].insert(col_index + 1, colour)
+
+        return header, matrix
+
+
+    @classmethod
     def _matrix_to_csv(cls, matrix, header, outfile):
         f = pyfastaq.utils.open_file_write(outfile)
         print(*header, sep=',', file=f)
