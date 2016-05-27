@@ -3,7 +3,7 @@ ARIBA
 
 Antibiotic Resistance Identification By Assembly
 
-For how to use ARIBA, please see the [ARIBA wiki page] [ARIBA wiki].
+For how to use ARIBA, please see the [ARIBA wiki page][ARIBA wiki].
 
 
 
