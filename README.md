@@ -42,6 +42,41 @@ If the tests all pass, install:
     python3 setup.py install
 
 
+### Dependencies and environment variables
+
+By default, ARIBA will look for the dependencies in your `$PATH`, using
+the names in the table below. This behaviour can be overridden and
+point ARIBA to a specific program using environment variables.
+The environment variable is checked first and is used if it is set.
+Otherwise ARIBA looks in your `$PATH` for the default name. This applies
+to the following dependencies.
+
+| Dependency     |  Default               | Environment variable name |
+|----------------|------------------------|---------------------------|
+| BCFtools       | `bcftools`             | `$ARIBA_BCFTOOLS`         |
+| Bowtie2        | `bowtie2`              | `$ARIBA_BOWTIE2`          |
+| CD-HIT         | `cd-hit-est`           | `$ARIBA_CDHIT`            |
+| GapFiller      | `GapFiller.pl`         | `$ARIBA_GAPFILLER`        |
+| R              | `Rscript`              | `$ARIBA_R`                |
+| Samtools       | `samtools`             | `$ARIBA_SAMTOOLS`         |
+| SPAdes         | `spades.py`            | `$ARIBA_SPADES`           |
+| SSPACE         | `SSPACE_Basic_v2.0.pl` | `$ARIBA_SSPACE`           |
+
+
+For example, you could specify an exact version of Samtools using
+(assuming BASH):
+
+    export ARIBA_SAMTOOLS=/path/to/samtools
+
+The path need not be absolute. ARIBA looks for the value of the variable
+in your $PATH. For example, suppose you have `samtools-0.1.19` and
+`samtools-1.3` installed. You could use this:
+
+    export ARIBA_SAMTOOLS=samtools-1.3
+
+
+
+
 Usage
 -----
 
