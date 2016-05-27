@@ -1,4 +1,5 @@
 import os
+import copy
 import re
 import sys
 import openpyxl
@@ -258,6 +259,31 @@ class Summary:
 
 
     @classmethod
+    def _add_phandango_colour_columns(cls, header, matrix):
+        header = copy.deepcopy(header)
+        matrix = copy.deepcopy(matrix)
+        cols_to_add_colour_col = [i for i in range(len(header)) if header[i].endswith(':o1')]
+        field_to_col = {
+            'yes': '#1f78b4',
+            'yes_nonunique': '#a6cee3',
+            'no': '#33a02c',
+            'NA': '#b2df8a',
+        }
+
+        cols_to_add_colour_col.reverse()
+
+        for col_index in cols_to_add_colour_col:
+            header[col_index] = header[col_index][:-3]
+            header.insert(col_index + 1, header[col_index] + ':colour')
+
+            for row_index in range(len(matrix)):
+                colour = field_to_col[matrix[row_index][col_index]]
+                matrix[row_index].insert(col_index + 1, colour)
+
+        return header, matrix
+
+
+    @classmethod
     def _matrix_to_csv(cls, matrix, header, outfile):
         f = pyfastaq.utils.open_file_write(outfile)
         print(*header, sep=',', file=f)
@@ -356,7 +382,8 @@ class Summary:
             if self.verbose:
                 print('Making Phandango csv file', csv_file, flush=True)
             csv_file = self.outprefix + '.phandango.csv'
-            Summary._matrix_to_csv(matrix, phandango_header, csv_file)
+            phandango_header, phandango_matrix = Summary._add_phandango_colour_columns(phandango_header, matrix)
+            Summary._matrix_to_csv(phandango_matrix, phandango_header, csv_file)
             dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
             tree_file = self.outprefix + '.phandango.tre'
 
