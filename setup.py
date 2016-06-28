@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ariba',
-    version='1.0.0',
+    version='1.0.1',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
     package_data={'ariba': ['test_run_data/*']},
