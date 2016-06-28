@@ -1,7 +1,15 @@
+Disclaimer
+==========
+
+This is pre-publication software that is currently under active development.
+Use it at your own risk.
+
+
 ARIBA
 =====
 
 Antibiotic Resistance Identification By Assembly
+
 
 For how to use ARIBA, please see the [ARIBA wiki page][ARIBA wiki].
 
