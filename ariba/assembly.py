@@ -115,7 +115,6 @@ class Assembly:
             '-o', self.assembler_dir,
             '-k', str(self.assembly_kmer),
             '--threads 1', # otherwise defaults to 16!
-            '--untrusted-contigs', self.ref_fasta,
         ])
         if self.spades_other_options is not None:
             cmd += ' ' + self.spades_other_options
