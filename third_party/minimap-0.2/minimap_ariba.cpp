@@ -22,6 +22,7 @@ void loadClusters(std::string& filename, std::map<std::string, std::string>& ref
 void chooseCluster(std::string outfile, std::map<std::string, uint64_t>& refnameToScore, std::map<std::string, std::string>& refnameToCluster);
 void writeClusterCountsFile(std::string outfile, const std::map<std::string, uint64_t>& readCounters, const std::map<std::string, uint64_t>& baseCounters);
 void writeInsertHistogramFile(std::string outfile, const std::map<uint32_t, uint32_t>& insertHist);
+void writeProperPairsFile(std::string outfile, uint32_t properPairs);
 
 
 int main(int argc, char *argv[])
@@ -39,6 +40,7 @@ int main(int argc, char *argv[])
     std::map<std::string, uint64_t> readCounters;
     std::map<std::string, uint64_t> baseCounters;
     std::map<uint32_t, uint32_t> insertHist;
+    uint32_t properPairs = 0;
     std::string outprefix(argv[5]);
     std::string readsOutfile = outprefix + ".reads";
     std::ofstream ofs;
@@ -97,6 +99,8 @@ int main(int argc, char *argv[])
                 positions2[mi->name[r->rid]].push_back(std::make_pair(coord, r->rev));
             }
 
+            bool foundProperPair = false;
+
             for (std::set<std::string>::const_iterator iter = refnames.begin(); iter != refnames.end(); iter++)
             {
                 std::string cluster = refnameToCluster[*iter];
@@ -130,9 +134,14 @@ int main(int argc, char *argv[])
                     }
 
                     insertHist[insertSize]++;
+                    foundProperPair = true;
                 }
             }
 
+            if (foundProperPair)
+            {
+                properPairs++;
+            }
         }
     }
     mm_tbuf_destroy(tbuf1);
@@ -148,6 +157,7 @@ int main(int argc, char *argv[])
     chooseCluster(outprefix + ".cluster2representative", refnameToScore, refnameToCluster);
     writeClusterCountsFile(outprefix + ".clusterCounts", readCounters, baseCounters);
     writeInsertHistogramFile(outprefix + ".insertHistogram", insertHist);
+    writeProperPairsFile(outprefix + ".properPairs", properPairs);
     return 0;
 }
 
@@ -242,5 +252,19 @@ void writeInsertHistogramFile(std::string outfile, const std::map<uint32_t, uint
         ofs << iter->first << '\t' << iter->second << '\n';
     }
 
+    ofs.close();
+}
+
+
+void writeProperPairsFile(std::string outfile, uint32_t properPairs)
+{
+    std::ofstream ofs;
+    ofs.open(outfile.c_str());
+    if (!ofs.good())
+    {
+        std::cerr << "Error opening output proper pairs count file '" << outfile << "'. Cannot continue" << std::endl;
+    }
+
+    ofs << properPairs << '\n';
     ofs.close();
 }
