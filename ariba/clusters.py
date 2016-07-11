@@ -129,6 +129,7 @@ class Clusters:
         self.pool = None
         self.fails_dir = os.path.join(self.outdir ,'.fails')
         self.clusters_all_ran_ok = True
+        self.inital_mapping_tool = 'bowtie2'
 
         for d in [self.outdir, self.logs_dir, self.fails_dir]:
             try:
@@ -235,6 +236,27 @@ class Clusters:
             cluster_ids = pickle.load(f)
 
         return refdata, cluster_ids
+
+
+    def _map_reads(self, tool):
+        if tool == 'bowtie2':
+            if self.verbose:
+                print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
+            self._map_reads_to_clustered_genes()
+
+            if self.verbose:
+                print('Finished mapping\n')
+                print('{:_^79}'.format(' Generating clusters '), flush=True)
+            self._bam_to_clusters_reads()
+            if self.clean:
+                if self.verbose:
+                    print('Deleting BAM', self.bam, flush=True)
+                os.unlink(self.bam)
+        elif tool == 'minimap':
+            print('To be implemented...')
+            pass
+        else:
+            raise Error('Tool "' + tool + '" not recognised. Cannot continue')
 
 
     def _map_reads_to_clustered_genes(self):
@@ -511,19 +533,7 @@ class Clusters:
         cwd = os.getcwd()
         os.chdir(self.outdir)
         self.write_versions_file(cwd)
-
-        if self.verbose:
-            print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
-        self._map_reads_to_clustered_genes()
-
-        if self.verbose:
-            print('Finished mapping\n')
-            print('{:_^79}'.format(' Generating clusters '), flush=True)
-        self._bam_to_clusters_reads()
-        if self.clean:
-            if self.verbose:
-                print('Deleting BAM', self.bam, flush=True)
-            os.unlink(self.bam)
+        self._map_reads(self.initial_mapping_tool)
 
         if len(self.cluster_to_dir) > 0:
             got_insert_data_ok = self._set_insert_size_data()
