@@ -9,16 +9,16 @@ class Histogram:
     def __len__(self):
         if len(self.bins) == 0:
             return 0
-            
+
         return sum(list(self.bins.values()))
 
     def _to_bin(self, n):
         return self.bin_width * (n // self.bin_width)
 
 
-    def add(self, n):
+    def add(self, n, count=1):
         b = self._to_bin(n)
-        self.bins[b] = self.bins.get(b, 0) + 1
+        self.bins[b] = self.bins.get(b, 0) + count
 
 
     def stats(self):
@@ -44,6 +44,6 @@ class Histogram:
 
         if None not in [pc5, pc95, median]:
             sspace_sd = round(max(pc95 - median, median - pc5) / median, 2)
- 
+
         return (pc5, median, pc95, sspace_sd)
 

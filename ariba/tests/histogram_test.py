@@ -33,7 +33,7 @@ class TestCluster(unittest.TestCase):
         self.assertEqual(2, len(h))
         h.add(2)
         self.assertEqual(3, len(h))
-        
+
 
     def test_add(self):
         '''Test add'''
@@ -44,6 +44,8 @@ class TestCluster(unittest.TestCase):
         self.assertEqual({3:2}, h.bins)
         h.add(42)
         self.assertEqual({3:2, 42:1}, h.bins)
+        h.add(42, count=11)
+        self.assertEqual({3:2, 42:12}, h.bins)
 
 
     def test_stats(self):
