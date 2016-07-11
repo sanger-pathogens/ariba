@@ -77,6 +77,7 @@ class Clusters:
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
         self.extern_progs = extern_progs
+        self.clusters_tsv = os.path.join(refdata_dir, 'cdhit.clusters.tsv')
 
         if version_report_lines is None:
             self.version_report_lines = []
@@ -222,7 +223,7 @@ class Clusters:
         non_coding_fa = os.path.join(indir, 'refcheck.01.check_variants.non_coding.fa')
         metadata_tsv = os.path.join(indir, 'refcheck.01.check_variants.tsv')
         info_file = os.path.join(indir, 'info.txt')
-        clusters_file = os.path.join(indir, 'cdhit.clusters.pickle')
+        clusters_pickle_file = os.path.join(indir, 'cdhit.clusters.pickle')
         params = Clusters._load_reference_data_info_file(info_file)
         refdata = reference_data.ReferenceData(
             presence_absence_fa=presence_absence_fa if os.path.exists(presence_absence_fa) else None,
@@ -232,7 +233,7 @@ class Clusters:
             genetic_code=params['genetic_code'],
         )
 
-        with open(clusters_file, 'rb') as f:
+        with open(clusters_pickle_file, 'rb') as f:
             cluster_ids = pickle.load(f)
 
         return refdata, cluster_ids
@@ -257,6 +258,24 @@ class Clusters:
             pass
         else:
             raise Error('Tool "' + tool + '" not recognised. Cannot continue')
+
+
+    @staticmethod
+    def _minimap_reads_to_all_ref_seqs(clusters_tsv, ref_fasta, reads_1, reads_2, outprefix):
+        modules_dir = os.path.dirname(os.path.abspath(cluster.__file__))
+        minimap_ariba = os.path.abspath(os.path.join(modules_dir, os.pardir, 'third_party', 'minimap', 'minimap_ariba'))
+        if not os.path.exists(minimap_ariba):
+            raise Error('Error finding minimap_ariba. Cannot continue')
+        print('minimap_ariba:', minimap_ariba)
+        cmd = ' '.join([
+            minimap_ariba,
+            clusters_tsv,
+            ref_fasta,
+            reads_1,
+            reads_2,
+            outprefix
+        ])
+        common.syscall(cmd)
 
 
     def _map_reads_to_clustered_genes(self):

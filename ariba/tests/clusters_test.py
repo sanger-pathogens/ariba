@@ -79,6 +79,33 @@ class TestClusters(unittest.TestCase):
         self.assertEqual(expected_clusters, got_clusters)
 
 
+    def test_minimap_reads_to_all_ref_seqs(self):
+        '''test test_minimap_reads_to_all_ref_seqs'''
+        clusters_tsv = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.clusters.tsv')
+        ref_fasta = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.ref.fa')
+        reads_1 = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.reads_1.fq')
+        reads_2 = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.reads_2.fq')
+        tmp_outprefix = 'tmp.clusters_test_minimap_reads_to_all_ref_seqs'
+        clusters.Clusters._minimap_reads_to_all_ref_seqs(clusters_tsv, ref_fasta, reads_1, reads_2, tmp_outprefix)
+        expected_cluster2rep = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.cluster2representative')
+        expected_cluster_counts = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.clusterCounts')
+        expected_proper_pairs = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.properPairs')
+        expected_insert_hist = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.insertHistogram')
+
+        # not sure that the reads order is preserved, so just check read store file exists
+        self.assertTrue(os.path.exists(os.path.join(tmp_outprefix + '.reads')))
+
+        self.assertTrue(filecmp.cmp(expected_cluster2rep, tmp_outprefix + '.cluster2representative', shallow=False))
+        self.assertTrue(filecmp.cmp(expected_cluster_counts, tmp_outprefix + '.clusterCounts', shallow=False))
+        self.assertTrue(filecmp.cmp(expected_proper_pairs, tmp_outprefix + '.properPairs', shallow=False))
+        self.assertTrue(filecmp.cmp(expected_insert_hist, tmp_outprefix + '.insertHistogram', shallow=False))
+        os.unlink(tmp_outprefix + '.cluster2representative')
+        os.unlink(tmp_outprefix + '.clusterCounts')
+        os.unlink(tmp_outprefix + '.properPairs')
+        os.unlink(tmp_outprefix + '.insertHistogram')
+        os.unlink(tmp_outprefix + '.reads')
+
+
     def test_bam_to_clusters_reads_no_reads_map(self):
         '''test _bam_to_clusters_reads when no reads map'''
         clusters_dir = 'tmp.Cluster.test_bam_to_clusters_reads_no_reads_map'
