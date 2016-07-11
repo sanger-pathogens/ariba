@@ -1,9 +1,13 @@
+minimap_ariba
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 
 # C extensions
 *.so
+*.o
+*.a
 
 # Distribution / packaging
 .Python
