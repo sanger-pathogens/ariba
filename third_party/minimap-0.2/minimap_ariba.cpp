@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    mm_verbose = 0;
     std::map<std::string, uint64_t> refnameToScore;
     std::map<std::string, std::string> refnameToCluster;
     std::string clustersFile(argv[1]);
