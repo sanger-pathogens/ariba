@@ -316,6 +316,16 @@ class Clusters:
         return hist
 
 
+    @staticmethod
+    def _load_minimap_proper_pairs(infile):
+        with open(infile) as f:
+            for line in f:
+                pairs = int(line.rstrip())
+                break
+
+        return pairs
+
+
     def _map_reads_to_clustered_genes(self):
         mapping.run_bowtie2(
             self.reads_1,

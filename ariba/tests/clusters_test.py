@@ -140,6 +140,13 @@ class TestClusters(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_load_minimap_proper_pairs(self):
+        '''test _load_minimap_proper_pairs'''
+        infile = os.path.join(data_dir, 'clusters_test_load_minimap_proper_pairs.in')
+        got = clusters.Clusters._load_minimap_proper_pairs(infile)
+        self.assertEqual(42424242, got)
+
+
     def test_bam_to_clusters_reads_no_reads_map(self):
         '''test _bam_to_clusters_reads when no reads map'''
         clusters_dir = 'tmp.Cluster.test_bam_to_clusters_reads_no_reads_map'
