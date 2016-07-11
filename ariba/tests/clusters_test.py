@@ -106,6 +106,14 @@ class TestClusters(unittest.TestCase):
         os.unlink(tmp_outprefix + '.reads')
 
 
+    def test_load_minimap_out_cluster2representative(self):
+        '''test _load_minimap_out_cluster2representative'''
+        infile = os.path.join(data_dir, 'clusters_test_load_minimap_out_cluster2representative.in')
+        got = clusters.Clusters._load_minimap_out_cluster2representative(infile)
+        expected = {'1': 'ref2', '2': 'ref42'}
+        self.assertEqual(expected, got)
+
+
     def test_bam_to_clusters_reads_no_reads_map(self):
         '''test _bam_to_clusters_reads when no reads map'''
         clusters_dir = 'tmp.Cluster.test_bam_to_clusters_reads_no_reads_map'

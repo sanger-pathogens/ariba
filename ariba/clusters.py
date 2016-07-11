@@ -278,6 +278,18 @@ class Clusters:
         common.syscall(cmd)
 
 
+    @staticmethod
+    def _load_minimap_out_cluster2representative(inprefix):
+        cluster2rep = {}
+
+        with open(inprefix) as f:
+            for line in f:
+                cluster, rep = line.rstrip().split('\t')
+                cluster2rep[cluster] = rep
+
+        return cluster2rep
+
+
     def _map_reads_to_clustered_genes(self):
         mapping.run_bowtie2(
             self.reads_1,
