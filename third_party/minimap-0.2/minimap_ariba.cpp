@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
     if (!ofs.good())
     {
         std::cerr << "Error opening reads output file '" << readsOutfile << "'. Cannot continue" << std::endl;
+        return 1;
     }
 
     // open query file for reading; you may use your favorite FASTA/Q parser
@@ -171,6 +172,7 @@ void loadClusters(std::string& filename, std::map<std::string, std::string>& ref
     if (!ifs.good())
     {
         std::cerr << "Error opening clusters file '" << filename << "'. Cannot continue" << std::endl;
+        exit(1);
     }
 
     while(getline(ifs, line))
@@ -209,6 +211,7 @@ void chooseCluster(std::string outfile, std::map<std::string, uint64_t>& refname
     if (!ofs.good())
     {
         std::cerr << "Error opening output best cluster file '" << outfile << "'. Cannot continue" << std::endl;
+        exit(1);
     }
 
     for (iter = bestClusterScore.begin(); iter != bestClusterScore.end(); iter++)
@@ -227,6 +230,7 @@ void writeClusterCountsFile(std::string outfile, const std::map<std::string, uin
     if (!ofs.good())
     {
         std::cerr << "Error opening output cluster reads/bases counts file '" << outfile << "'. Cannot continue" << std::endl;
+        exit(1);
     }
 
     for (std::map<std::string, uint64_t>::const_iterator iter = readCounters.begin(); iter != readCounters.end(); iter++)
@@ -246,6 +250,7 @@ void writeInsertHistogramFile(std::string outfile, const std::map<uint32_t, uint
     if (!ofs.good())
     {
         std::cerr << "Error opening output insert histogram file '" << outfile << "'. Cannot continue" << std::endl;
+        exit(1);
     }
 
     for (std::map<uint32_t, uint32_t>::const_iterator iter = insertHist.begin(); iter != insertHist.end(); iter++)
@@ -264,6 +269,7 @@ void writeProperPairsFile(std::string outfile, uint32_t properPairs)
     if (!ofs.good())
     {
         std::cerr << "Error opening output proper pairs count file '" << outfile << "'. Cannot continue" << std::endl;
+        exit(1);
     }
 
     ofs << properPairs << '\n';
