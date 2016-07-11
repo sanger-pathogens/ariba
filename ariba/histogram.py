@@ -12,6 +12,11 @@ class Histogram:
 
         return sum(list(self.bins.values()))
 
+
+    def __eq__(self, other):
+       return type(other) is type(self) and self.__dict__ == other.__dict__
+
+
     def _to_bin(self, n):
         return self.bin_width * (n // self.bin_width)
 
