@@ -14,8 +14,8 @@ KSEQ_INIT(gzFile, gzread)
 
 
 void loadClusters(std::string& filename, std::map<std::string, std::string>& refnameToCluster);
-
 void chooseCluster(std::string outfile, std::map<std::string, uint64_t>& refnameToScore, std::map<std::string, std::string>& refnameToCluster);
+void writeClusterCountsFile(std::string outfile, const std::map<std::string, uint64_t>& readCounters, const std::map<std::string, uint64_t>& baseCounters);
 
 
 int main(int argc, char *argv[])
@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
     std::string clustersFile(argv[1]);
     loadClusters(clustersFile, refnameToCluster);
     std::map<std::string, uint64_t> readCounters;
+    std::map<std::string, uint64_t> baseCounters;
     std::string outprefix(argv[5]);
     std::string readsOutfile = outprefix + ".reads";
     std::ofstream ofs;
@@ -62,6 +63,7 @@ int main(int argc, char *argv[])
         assert(kseq_read(ks2) >= 0);
         const mm_reg1_t *reg1, *reg2;
         int j, n_reg1, n_reg2;
+
         // get all hits for the forward and reverse reads
         reg1 = mm_map(mi, ks1->seq.l, ks1->seq.s, &n_reg1, tbuf, &opt, 0);
         reg2 = mm_map(mi, ks2->seq.l, ks2->seq.s, &n_reg2, tbuf, &opt, 0);
@@ -86,8 +88,9 @@ int main(int argc, char *argv[])
                 std::string cluster = refnameToCluster[*iter];
                 readCounters[cluster]++;
                 ofs << cluster << '\t' << readCounters[cluster] << '\t' << ks1->seq.s << '\t' << ks1->qual.s << '\n';
-                readCounters[*iter]++;
+                readCounters[cluster]++;
                 ofs << cluster << '\t' << readCounters[cluster] << '\t' << ks2->seq.s << '\t' << ks2->qual.s << '\n';
+                baseCounters[cluster] += ks1->seq.l + ks2->seq.l;
             }
 
         }
@@ -101,7 +104,8 @@ int main(int argc, char *argv[])
     gzclose(infile1);
     gzclose(infile2);
     ofs.close();
-    chooseCluster(outprefix + ".clusters", refnameToScore, refnameToCluster);
+    chooseCluster(outprefix + ".cluster2representative", refnameToScore, refnameToCluster);
+    writeClusterCountsFile(outprefix + ".clusterCounts", readCounters, baseCounters);
     return 0;
 }
 
@@ -157,6 +161,25 @@ void chooseCluster(std::string outfile, std::map<std::string, uint64_t>& refname
     for (iter = bestClusterScore.begin(); iter != bestClusterScore.end(); iter++)
     {
         ofs << iter->first << '\t' << bestCluster[iter->first] << '\n';
+    }
+
+    ofs.close();
+}
+
+
+void writeClusterCountsFile(std::string outfile, const std::map<std::string, uint64_t>& readCounters, const std::map<std::string, uint64_t>& baseCounters)
+{
+    std::ofstream ofs;
+    ofs.open(outfile.c_str());
+    if (!ofs.good())
+    {
+        std::cerr << "Error opening output cluster reads/bases counts file '" << outfile << "'. Cannot continue" << std::endl;
+    }
+
+    for (std::map<std::string, uint64_t>::const_iterator iter = readCounters.begin(); iter != readCounters.end(); iter++)
+    {
+        assert ( baseCounters.find(iter->first) != baseCounters.end());
+        ofs << iter->first << '\t' << iter->second << '\t' << baseCounters.find(iter->first)->second << '\n';
     }
 
     ofs.close();
