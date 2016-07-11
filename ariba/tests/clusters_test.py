@@ -114,6 +114,16 @@ class TestClusters(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_load_minimap_out_cluster_counts(self):
+        '''test _load_minimap_out_cluster_counts'''
+        infile = os.path.join(data_dir, 'clusters_test_load_minimap_out_cluster_counts.in')
+        got_read_count, got_base_count = clusters.Clusters._load_minimap_out_cluster_counts(infile)
+        expected_read_count = {'1': 42, '2': 43}
+        expected_base_count = {'1': 4242, '2': 4343}
+        self.assertEqual(got_read_count, expected_read_count)
+        self.assertEqual(got_base_count, expected_base_count)
+
+
     def test_bam_to_clusters_reads_no_reads_map(self):
         '''test _bam_to_clusters_reads when no reads map'''
         clusters_dir = 'tmp.Cluster.test_bam_to_clusters_reads_no_reads_map'

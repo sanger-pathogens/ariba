@@ -279,15 +279,29 @@ class Clusters:
 
 
     @staticmethod
-    def _load_minimap_out_cluster2representative(inprefix):
+    def _load_minimap_out_cluster2representative(infile):
         cluster2rep = {}
 
-        with open(inprefix) as f:
+        with open(infile) as f:
             for line in f:
                 cluster, rep = line.rstrip().split('\t')
                 cluster2rep[cluster] = rep
 
         return cluster2rep
+
+
+    @staticmethod
+    def _load_minimap_out_cluster_counts(infile):
+        reads = {}
+        bases = {}
+
+        with open(infile) as f:
+            for line in f:
+                cluster, read, base = line.rstrip().split('\t')
+                reads[cluster] = int(read)
+                bases[cluster] = int(base)
+
+        return reads, bases
 
 
     def _map_reads_to_clustered_genes(self):
