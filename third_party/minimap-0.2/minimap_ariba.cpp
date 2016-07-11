@@ -8,14 +8,20 @@
 #include <stdio.h>
 #include <zlib.h>
 #include <map>
+#include <vector>
+#include <algorithm>
 #include "minimap.h"
 #include "kseq.h"
 KSEQ_INIT(gzFile, gzread)
 
 
+
+typedef std::vector<std::pair<uint32_t, bool> > MapPositionVector;
+
 void loadClusters(std::string& filename, std::map<std::string, std::string>& refnameToCluster);
 void chooseCluster(std::string outfile, std::map<std::string, uint64_t>& refnameToScore, std::map<std::string, std::string>& refnameToCluster);
 void writeClusterCountsFile(std::string outfile, const std::map<std::string, uint64_t>& readCounters, const std::map<std::string, uint64_t>& baseCounters);
+void writeInsertHistogramFile(std::string outfile, const std::map<uint32_t, uint32_t>& insertHist);
 
 
 int main(int argc, char *argv[])
@@ -32,6 +38,7 @@ int main(int argc, char *argv[])
     loadClusters(clustersFile, refnameToCluster);
     std::map<std::string, uint64_t> readCounters;
     std::map<std::string, uint64_t> baseCounters;
+    std::map<uint32_t, uint32_t> insertHist;
     std::string outprefix(argv[5]);
     std::string readsOutfile = outprefix + ".reads";
     std::ofstream ofs;
@@ -58,15 +65,18 @@ int main(int argc, char *argv[])
     // mapping
     mm_mapopt_t opt;
     mm_mapopt_init(&opt); // initialize mapping parameters
-    mm_tbuf_t *tbuf = mm_tbuf_init(); // thread buffer; for multi-threading, allocate one tbuf for each thread
+    mm_tbuf_t *tbuf1 = mm_tbuf_init(); // thread buffer; for multi-threading, allocate one tbuf for each thread
+    mm_tbuf_t *tbuf2 = mm_tbuf_init(); // thread buffer; for multi-threading, allocate one tbuf for each thread
     while (kseq_read(ks1) >= 0) { // each kseq_read() call reads one query sequence
         assert(kseq_read(ks2) >= 0);
         const mm_reg1_t *reg1, *reg2;
         int j, n_reg1, n_reg2;
+        std::map<std::string, MapPositionVector> positions1;
+        std::map<std::string, MapPositionVector> positions2;
 
         // get all hits for the forward and reverse reads
-        reg1 = mm_map(mi, ks1->seq.l, ks1->seq.s, &n_reg1, tbuf, &opt, 0);
-        reg2 = mm_map(mi, ks2->seq.l, ks2->seq.s, &n_reg2, tbuf, &opt, 0);
+        reg1 = mm_map(mi, ks1->seq.l, ks1->seq.s, &n_reg1, tbuf1, &opt, 0);
+        reg2 = mm_map(mi, ks2->seq.l, ks2->seq.s, &n_reg2, tbuf2, &opt, 0);
         if (n_reg1 > 0 || n_reg2 > 0)
         {
             std::set<std::string> refnames;
@@ -75,12 +85,16 @@ int main(int argc, char *argv[])
                 const mm_reg1_t *r = &reg1[j];
                 refnames.insert(mi->name[r->rid]);
                 refnameToScore[mi->name[r->rid]] += r->cnt;
+                uint32_t coord = r->rev ? std::max(r->rs, r->re) : std::min(r->rs, r->re);
+                positions1[mi->name[r->rid]].push_back(std::make_pair(coord, r->rev));
             }
             for (j  =0; j < n_reg2; ++j)
             {
                 const mm_reg1_t *r = &reg2[j];
                 refnames.insert(mi->name[r->rid]);
                 refnameToScore[mi->name[r->rid]] += r->cnt;
+                uint32_t coord = r->rev ? std::max(r->rs, r->re) : std::min(r->rs, r->re);
+                positions2[mi->name[r->rid]].push_back(std::make_pair(coord, r->rev));
             }
 
             for (std::set<std::string>::const_iterator iter = refnames.begin(); iter != refnames.end(); iter++)
@@ -91,11 +105,38 @@ int main(int argc, char *argv[])
                 readCounters[cluster]++;
                 ofs << cluster << '\t' << readCounters[cluster] << '\t' << ks2->seq.s << '\t' << ks2->qual.s << '\n';
                 baseCounters[cluster] += ks1->seq.l + ks2->seq.l;
+
+                // get insert size info, if reads mapped as proper pair
+                if (positions1.find(*iter) != positions1.end() && positions2.find(*iter) != positions2.end())
+                {
+                    if (positions1[*iter].size() != 1 || positions2[*iter].size() != 1 || positions1[*iter][0].second == positions2[*iter][0].second)
+                    {
+                        continue;
+                    }
+
+                    uint32_t insertSize;
+
+                    if (positions1[*iter][0].second && positions1[*iter][0].first > positions2[*iter][0].first)
+                    {
+                        insertSize = positions1[*iter][0].first - positions2[*iter][0].first + 1;
+                    }
+                    else if (positions2[*iter][0].second && positions2[*iter][0].first > positions1[*iter][0].first)
+                    {
+                        insertSize = positions2[*iter][0].first - positions1[*iter][0].first + 1;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    insertHist[insertSize]++;
+                }
             }
 
         }
     }
-    mm_tbuf_destroy(tbuf);
+    mm_tbuf_destroy(tbuf1);
+    mm_tbuf_destroy(tbuf2);
 
     // deallocate index and close the query file
     mm_idx_destroy(mi);
@@ -106,6 +147,7 @@ int main(int argc, char *argv[])
     ofs.close();
     chooseCluster(outprefix + ".cluster2representative", refnameToScore, refnameToCluster);
     writeClusterCountsFile(outprefix + ".clusterCounts", readCounters, baseCounters);
+    writeInsertHistogramFile(outprefix + ".insertHistogram", insertHist);
     return 0;
 }
 
@@ -180,6 +222,24 @@ void writeClusterCountsFile(std::string outfile, const std::map<std::string, uin
     {
         assert ( baseCounters.find(iter->first) != baseCounters.end());
         ofs << iter->first << '\t' << iter->second << '\t' << baseCounters.find(iter->first)->second << '\n';
+    }
+
+    ofs.close();
+}
+
+
+void writeInsertHistogramFile(std::string outfile, const std::map<uint32_t, uint32_t>& insertHist)
+{
+    std::ofstream ofs;
+    ofs.open(outfile.c_str());
+    if (!ofs.good())
+    {
+        std::cerr << "Error opening output insert histogram file '" << outfile << "'. Cannot continue" << std::endl;
+    }
+
+    for (std::map<uint32_t, uint32_t>::const_iterator iter = insertHist.begin(); iter != insertHist.end(); iter++)
+    {
+        ofs << iter->first << '\t' << iter->second << '\n';
     }
 
     ofs.close();
