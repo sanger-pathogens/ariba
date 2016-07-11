@@ -5,7 +5,7 @@ import pickle
 import pysam
 import pyfastaq
 import filecmp
-from ariba import clusters, external_progs, reference_data, sequence_metadata
+from ariba import clusters, external_progs, histogram, reference_data, sequence_metadata
 
 modules_dir = os.path.dirname(os.path.abspath(clusters.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -122,6 +122,22 @@ class TestClusters(unittest.TestCase):
         expected_base_count = {'1': 4242, '2': 4343}
         self.assertEqual(got_read_count, expected_read_count)
         self.assertEqual(got_base_count, expected_base_count)
+
+
+    def test_load_minimap_insert_histogram(self):
+        '''test _load_minimap_insert_histogram'''
+        infile = os.path.join(data_dir, 'clusters_test_load_minimap_insert_histogram.in')
+        bin_size = 10
+        got = clusters.Clusters._load_minimap_insert_histogram(infile, bin_size)
+        expected = histogram.Histogram(bin_size)
+        expected.add(85, count=1)
+        expected.add(86, count=2)
+        expected.add(90, count=4)
+        expected.add(91, count=6)
+        expected.add(97, count=10)
+        expected.add(100, count=7)
+        expected.add(111, count=3)
+        self.assertEqual(expected, got)
 
 
     def test_bam_to_clusters_reads_no_reads_map(self):

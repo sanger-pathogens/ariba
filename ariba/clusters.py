@@ -304,6 +304,18 @@ class Clusters:
         return reads, bases
 
 
+    @staticmethod
+    def _load_minimap_insert_histogram(infile, bin_size):
+        hist = histogram.Histogram(bin_size)
+
+        with open(infile) as f:
+            for line in f:
+                value, count = line.rstrip().split('\t')
+                hist.add(int(value), count=int(count))
+
+        return hist
+
+
     def _map_reads_to_clustered_genes(self):
         mapping.run_bowtie2(
             self.reads_1,
