@@ -70,12 +70,11 @@ class ReferenceData:
 
 
     @staticmethod
-    def _load_metadata_tsv(filename):
+    def _load_metadata_tsv(filename, metadata_dict):
         if filename is None:
             return {}
 
         f = pyfastaq.utils.open_file_read(filename)
-        metadata_dict = {}
 
         for line in f:
             try:

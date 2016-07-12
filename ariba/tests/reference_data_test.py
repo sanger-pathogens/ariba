@@ -99,8 +99,10 @@ class TestReferenceData(unittest.TestCase):
             }
         }
 
+        got = {}
         tsv_file = os.path.join(data_dir, 'reference_data_load_metadata_tsv.tsv')
-        self.assertEqual(expected, reference_data.ReferenceData._load_metadata_tsv(tsv_file))
+        reference_data.ReferenceData._load_metadata_tsv(tsv_file, got)
+        self.assertEqual(expected, got)
 
 
     def test_load_fasta_file(self):
