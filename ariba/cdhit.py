@@ -15,7 +15,6 @@ class Runner:
       threads=1,
       length_diff_cutoff=0.9,
       verbose=False,
-      cd_hit_est='cd-hit-est',
       rename_suffix='x',
     ):
 
@@ -28,7 +27,8 @@ class Runner:
         self.threads = threads
         self.length_diff_cutoff = length_diff_cutoff
         self.verbose = verbose
-        self.cd_hit_est = cd_hit_est
+        extern_progs = external_progs.ExternalProgs(fail_on_error=True)
+        self.cd_hit_est = extern_progs.exe('cdhit')
         self.rename_suffix = rename_suffix
 
 

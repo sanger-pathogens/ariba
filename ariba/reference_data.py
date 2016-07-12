@@ -429,7 +429,7 @@ class ReferenceData:
         pyfastaq.utils.close(f_out)
 
 
-    def cluster_with_cdhit(self, inprefix, outprefix, seq_identity_threshold=0.9, threads=1, length_diff_cutoff=0.9, nocluster=False, verbose=False, cd_hit_est='cd-hit-est', clusters_file=None):
+    def cluster_with_cdhit(self, inprefix, outprefix, seq_identity_threshold=0.9, threads=1, length_diff_cutoff=0.9, nocluster=False, verbose=False, clusters_file=None):
         files_to_cat = []
         clusters = {}
 
@@ -444,7 +444,6 @@ class ReferenceData:
                   threads=threads,
                   length_diff_cutoff=length_diff_cutoff,
                   verbose=verbose,
-                  cd_hit_est=cd_hit_est,
                   rename_suffix = seqs_type[0]
                 )
 
