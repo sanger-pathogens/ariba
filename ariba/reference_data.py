@@ -131,8 +131,8 @@ class ReferenceData:
         return None
 
 
-    @staticmethod
-    def _write_metadata_tsv(metadata, filename):
+    @classmethod
+    def _write_metadata_tsv(cls, metadata, filename):
         f = pyfastaq.utils.open_file_write(filename)
 
         for gene_name, data_dict in sorted(metadata.items()):

@@ -190,12 +190,11 @@ class TestReferenceData(unittest.TestCase):
 
     def test_write_metadata_tsv(self):
         '''Test _write_metadata_tsv'''
-        presence_absence_fa = os.path.join(data_dir, 'reference_data_write_metadata_tsv_presence_absence.fa')
         metadata_tsv_in = os.path.join(data_dir, 'reference_data_write_metadata_tsv.tsv')
         metadata_tsv_expected = os.path.join(data_dir, 'reference_data_write_metadata_tsv.expected.tsv')
         tmp_tsv = 'tmp.test_write_metadata_tsv.out.tsv'
-        ref_data = reference_data.ReferenceData(presence_absence_fa=presence_absence_fa, metadata_tsv=metadata_tsv_in)
-        ref_data._write_metadata_tsv(ref_data.metadata, tmp_tsv)
+        metadata = reference_data.ReferenceData._load_all_metadata_tsvs([metadata_tsv_in])
+        reference_data.ReferenceData._write_metadata_tsv(metadata, tmp_tsv)
         self.assertTrue(filecmp.cmp(metadata_tsv_expected, tmp_tsv, shallow=False))
         os.unlink(tmp_tsv)
 
