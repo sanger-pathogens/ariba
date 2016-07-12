@@ -1,0 +1,7 @@
+non_coding_1 variant does not match reference. Removing. Line of file was: non_coding_1	0	0	L2K	.	should be removed because this is non-coding, but variant is protein
+presence_absence_1 metadata has no info. Just gene name given. Removing. Line of file was: presence_absence_1	1	0	.	.	.
+presence_absence_3 variant does not match reference. Removing. Line of file was: presence_absence_3	1	0	I3S	.	amino acid variant not ok
+variants_only_1 metadata has no info. Just gene name given. Removing. Line of file was: variants_only_1	1	1	.	.	.
+variants_only_1 variant does not match reference. Removing. Line of file was: variants_only_1	1	1	I2L	.	amin acid variant not ok
+variants_only_no_good_variants variant does not match reference. Removing. Line of file was: variants_only_no_good_variants	1	1	A4G	.	dna variant not ok
+variants_only_no_good_variants No remaining data after checks. Removing this sequence because it is variants only

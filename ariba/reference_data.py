@@ -195,17 +195,17 @@ class ReferenceData:
 
 
     @classmethod
-    def _filter_bad_variant_data(cls, sequences, metadata, out_prefix, removed_sequences):
+    def _filter_bad_variant_data(cls, sequences, all_metadata, out_prefix, removed_sequences):
         genes_to_remove = set()
         variants_only_genes_found_variant = set()
         log_file = out_prefix + '.log'
-        tsv_file = out_prefix + '.tsv'
+        tsv_file = out_prefix + '.metadata.tsv'
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
-        for sequence_name, metadata_dict in sorted(metadata.items()):
+        for sequence_name, metadata_dict in sorted(all_metadata.items()):
             assert sequence_name in sequences
 
-            if sequence_name in remove_sequences:
+            if sequence_name in removed_sequences:
                 print(sequence_name, 'was removed because does not look like a gene, so removing its metadata', file=log_fh)
                 genes_to_remove.add(sequence_name)
                 continue
@@ -258,18 +258,12 @@ class ReferenceData:
                 genes_to_remove.add(sequence_name)
 
         for sequence_name in genes_to_remove:
-            self.metadata.pop(sequence_name)
-
-        for sequence_name in sequences:
-            if sequence_name not in variants_only_genes_found_variant:
-                print(sequence_name, 'is in variants only gene file, but no variants found. Removing.', file=log_fh)
-                sequences.pop(sequence_name)
+            del all_metadata[sequence_name]
+            del sequences[sequence_name]
 
         pyfastaq.utils.close(log_fh)
-        self._write_metadata_tsv(self.metadata, tsv_file)
-        self._write_sequences(out_prefix + '.presence_absence.fa', 'presence_absence')
-        self._write_sequences(out_prefix + '.non_coding.fa', 'non_coding')
-        self._write_sequences(out_prefix + '.variants_only.fa', 'variants_only')
+        ReferenceData._write_metadata_tsv(all_metadata, tsv_file)
+        ReferenceData._write_sequences_to_files(sequences, all_metadata, out_prefix)
 
 
     @classmethod

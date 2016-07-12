@@ -240,33 +240,18 @@ class TestReferenceData(unittest.TestCase):
 
     def test_filter_bad_variant_data(self):
         '''Test _filter_bad_variant_data'''
-        presence_absence_fa = os.path.join(data_dir, 'reference_data_filter_bad_data_presence_absence.in.fa')
-        expected_presence_absence_fa = os.path.join(data_dir, 'reference_data_filter_bad_data_presence_absence.expected.fa')
-        variants_only_fa = os.path.join(data_dir, 'reference_data_filter_bad_data_variants_only.in.fa')
-        expected_variants_only_fa = os.path.join(data_dir, 'reference_data_filter_bad_data_variants_only.expected.fa')
-        non_coding_fa = os.path.join(data_dir, 'reference_data_filter_bad_data_non_coding.in.fa')
-        expected_non_coding_fa = os.path.join(data_dir, 'reference_data_filter_bad_data_non_coding.expected.fa')
+        fasta_in = os.path.join(data_dir, 'reference_data_filter_bad_data.in.fa')
         metadata_tsv = os.path.join(data_dir, 'reference_data_filter_bad_data_metadata.in.tsv')
-        expected_tsv = os.path.join(data_dir, 'reference_data_filter_bad_data_metadata.expected.tsv')
-        refdata = reference_data.ReferenceData(
-            presence_absence_fa=presence_absence_fa,
-            variants_only_fa=variants_only_fa,
-            non_coding_fa=non_coding_fa,
-            metadata_tsv=metadata_tsv
-        )
+        sequences, metadata = reference_data.ReferenceData._load_input_files_and_check_seq_names([fasta_in], [metadata_tsv])
+        tmp_prefix = 'tmp.test_filter_bad_variant_data'
+        reference_data.ReferenceData._filter_bad_variant_data(sequences, metadata, tmp_prefix, set())
+        expected_prefix = os.path.join(data_dir, 'reference_data_filter_bad_data.expected')
 
-        outprefix = 'tmp.test_filter_bad_variant_data'
-        refdata._filter_bad_variant_data(outprefix, set(), set())
-
-        self.assertTrue(filecmp.cmp(expected_tsv, outprefix + '.tsv'))
-        self.assertTrue(filecmp.cmp(expected_variants_only_fa, outprefix + '.variants_only.fa'))
-        self.assertTrue(filecmp.cmp(expected_presence_absence_fa, outprefix + '.presence_absence.fa'))
-        self.assertTrue(filecmp.cmp(expected_non_coding_fa, outprefix + '.non_coding.fa'))
-        os.unlink(outprefix + '.tsv')
-        os.unlink(outprefix + '.variants_only.fa')
-        os.unlink(outprefix + '.presence_absence.fa')
-        os.unlink(outprefix + '.non_coding.fa')
-        os.unlink(outprefix + '.log')
+        for suffix in ['gene.fa', 'gene.varonly.fa', 'noncoding.fa', 'noncoding.varonly.fa', 'all.fa', 'log', 'metadata.tsv']:
+            expected = expected_prefix + '.' + suffix
+            got = tmp_prefix + '.' + suffix
+            self.assertTrue(filecmp.cmp(expected, got, shallow=False))
+            os.unlink(got)
 
 
     def test_try_to_get_gene_seq(self):
