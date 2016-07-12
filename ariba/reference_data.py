@@ -124,6 +124,29 @@ class ReferenceData:
         return seq_dict
 
 
+
+    @staticmethod
+    def _load_input_files_and_check_seq_names(fasta_files, metadata_files):
+        metadata = ReferenceData._load_all_metadata_tsvs(metadata_files)
+        all_seqs = ReferenceData._load_all_fasta_files(fasta_files)
+
+        for seq_name in all_seqs:
+            if seq_name not in metadata:
+                raise Error('Sequence "' + seq_name + '" found in input fasta file but not in metadata file. Cannot continue')
+
+        to_remove = set()
+
+        for seq_name in metadata:
+            if seq_name not in all_seqs:
+                to_remove.add(seq_name)
+                print('WARNING: sequence "', seq_name, '" found in metadata, but not in fasta file. Ignoring it.', sep='', file=sys.stderr)
+
+        for key in to_remove:
+            del metadata[key]
+
+        return all_seqs, metadata
+
+
     @staticmethod
     def _find_gene_in_seqs(name, dicts):
         for dict_name, this_dict in dicts.items():
