@@ -397,19 +397,6 @@ class ReferenceData:
             self.metadata = ReferenceData._rename_names_in_metadata(self.metadata, rename_dict)
 
 
-    def make_catted_fasta(self, outfile):
-        f = pyfastaq.utils.open_file_write(outfile)
-
-        for key in ['presence_absence', 'variants_only', 'non_coding']:
-            filename = self.seq_filenames[key]
-            if filename is not None:
-                file_reader = pyfastaq.sequences.file_reader(filename)
-                for seq in file_reader:
-                    print(seq, file=f)
-
-        pyfastaq.utils.close(f)
-
-
     def sequence_type(self, sequence_name):
         return self._find_gene_in_seqs(sequence_name, self.seq_dicts)
 
