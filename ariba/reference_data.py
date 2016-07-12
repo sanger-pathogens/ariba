@@ -298,9 +298,9 @@ class ReferenceData:
 
 
     def sanity_check(self, outprefix):
-        variants_only_removed = self._remove_bad_genes(self.seq_dicts['variants_only'], outprefix + '.00.check_fasta_variants_only.log')
-        presence_absence_removed = self._remove_bad_genes(self.seq_dicts['presence_absence'], outprefix + '.00.check_fasta_presence_absence.log')
+        removed_seqs = self._remove_bad_genes(self.sequences, outprefix + '.00.remove_bad_genes.log')
         self._filter_bad_variant_data(outprefix + '.01.check_variants', presence_absence_removed, variants_only_removed)
+        ReferenceData._filter_bad_variant_data(self.sequences, self.metadata, outprefix, removed_seqs)
 
 
     @classmethod
