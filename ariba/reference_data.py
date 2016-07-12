@@ -13,10 +13,8 @@ rename_sub_regex = re.compile(r'[^\w.-]')
 
 class ReferenceData:
     def __init__(self,
-        presence_absence_fa=None,
-        variants_only_fa=None,
-        non_coding_fa=None,
-        metadata_tsv=None,
+        input_fasta_files,
+        metadata_tsv_files,
         min_gene_length=6,
         max_gene_length=10000,
         genetic_code=11,
@@ -89,13 +87,13 @@ class ReferenceData:
             if metadata.name not in metadata_dict:
                 metadata_dict[metadata.name] = {'n': {}, 'p': {}, '.': set()}
 
-            if metadata.variant_type == '.':
+            if metadata.variant is None:
                 metadata_dict[metadata.name]['.'].add(metadata)
             else:
-                if metadata.variant.position not in metadata_dict[metadata.name][metadata.variant_type]:
-                    metadata_dict[metadata.name][metadata.variant_type][metadata.variant.position] = set()
+                if metadata.variant.position not in metadata_dict[metadata.name][metadata.seq_type]:
+                    metadata_dict[metadata.name][metadata.seq_type][metadata.variant.position] = set()
 
-                metadata_dict[metadata.name][metadata.variant_type][metadata.variant.position].add(metadata)
+                metadata_dict[metadata.name][metadata.seq_type][metadata.variant.position].add(metadata)
 
         pyfastaq.utils.close(f)
         return metadata_dict
