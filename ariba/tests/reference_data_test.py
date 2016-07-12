@@ -309,40 +309,28 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_rename_names_in_seq_dicts(self):
-        '''Test _rename_names_in_seq_dicts'''
+    def test_rename_names_in_seq_dict(self):
+        '''Test _rename_names_in_seq_dict'''
+        original_seqs = {
+            'pa abc': pyfastaq.sequences.Fasta('pa abc', 'AAAA'),
+            'pa 1': pyfastaq.sequences.Fasta('pa 1', 'CCC'),
+            'vo:': pyfastaq.sequences.Fasta('vo:', 'GGG'),
+            'nonc': pyfastaq.sequences.Fasta('nonc', 'TTT'),
+        }
         rename_dict = {
             'pa abc': 'pa',
             'pa 1': 'pa_1',
             'vo:': 'vo_',
         }
-        seqs_dict = {
-            'presence_absence': {
-                'pa abc': pyfastaq.sequences.Fasta('pa abc', 'AAAA'),
-                'pa 1': pyfastaq.sequences.Fasta('pa 1', 'CCC'),
-            },
-            'variants_only': {
-                'vo:': pyfastaq.sequences.Fasta('vo:', 'GGG'),
-            },
-            'non_coding': {
-                'nonc': pyfastaq.sequences.Fasta('nonc', 'TTT'),
-            }
+        expected = {
+            'pa': pyfastaq.sequences.Fasta('pa', 'AAAA'),
+            'pa_1': pyfastaq.sequences.Fasta('pa_1', 'CCC'),
+            'vo_': pyfastaq.sequences.Fasta('vo_', 'GGG'),
+            'nonc': pyfastaq.sequences.Fasta('nonc', 'TTT'),
         }
 
-        got = reference_data.ReferenceData._rename_names_in_seq_dicts(seqs_dict, rename_dict)
-        expected = {
-            'presence_absence': {
-                'pa': pyfastaq.sequences.Fasta('pa', 'AAAA'),
-                'pa_1': pyfastaq.sequences.Fasta('pa_1', 'CCC'),
-            },
-            'variants_only': {
-                'vo_': pyfastaq.sequences.Fasta('vo_', 'GGG'),
-            },
-            'non_coding': {
-                'nonc': pyfastaq.sequences.Fasta('nonc', 'TTT'),
-            }
-        }
-        self.assertEqual(expected, seqs_dict)
+        got = reference_data.ReferenceData._rename_names_in_seq_dict(original_seqs, rename_dict)
+        self.assertEqual(expected, got)
 
 
     def test_rename_metadata_set(self):

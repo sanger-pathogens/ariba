@@ -333,18 +333,14 @@ class ReferenceData:
 
 
     @classmethod
-    def _rename_names_in_seq_dicts(cls, seq_dicts, rename_dict):
-        '''Changes seq_dicts in place'''
-        for seq_type in ['presence_absence', 'variants_only', 'non_coding']:
-            new_dict = {}
-            while len(seq_dicts[seq_type]):
-                old_name, seq = seq_dicts[seq_type].popitem()
-                if old_name in rename_dict:
-                    seq.id = rename_dict[old_name]
+    def _rename_names_in_seq_dict(cls, seq_dict, rename_dict):
+        new_dict = {}
+        for name, seq in seq_dict.items():
+            if name in rename_dict:
+                seq.id = rename_dict[name]
 
-                new_dict[seq.id] = seq
-            seq_dicts[seq_type] = new_dict
-
+            new_dict[seq.id] = seq
+        return new_dict
 
     @classmethod
     def _rename_metadata_set(cls, metadata_set, new_name):
