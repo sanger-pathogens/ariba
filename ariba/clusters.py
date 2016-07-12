@@ -278,8 +278,8 @@ class Clusters:
         common.syscall(cmd)
 
 
-    @staticmethod
-    def _load_minimap_out_cluster2representative(infile):
+    @classmethod
+    def _load_minimap_out_cluster2representative(cls, infile):
         cluster2rep = {}
 
         with open(infile) as f:
@@ -290,8 +290,8 @@ class Clusters:
         return cluster2rep
 
 
-    @staticmethod
-    def _load_minimap_out_cluster_counts(infile):
+    @classmethod
+    def _load_minimap_out_cluster_counts(cls, infile):
         reads = {}
         bases = {}
 
@@ -304,8 +304,8 @@ class Clusters:
         return reads, bases
 
 
-    @staticmethod
-    def _load_minimap_insert_histogram(infile, bin_size):
+    @classmethod
+    def _load_minimap_insert_histogram(cls, infile, bin_size):
         hist = histogram.Histogram(bin_size)
 
         with open(infile) as f:
@@ -316,14 +316,23 @@ class Clusters:
         return hist
 
 
-    @staticmethod
-    def _load_minimap_proper_pairs(infile):
+    @classmethod
+    def _load_minimap_proper_pairs(cls, infile):
         with open(infile) as f:
             for line in f:
                 pairs = int(line.rstrip())
                 break
 
         return pairs
+
+
+    @staticmethod
+    def _load_minimap_files(inprefix, hist_bin_size):
+        cluster2rep = Clusters._load_minimap_out_cluster2representative(inprefix + '.cluster2representative')
+        cluster_read_count, cluster_base_count = Clusters._load_minimap_out_cluster_counts(inprefix + '.clusterCounts')
+        insert_hist = Clusters._load_minimap_insert_histogram(inprefix + '.insertHistogram', hist_bin_size)
+        proper_pairs = Clusters._load_minimap_proper_pairs(inprefix + '.properPairs')
+        return cluster2rep, cluster_read_count, cluster_base_count, insert_hist, proper_pairs
 
 
     def _map_reads_to_clustered_genes(self):
