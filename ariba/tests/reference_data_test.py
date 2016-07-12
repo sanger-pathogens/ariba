@@ -481,38 +481,26 @@ class TestReferenceData(unittest.TestCase):
     def test_all_non_wild_type_variants(self):
         '''Test all_non_wild_type_variants'''
         tsv_file = os.path.join(data_dir, 'reference_data_test_all_non_wild_type_variants.tsv')
-        presence_absence_fa = os.path.join(data_dir, 'reference_data_test_all_non_wild_type_variants.ref.pres_abs.fa')
-        variants_only_fa = os.path.join(data_dir, 'reference_data_test_all_non_wild_type_variants.ref.var_only.fa')
-        noncoding_fa = os.path.join(data_dir, 'reference_data_test_all_non_wild_type_variants.ref.noncoding.fa')
+        fasta_in = os.path.join(data_dir, 'reference_data_test_all_non_wild_type_variants.ref.fa')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_file])
 
-        refdata = reference_data.ReferenceData(
-            presence_absence_fa=presence_absence_fa,
-            variants_only_fa=variants_only_fa,
-            non_coding_fa=noncoding_fa,
-            metadata_tsv=tsv_file
-        )
-
-        v1 = sequence_metadata.SequenceMetadata('var_only_gene\tn\tA8T\t.\tref has wild type A')
-        v2 = sequence_metadata.SequenceMetadata('var_only_gene\tn\tG9C\t.\tref has variant C instead of G')
-        v3 = sequence_metadata.SequenceMetadata('var_only_gene\tp\tP3Q\t.\tref has wild type P')
-        v4 = sequence_metadata.SequenceMetadata('var_only_gene\tp\tG4I\t.\tref has wild type F')
-        v5 = sequence_metadata.SequenceMetadata('var_only_gene\tp\tI5V\t.\tref has variant V instead of I')
-        v6 = sequence_metadata.SequenceMetadata('var_only_gene\tp\tF6I\t.\tref has wild type F')
-        p1 = sequence_metadata.SequenceMetadata('presence_absence_gene\tn\tA4G\t.\tref has wild type A')
-        p2 = sequence_metadata.SequenceMetadata('presence_absence_gene\tn\tA6C\t.\tref has variant C instead of A')
-        p3 = sequence_metadata.SequenceMetadata('presence_absence_gene\tp\tN2I\t.\tref has wild type N')
-        p4 = sequence_metadata.SequenceMetadata('presence_absence_gene\tp\tA4G\t.\tref has variant G instead of A')
-        n1 = sequence_metadata.SequenceMetadata('non_coding\tn\tA2C\t.\tref has wild type A')
-        n2 = sequence_metadata.SequenceMetadata('non_coding\tn\tC4T\t.\tref has variant T instead of C')
+        v1 = sequence_metadata.SequenceMetadata('var_only_gene\t1\t1\tP3Q\t.\tref has wild type P')
+        v2 = sequence_metadata.SequenceMetadata('var_only_gene\t1\t1\tG4I\t.\tref has wild type F')
+        v3 = sequence_metadata.SequenceMetadata('var_only_gene\t1\t1\tI5V\t.\tref has variant V instead of I')
+        v4 = sequence_metadata.SequenceMetadata('var_only_gene\t1\t1\tF6I\t.\tref has wild type F')
+        p1 = sequence_metadata.SequenceMetadata('presence_absence_gene\t1\t0\tN2I\t.\tref has wild type N')
+        p2 = sequence_metadata.SequenceMetadata('presence_absence_gene\t1\t0\tA4G\t.\tref has variant G instead of A')
+        n1 = sequence_metadata.SequenceMetadata('non_coding\t0\t0\tA2C\t.\tref has wild type A')
+        n2 = sequence_metadata.SequenceMetadata('non_coding\t0\t0\tC4T\t.\tref has variant T instead of C')
 
         var_only_expected = {
-             'n': {7: {v1}, 8: {v2}},
-             'p': {2: {v3}, 3: {v4}, 4: {v5}, 5: {v6}}
+             'n': {},
+             'p': {2: {v1}, 3: {v2}, 4: {v3}, 5: {v4}}
         }
 
         pres_abs_expected = {
-            'n': {3: {p1}, 5: {p2}},
-            'p': {1: {p3}, 3: {p4}},
+            'n': {},
+            'p': {1: {p1}, 3: {p2}},
         }
 
         non_coding_expected = {
