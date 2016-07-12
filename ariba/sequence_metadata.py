@@ -6,12 +6,14 @@ class Error (Exception): pass
 class SequenceMetadata:
     def __init__(self, line):
         try:
-            self.name, self.seq_type, var_only, variant, variant_id, self.free_text = line.rstrip().split('\t')
+            self.name, seq_type, var_only, variant, variant_id, self.free_text = line.rstrip().split('\t')
         except:
             raise Error('Error parsing line of file:\n' + line)
 
-        if self.seq_type not in {'n', 'p'}:
-            raise Error('Error. Second column must be "n" or "p". Cannot continue. Line was:\n' + line)
+        if seq_type not in {'0', '1'}:
+            raise Error('Error. Second column must be "0" or "1". Cannot continue. Line was:\n' + line)
+
+        self.seq_type = 'n' if seq_type == '0' else 'p'
 
         if var_only not in {'0', '1'}:
             raise Error('Error. Third column must be "0" or "1". Cannot continue. Line was:\n' + line)
@@ -43,7 +45,7 @@ class SequenceMetadata:
     def to_string(self, separator='\t'):
         return separator.join([
             self.name,
-            self.seq_type,
+            '1' if self.seq_type == 'p' else '0',
             '1' if self.variant_only else '0',
             '.' if self.variant is None else str(self.variant),
             '.' if (self.variant is None or self.variant.identifier is None) else self.variant.identifier,
