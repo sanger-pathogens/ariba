@@ -62,14 +62,6 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual(expected_seqs_dict, ref_data.seq_dicts)
 
 
-    def test_dict_keys_intersection(self):
-        '''Test dict_keys_intersection'''
-        d1 = {'a': 1, 'b':2, 'c': 42}
-        d2 = {'a': 42}
-        d3 = {'a': 11, 'b': 'xyz'}
-        self.assertEqual({'a'}, reference_data.ReferenceData._dict_keys_intersection([d1, d2, d3]))
-
-
     def test_load_metadata_tsv(self):
         '''Test _load_metadata_tsv'''
         meta1 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA42G\t.\tfree text')

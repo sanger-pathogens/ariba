@@ -13,7 +13,7 @@ rename_sub_regex = re.compile(r'[^\w.-]')
 
 class ReferenceData:
     def __init__(self,
-        input_fasta_files,
+        fasta_files,
         metadata_tsv_files,
         min_gene_length=6,
         max_gene_length=10000,
@@ -26,36 +26,9 @@ class ReferenceData:
 
         total_ref_seqs_loaded = 0
 
-        for x in ['presence_absence', 'variants_only', 'non_coding']:
-            exec('self.seq_filenames[x] = self._get_filename(' + x + '_fa)')
-            self.seq_dicts[x] = self._load_fasta_file(self.seq_filenames[x])
-            total_ref_seqs_loaded += len(self.seq_dicts[x])
-
-        if {None} == set(self.seq_filenames.values()):
-            raise Error('Error! Must supply at least one of presence_absence_fa, variants_only_fa, non_coding_fa. Cannot continue')
-
-        if total_ref_seqs_loaded == 0:
-            raise Error('Error! No sequences found in input file(s). Maybe they were empty? Cannot continue.')
-
-        self.metadata = self._load_metadata_tsv(metadata_tsv)
+        self.sequences, self.metadata = ReferenceData._load_input_files_and_check_seq_names(fasta_files, metadata_tsv_files)
         self.genetic_code = genetic_code
         pyfastaq.sequences.genetic_code = self.genetic_code
-        common_names = self._dict_keys_intersection(list(self.seq_dicts.values()))
-        if len(common_names):
-            raise Error('Error! Non-unique names found in input fasta files:\n' + '\n'.join(common_names))
-
-
-    @staticmethod
-    def _dict_keys_intersection(dicts):
-        dicts = [x for x in dicts if x is not None]
-        if len(dicts) == 0:
-            return set()
-
-        inter = set(dicts[0].keys())
-
-        for d in dicts[1:]:
-            inter = inter.intersection(set(d.keys()))
-        return inter
 
 
     @classmethod
