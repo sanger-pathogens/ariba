@@ -496,10 +496,11 @@ class TestReferenceData(unittest.TestCase):
 
     def test_sequence(self):
         '''Test sequence'''
-        presence_absence_fa = os.path.join(data_dir, 'reference_data_sequence.presence_absence.fa')
-        expected = pyfastaq.sequences.Fasta('pa', 'ATGTTTTAA')
-        refdata = reference_data.ReferenceData(presence_absence_fa=presence_absence_fa)
-        self.assertEqual(expected, refdata.sequence('pa'))
+        fasta_in = os.path.join(data_dir, 'reference_data_sequence.in.fa')
+        tsv_in = os.path.join(data_dir, 'reference_data_sequence.in.tsv')
+        expected = pyfastaq.sequences.Fasta('seq1', 'ATGTTTTAA')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        self.assertEqual(expected, refdata.sequence('seq1'))
 
 
     def test_all_non_wild_type_variants(self):

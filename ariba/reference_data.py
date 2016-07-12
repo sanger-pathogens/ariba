@@ -402,11 +402,7 @@ class ReferenceData:
 
 
     def sequence(self, sequence_name):
-        d = self._find_gene_in_seqs(sequence_name, self.seq_dicts)
-        if d is None:
-            return None
-        else:
-            return self.seq_dicts[d][sequence_name]
+        return self.sequences.get(sequence_name, None)
 
 
     def all_non_wild_type_variants(self, ref_name):
