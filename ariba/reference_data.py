@@ -409,12 +409,6 @@ class ReferenceData:
             return self.seq_dicts[d][sequence_name]
 
 
-    def sequence_length(self, sequence_name):
-        seq = self.sequence(sequence_name)
-        assert seq is not None
-        return len(seq)
-
-
     def all_non_wild_type_variants(self, ref_name):
         ref_seq = self.sequence(ref_name)
         variants = {'n': {}, 'p': {}}

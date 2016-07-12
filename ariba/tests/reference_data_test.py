@@ -502,13 +502,6 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual(expected, refdata.sequence('pa'))
 
 
-    def test_sequence_length(self):
-        '''Test sequence_length'''
-        presence_absence_fa = os.path.join(data_dir, 'reference_data_sequence_length.presence_absence.fa')
-        refdata = reference_data.ReferenceData(presence_absence_fa=presence_absence_fa)
-        self.assertEqual(9, refdata.sequence_length('pa'))
-
-
     def test_all_non_wild_type_variants(self):
         '''Test all_non_wild_type_variants'''
         tsv_file = os.path.join(data_dir, 'reference_data_test_all_non_wild_type_variants.tsv')
