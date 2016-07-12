@@ -232,7 +232,7 @@ class TestReferenceData(unittest.TestCase):
         tmp_prefix = 'tmp.test_write_sequences_to_files'
         reference_data.ReferenceData._write_sequences_to_files(sequences, metadata, tmp_prefix)
         expected_prefix = os.path.join(data_dir, 'reference_data_write_sequences_to_files')
-        for suffix in ['gene.fa', 'gene.varonly.fa', 'noncoding.fa', 'noncoding.varonly.fa']:
+        for suffix in ['gene.fa', 'gene.varonly.fa', 'noncoding.fa', 'noncoding.varonly.fa', 'all.fa']:
             expected = expected_prefix + '.' + suffix
             got = tmp_prefix + '.' + suffix
             self.assertTrue(filecmp.cmp(expected, got, shallow=False))

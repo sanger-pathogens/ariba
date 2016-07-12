@@ -180,13 +180,18 @@ class ReferenceData:
         for key in filenames:
             filename2filehandle[filenames[key]] = pyfastaq.utils.open_file_write(filenames[key])
 
+        all_fh = pyfastaq.utils.open_file_write(outprefix + '.all.fa')
+
         for sequence in sorted(sequences):
             key = metadata[sequence]['seq_type'], metadata[sequence]['variant_only']
             filehandle = filename2filehandle[filenames[key]]
             print(sequences[sequence], file=filehandle)
+            print(sequences[sequence], file=all_fh)
 
         for filehandle in filename2filehandle.values():
             pyfastaq.utils.close(filehandle)
+
+        pyfastaq.utils.close(all_fh)
 
 
     @classmethod
