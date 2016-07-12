@@ -213,6 +213,32 @@ class TestReferenceData(unittest.TestCase):
         os.unlink(tmp_file)
 
 
+    def test_write_sequences_to_files(self):
+        '''Test _write_sequences_to_files'''
+        sequences = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'ACGT'),
+            'seq2': pyfastaq.sequences.Fasta('seq2', 'ACGTA'),
+            'seq3': pyfastaq.sequences.Fasta('seq3', 'ACGTAC'),
+            'seq4': pyfastaq.sequences.Fasta('seq4', 'ACGTAAA'),
+            'seq5': pyfastaq.sequences.Fasta('seq5', 'ACGTCCC'),
+        }
+        metadata = {
+            'seq1': {'seq_type': 'n', 'variant_only': False},
+            'seq2': {'seq_type': 'n', 'variant_only': True},
+            'seq3': {'seq_type': 'p', 'variant_only': False},
+            'seq4': {'seq_type': 'p', 'variant_only': True},
+            'seq5': {'seq_type': 'n', 'variant_only': False},
+        }
+        tmp_prefix = 'tmp.test_write_sequences_to_files'
+        reference_data.ReferenceData._write_sequences_to_files(sequences, metadata, tmp_prefix)
+        expected_prefix = os.path.join(data_dir, 'reference_data_write_sequences_to_files')
+        for suffix in ['gene.fa', 'gene.varonly.fa', 'noncoding.fa', 'noncoding.varonly.fa']:
+            expected = expected_prefix + '.' + suffix
+            got = tmp_prefix + '.' + suffix
+            self.assertTrue(filecmp.cmp(expected, got, shallow=False))
+            os.unlink(got)
+
+
     def test_filter_bad_variant_data(self):
         '''Test _filter_bad_variant_data'''
         presence_absence_fa = os.path.join(data_dir, 'reference_data_filter_bad_data_presence_absence.in.fa')

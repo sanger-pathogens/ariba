@@ -167,27 +167,42 @@ class ReferenceData:
             self._write_dict_of_sequences(self.seq_dicts[sequences_to_write], filename)
 
 
-    def _filter_bad_variant_data(self, out_prefix, presence_absence_removed, variants_only_removed):
+    @classmethod
+    def _write_sequences_to_files(cls, sequences, metadata, outprefix):
+        filenames = {
+            ('n', False): outprefix + '.noncoding.fa',
+            ('n', True): outprefix + '.noncoding.varonly.fa',
+            ('p', False): outprefix + '.gene.fa',
+            ('p', True): outprefix + '.gene.varonly.fa',
+        }
+
+        filename2filehandle = {}
+        for key in filenames:
+            filename2filehandle[filenames[key]] = pyfastaq.utils.open_file_write(filenames[key])
+
+        for sequence in sorted(sequences):
+            key = metadata[sequence]['seq_type'], metadata[sequence]['variant_only']
+            filehandle = filename2filehandle[filenames[key]]
+            print(sequences[sequence], file=filehandle)
+
+        for filehandle in filename2filehandle.values():
+            pyfastaq.utils.close(filehandle)
+
+
+    @classmethod
+    def _filter_bad_variant_data(cls, sequences, metadata, out_prefix, removed_sequences):
         genes_to_remove = set()
-        variants_only_genes_not_found = set(self.seq_dicts['variants_only'].keys())
+        variants_only_genes_found_variant = set()
         log_file = out_prefix + '.log'
         tsv_file = out_prefix + '.tsv'
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
-        for gene_name, metadata_dict in sorted(self.metadata.items()):
-            if gene_name in presence_absence_removed:
-                print(gene_name, 'was removed from presence/absence fasta, so removing its metadata', file=log_fh)
-                genes_to_remove.add(gene_name)
-                continue
-            elif gene_name in variants_only_removed:
-                print(gene_name, 'was removed from variants only fasta, so removing its metadata', file=log_fh)
-                genes_to_remove.add(gene_name)
-                continue
+        for sequence_name, metadata_dict in sorted(metadata.items()):
+            assert sequence_name in sequences
 
-            gene_in_seq_dict = self._find_gene_in_seqs(gene_name, self.seq_dicts)
-            if gene_in_seq_dict is None:
-                print(gene_name, 'is in input tsv file, but not found in any input sequence files. Removing', file=log_fh)
-                genes_to_remove.add(gene_name)
+            if sequence_name in remove_sequences:
+                print(sequence_name, 'was removed because does not look like a gene, so removing its metadata', file=log_fh)
+                genes_to_remove.add(sequence_name)
                 continue
 
             # take out any metadata that is not a variant and has no extra info.
@@ -195,21 +210,19 @@ class ReferenceData:
 
             for metadata in metadata_dict['.']:
                 if metadata.free_text == '.':
-                    print(gene_name, 'metadata has no info. Just gene name given. Removing. Line of file was:', metadata, file=log_fh)
+                    print(sequence_name, 'metadata has no info. Just gene name given. Removing. Line of file was:', metadata, file=log_fh)
                     to_remove.append(metadata)
 
             for metadata in to_remove:
                 metadata_dict['.'].remove(metadata)
 
-
             # if this is non_coding, we shouldn't have any amino acid variants
-            if gene_in_seq_dict == 'non_coding':
+            if metadata_dict['seq_type'] != 'p':
                 for position in metadata_dict['p']:
                     for metadata in metadata_dict['p'][position]:
-                        print(gene_name, 'variant of type "p" for protein, but sequence is non-coding. Removing. Line of file was:', metadata, file=log_fh)
+                        print(sequence_name, 'variant is an amino acid change, but sequence is non-coding. Removing. Line of file was:', metadata, file=log_fh)
 
                 metadata_dict['p'] = {}
-
 
             # take out variant metadata that doesn't make sense (eg bases not matching ref sequence)
             for variant_type in ['n', 'p']:
@@ -219,13 +232,13 @@ class ReferenceData:
                     for metadata in metadata_dict[variant_type][position]:
                         to_translate = variant_type == 'p'
 
-                        if not metadata.variant.sanity_check_against_seq(self.seq_dicts[gene_in_seq_dict][gene_name], translate_seq=to_translate):
-                            print(gene_name, 'variant does not match reference. Removing. Line of file was:', metadata, file=log_fh)
+                        if not metadata.variant.sanity_check_against_seq(sequences[sequence_name], translate_seq=to_translate):
+                            print(sequence_name, 'variant does not match reference. Removing. Line of file was:', metadata, file=log_fh)
                             meta_to_remove.append(metadata)
                             continue
 
-                        if gene_in_seq_dict == 'variants_only':
-                            variants_only_genes_not_found.discard(gene_name)
+                        if metadata_dict['variant_only']:
+                            variants_only_genes_found_variant.add(sequence_name)
 
                     for metadata in meta_to_remove:
                         metadata_dict[variant_type][position].remove(metadata)
@@ -235,17 +248,17 @@ class ReferenceData:
                 for position in positions_to_remove:
                     del metadata_dict[variant_type][position]
 
+            if metadata_dict['variant_only'] and len(metadata_dict['n']) == len(metadata_dict['p']) == len(metadata_dict['.']) == 0:
+                print(sequence_name, 'No remaining data after checks. Removing this sequence because it is variants only', file=log_fh)
+                genes_to_remove.add(sequence_name)
 
-            if gene_in_seq_dict == 'variants_only' and len(metadata_dict['n']) == len(metadata_dict['p']) == len(metadata_dict['.']) == 0:
-                print(gene_name, 'No remaining data after checks. Removing this sequence because it is in the variants only file', file=log_fh)
-                genes_to_remove.add(gene_name)
+        for sequence_name in genes_to_remove:
+            self.metadata.pop(sequence_name)
 
-        for gene_name in genes_to_remove:
-            self.metadata.pop(gene_name)
-
-        for gene_name in variants_only_genes_not_found:
-            print(gene_name, 'is in variants only gene file, but no variants found. Removing.', file=log_fh)
-            self.seq_dicts['variants_only'].pop(gene_name)
+        for sequence_name in sequences:
+            if sequence_name not in variants_only_genes_found_variant:
+                print(sequence_name, 'is in variants only gene file, but no variants found. Removing.', file=log_fh)
+                sequences.pop(sequence_name)
 
         pyfastaq.utils.close(log_fh)
         self._write_metadata_tsv(self.metadata, tsv_file)
