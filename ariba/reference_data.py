@@ -161,12 +161,6 @@ class ReferenceData:
         pyfastaq.utils.close(f)
 
 
-    def _write_sequences(self, filename, sequences_to_write):
-        assert sequences_to_write in self.seq_dicts and sequences_to_write in self.seq_filenames
-        if self.seq_filenames[sequences_to_write] is not None:
-            self._write_dict_of_sequences(self.seq_dicts[sequences_to_write], filename)
-
-
     @classmethod
     def _write_sequences_to_files(cls, sequences, metadata, outprefix):
         filenames = {
