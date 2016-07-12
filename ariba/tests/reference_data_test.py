@@ -199,19 +199,6 @@ class TestReferenceData(unittest.TestCase):
         os.unlink(tmp_tsv)
 
 
-    def test_write_dict_of_sequences(self):
-        '''Test _write_dict_of_sequences'''
-        d = {
-            'seq1': pyfastaq.sequences.Fasta('seq1', 'ACGT'),
-            'seq2': pyfastaq.sequences.Fasta('seq2', 'GGGG'),
-        }
-        tmp_file = 'tmp.test_write_dict_of_sequences.fa'
-        reference_data.ReferenceData._write_dict_of_sequences(d, tmp_file)
-        expected = os.path.join(data_dir, 'reference_data_write_dict_of_sequences.fa')
-        self.assertTrue(filecmp.cmp(expected, tmp_file, shallow=False))
-        os.unlink(tmp_file)
-
-
     def test_write_sequences_to_files(self):
         '''Test _write_sequences_to_files'''
         sequences = {

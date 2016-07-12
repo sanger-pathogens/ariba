@@ -153,14 +153,6 @@ class ReferenceData:
         pyfastaq.utils.close(f)
 
 
-    @staticmethod
-    def _write_dict_of_sequences(seq_dict, filename):
-        f = pyfastaq.utils.open_file_write(filename)
-        for seq in sorted(seq_dict):
-            print(seq_dict[seq], file=f)
-        pyfastaq.utils.close(f)
-
-
     @classmethod
     def _write_sequences_to_files(cls, sequences, metadata, outprefix):
         filenames = {
