@@ -58,17 +58,6 @@ class ReferenceData:
         return inter
 
 
-    @staticmethod
-    def _get_filename(filename):
-        if filename is None:
-            return None
-        else:
-            if os.path.exists(filename):
-                return os.path.abspath(filename)
-            else:
-                raise Error('Error! File not found: ' + filename)
-
-
     @classmethod
     def _load_metadata_tsv(cls, filename, metadata_dict):
         if filename is None:

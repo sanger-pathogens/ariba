@@ -70,17 +70,6 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual({'a'}, reference_data.ReferenceData._dict_keys_intersection([d1, d2, d3]))
 
 
-    def test_get_filename(self):
-        '''Test _get_filename'''
-        file_that_exists_abs = os.path.join(data_dir, 'reference_data_get_filename')
-        file_that_exists_rel = os.path.relpath(file_that_exists_abs)
-        self.assertEqual(file_that_exists_abs, reference_data.ReferenceData._get_filename(file_that_exists_rel))
-        self.assertIsNone(reference_data.ReferenceData._get_filename(None))
-
-        with self.assertRaises(reference_data.Error):
-            reference_data.ReferenceData._get_filename('thisisnotafilesoshouldthrowerror,unlessyoujustmadeitwhichseemslikeanoddthingtodoandyoudeservethefailingtest')
-
-
     def test_load_metadata_tsv(self):
         '''Test _load_metadata_tsv'''
         meta1 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA42G\t.\tfree text')
