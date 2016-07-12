@@ -69,8 +69,8 @@ class ReferenceData:
                 raise Error('Error! File not found: ' + filename)
 
 
-    @staticmethod
-    def _load_metadata_tsv(filename, metadata_dict):
+    @classmethod
+    def _load_metadata_tsv(cls, filename, metadata_dict):
         if filename is None:
             return {}
 
@@ -95,6 +95,15 @@ class ReferenceData:
                 metadata_dict[metadata.name][metadata.seq_type][metadata.variant.position].add(metadata)
 
         pyfastaq.utils.close(f)
+        return metadata_dict
+
+
+    @staticmethod
+    def _load_all_metadata_tsvs(filenames):
+        metadata_dict = {}
+        assert len(filenames) > 0
+        for filename in filenames:
+            ReferenceData._load_metadata_tsv(filename, metadata_dict)
         return metadata_dict
 
 

@@ -105,6 +105,29 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_load_all_metadata_tsvs(self):
+       '''Test _load_all_metadata_tsvs'''
+       input_files = [os.path.join(data_dir, 'reference_data_load_all_metadata_tsvs.' + x + '.tsv') for x in ['1', '2']]
+       meta1 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA42G\t.\tfree text')
+       meta2 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tG13T\t.\tconfers killer rabbit resistance')
+       meta3 = sequence_metadata.SequenceMetadata("gene2\t1\t0\tI42L\t.\tremoves tardigrade's space-living capability")
+       expected = {
+           'gene1': {
+               'n': {12: {meta2}, 41: {meta1}},
+               'p': {},
+               '.': set(),
+           },
+           'gene2': {
+               'n': {},
+               'p': {41: {meta3}},
+               '.': set(),
+           }
+       }
+
+       got = reference_data.ReferenceData._load_all_metadata_tsvs(input_files)
+       self.assertEqual(expected, got)
+
+
     def test_load_fasta_file(self):
         '''Test _load_fasta_file'''
         expected = {'seq1': pyfastaq.sequences.Fasta('seq1', 'ACGT')}
