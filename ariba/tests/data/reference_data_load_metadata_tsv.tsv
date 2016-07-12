@@ -1,3 +1,3 @@
 gene1	0	0	A42G	.	free text
 gene1	0	0	G13T	.	confers killer rabbit resistance
-gene2	1	0	I42L	.	removes tardigrade's space-living capability
+gene2	1	1	I42L	.	removes tardigrade's space-living capability

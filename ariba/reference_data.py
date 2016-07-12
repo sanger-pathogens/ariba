@@ -73,7 +73,15 @@ class ReferenceData:
                 continue
 
             if metadata.name not in metadata_dict:
-                metadata_dict[metadata.name] = {'n': {}, 'p': {}, '.': set()}
+                metadata_dict[metadata.name] = {
+                    'seq_type': metadata.seq_type,
+                    'variant_only': metadata.variant_only,
+                    'n': {},
+                    'p': {},
+                    '.': set()
+                }
+            elif metadata.seq_type != metadata_dict[metadata.name]['seq_type'] or metadata.variant_only != metadata_dict[metadata.name]['variant_only']:
+                raise Error('Inconsistent metadata for sequence ' + metadata.name + '. Cannot continue')
 
             if metadata.variant is None:
                 metadata_dict[metadata.name]['.'].add(metadata)
@@ -87,8 +95,8 @@ class ReferenceData:
         return metadata_dict
 
 
-    @staticmethod
-    def _load_all_metadata_tsvs(filenames):
+    @classmethod
+    def _load_all_metadata_tsvs(cls, filenames):
         metadata_dict = {}
         assert len(filenames) > 0
         for filename in filenames:
@@ -107,8 +115,8 @@ class ReferenceData:
                 seq_dict[seq.id] = copy.copy(seq)
 
 
-    @staticmethod
-    def _load_all_fasta_files(filenames):
+    @classmethod
+    def _load_all_fasta_files(cls, filenames):
         seq_dict = {}
         assert len(filenames) > 0
         for filename in filenames:

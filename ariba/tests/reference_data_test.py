@@ -74,14 +74,18 @@ class TestReferenceData(unittest.TestCase):
         '''Test _load_metadata_tsv'''
         meta1 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA42G\t.\tfree text')
         meta2 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tG13T\t.\tconfers killer rabbit resistance')
-        meta3 = sequence_metadata.SequenceMetadata("gene2\t1\t0\tI42L\t.\tremoves tardigrade's space-living capability")
+        meta3 = sequence_metadata.SequenceMetadata("gene2\t1\t1\tI42L\t.\tremoves tardigrade's space-living capability")
         expected = {
             'gene1': {
+                'seq_type': 'n',
+                'variant_only': False,
                 'n': {12: {meta2}, 41: {meta1}},
                 'p': {},
                 '.': set(),
             },
             'gene2': {
+                'seq_type': 'p',
+                'variant_only': True,
                 'n': {},
                 'p': {41: {meta3}},
                 '.': set(),
@@ -102,11 +106,15 @@ class TestReferenceData(unittest.TestCase):
        meta3 = sequence_metadata.SequenceMetadata("gene2\t1\t0\tI42L\t.\tremoves tardigrade's space-living capability")
        expected = {
            'gene1': {
+                'seq_type': 'n',
+                'variant_only': False,
                'n': {12: {meta2}, 41: {meta1}},
                'p': {},
                '.': set(),
            },
            'gene2': {
+                'seq_type': 'p',
+                'variant_only': False,
                'n': {},
                'p': {41: {meta3}},
                '.': set(),
