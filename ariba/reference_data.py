@@ -254,8 +254,8 @@ class ReferenceData:
         self._write_sequences(out_prefix + '.variants_only.fa', 'variants_only')
 
 
-    @staticmethod
-    def _try_to_get_gene_seq(seq, min_length, max_length):
+    @classmethod
+    def _try_to_get_gene_seq(cls, seq, min_length, max_length):
         seq.seq = seq.seq.upper()
         if len(seq) < min_length:
             return None, 'Remove: too short. Length: ' + str(len(seq))
@@ -269,20 +269,21 @@ class ReferenceData:
                 return got[0], 'Made ' + seq.id + ' into gene. strand=' + got[1] + ', frame=' + str(got[2])
 
 
-    def _remove_bad_genes(self, seqs_dict, log_file):
+    @classmethod
+    def _remove_bad_genes(cls, sequences, log_file, min_gene_length, max_gene_length):
         to_remove = set()
 
-        if len(seqs_dict) == 0:
+        if len(sequences) == 0:
             return to_remove
 
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
-        for name in sorted(seqs_dict):
-            new_seq, message = self._try_to_get_gene_seq(seqs_dict[name], self.min_gene_length, self.max_gene_length)
+        for name in sorted(sequences):
+            new_seq, message = ReferenceData._try_to_get_gene_seq(sequences[name], min_gene_length, max_gene_length)
             if new_seq is None:
                 to_remove.add(name)
             else:
-                seqs_dict[name] = new_seq
+                sequences[name] = new_seq
 
             if message is not None:
                 print(name, message, file=log_fh)
@@ -290,7 +291,7 @@ class ReferenceData:
         pyfastaq.utils.close(log_fh)
 
         for name in to_remove:
-            seqs_dict.pop(name)
+            sequences.pop(name)
 
         return to_remove
 

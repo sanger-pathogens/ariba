@@ -260,18 +260,17 @@ class TestReferenceData(unittest.TestCase):
 
     def test_remove_bad_genes(self):
         '''Test _remove_bad_genes'''
-        presence_absence_fasta = os.path.join(data_dir, 'reference_data_remove_bad_genes.in.fa')
-        refdata = reference_data.ReferenceData(presence_absence_fa=presence_absence_fasta, max_gene_length=99)
+        test_seq_dict = {}
+        fasta_file = os.path.join(data_dir, 'reference_data_remove_bad_genes.in.fa')
+        pyfastaq.tasks.file_to_dict(fasta_file, test_seq_dict)
         tmp_log = 'tmp.test_remove_bad_genes.log'
-
         expected_removed = {'g1', 'g2', 'g3', 'g4'}
-        got_removed = refdata._remove_bad_genes(refdata.seq_dicts['presence_absence'], tmp_log)
+        got_removed = reference_data.ReferenceData._remove_bad_genes(test_seq_dict, tmp_log, min_gene_length=6, max_gene_length=99)
         self.assertEqual(expected_removed, got_removed)
-
         expected_dict = {
             'g5': pyfastaq.sequences.Fasta('g5', 'ATGCCTTAA')
         }
-        self.assertEqual(expected_dict, refdata.seq_dicts['presence_absence'])
+        self.assertEqual(expected_dict, test_seq_dict)
         expected_log = os.path.join(data_dir, 'reference_data_test_remove_bad_genes.log')
         self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
         os.unlink(tmp_log)
