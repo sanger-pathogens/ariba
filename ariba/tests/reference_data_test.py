@@ -137,6 +137,17 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_load_all_fasta_files(self):
+        '''Test _load_all_fasta_files'''
+        filenames = [os.path.join(data_dir, 'reference_data_load_all_fasta_files.in.' + x) for x in ['1', '2']]
+        expected = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'ACGT'),
+            'seq2': pyfastaq.sequences.Fasta('seq2', 'TTTT')
+        }
+        got = reference_data.ReferenceData._load_all_fasta_files(filenames)
+        self.assertEqual(expected, got)
+
+
     def test_find_gene_in_seqs(self):
         '''Test _find_gene_in_seqs'''
         seqs_dict = {

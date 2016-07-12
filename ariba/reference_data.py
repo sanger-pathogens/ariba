@@ -118,6 +118,15 @@ class ReferenceData:
 
 
     @staticmethod
+    def _load_all_fasta_files(filenames):
+        seq_dict = {}
+        assert len(filenames) > 0
+        for filename in filenames:
+            ReferenceData._load_fasta_file(filename, seq_dict)
+        return seq_dict
+
+
+    @staticmethod
     def _find_gene_in_seqs(name, dicts):
         for dict_name, this_dict in dicts.items():
             if this_dict is None:
