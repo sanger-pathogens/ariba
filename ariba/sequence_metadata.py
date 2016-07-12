@@ -27,7 +27,7 @@ class SequenceMetadata:
 
 
     def __eq__(self, other):
-       return type(other) is type(self) and self.name == other.name and self.seq_type == other.seq_type and self.var_only == other.var_only and self.variant == other.variant and self.free_text == other.free_text
+       return type(other) is type(self) and self.name == other.name and self.seq_type == other.seq_type and self.variant_only == other.variant_only and self.variant == other.variant and self.free_text == other.free_text
 
 
     def __lt__(self, other):
