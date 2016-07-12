@@ -1,8 +1,0 @@
->var_only1 hello
-AAAA
->var:only1 boo
-CCCC
->var_only1
-GGGG
->var_only2
-TTTT

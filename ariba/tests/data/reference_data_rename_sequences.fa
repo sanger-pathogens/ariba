@@ -1,0 +1,22 @@
+>pres_abs1 foo bar spam eggs
+ACGT
+>pres_abs1 blah
+AAAA
+>pres'abs1
+CCCC
+>pres_abs2
+TTTT
+>pres!abs3
+GGGG
+>var_only1 hello
+AAAA
+>var:only1 boo
+CCCC
+>var_only1
+GGGG
+>var_only2
+TTTT
+>noncoding1
+AAAA
+>noncoding1 blah
+CCCC

@@ -82,7 +82,6 @@ class ReferenceData:
         if filename is not None:
             seq_reader = pyfastaq.sequences.file_reader(filename)
             for seq in seq_reader:
-                seq.id = seq.id.split()[0]
                 if seq.id in seq_dict:
                     raise Error('Duplicate name "' + seq.id + '" found in file ' + filename + '. Cannot continue)')
                 seq_dict[seq.id] = copy.copy(seq)
@@ -374,22 +373,14 @@ class ReferenceData:
 
 
     def rename_sequences(self, outfile):
-        presabs_names = set(self.seq_dicts['presence_absence'].keys())
-        noncoding_names = set(self.seq_dicts['non_coding'].keys())
-        varonly_names = set(self.seq_dicts['variants_only'].keys())
-        # we should have already checked that all the names are unique, but let's do it again!
-        all_names = presabs_names.union(noncoding_names).union(varonly_names)
-        if len(all_names) != len(presabs_names) + len(noncoding_names) + len(varonly_names):
-            raise Error('Got a non-unique name in input data. Cannot continue')
-
-        rename_dict = ReferenceData._seq_names_to_rename_dict(all_names)
+        rename_dict = ReferenceData._seq_names_to_rename_dict(self.sequences.keys())
         if len(rename_dict):
             print('Had to rename some sequences. See', outfile, 'for old -> new names', file=sys.stderr)
             with open(outfile, 'w') as f:
                 for old_name, new_name in sorted(rename_dict.items()):
                     print(old_name, new_name, sep='\t', file=f)
 
-            ReferenceData._rename_names_in_seq_dicts(self.seq_dicts, rename_dict)
+            self.sequences = ReferenceData._rename_names_in_seq_dict(self.sequences, rename_dict)
             self.metadata = ReferenceData._rename_names_in_metadata(self.metadata, rename_dict)
 
 
