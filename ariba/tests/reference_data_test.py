@@ -262,13 +262,16 @@ class TestReferenceData(unittest.TestCase):
         '''Test _remove_bad_genes'''
         test_seq_dict = {}
         fasta_file = os.path.join(data_dir, 'reference_data_remove_bad_genes.in.fa')
+        metadata_file = os.path.join(data_dir, 'reference_data_remove_bad_genes.in.tsv')
+        metadata = reference_data.ReferenceData._load_all_metadata_tsvs([metadata_file])
         pyfastaq.tasks.file_to_dict(fasta_file, test_seq_dict)
         tmp_log = 'tmp.test_remove_bad_genes.log'
         expected_removed = {'g1', 'g2', 'g3', 'g4'}
-        got_removed = reference_data.ReferenceData._remove_bad_genes(test_seq_dict, tmp_log, min_gene_length=6, max_gene_length=99)
+        got_removed = reference_data.ReferenceData._remove_bad_genes(test_seq_dict, metadata, tmp_log, min_gene_length=6, max_gene_length=99)
         self.assertEqual(expected_removed, got_removed)
         expected_dict = {
-            'g5': pyfastaq.sequences.Fasta('g5', 'ATGCCTTAA')
+            'g5': pyfastaq.sequences.Fasta('g5', 'ATGCCTTAA'),
+            'noncoding1': pyfastaq.sequences.Fasta('noncoding1', 'AAAAAAAAAAAAAAAAAAAAAAA')
         }
         self.assertEqual(expected_dict, test_seq_dict)
         expected_log = os.path.join(data_dir, 'reference_data_test_remove_bad_genes.log')

@@ -270,7 +270,7 @@ class ReferenceData:
 
 
     @classmethod
-    def _remove_bad_genes(cls, sequences, log_file, min_gene_length, max_gene_length):
+    def _remove_bad_genes(cls, sequences, metadata, log_file, min_gene_length, max_gene_length):
         to_remove = set()
 
         if len(sequences) == 0:
@@ -279,6 +279,9 @@ class ReferenceData:
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
         for name in sorted(sequences):
+            if metadata[name]['seq_type'] != 'p':
+                continue
+
             new_seq, message = ReferenceData._try_to_get_gene_seq(sequences[name], min_gene_length, max_gene_length)
             if new_seq is None:
                 to_remove.add(name)
