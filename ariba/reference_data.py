@@ -107,19 +107,14 @@ class ReferenceData:
         return metadata_dict
 
 
-    @staticmethod
-    def _load_fasta_file(filename):
-        d = {}
-
+    @classmethod
+    def _load_fasta_file(cls, filename, seq_dict):
         if filename is not None:
             seq_reader = pyfastaq.sequences.file_reader(filename)
             for seq in seq_reader:
-                #seq.id = seq.id.split()[0]
-                if seq.id in d:
+                if seq.id in seq_dict:
                     raise Error('Duplicate name "' + seq.id + '" found in file ' + filename + '. Cannot continue)')
-                d[seq.id] = copy.copy(seq)
-
-        return d
+                seq_dict[seq.id] = copy.copy(seq)
 
 
     @staticmethod

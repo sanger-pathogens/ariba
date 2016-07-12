@@ -130,9 +130,10 @@ class TestReferenceData(unittest.TestCase):
 
     def test_load_fasta_file(self):
         '''Test _load_fasta_file'''
+        got = {}
         expected = {'seq1': pyfastaq.sequences.Fasta('seq1', 'ACGT')}
         filename = os.path.join(data_dir, 'reference_data_load_fasta_file.fa')
-        got = reference_data.ReferenceData._load_fasta_file(filename)
+        reference_data.ReferenceData._load_fasta_file(filename, got)
         self.assertEqual(expected, got)
 
 
