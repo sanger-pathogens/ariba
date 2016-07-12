@@ -350,15 +350,15 @@ class TestReferenceData(unittest.TestCase):
 
     def test_rename_names_in_metadata(self):
         '''Test _rename_names_in_metadata'''
-        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\t.\tfree text')
-        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tA42T\t.\tfree text2')
-        meta3 = sequence_metadata.SequenceMetadata('gene1\t.\t.\t.\tfree text3')
-        meta4 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\t.\tconfers killer rabbit resistance')
-        meta5 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\t.\tremoves tardigrade's space-living capability")
-        meta1rename = sequence_metadata.SequenceMetadata('new_gene1\tn\tA42G\t.\tfree text')
-        meta2rename = sequence_metadata.SequenceMetadata('new_gene1\tn\tA42T\t.\tfree text2')
-        meta3rename = sequence_metadata.SequenceMetadata('new_gene1\t.\t.\t.\tfree text3')
-        meta4rename = sequence_metadata.SequenceMetadata('new_gene1\tn\tG13T\t.\tconfers killer rabbit resistance')
+        meta1 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA42G\t.\tfree text')
+        meta2 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA42T\t.\tfree text2')
+        meta3 = sequence_metadata.SequenceMetadata('gene1\t0\t0\t.\t.\tfree text3')
+        meta4 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tG13T\t.\tconfers killer rabbit resistance')
+        meta5 = sequence_metadata.SequenceMetadata("gene2\t1\t0\tI42L\t.\tremoves tardigrade's space-living capability")
+        meta1rename = sequence_metadata.SequenceMetadata('new_gene1\t0\t0\tA42G\t.\tfree text')
+        meta2rename = sequence_metadata.SequenceMetadata('new_gene1\t0\t0\tA42T\t.\tfree text2')
+        meta3rename = sequence_metadata.SequenceMetadata('new_gene1\t0\t0\t.\t.\tfree text3')
+        meta4rename = sequence_metadata.SequenceMetadata('new_gene1\t0\t0\tG13T\t.\tconfers killer rabbit resistance')
 
         metadata = {
             'gene1': {
