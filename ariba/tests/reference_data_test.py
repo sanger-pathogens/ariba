@@ -328,13 +328,13 @@ class TestReferenceData(unittest.TestCase):
     def test_rename_metadata_set(self):
         '''Test _rename_metadata_set'''
         metaset = {
-            sequence_metadata.SequenceMetadata('foo 1\t.\t.\t.\tdescription'),
-            sequence_metadata.SequenceMetadata('foo 1\tp\tI42L\t.\tspam eggs')
+            sequence_metadata.SequenceMetadata('foo 1\t1\t0\t.\t.\tdescription'),
+            sequence_metadata.SequenceMetadata('foo 1\t1\t0\tI42L\t.\tspam eggs')
         }
 
         expected = {
-            sequence_metadata.SequenceMetadata('new_name\t.\t.\t.\tdescription'),
-            sequence_metadata.SequenceMetadata('new_name\tp\tI42L\t.\tspam eggs')
+            sequence_metadata.SequenceMetadata('new_name\t1\t0\t.\t.\tdescription'),
+            sequence_metadata.SequenceMetadata('new_name\t1\t0\tI42L\t.\tspam eggs')
         }
         got = reference_data.ReferenceData._rename_metadata_set(metaset, 'new_name')
         self.assertEqual(expected, got)
