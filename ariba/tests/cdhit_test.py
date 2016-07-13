@@ -73,6 +73,20 @@ class TestCdhit(unittest.TestCase):
         self.assertEqual(clusters, expected_clusters)
 
 
+    def test_fake_run_cluster_min_42(self):
+        '''test fake_run min_cluster 42'''
+        infile = os.path.join(data_dir, 'cdhit_test_fake_run.in.fa')
+        r = cdhit.Runner(infile, min_cluster_number=42)
+        clusters = r.fake_run()
+        expected_clusters = {
+            '42': {'seq1'},
+            '43': {'seq2'},
+            '44': {'seq3'},
+            '45': {'seq4'},
+        }
+        self.assertEqual(clusters, expected_clusters)
+
+
     def test_fake_run_fail(self):
         '''test fake_run with non-unique names'''
         infile = os.path.join(data_dir, 'cdhit_test_fake_run.non-unique.in.fa')

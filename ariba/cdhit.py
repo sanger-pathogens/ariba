@@ -40,7 +40,7 @@ class Runner:
             if seq.id in used_names:
                 raise Error('Sequence name "' + seq.id + '" not unique. Cannot continue')
 
-            clusters[str(len(clusters))] = {seq.id}
+            clusters[str(len(clusters) + self.min_cluster_number)] = {seq.id}
             used_names.add(seq.id)
 
         return clusters
