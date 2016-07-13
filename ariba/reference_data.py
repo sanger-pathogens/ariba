@@ -238,7 +238,6 @@ class ReferenceData:
 
         pyfastaq.utils.close(log_fh)
         ReferenceData._write_metadata_tsv(all_metadata, tsv_file)
-        ReferenceData._write_sequences_to_files(sequences, all_metadata, out_prefix)
 
 
     @classmethod
@@ -287,8 +286,7 @@ class ReferenceData:
 
 
     def sanity_check(self, outprefix):
-        removed_seqs = self._remove_bad_genes(self.sequences, outprefix + '.00.remove_bad_genes.log')
-        self._filter_bad_variant_data(outprefix + '.01.check_variants', presence_absence_removed, variants_only_removed)
+        removed_seqs = self._remove_bad_genes(self.sequences, self.metadata, outprefix + '.00.remove_bad_genes.log', self.min_gene_length, self.max_gene_length)
         ReferenceData._filter_bad_variant_data(self.sequences, self.metadata, outprefix, removed_seqs)
 
 

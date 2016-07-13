@@ -214,11 +214,15 @@ class TestReferenceData(unittest.TestCase):
         reference_data.ReferenceData._filter_bad_variant_data(sequences, metadata, tmp_prefix, set())
         expected_prefix = os.path.join(data_dir, 'reference_data_filter_bad_data.expected')
 
-        for suffix in ['gene.fa', 'gene.varonly.fa', 'noncoding.fa', 'noncoding.varonly.fa', 'all.fa', 'log', 'metadata.tsv']:
+        for suffix in ['log', 'metadata.tsv']:
             expected = expected_prefix + '.' + suffix
             got = tmp_prefix + '.' + suffix
             self.assertTrue(filecmp.cmp(expected, got, shallow=False))
             os.unlink(got)
+
+        expected_seqs = {}
+        pyfastaq.tasks.file_to_dict(os.path.join(data_dir, 'reference_data_filter_bad_data.expected.all.fa'), expected_seqs)
+        self.assertEqual(expected_seqs, sequences)
 
 
     def test_try_to_get_gene_seq(self):
