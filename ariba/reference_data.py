@@ -414,58 +414,46 @@ class ReferenceData:
     def write_cluster_allocation_file(clusters, outfile):
         f_out = pyfastaq.utils.open_file_write(outfile)
 
-        for seq_type in ['presence_absence', 'variants_only', 'non_coding']:
-            if clusters[seq_type] is None:
+        for cluster, name_set in sorted(clusters.items()):
+            seq_names = sorted(list(name_set))
+            print(cluster, *seq_names, sep='\t', file=f_out)
+
+        pyfastaq.utils.close(f_out)
+
+
+    def cluster_with_cdhit(self, outprefix, seq_identity_threshold=0.9, threads=1, length_diff_cutoff=0.9, nocluster=False, verbose=False, clusters_file=None):
+        clusters = {}
+        ReferenceData._write_sequences_to_files(self.sequences, self.metadata, outprefix)
+        ref_types = ('noncoding', 'noncoding.varonly', 'gene', 'gene.varonly')
+
+        for ref_type in ref_types:
+            ref_file = outprefix + '.' + ref_type + '.fa'
+            if os.path.getsize(ref_file) == 0:
                 continue
 
-            for seq_name in sorted(clusters[seq_type]):
-                other_seqs = clusters[seq_type][seq_name].difference({seq_name})
-                if len(other_seqs) > 0:
-                    other_seq_string = '\t'.join(sorted(list(other_seqs)))
-                    print(seq_name, other_seq_string, sep='\t', file=f_out)
-                else:
-                    print(seq_name, file=f_out)
-
-        pyfastaq.utils.close(f_out)
-
-
-    def cluster_with_cdhit(self, inprefix, outprefix, seq_identity_threshold=0.9, threads=1, length_diff_cutoff=0.9, nocluster=False, verbose=False, clusters_file=None):
-        files_to_cat = []
-        clusters = {}
-
-        for seqs_type in ['presence_absence', 'variants_only', 'non_coding']:
-            if len(self.seq_dicts[seqs_type]) > 0:
-                outfile = outprefix + '.' + seqs_type + '.cdhit'
-                files_to_cat.append(outfile)
-                cdhit_runner = cdhit.Runner(
-                  inprefix + '.' + seqs_type + '.fa',
-                  outfile,
-                  seq_identity_threshold=seq_identity_threshold,
-                  threads=threads,
-                  length_diff_cutoff=length_diff_cutoff,
-                  verbose=verbose,
-                  rename_suffix = seqs_type[0]
-                )
-
-                if clusters_file is not None:
-                    new_clusters = cdhit_runner.run_get_clusters_from_file(clusters_file)
-                elif nocluster:
-                    new_clusters = cdhit_runner.fake_run()
-                else:
-                    new_clusters = cdhit_runner.run()
-
-                clusters[seqs_type] = new_clusters
+            if len(clusters) == 0:
+                min_cluster_number = 0
             else:
-                clusters[seqs_type] = None
+                min_cluster_number = 1 + max([int(x) for x in clusters.keys()])
 
-        assert len(files_to_cat) > 0
-        f_out = pyfastaq.utils.open_file_write(outprefix + '.cluster_representatives.fa')
+            cdhit_runner = cdhit.Runner(
+              ref_file,
+              seq_identity_threshold=seq_identity_threshold,
+              threads=threads,
+              length_diff_cutoff=length_diff_cutoff,
+              verbose=verbose,
+              min_cluster_number = min_cluster_number,
+            )
 
-        for filename in files_to_cat:
-            for seq in pyfastaq.sequences.file_reader(filename):
-                print(seq, file=f_out)
+            if clusters_file is not None:
+                new_clusters = cdhit_runner.run_get_clusters_from_file(clusters_file)
+            elif nocluster:
+                new_clusters = cdhit_runner.fake_run()
+            else:
+                new_clusters = cdhit_runner.run()
 
-        pyfastaq.utils.close(f_out)
+            clusters.update(new_clusters)
+
         self.write_cluster_allocation_file(clusters, outprefix + '.clusters.tsv')
         return clusters
 
