@@ -375,7 +375,8 @@ class ReferenceData:
 
 
     def sequence_type(self, sequence_name):
-        return self._find_gene_in_seqs(sequence_name, self.seq_dicts)
+        assert sequence_name in self.metadata
+        return self.metadata[sequence_name]['seq_type'], self.metadata[sequence_name]['variant_only']
 
 
     def sequence(self, sequence_name):

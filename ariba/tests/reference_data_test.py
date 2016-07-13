@@ -429,20 +429,15 @@ class TestReferenceData(unittest.TestCase):
 
     def test_sequence_type(self):
         '''Test sequence_type'''
-        presence_absence_fa = os.path.join(data_dir, 'reference_data_sequence_type.presence_absence.fa')
-        variants_only_fa = os.path.join(data_dir, 'reference_data_sequence_type.variants_only.fa')
-        noncoding_fa = os.path.join(data_dir, 'reference_data_sequence_type.noncoding.fa')
-        refdata = reference_data.ReferenceData(
-            presence_absence_fa=presence_absence_fa,
-            variants_only_fa=variants_only_fa,
-            non_coding_fa=noncoding_fa
-        )
+        fasta_in = os.path.join(data_dir, 'reference_data_sequence_type.in.fa')
+        tsv_in = os.path.join(data_dir, 'reference_data_sequence_type.in.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
 
         tests = [
-            ('pa', 'presence_absence'),
-            ('var_only', 'variants_only'),
-            ('noncoding', 'non_coding'),
-            ('not_there', None)
+            ('gene', ('p', False)),
+            ('gene.var_only', ('p', True)),
+            ('noncoding', ('n', False)),
+            ('noncogind.var_only', ('n', True)),
         ]
 
         for name, expected in tests:
