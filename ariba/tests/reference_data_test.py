@@ -597,7 +597,9 @@ class TestReferenceData(unittest.TestCase):
 
     def test_write_seqs_to_fasta(self):
         '''Test write_seqs_to_fasta'''
-        refdata = reference_data.ReferenceData(presence_absence_fa=os.path.join(data_dir, 'reference_data_test_write_seqs_to_fasta.in.fa'))
+        fasta_in = os.path.join(data_dir, 'reference_data_test_write_seqs_to_fasta.in.fa')
+        tsv_in = os.path.join(data_dir, 'reference_data_test_write_seqs_to_fasta.in.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         expected_outfile = os.path.join(data_dir, 'reference_data_test_write_seqs_to_fasta.expected.fa')
         tmpfile = 'tmp.test.reference_data.write_seqs_to_fasta.out.fa'
         refdata.write_seqs_to_fasta(tmpfile, {'seq1', 'seq4', 'seq5'})
