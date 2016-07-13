@@ -70,37 +70,28 @@ class Runner:
         return clusters
 
 
-    def run_get_clusters_from_file(self, infile):
-        '''Instead of running cdhit, gets the clusters info from the input dict.
-           Dict expected to be key=sequence name, value=name of cluster'''
-        seq_to_cluster = self._load_user_clusters_file(infile)
-        cluster_names = set(seq_to_cluster.values())
-        tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
-        tmp_fa = os.path.join(tmpdir, 'cdhit.fa')
-        clusters = {}
+    def run_get_clusters_from_file(self, clusters_infile):
+        '''Instead of running cdhit, gets the clusters info from the input file.'''
+        clusters = self._load_user_clusters_file(clusters_infile)
+
+        # check that the names in the fasta file match with what we got
+        # from the clusters file
         seq_reader = pyfastaq.sequences.file_reader(self.infile)
-        f = pyfastaq.utils.open_file_write(tmp_fa)
+        names_list_from_fasta_file = [seq.id for seq in seq_reader]
+        names_set_from_fasta_file = set(names_list_from_fasta_file)
+        if len(names_set_from_fasta_file) != len(names_list_from_fasta_file):
+            raise Error('At least one duplicate name in fasta file ' + self.infile + '. Cannot continue')
 
-        for seq in seq_reader:
-            if seq.id in clusters and seq.id in clusters[seq.id]:
-                pyfastaq.utils.close(f)
-                shutil.rmtree(tmpdir)
-                raise Error('Sequence name "' + seq.id + '" not unique. Cannot continue')
+        found_names = 0
+        for cluster in clusters:
+            for name in clusters[cluster]:
+                if name not in names_set_from_fasta_file:
+                    raise Error('Got name "' + name + '" in clusters file, but not found in fasta file')
+                found_names += 1
 
-            if seq.id not in seq_to_cluster:
-                raise Error('Error forcing cdhit clustering. Found sequence ' + seq.id + ' in FASTA file, but not in provided clusters info from file ' + infile)
+        if found_names < len(names_list_from_fasta_file):
+            raise Error('Some sequences in fasta file not given in cluster file')
 
-            cluster = seq_to_cluster[seq.id]
-            if cluster not in clusters:
-                clusters[cluster] = set()
-
-            clusters[cluster].add(seq.id)
-            if seq.id in cluster_names:
-                print(seq, file=f)
-
-        pyfastaq.utils.close(f)
-        clusters = self._rename_clusters(clusters, tmp_fa, self.outfile, rename_suffix=self.rename_suffix)
-        shutil.rmtree(tmpdir)
         return clusters
 
 
