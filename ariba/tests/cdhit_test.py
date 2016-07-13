@@ -18,7 +18,7 @@ class TestCdhit(unittest.TestCase):
         '''test _get_ids'''
         infile = os.path.join(data_dir, 'cdhit_test_get_ids.fa')
         expected = {'id1', 'id2', 'id3'}
-        r = cdhit.Runner(infile, 'out', cd_hit_est=extern_progs.exe('cdhit'))
+        r = cdhit.Runner(infile, 'out')
         got = r._get_ids(infile)
         self.assertEqual(expected, got)
 
@@ -63,9 +63,9 @@ class TestCdhit(unittest.TestCase):
         '''test _get_clusters_from_bak_file'''
         infile = os.path.join(data_dir, 'cdhit_test_get_clusters_from_bak_file.in')
         expected = {
-            0: {'seq1', 'seq2', 'seq3'},
-            1: {'seq4'},
-            2: {'seq5'}
+            '0': {'seq1', 'seq2', 'seq3'},
+            '1': {'seq4'},
+            '2': {'seq5'}
         }
         got = cdhit.Runner._get_clusters_from_bak_file(infile)
         self.assertEqual(expected, got)
@@ -76,15 +76,13 @@ class TestCdhit(unittest.TestCase):
         infile = os.path.join(data_dir, 'cdhit_test_run.in.fa')
         expected_outfile = os.path.join(data_dir, 'cdhit_test_run.out.fa')
         tmpfile = 'tmp.cdhit_test_run.out.fa'
-        r = cdhit.Runner(infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
+        r = cdhit.Runner(infile, tmpfile)
         clusters = r.run()
         expected_clusters = {
-            'seq1.x': {'seq1', 'seq2', 'seq3'},
-            'seq4.x': {'seq4'},
+            '0': {'seq1', 'seq2', 'seq3'},
+            '1': {'seq4'},
         }
         self.assertEqual(clusters, expected_clusters)
-        self.assertTrue(filecmp.cmp(tmpfile, expected_outfile, shallow=False))
-        os.unlink(tmpfile)
 
 
     def test_fake_run(self):
@@ -92,7 +90,7 @@ class TestCdhit(unittest.TestCase):
         infile = os.path.join(data_dir, 'cdhit_test_fake_run.in.fa')
         expected_outfile = os.path.join(data_dir, 'cdhit_test_fake_run.out.fa')
         tmpfile = 'tmp.cdhit_test_fake_run.out.fa'
-        r = cdhit.Runner(infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
+        r = cdhit.Runner(infile, tmpfile)
         clusters = r.fake_run()
         expected_clusters = {
             'seq1.x': {'seq1'},
@@ -109,7 +107,7 @@ class TestCdhit(unittest.TestCase):
         '''test fake_run with non-unique names'''
         infile = os.path.join(data_dir, 'cdhit_test_fake_run.non-unique.in.fa')
         tmpfile = 'tmp.cdhit_test_fake_run.out.non-unique.fa'
-        r = cdhit.Runner(infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
+        r = cdhit.Runner(infile, tmpfile)
         with self.assertRaises(cdhit.Error):
             clusters = r.fake_run()
 
@@ -148,7 +146,7 @@ class TestCdhit(unittest.TestCase):
         clusters_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.in.clusters')
         expected_outfile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.out.fa')
         tmpfile = 'tmp.cdhit_test_run_get_clusters_from_dict.out.fa'
-        r = cdhit.Runner(fa_infile, tmpfile, cd_hit_est=extern_progs.exe('cdhit'))
+        r = cdhit.Runner(fa_infile, tmpfile)
         clusters = r.run_get_clusters_from_file(clusters_infile)
         expected_clusters = {
             'seq1.x': {'seq1', 'seq2'},

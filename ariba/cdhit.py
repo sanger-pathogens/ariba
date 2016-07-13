@@ -2,7 +2,7 @@ import tempfile
 import shutil
 import os
 import pyfastaq
-from ariba import common
+from ariba import common, external_progs
 
 class Error (Exception): pass
 
@@ -184,13 +184,17 @@ class Runner:
                 pyfastaq.utils.close(f)
                 raise Error('Error parsing cdhit output at this line:\n' + line)
 
+            # keep cluster names as strings in case we want to change them
+            # at a later date.
+            cluster = str(cluster_number)
+
             if not (name.startswith('>') and name.endswith('...')):
                 pyfastaq.utils.close(f)
                 raise Error('Error getting sequence name from cdhit output at this line:\n' + line)
 
-            if cluster_number not in clusters:
-                clusters[cluster_number] = set()
-            clusters[cluster_number].add(name[1:-3])
+            if cluster not in clusters:
+                clusters[cluster] = set()
+            clusters[str(cluster)].add(name[1:-3])
 
         pyfastaq.utils.close(f)
         return clusters
@@ -213,10 +217,7 @@ class Runner:
         ])
 
         common.syscall(cmd, verbose=self.verbose)
-        cluster_representatives = self._get_ids(cdhit_fasta)
-        clusters = self._parse_cluster_info_file(cluster_info_outfile, cluster_representatives)
-        clusters = self._rename_clusters(clusters, cdhit_fasta, self.outfile, rename_suffix=self.rename_suffix)
-
+        clusters = self._get_clusters_from_bak_file(cluster_info_outfile)
         shutil.rmtree(tmpdir)
         return clusters
 
