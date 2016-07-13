@@ -173,18 +173,17 @@ class ReferenceData:
     def _filter_bad_variant_data(cls, sequences, all_metadata, out_prefix, removed_sequences):
         genes_to_remove = set()
         variants_only_genes_found_variant = set()
-        log_file = out_prefix + '.log'
-        tsv_file = out_prefix + '.metadata.tsv'
+        log_file = out_prefix + '.check_metadata.log'
+        tsv_file = out_prefix + '.checked_metadata.tsv'
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
         for sequence_name, metadata_dict in sorted(all_metadata.items()):
-            assert sequence_name in sequences
-
             if sequence_name in removed_sequences:
                 print(sequence_name, 'was removed because does not look like a gene, so removing its metadata', file=log_fh)
-                genes_to_remove.add(sequence_name)
+                del all_metadata[sequence_name]
                 continue
 
+            assert sequence_name in sequences
 
             # if this is non_coding, we shouldn't have any amino acid variants
             if metadata_dict['seq_type'] != 'p':
@@ -276,7 +275,7 @@ class ReferenceData:
 
 
     def sanity_check(self, outprefix):
-        removed_seqs = self._remove_bad_genes(self.sequences, self.metadata, outprefix + '.00.remove_bad_genes.log', self.min_gene_length, self.max_gene_length)
+        removed_seqs = self._remove_bad_genes(self.sequences, self.metadata, outprefix + '.check_genes.log', self.min_gene_length, self.max_gene_length)
         ReferenceData._filter_bad_variant_data(self.sequences, self.metadata, outprefix, removed_seqs)
 
 
