@@ -65,15 +65,11 @@ class RefGenesGetter:
 
         print('Extracted json data file ', json_file,'. Reading its contents...', sep='')
 
-        variant_metadata_tsv = outprefix + '.metadata.tsv'
-        presence_absence_fa = outprefix + '.presence_absence.fa'
-        variants_only_fa = outprefix + '.variants_only.fa'
-        noncoding_fa = outprefix + '.noncoding.fa'
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
         log_file = outprefix + '.log'
-        f_out_tsv = pyfastaq.utils.open_file_write(variant_metadata_tsv)
-        f_out_presabs = pyfastaq.utils.open_file_write(presence_absence_fa)
-        f_out_var_only = pyfastaq.utils.open_file_write(variants_only_fa)
-        f_out_noncoding = pyfastaq.utils.open_file_write(noncoding_fa)
+        f_out_fa = pyfastaq.utils.open_file_write(final_fasta)
+        f_out_tsv = pyfastaq.utils.open_file_write(final_tsv)
         f_out_log = pyfastaq.utils.open_file_write(log_file)
 
         with open(json_file) as f:
@@ -102,7 +98,6 @@ class RefGenesGetter:
                     card_key
                 ])
                 fasta = pyfastaq.sequences.Fasta(fasta_id, dna_seq)
-                variant_type = 'p'
 
                 if gi != 'NA':
                     gene_tuple = fasta.make_into_gene()
@@ -118,40 +113,36 @@ class RefGenesGetter:
                             print('Translation of inferred gene dna sequence does not match protein sequence', fasta.id, sep='\t', file=f_out_log)
                             continue
 
+                print(fasta, file=f_out_fa)
+
                 if gi == 'NA':
-                    fasta_filehandle = f_out_noncoding
-                    variant_type = 'n'
+                    gene_or_not = '0'
+                    variant_only = '0'
                 elif len(data['snps']) == 0:
-                    fasta_filehandle = f_out_presabs
+                    gene_or_not = '1'
+                    variant_only = '0'
                 else:
-                    fasta_filehandle = f_out_var_only
+                    gene_or_not = '1'
+                    variant_only = '1'
 
-                print(fasta.id, '.', '.', '.', data['ARO_name'], sep='\t', file=f_out_tsv)
+                print(fasta.id, gene_or_not, variant_only, '.', '.', data['ARO_name'], sep='\t', file=f_out_tsv)
 
-                if len(data['snps']) == 0:
-                    print(fasta, file=fasta_filehandle)
-                    print(fasta.id, '.', '.', '.', data['ARO_description'], sep='\t', file=f_out_tsv)
+                if len(data['snps']) == 0 and data['ARO_description'] != '':
+                    print(fasta.id, gene_or_not, variant_only, '.', '.', data['ARO_description'], sep='\t', file=f_out_tsv)
                 else:
-                    print(fasta, file=fasta_filehandle)
                     for snp in data['snps']:
-                        print(fasta.id, variant_type, snp, '.', data['ARO_description'], sep='\t', file=f_out_tsv)
+                        if data['ARO_description'] != '':
+                            print(fasta.id, gene_or_not, variant_only, snp, '.', data['ARO_description'], sep='\t', file=f_out_tsv)
 
 
+        pyfastaq.utils.close(f_out_fa)
         pyfastaq.utils.close(f_out_tsv)
-        pyfastaq.utils.close(f_out_presabs)
-        pyfastaq.utils.close(f_out_var_only)
-        pyfastaq.utils.close(f_out_noncoding)
         pyfastaq.utils.close(f_out_log)
         os.chdir(current_dir)
         print('Extracted data and written ARIBA input files\n')
-        print('Final genes files and metadata file:')
-        print('   ', presence_absence_fa)
-        print('   ', variants_only_fa)
-        print('   ', variant_metadata_tsv)
-
-        print('\nYou can use those files with ARIBA like this:')
-        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
-
+        print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"The Comprehensive Antibiotic Resistance Database", McArthur et al 2013, PMID: 23650175')
         print('and in your methods say that version', card_version, 'of the database was used')
