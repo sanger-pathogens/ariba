@@ -59,6 +59,18 @@ class TestCdhit(unittest.TestCase):
         os.unlink(tmpfile)
 
 
+    def test_get_clusters_from_bak_file(self):
+        '''test _get_clusters_from_bak_file'''
+        infile = os.path.join(data_dir, 'cdhit_test_get_clusters_from_bak_file.in')
+        expected = {
+            0: {'seq1', 'seq2', 'seq3'},
+            1: {'seq4'},
+            2: {'seq5'}
+        }
+        got = cdhit.Runner._get_clusters_from_bak_file(infile)
+        self.assertEqual(expected, got)
+
+
     def test_run(self):
         '''test run'''
         infile = os.path.join(data_dir, 'cdhit_test_run.in.fa')

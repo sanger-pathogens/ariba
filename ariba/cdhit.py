@@ -171,6 +171,31 @@ class Runner:
         return new_clusters_dict
 
 
+    @staticmethod
+    def _get_clusters_from_bak_file(filename):
+        f = pyfastaq.utils.open_file_read(filename)
+        clusters = {}
+
+        for line in f:
+            try:
+                cluster_number, length, name, *spam = line.rstrip().split()
+                cluster_number = int(cluster_number)
+            except:
+                pyfastaq.utils.close(f)
+                raise Error('Error parsing cdhit output at this line:\n' + line)
+
+            if not (name.startswith('>') and name.endswith('...')):
+                pyfastaq.utils.close(f)
+                raise Error('Error getting sequence name from cdhit output at this line:\n' + line)
+
+            if cluster_number not in clusters:
+                clusters[cluster_number] = set()
+            clusters[cluster_number].add(name[1:-3])
+
+        pyfastaq.utils.close(f)
+        return clusters
+
+
     def run(self):
         tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
         cdhit_fasta = os.path.join(tmpdir, 'cdhit')
