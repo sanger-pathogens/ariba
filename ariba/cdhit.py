@@ -114,40 +114,6 @@ class Runner:
 
 
     @staticmethod
-    def _parse_cluster_info_file(infile, cluster_representatives):
-        f = pyfastaq.utils.open_file_read(infile)
-        cluster_sets = {}
-        found_representatives = {}  # store cluster number -> representative name
-
-        for line in f:
-            data = line.rstrip().split()
-            seqname = data[2]
-            if not (seqname.startswith('>') and seqname.endswith('...')):
-                raise Error('Unexpected format of line from cdhit output file "' + infile + '". Line is:\n' + line)
-            seqname = seqname[1:-3]
-
-            cluster_number = int(data[0]) # this is the cluster number used by cdhit
-            if cluster_number not in cluster_sets:
-                cluster_sets[cluster_number] = set()
-
-            cluster_sets[cluster_number].add(seqname)
-
-            if data[3] == '*':
-                found_representatives[cluster_number] = seqname
-
-        pyfastaq.utils.close(f)
-
-        if set(found_representatives.values()) != cluster_representatives:
-            raise Error('Mismatch in cdhit output sequence names between fasta file and clusters file. Cannot continue')
-
-        clusters = {}
-        for cluster_number, cluster_name in found_representatives.items():
-            clusters[cluster_name] = cluster_sets[cluster_number]
-
-        return clusters
-
-
-    @staticmethod
     def _rename_clusters(clusters_dict, infile, outfile, rename_suffix='x'):
         new_clusters_dict = {}
         freader = pyfastaq.sequences.file_reader(infile)
