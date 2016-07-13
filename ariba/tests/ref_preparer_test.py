@@ -29,7 +29,7 @@ class TestRefPreparer(unittest.TestCase):
         expected_outdir = os.path.join(data_dir, 'ref_preparer_test_run.out')
 
         test_files = [
-            '01.filter.checked_metadata.tsv',
+            '01.filter.check_metadata.tsv',
             '01.filter.check_genes.log',
             '01.filter.check_metadata.log',
             '02.cdhit.all.fa',
