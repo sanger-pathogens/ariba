@@ -24,9 +24,10 @@ class ReferenceData:
         self.min_gene_length = min_gene_length
         self.max_gene_length = max_gene_length
 
-        total_ref_seqs_loaded = 0
-
         self.sequences, self.metadata = ReferenceData._load_input_files_and_check_seq_names(fasta_files, metadata_tsv_files)
+        if len(self.sequences) == 0:
+            raise Error('Error. No sequences found in input file(s):' + '\n'.join(fasta_files) + '\nCannot continue')
+
         self.genetic_code = genetic_code
         pyfastaq.sequences.genetic_code = self.genetic_code
 

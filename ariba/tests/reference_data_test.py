@@ -11,19 +11,13 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 class TestReferenceData(unittest.TestCase):
     def test_init_fails(self):
         '''Test __init__ fails when it should'''
+        empty_fasta = os.path.join(data_dir, 'reference_data_init_fails.empty.fa')
+        empty_tsv = os.path.join(data_dir, 'reference_data_init_fails.empty.tsv')
+        fasta = os.path.join(data_dir, 'reference_data_init_fails.in.fa')
 
         with self.assertRaises(reference_data.Error):
-            ref_data = reference_data.ReferenceData()
-
-        presence_absence_bad  = os.path.join(data_dir, 'reference_data_init_presence_absence_bad.fa')
-
-        with self.assertRaises(reference_data.Error):
-            ref_data = reference_data.ReferenceData(presence_absence_fa=presence_absence_bad)
-
-        empty_fasta = os.path.join(data_dir, 'reference_data_init_empty.fa')
-
-        with self.assertRaises(reference_data.Error):
-            ref_data = reference_data.ReferenceData(presence_absence_fa=empty_fasta)
+            ref_data = reference_data.ReferenceData([empty_fasta], [empty_tsv])
+            ref_data = reference_data.ReferenceData([fasta], [empty_tsv])
 
 
     def test_init_ok(self):
