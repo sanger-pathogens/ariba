@@ -70,6 +70,14 @@ class TestCdhit(unittest.TestCase):
         got = cdhit.Runner._get_clusters_from_bak_file(infile)
         self.assertEqual(expected, got)
 
+        expected = {
+            '42': {'seq1', 'seq2', 'seq3'},
+            '43': {'seq4'},
+            '44': {'seq5'}
+        }
+        got = cdhit.Runner._get_clusters_from_bak_file(infile, min_cluster_number=42)
+        self.assertEqual(expected, got)
+
 
     def test_run(self):
         '''test run'''
@@ -81,6 +89,20 @@ class TestCdhit(unittest.TestCase):
         expected_clusters = {
             '0': {'seq1', 'seq2', 'seq3'},
             '1': {'seq4'},
+        }
+        self.assertEqual(clusters, expected_clusters)
+
+
+    def test_run_min_cluster_number_42(self):
+        '''test run with min_cluster_number 42'''
+        infile = os.path.join(data_dir, 'cdhit_test_run.in.fa')
+        expected_outfile = os.path.join(data_dir, 'cdhit_test_run.out.fa')
+        tmpfile = 'tmp.cdhit_test_run.out.fa'
+        r = cdhit.Runner(infile, tmpfile, min_cluster_number=42)
+        clusters = r.run()
+        expected_clusters = {
+            '42': {'seq1', 'seq2', 'seq3'},
+            '43': {'seq4'},
         }
         self.assertEqual(clusters, expected_clusters)
 

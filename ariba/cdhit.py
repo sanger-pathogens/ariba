@@ -16,6 +16,7 @@ class Runner:
       length_diff_cutoff=0.9,
       verbose=False,
       rename_suffix='x',
+      min_cluster_number=0
     ):
 
         if not os.path.exists(infile):
@@ -30,6 +31,7 @@ class Runner:
         extern_progs = external_progs.ExternalProgs(fail_on_error=True)
         self.cd_hit_est = extern_progs.exe('cdhit')
         self.rename_suffix = rename_suffix
+        self.min_cluster_number = min_cluster_number
 
 
     def fake_run(self):
@@ -172,14 +174,14 @@ class Runner:
 
 
     @staticmethod
-    def _get_clusters_from_bak_file(filename):
+    def _get_clusters_from_bak_file(filename, min_cluster_number=0):
         f = pyfastaq.utils.open_file_read(filename)
         clusters = {}
 
         for line in f:
             try:
                 cluster_number, length, name, *spam = line.rstrip().split()
-                cluster_number = int(cluster_number)
+                cluster_number = int(cluster_number) + min_cluster_number
             except:
                 pyfastaq.utils.close(f)
                 raise Error('Error parsing cdhit output at this line:\n' + line)
@@ -217,7 +219,7 @@ class Runner:
         ])
 
         common.syscall(cmd, verbose=self.verbose)
-        clusters = self._get_clusters_from_bak_file(cluster_info_outfile)
+        clusters = self._get_clusters_from_bak_file(cluster_info_outfile, self.min_cluster_number)
         shutil.rmtree(tmpdir)
         return clusters
 
