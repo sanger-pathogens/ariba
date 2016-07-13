@@ -217,7 +217,7 @@ class RefGenesGetter:
         print('Extracted files.')
 
         genes_file = os.path.join(tmpdir, 'Database Nt Sequences File.txt')
-        final_fasta = outprefix + '.presence_absence.fa'
+        final_fasta = outprefix + '.fa'
 
         seq_reader = pyfastaq.sequences.file_reader(genes_file)
         ids = {}
@@ -231,11 +231,21 @@ class RefGenesGetter:
         pyfastaq.tasks.to_unique_by_id(genes_file, final_fasta)
         shutil.rmtree(tmpdir)
 
-        print('Finished. Final genes file is called', final_fasta, end='\n\n')
-        print('You can use it with ARIBA like this:')
-        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
+        final_tsv = outprefix + '.tsv'
+        f = pyfastaq.utils.open_file_write(final_tsv)
+        seq_reader = pyfastaq.sequences.file_reader(final_fasta)
+
+        for seq in seq_reader:
+            print(seq.id, '1', '0', '.', '.', '.', sep='\t', file=f)
+
+        pyfastaq.utils.close(f)
+
+        print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n')
+
 
     def _get_from_vfdb(self, outprefix):
         outprefix = os.path.abspath(outprefix)
@@ -257,7 +267,7 @@ class RefGenesGetter:
         final_tsv = outprefix + '.tsv'
 
         print('Extracted core DNA sequence dataset and metadata. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
-        print('You can use it with ARIBA like this:')
+        print('You can use them with ARIBA like this:')
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"VFDB 2016: hierarchical and refined dataset for big data analysis-10 years on",\nChen LH et al 2016, Nucleic Acids Res. 44(Database issue):D694-D697. PMID: 26578559\n')
