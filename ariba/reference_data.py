@@ -174,7 +174,7 @@ class ReferenceData:
         genes_to_remove = set()
         variants_only_genes_found_variant = set()
         log_file = out_prefix + '.check_metadata.log'
-        tsv_file = out_prefix + '.checked_metadata.tsv'
+        tsv_file = out_prefix + '.check_metadata.tsv'
         log_fh = pyfastaq.utils.open_file_write(log_file)
 
         for sequence_name, metadata_dict in sorted(all_metadata.items()):
