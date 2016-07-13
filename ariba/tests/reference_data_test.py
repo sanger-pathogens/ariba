@@ -22,38 +22,36 @@ class TestReferenceData(unittest.TestCase):
 
     def test_init_ok(self):
         '''Test init with good input'''
-        tsv_file = os.path.join(data_dir, 'reference_data_init.tsv')
-        presence_absence_fa = os.path.join(data_dir, 'reference_data_init_presence_absence.fa')
-        meta1 = sequence_metadata.SequenceMetadata('gene1\tn\tA42G\t.\tfree text')
-        meta2 = sequence_metadata.SequenceMetadata('gene1\tn\tA42T\t.\tfree text2')
-        meta3 = sequence_metadata.SequenceMetadata('gene1\tn\tG13T\t.\tconfers killer rabbit resistance')
-        meta4 = sequence_metadata.SequenceMetadata("gene2\tp\tI42L\t.\tremoves tardigrade's space-living capability")
+        fasta_in = os.path.join(data_dir, 'reference_data_init_ok.in.fa')
+        tsv_in = os.path.join(data_dir, 'reference_data_init_ok.in.tsv')
+        meta1 = sequence_metadata.SequenceMetadata('gene1\t1\t0\tR2S\t.\tconfers killer rabbit resistance')
+        meta2 = sequence_metadata.SequenceMetadata("gene2\t1\t0\tI42L\t.\tremoves tardigrade's space-living capability")
 
         expected_metadata = {
             'gene1': {
-                'n': {12: {meta3}, 41: {meta1, meta2}},
-                'p': {},
+                'seq_type': 'p',
+                'variant_only': False,
+                'n': {},
+                'p': {1: {meta1}},
                 '.': set(),
             },
             'gene2': {
+                'seq_type': 'p',
+                'variant_only': False,
                 'n': {},
-                'p': {41: {meta4}},
+                'p': {41: {meta2}},
                 '.': set(),
             }
         }
-        ref_data = reference_data.ReferenceData(presence_absence_fa=presence_absence_fa, metadata_tsv=tsv_file)
+        ref_data = reference_data.ReferenceData([fasta_in], [tsv_in])
         self.assertEqual(expected_metadata, ref_data.metadata)
 
         expected_seqs_dict = {
-            'presence_absence': {
-                'gene1': pyfastaq.sequences.Fasta('gene1', 'CATTCCTAGCGTCGTCTATCGTCG'),
-                'gene2': pyfastaq.sequences.Fasta('gene2', 'AAAAACCCCGGGGTTTT')
-            },
-            'variants_only': {},
-            'non_coding': {},
+            'gene1': pyfastaq.sequences.Fasta('gene1', 'CATCGTCGTCTATCGTCGTCCTAG'),
+            'gene2': pyfastaq.sequences.Fasta('gene2', 'AAAAACCCCGGGGTTTT')
         }
 
-        self.assertEqual(expected_seqs_dict, ref_data.seq_dicts)
+        self.assertEqual(expected_seqs_dict, ref_data.sequences)
 
 
     def test_load_metadata_tsv(self):
