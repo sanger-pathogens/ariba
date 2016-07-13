@@ -12,7 +12,7 @@ package_min_versions = {
 }
 
 package_max_versions = {
-    'pysam': '0.8.3',
+    #'pysam': '0.8.3',
 }
 
 

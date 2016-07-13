@@ -20,7 +20,7 @@ setup(
     install_requires=[
         'openpyxl >= 1.6.2',
         'pyfastaq >= 3.12.0',
-        'pysam >= 0.9.1',
+        'pysam >= 0.8.1',
         'pymummer>=0.6.1',
     ],
     license='GPLv3',
