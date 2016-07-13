@@ -36,24 +36,17 @@ class Runner:
 
     def fake_run(self):
         '''Doesn't actually run cd-hit. Instead, puts each input sequence into its own cluster. So it's as if cdhit was run, but didn't cluster anything'''
-        tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
-        tmp_fa = os.path.join(tmpdir, 'cdhit.fa')
         clusters = {}
+        used_names = set()
         seq_reader = pyfastaq.sequences.file_reader(self.infile)
-        f = pyfastaq.utils.open_file_write(tmp_fa)
 
         for seq in seq_reader:
-            if seq.id in clusters:
-                pyfastaq.utils.close(f)
-                shutil.rmtree(tmpdir)
+            if seq.id in used_names:
                 raise Error('Sequence name "' + seq.id + '" not unique. Cannot continue')
 
-            clusters[seq.id] = {seq.id}
-            print(seq, file=f)
+            clusters[str(len(clusters))] = {seq.id}
+            used_names.add(seq.id)
 
-        pyfastaq.utils.close(f)
-        clusters = self._rename_clusters(clusters, tmp_fa, self.outfile, rename_suffix=self.rename_suffix)
-        shutil.rmtree(tmpdir)
         return clusters
 
 
