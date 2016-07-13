@@ -70,23 +70,18 @@ class Runner:
         '''Instead of running cdhit, gets the clusters info from the input file.'''
         clusters = self._load_user_clusters_file(clusters_infile)
 
-        # check that the names in the fasta file match with what we got
-        # from the clusters file
+        # check that every sequence in the clusters file can be
+        # found in the fasta file
         seq_reader = pyfastaq.sequences.file_reader(self.infile)
         names_list_from_fasta_file = [seq.id for seq in seq_reader]
         names_set_from_fasta_file = set(names_list_from_fasta_file)
         if len(names_set_from_fasta_file) != len(names_list_from_fasta_file):
             raise Error('At least one duplicate name in fasta file ' + self.infile + '. Cannot continue')
 
-        found_names = 0
         for cluster in clusters:
             for name in clusters[cluster]:
                 if name not in names_set_from_fasta_file:
                     raise Error('Got name "' + name + '" in clusters file, but not found in fasta file')
-                found_names += 1
-
-        if found_names < len(names_list_from_fasta_file):
-            raise Error('Some sequences in fasta file not given in cluster file')
 
         return clusters
 
