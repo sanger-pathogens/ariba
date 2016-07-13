@@ -566,7 +566,6 @@ class TestReferenceData(unittest.TestCase):
         }
 
         got_clusters = refdata.cluster_with_cdhit(outprefix, clusters_file=cluster_tsv_in)
-        print(got_clusters)
         self.assertEqual(expected_clusters, got_clusters)
 
         expected_clusters_file = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_clusters_in_file.expected.clusters.tsv')
