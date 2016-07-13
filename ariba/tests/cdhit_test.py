@@ -14,29 +14,6 @@ class TestCdhit(unittest.TestCase):
             r = cdhit.Runner('oopsnotafile', 'out')
 
 
-    def test_rename_clusters(self):
-        '''test _rename_clusters'''
-        infile = os.path.join(data_dir, 'cdhit_test_rename_clusters.in.fa')
-        tmpfile = 'tmp.test_rename_clusters.out.fa'
-        expected_file = os.path.join(data_dir, 'cdhit_test_rename_clusters.expected.fa')
-
-        clusters_in = {
-            'seq.foo': {'seq.foo', 'seq'},
-            'seq.bar': {'seq.bar', 'seq3.spam'},
-            'seq4.eggs': {'seq4.eggs'}
-        }
-        tmp_out = 'tmp.test_rename_clusters.out.fa'
-        expected_clusters = {
-            'seq.x': {'seq.foo', 'seq'},
-            'seq.x.2': {'seq.bar', 'seq3.spam'},
-            'seq4.x': {'seq4.eggs'}
-        }
-        got = cdhit.Runner._rename_clusters(clusters_in, infile, tmpfile)
-        self.assertEqual(expected_clusters, got)
-        self.assertTrue(filecmp.cmp(expected_file, tmpfile, shallow=False))
-        os.unlink(tmpfile)
-
-
     def test_get_clusters_from_bak_file(self):
         '''test _get_clusters_from_bak_file'''
         infile = os.path.join(data_dir, 'cdhit_test_get_clusters_from_bak_file.in')
