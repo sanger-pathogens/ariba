@@ -75,13 +75,16 @@ class Runner:
         seq_reader = pyfastaq.sequences.file_reader(self.infile)
         names_list_from_fasta_file = [seq.id for seq in seq_reader]
         names_set_from_fasta_file = set(names_list_from_fasta_file)
+
         if len(names_set_from_fasta_file) != len(names_list_from_fasta_file):
             raise Error('At least one duplicate name in fasta file ' + self.infile + '. Cannot continue')
 
-        for cluster in clusters:
-            for name in clusters[cluster]:
-                if name not in names_set_from_fasta_file:
-                    raise Error('Got name "' + name + '" in clusters file, but not found in fasta file')
+        names_from_clusters_file = set()
+        for new_names in clusters.values():
+            names_from_clusters_file.update(new_names)
+
+        if not names_set_from_fasta_file.issubset(names_from_clusters_file):
+            raise Error('Some names in fasta file "' + self.infile + '" not given in cluster file. Cannot continue')
 
         return clusters
 
