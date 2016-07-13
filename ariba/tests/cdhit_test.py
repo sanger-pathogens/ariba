@@ -120,12 +120,9 @@ class TestCdhit(unittest.TestCase):
         '''test _load_user_clusters_file with good input file'''
         infile = os.path.join(data_dir, 'cdhit_test_load_user_clusters_file.good')
         expected  = {
-            'seq1': 'seq1',
-            'seq2': 'seq1',
-            'seq3': 'seq1',
-            'seq4': 'seq4',
-            'seq5': 'seq5',
-            'seq6': 'seq5',
+            '0': {'seq1', 'seq2', 'seq3'},
+            '1': {'seq4'},
+            '2': {'seq5', 'seq6'}
         }
 
         got = cdhit.Runner._load_user_clusters_file(infile)

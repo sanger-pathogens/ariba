@@ -53,18 +53,21 @@ class Runner:
     @staticmethod
     def _load_user_clusters_file(filename):
         f = pyfastaq.utils.open_file_read(filename)
-        seq_to_cluster = {}
-        for line in f:
-            data = line.rstrip().split()
+        clusters = {}
+        used_names = set()
 
-            for seq_name in data:
-                if seq_name in seq_to_cluster:
-                    pyfastaq.utils.close(f)
-                    raise Error('Error reading clusters file. The sequence "' + seq_name + '" was found more than once in the file ' + filename)
-                seq_to_cluster[seq_name] = data[0]
+        for line in f:
+            names_list = line.rstrip().split()
+            new_names = set(names_list)
+            if len(names_list) != len(new_names) or not new_names.isdisjoint(used_names):
+                pyfastaq.utils.close(f)
+                raise Error('Error in user-provided clusters file ' + filename + '. Non unique name found at this line:\n' + line)
+
+            clusters[str(len(clusters))] = new_names
+            used_names.update(new_names)
 
         pyfastaq.utils.close(f)
-        return seq_to_cluster
+        return clusters
 
 
     def run_get_clusters_from_file(self, infile):
