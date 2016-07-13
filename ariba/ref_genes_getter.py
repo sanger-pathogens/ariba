@@ -159,7 +159,8 @@ class RefGenesGetter:
 
     def _get_from_resfinder(self, outprefix):
         outprefix = os.path.abspath(outprefix)
-        final_fasta = outprefix + '.presence_absence.fa'
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
         tmpdir = outprefix + '.tmp.download'
         current_dir = os.getcwd()
 
@@ -176,7 +177,8 @@ class RefGenesGetter:
         common.syscall('unzip ' + zipfile)
 
         print('Combining downloaded fasta files...')
-        f = pyfastaq.utils.open_file_write(final_fasta)
+        fout_fa = pyfastaq.utils.open_file_write(final_fasta)
+        fout_tsv = pyfastaq.utils.open_file_write(final_tsv)
 
         for filename in os.listdir('database'):
             if filename.endswith('.fsa'):
@@ -185,16 +187,17 @@ class RefGenesGetter:
                 file_reader = pyfastaq.sequences.file_reader(os.path.join('database', filename))
                 for seq in file_reader:
                     seq.id = prefix + '.' + seq.id
-                    print(seq, file=f)
+                    print(seq, file=fout_fa)
+                    print(seq.id, '1', '0', '.', '.', '.', sep='\t', file=fout_tsv)
 
-        pyfastaq.utils.close(f)
-
-        print('\nCombined files. Final genes file is called', final_fasta, end='\n\n')
+        pyfastaq.utils.close(fout_fa)
+        pyfastaq.utils.close(fout_tsv)
+        print('\nFinished combining files\n')
         os.chdir(current_dir)
         shutil.rmtree(tmpdir)
-
-        print('You can use it with ARIBA like this:')
-        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
+        print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"Identification of acquired antimicrobial resistance genes", Zankari et al 2012, PMID: 22782487\n')
 
