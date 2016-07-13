@@ -185,16 +185,6 @@ class ReferenceData:
                 genes_to_remove.add(sequence_name)
                 continue
 
-            # take out any metadata that is not a variant and has no extra info.
-            to_remove = []
-
-            for metadata in metadata_dict['.']:
-                if metadata.free_text == '.':
-                    print(sequence_name, 'metadata has no info. Just gene name given. Removing. Line of file was:', metadata, file=log_fh)
-                    to_remove.append(metadata)
-
-            for metadata in to_remove:
-                metadata_dict['.'].remove(metadata)
 
             # if this is non_coding, we shouldn't have any amino acid variants
             if metadata_dict['seq_type'] != 'p':
