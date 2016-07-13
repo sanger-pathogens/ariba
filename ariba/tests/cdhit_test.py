@@ -38,8 +38,7 @@ class TestCdhit(unittest.TestCase):
         '''test run'''
         infile = os.path.join(data_dir, 'cdhit_test_run.in.fa')
         expected_outfile = os.path.join(data_dir, 'cdhit_test_run.out.fa')
-        tmpfile = 'tmp.cdhit_test_run.out.fa'
-        r = cdhit.Runner(infile, tmpfile)
+        r = cdhit.Runner(infile)
         clusters = r.run()
         expected_clusters = {
             '0': {'seq1', 'seq2', 'seq3'},
@@ -51,9 +50,7 @@ class TestCdhit(unittest.TestCase):
     def test_run_min_cluster_number_42(self):
         '''test run with min_cluster_number 42'''
         infile = os.path.join(data_dir, 'cdhit_test_run.in.fa')
-        expected_outfile = os.path.join(data_dir, 'cdhit_test_run.out.fa')
-        tmpfile = 'tmp.cdhit_test_run.out.fa'
-        r = cdhit.Runner(infile, tmpfile, min_cluster_number=42)
+        r = cdhit.Runner(infile, min_cluster_number=42)
         clusters = r.run()
         expected_clusters = {
             '42': {'seq1', 'seq2', 'seq3'},
@@ -65,7 +62,7 @@ class TestCdhit(unittest.TestCase):
     def test_fake_run(self):
         '''test fake_run'''
         infile = os.path.join(data_dir, 'cdhit_test_fake_run.in.fa')
-        r = cdhit.Runner(infile, 'x')
+        r = cdhit.Runner(infile)
         clusters = r.fake_run()
         expected_clusters = {
             '0': {'seq1'},
@@ -79,7 +76,7 @@ class TestCdhit(unittest.TestCase):
     def test_fake_run_fail(self):
         '''test fake_run with non-unique names'''
         infile = os.path.join(data_dir, 'cdhit_test_fake_run.non-unique.in.fa')
-        r = cdhit.Runner(infile, 'x')
+        r = cdhit.Runner(infile)
         with self.assertRaises(cdhit.Error):
             clusters = r.fake_run()
 
@@ -113,7 +110,7 @@ class TestCdhit(unittest.TestCase):
         '''test run_get_clusters_from_file'''
         fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.in.fa')
         clusters_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.in.clusters')
-        r = cdhit.Runner(fa_infile, 'x')
+        r = cdhit.Runner(fa_infile)
         clusters = r.run_get_clusters_from_file(clusters_infile)
         expected_clusters = {
             '0': {'seq1', 'seq2'},

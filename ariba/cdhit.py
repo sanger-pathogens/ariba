@@ -10,12 +10,10 @@ class Runner:
     def __init__(
       self,
       infile,
-      outfile,
       seq_identity_threshold=0.9,
       threads=1,
       length_diff_cutoff=0.9,
       verbose=False,
-      rename_suffix='x',
       min_cluster_number=0
     ):
 
@@ -23,15 +21,13 @@ class Runner:
             raise Error('File not found: "' + infile + '". Cannot continue')
 
         self.infile = os.path.abspath(infile)
-        self.outfile = os.path.abspath(outfile)
         self.seq_identity_threshold = seq_identity_threshold
         self.threads = threads
         self.length_diff_cutoff = length_diff_cutoff
         self.verbose = verbose
+        self.min_cluster_number = min_cluster_number
         extern_progs = external_progs.ExternalProgs(fail_on_error=True)
         self.cd_hit_est = extern_progs.exe('cdhit')
-        self.rename_suffix = rename_suffix
-        self.min_cluster_number = min_cluster_number
 
 
     def fake_run(self):
