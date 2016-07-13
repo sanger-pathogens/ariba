@@ -560,52 +560,36 @@ class TestReferenceData(unittest.TestCase):
 
     def test_cluster_with_cdhit_clusters_in_file(self):
         '''Test cluster_with_cd_hit clusters from file'''
-        inprefix = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_clusters_in_file')
-        presence_absence_fa = inprefix + '.presence_absence.fa'
-        non_coding_fa = inprefix + '.non_coding.fa'
-        clusters_file = inprefix + '.clusters'
-
-        refdata = reference_data.ReferenceData(
-            presence_absence_fa=presence_absence_fa,
-            non_coding_fa=non_coding_fa,
-        )
-
+        fasta_in = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_clusters_in_file.in.fa')
+        meta_tsv_in = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_clusters_in_file.in.meta.tsv')
+        cluster_tsv_in = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_clusters_in_file.in.clusters.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [meta_tsv_in])
         outprefix = 'tmp.test_cluster_with_cdhit_clusters_in_file'
 
-        expected = {
-            'non_coding': {
-                'noncoding1.n': {'noncoding1'},
-                'noncoding2.n': {'noncoding2'}
-            },
-            'presence_absence': {
-                'presence_absence1.p': {'presence_absence1', 'presence_absence3', 'presence_absence4'},
-                'presence_absence2.p': {'presence_absence2'}
-            },
-            'variants_only': None,
+        expected_clusters = {
+            '0': {'presence_absence1', 'presence_absence3', 'presence_absence4'},
+            '1': {'presence_absence2'},
+            '2': {'noncoding1'},
+            '3': {'noncoding2'},
         }
 
-        got = refdata.cluster_with_cdhit(inprefix, outprefix, clusters_file=clusters_file)
-        self.assertEqual(expected, got)
+        got_clusters = refdata.cluster_with_cdhit(outprefix, clusters_file=cluster_tsv_in)
+        self.assertEqual(expected_clusters, got_clusters)
 
-        expected_cluster_reps_fa = inprefix +  '.expected_representatives.fa'
-        expected_seqs = {}
-        pyfastaq.tasks.file_to_dict(expected_cluster_reps_fa, expected_seqs)
-        got_seqs = {}
-        pyfastaq.tasks.file_to_dict(outprefix + '.cluster_representatives.fa', got_seqs)
-        self.assertEqual(expected_seqs, got_seqs)
-
-        expected_clusters_file = inprefix + '.clusters.tsv'
+        expected_clusters_file = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_clusters_in_file.expected.clusters.tsv')
         got_clusters_file = outprefix + '.clusters.tsv'
         self.assertTrue(filecmp.cmp(expected_clusters_file, got_clusters_file, shallow=False))
 
         os.unlink(got_clusters_file)
-        os.unlink(outprefix + '.cluster_representatives.fa')
-        os.unlink(outprefix + '.non_coding.cdhit')
-        os.unlink(outprefix + '.presence_absence.cdhit')
+        os.unlink(outprefix + '.all.fa')
+        os.unlink(outprefix + '.gene.fa')
+        os.unlink(outprefix + '.gene.varonly.fa')
+        os.unlink(outprefix + '.noncoding.fa')
+        os.unlink(outprefix + '.noncoding.varonly.fa')
 
 
-    def test_cluster_with_cdhit_clusters_in_file(self):
-        '''Test cluster_with_cd_hit clusters from file'''
+    def test_cluster_with_cdhit_nocdhit(self):
+        '''Test cluster_with_cd_hit do not run cdhit'''
         inprefix = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_nocluster')
         presence_absence_fa = inprefix + '.presence_absence.fa'
         non_coding_fa = inprefix + '.non_coding.fa'
