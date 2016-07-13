@@ -168,18 +168,6 @@ class TestReferenceData(unittest.TestCase):
             reference_data.ReferenceData._load_input_files_and_check_seq_names(fasta_files, metadata_files)
 
 
-    def test_find_gene_in_seqs(self):
-        '''Test _find_gene_in_seqs'''
-        seqs_dict = {
-            'dict1': {'name1': 'seq1', 'name2': 'seq2'},
-            'dict2': {'name3': 'seq3'}
-        }
-        self.assertEqual(None, reference_data.ReferenceData._find_gene_in_seqs('name42', seqs_dict))
-        self.assertEqual('dict1', reference_data.ReferenceData._find_gene_in_seqs('name1', seqs_dict))
-        self.assertEqual('dict1', reference_data.ReferenceData._find_gene_in_seqs('name2', seqs_dict))
-        self.assertEqual('dict2', reference_data.ReferenceData._find_gene_in_seqs('name3', seqs_dict))
-
-
     def test_write_metadata_tsv(self):
         '''Test _write_metadata_tsv'''
         metadata_tsv_in = os.path.join(data_dir, 'reference_data_write_metadata_tsv.tsv')

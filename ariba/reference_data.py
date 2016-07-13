@@ -120,17 +120,6 @@ class ReferenceData:
         return all_seqs, metadata
 
 
-    @staticmethod
-    def _find_gene_in_seqs(name, dicts):
-        for dict_name, this_dict in dicts.items():
-            if this_dict is None:
-                continue
-            elif name in this_dict:
-                return dict_name
-
-        return None
-
-
     @classmethod
     def _write_metadata_tsv(cls, metadata, filename):
         f = pyfastaq.utils.open_file_write(filename)
