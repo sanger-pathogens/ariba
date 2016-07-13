@@ -14,15 +14,6 @@ class TestCdhit(unittest.TestCase):
             r = cdhit.Runner('oopsnotafile', 'out')
 
 
-    def test_get_ids(self):
-        '''test _get_ids'''
-        infile = os.path.join(data_dir, 'cdhit_test_get_ids.fa')
-        expected = {'id1', 'id2', 'id3'}
-        r = cdhit.Runner(infile, 'out')
-        got = r._get_ids(infile)
-        self.assertEqual(expected, got)
-
-
     def test_rename_clusters(self):
         '''test _rename_clusters'''
         infile = os.path.join(data_dir, 'cdhit_test_rename_clusters.in.fa')

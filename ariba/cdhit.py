@@ -95,11 +95,6 @@ class Runner:
         return clusters
 
 
-    def _get_ids(self, infile):
-        seq_reader = pyfastaq.sequences.file_reader(infile)
-        return set([seq.id for seq in seq_reader])
-
-
     @staticmethod
     def _rename_clusters(clusters_dict, infile, outfile, rename_suffix='x'):
         new_clusters_dict = {}
