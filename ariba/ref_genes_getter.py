@@ -253,12 +253,12 @@ class RefGenesGetter:
         vparser.run()
         shutil.rmtree(tmpdir)
         print('Extracted files.')
-        final_fasta = outprefix + '.presence_absence.fa'
-        final_tsv = outprefix + '.metadata.tsv'
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
 
         print('Extracted core DNA sequence dataset and metadata. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use it with ARIBA like this:')
-        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"VFDB 2016: hierarchical and refined dataset for big data analysis-10 years on",\nChen LH et al 2016, Nucleic Acids Res. 44(Database issue):D694-D697. PMID: 26578559\n')
 

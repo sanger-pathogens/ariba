@@ -24,7 +24,7 @@ class VfdbParser:
     def _fa_header_to_name_and_metadata(fa_header):
         name_data = VfdbParser._fa_header_to_name_pieces(fa_header)
         if name_data is None:
-            return fa_header, None
+            return fa_header, '.'
         else:
             vfdb_id, name, description, genus_etc = name_data
             return name + '.' + vfdb_id + '.' + genus_etc.replace(' ', '_'), description
@@ -32,13 +32,12 @@ class VfdbParser:
 
     def run(self):
         file_reader = pyfastaq.sequences.file_reader(self.infile)
-        fa_out = pyfastaq.utils.open_file_write(self.outprefix + '.presence_absence.fa')
-        tsv_out = pyfastaq.utils.open_file_write(self.outprefix + '.metadata.tsv')
+        fa_out = pyfastaq.utils.open_file_write(self.outprefix + '.fa')
+        tsv_out = pyfastaq.utils.open_file_write(self.outprefix + '.tsv')
 
         for seq in file_reader:
             seq.id, description = self._fa_header_to_name_and_metadata(seq.id)
-            if description is not None:
-                print(seq.id, '.', '.', '.', description, sep='\t', file=tsv_out)
+            print(seq.id, '1', '0', '.', '.', description, sep='\t', file=tsv_out)
             print(seq, file=fa_out)
 
         pyfastaq.utils.close(fa_out)
