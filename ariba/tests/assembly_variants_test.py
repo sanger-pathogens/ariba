@@ -288,11 +288,11 @@ class TestAssemblyVariants(unittest.TestCase):
 
     def test_get_variants_presence_absence(self):
         '''test get_variants presence absence genes'''
-        meta1 = sequence_metadata.SequenceMetadata('presence_absence\tp\tD2E\tid1\tref has wild type D, contig has var (GAT=D, GAA=E)')
-        meta2 = sequence_metadata.SequenceMetadata('presence_absence\tp\tS3R\tid1\tref has variant type R, contig has wild (AGA=R, AGT=S)')
-        meta3 = sequence_metadata.SequenceMetadata('presence_absence\tp\tD4E\tid1\tref has variant type E, contig has var (GAA=E, GAC=D)')
-        meta4 = sequence_metadata.SequenceMetadata('presence_absence\tp\tA5D\tid1\tref has wild type A, contig has var (GCG=A, GAC=D)')
-        meta5 = sequence_metadata.SequenceMetadata('presence_absence\tp\tR13S\tid1\tref and qry have wild type')
+        meta1 = sequence_metadata.SequenceMetadata('presence_absence\t1\t0\tD2E\tid1\tref has wild type D, contig has var (GAT=D, GAA=E)')
+        meta2 = sequence_metadata.SequenceMetadata('presence_absence\t1\t0\tS3R\tid1\tref has variant type R, contig has wild (AGA=R, AGT=S)')
+        meta3 = sequence_metadata.SequenceMetadata('presence_absence\t1\t0\tD4E\tid1\tref has variant type E, contig has var (GAA=E, GAC=D)')
+        meta4 = sequence_metadata.SequenceMetadata('presence_absence\t1\t0\tA5D\tid1\tref has wild type A, contig has var (GCG=A, GAC=D)')
+        meta5 = sequence_metadata.SequenceMetadata('presence_absence\t1\t0\tR13S\tid1\tref and qry have wild type')
 
         metadata_tsv = 'tmp.test_get_variants_presence_absence.metadata.tsv'
         with open(metadata_tsv, 'w') as f:
@@ -302,10 +302,8 @@ class TestAssemblyVariants(unittest.TestCase):
             print(meta4, file=f)
             print(meta5, file=f)
 
-        refdata = reference_data.ReferenceData(
-            presence_absence_fa=os.path.join(data_dir, 'assembly_variants_test_get_variants_presence_absence.fa'),
-            metadata_tsv=metadata_tsv
-        )
+        fasta_in = os.path.join(data_dir, 'assembly_variants_test_get_variants_presence_absence.fa')
+        refdata = reference_data.ReferenceData([fasta_in], [metadata_tsv])
 
         os.unlink(metadata_tsv)
 
