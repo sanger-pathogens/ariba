@@ -271,7 +271,7 @@ class Clusters:
               log_fh=filehandle
             )
 
-        #os.unlink(reads_file_for_read_store)
+        os.unlink(reads_file_for_read_store)
 
         if self.verbose:
             print('Found', self.proper_pairs, 'proper read pairs')
