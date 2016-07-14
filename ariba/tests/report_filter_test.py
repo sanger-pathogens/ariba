@@ -182,9 +182,9 @@ class TestReportFilter(unittest.TestCase):
 
     def test_report_dict_passes_essential_filters(self):
         '''Test _report_dict_passes_essential_filters'''
-        line1 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
-        line2 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t0\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
-        line3 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line1 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t0\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line3 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         tests = [
             (report_filter.ReportFilter._report_line_to_dict(line1), True),
             (report_filter.ReportFilter._report_line_to_dict(line2), False),
