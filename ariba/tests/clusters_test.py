@@ -54,29 +54,40 @@ class TestClusters(unittest.TestCase):
         '''test _load_reference_data_from_dir'''
         indir = os.path.join(data_dir, 'clusters_test_load_reference_data_from_dir')
         got_refdata, got_clusters = clusters.Clusters._load_reference_data_from_dir(indir)
-        expected_seq_dicts = {
-            'variants_only': {'variants_only1': pyfastaq.sequences.Fasta('variants_only1', 'atggcgtgcgatgaataa')},
-            'presence_absence': {'presabs1': pyfastaq.sequences.Fasta('presabs1', 'atgatgatgagcccggcgatggaaggcggctag')},
-            'non_coding': {'noncoding1': pyfastaq.sequences.Fasta('noncoding1', 'ACGTA')},
+        expected_seq_dict = {
+            'variants_only1': pyfastaq.sequences.Fasta('variants_only1', 'atggcgtgcgatgaataa'),
+            'presabs1': pyfastaq.sequences.Fasta('presabs1', 'atgatgatgagcccggcgatggaaggcggctag'),
+            'noncoding1': pyfastaq.sequences.Fasta('noncoding1', 'ACGTA'),
         }
-        self.assertEqual(expected_seq_dicts, got_refdata.seq_dicts)
+        self.assertEqual(expected_seq_dict, got_refdata.sequences)
         self.assertEqual(11, got_refdata.genetic_code)
 
         expected_metadata = {
             'presabs1': {
-                '.': {sequence_metadata.SequenceMetadata('presabs1\t.\t.\t.\tpresabs1 description')},
+                'seq_type': 'p',
+                'variant_only': False,
+                '.': {sequence_metadata.SequenceMetadata('presabs1\t1\t0\t.\t.\tpresabs1 description')},
                 'n': {},
                 'p': {}
             },
             'variants_only1': {
+                'seq_type': 'p',
+                'variant_only': True,
                 '.': set(),
                 'n': {},
-                'p': {1: {sequence_metadata.SequenceMetadata('variants_only1\tp\tC2I\t.\tdescription of variants_only1 C2I')}}
+                'p': {1: {sequence_metadata.SequenceMetadata('variants_only1\t1\t1\tC2I\t.\tdescription of variants_only1 C2I')}}
+            },
+            'noncoding1': {
+                'seq_type': 'n',
+                'variant_only': False,
+                '.': {sequence_metadata.SequenceMetadata('noncoding1\t0\t0\t.\t.\t.')},
+                'n': {},
+                'p': {},
             }
         }
         self.assertEqual(expected_metadata, got_refdata.metadata)
 
-        expected_clusters = {'key1': 1, 'key2': 2}
+        expected_clusters = {'0': {'presabs1'}, '1': {'variants_only1'}, '2': {'noncoding1'}}
         self.assertEqual(expected_clusters, got_clusters)
 
 
