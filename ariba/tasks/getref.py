@@ -3,7 +3,7 @@ from ariba import ref_genes_getter
 
 
 def run():
-    allowed_dbs = ['argannot', 'card', 'resfinder','vfdb']
+    allowed_dbs = ['argannot', 'card', 'resfinder','vfdb_core','vfdb_full']
     parser = argparse.ArgumentParser(
         description = 'Downloads reference data',
         usage = 'ariba getref [options] <' + '|'.join(allowed_dbs) + '> <outprefix>'
