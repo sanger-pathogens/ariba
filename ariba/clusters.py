@@ -77,7 +77,8 @@ class Clusters:
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
         self.extern_progs = extern_progs
-        self.clusters_tsv = os.path.join(refdata_dir, 'cdhit.clusters.tsv')
+        self.clusters_tsv = os.path.join(refdata_dir, '02.cdhit.clusters.tsv')
+        self.all_ref_seqs_fasta = os.path.join(refdata_dir, '02.cdhit.all.fa')
 
         if version_report_lines is None:
             self.version_report_lines = []
@@ -235,34 +236,54 @@ class Clusters:
         return refdata, cluster_ids
 
 
-    def _map_reads(self, tool):
-        if tool == 'bowtie2':
-            if self.verbose:
-                print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
-            self._map_reads_to_clustered_genes()
+    def _map_and_cluster_reads(self, tool):
+        if self.verbose:
+            print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
 
+        minimap_prefix = 'minimap'
+
+        self._minimap_reads_to_all_ref_seqs(
+            self.clusters_tsv,
+            self.all_ref_seqs_fasta,
+            self.reads_1,
+            self.reads_2,
+            minimap_prefix,
+            verbose=self.verbose
+        )
+
+        if self.verbose:
+            print('Finished mapping\n')
+            print('{:_^79}'.format(' Generating clusters '), flush=True)
+
+        self.cluster_to_rep, self.cluster_read_counts, self.cluster_base_counts, self.insert_hist, self.proper_pairs = self._load_minimap_files(minimap_prefix, self.insert_hist_bin)
+        self.cluster_to_dir = {x: os.path.join(self.tmp_dir, x) for x in self.cluster_to_rep}
+        reads_file_for_read_store = minimap_prefix + '.reads'
+
+        if len(self.cluster_read_counts):
             if self.verbose:
-                print('Finished mapping\n')
-                print('{:_^79}'.format(' Generating clusters '), flush=True)
-            self._bam_to_clusters_reads()
-            if self.clean:
-                if self.verbose:
-                    print('Deleting BAM', self.bam, flush=True)
-                os.unlink(self.bam)
-        elif tool == 'minimap':
-            print('To be implemented...')
-            pass
-        else:
-            raise Error('Tool "' + tool + '" not recognised. Cannot continue')
+                filehandle = sys.stdout
+            else:
+                filehandle = None
+
+            self.read_store = read_store.ReadStore(
+              reads_file_for_read_store,
+              os.path.join(self.outdir, 'read_store'),
+              log_fh=filehandle
+            )
+
+        #os.unlink(reads_file_for_read_store)
+
+        if self.verbose:
+            print('Found', self.proper_pairs, 'proper read pairs')
+            print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)
 
 
     @staticmethod
-    def _minimap_reads_to_all_ref_seqs(clusters_tsv, ref_fasta, reads_1, reads_2, outprefix):
+    def _minimap_reads_to_all_ref_seqs(clusters_tsv, ref_fasta, reads_1, reads_2, outprefix, verbose=False):
         modules_dir = os.path.dirname(os.path.abspath(cluster.__file__))
         minimap_ariba = os.path.abspath(os.path.join(modules_dir, os.pardir, 'third_party', 'minimap', 'minimap_ariba'))
         if not os.path.exists(minimap_ariba):
             raise Error('Error finding minimap_ariba. Cannot continue')
-        print('minimap_ariba:', minimap_ariba)
         cmd = ' '.join([
             minimap_ariba,
             clusters_tsv,
@@ -271,7 +292,7 @@ class Clusters:
             reads_2,
             outprefix
         ])
-        common.syscall(cmd)
+        common.syscall(cmd, verbose=verbose)
 
 
     @classmethod
@@ -329,86 +350,6 @@ class Clusters:
         insert_hist = Clusters._load_minimap_insert_histogram(inprefix + '.insertHistogram', hist_bin_size)
         proper_pairs = Clusters._load_minimap_proper_pairs(inprefix + '.properPairs')
         return cluster2rep, cluster_read_count, cluster_base_count, insert_hist, proper_pairs
-
-
-    def _map_reads_to_clustered_genes(self):
-        mapping.run_bowtie2(
-            self.reads_1,
-            self.reads_2,
-            self.cdhit_cluster_representatives_fa,
-            self.bam_prefix,
-            threads=self.threads,
-            samtools=self.extern_progs.exe('samtools'),
-            bowtie2=self.extern_progs.exe('bowtie2'),
-            bowtie2_preset=self.bowtie2_preset,
-            verbose=self.verbose,
-            remove_both_unmapped=True,
-        )
-
-
-    def _bam_to_clusters_reads(self):
-        '''Sets up ReadStore of reads for all the clusters. Also gathers histogram data of insert size'''
-        reads_file_for_read_store = os.path.join(self.outdir, 'reads')
-        f_out = pyfastaq.utils.open_file_write(reads_file_for_read_store)
-
-        sam_reader = pysam.Samfile(self.bam, "rb")
-        sam1 = None
-        self.proper_pairs = 0
-
-        for s in sam_reader.fetch(until_eof=True):
-            if sam1 is None:
-                sam1 = s
-                continue
-
-            ref_seqs = set()
-            if not s.is_unmapped:
-                ref_seqs.add(sam_reader.getrname(s.tid))
-            if not sam1.is_unmapped:
-                ref_seqs.add(sam_reader.getrname(sam1.tid))
-
-            read1 = mapping.sam_to_fastq(sam1)
-            read2 = mapping.sam_to_fastq(s)
-            if read1.id.endswith('/2'):
-                read1, read2 = read2, read1
-
-            insert = mapping.sam_pair_to_insert(s, sam1)
-            if insert is not None:
-                self.insert_hist.add(insert)
-                self.proper_pairs += 1
-
-            for ref in ref_seqs:
-                if ref not in self.cluster_to_dir:
-                    new_dir = os.path.join(self.tmp_dir, ref)
-                    self.cluster_to_dir[ref] = new_dir
-                    if self.verbose:
-                        print('New cluster with reads that hit:', ref, flush=True)
-
-                self.cluster_read_counts[ref] = self.cluster_read_counts.get(ref, 0) + 2
-                self.cluster_base_counts[ref] = self.cluster_base_counts.get(ref, 0) + len(read1) + len(read2)
-                print(ref, self.cluster_read_counts[ref] - 1, read1.seq, read1.qual, sep='\t', file=f_out)
-                print(ref, self.cluster_read_counts[ref], read2.seq, read2.qual, sep='\t', file=f_out)
-
-            sam1 = None
-
-        pyfastaq.utils.close(f_out)
-
-        if len(self.cluster_read_counts):
-            if self.verbose:
-                filehandle = sys.stdout
-            else:
-                filehandle = None
-
-            self.read_store = read_store.ReadStore(
-              reads_file_for_read_store,
-              os.path.join(self.outdir, 'read_store'),
-              log_fh=filehandle
-            )
-
-        os.unlink(reads_file_for_read_store)
-
-        if self.verbose:
-            print('Found', self.proper_pairs, 'proper read pairs')
-            print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)
 
 
     def _set_insert_size_data(self):
@@ -605,7 +546,7 @@ class Clusters:
         cwd = os.getcwd()
         os.chdir(self.outdir)
         self.write_versions_file(cwd)
-        self._map_reads(self.initial_mapping_tool)
+        self._map_reads()
 
         if len(self.cluster_to_dir) > 0:
             got_insert_data_ok = self._set_insert_size_data()
