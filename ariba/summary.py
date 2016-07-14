@@ -187,6 +187,7 @@ class Summary:
         making_header_lines = True
         phandango_header = ['name']
         phandago_suffixes = {'assembled': ':o1', 'match': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': ':o1'}
+        ref_seq_counter = 2
         csv_header = ['name']
         all_cluster_cols_in_order = ['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
         all_cluster_cols_in_order_set = set(['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
@@ -201,6 +202,9 @@ class Summary:
                 for col in cluster_cols_in_order:
                     if making_header_lines:
                         csv_header.append(cluster_name + '.' + col)
+                        if col == 'ref_seq':
+                            phandago_suffixes[col] = ':o' + str(ref_seq_counter)
+                            ref_seq_counter += 1
                         phandango_header.append(cluster_name + '.' + col + phandago_suffixes[col])
 
                     line.append(rows[filename][cluster_name][col])
