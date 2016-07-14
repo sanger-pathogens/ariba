@@ -226,11 +226,11 @@ class TestReportFilter(unittest.TestCase):
     def test_filter_list_of_dicts_with_essential(self):
         '''Test _filter_list_of_dicts with an essential line but all others fail'''
         rf = report_filter.ReportFilter(ignore_not_has_known_variant=True)
-        line1 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
-        line2 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line1 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
         dict2 = report_filter.ReportFilter._report_line_to_dict(line2)
-        expected_line = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t' + '\t'.join(['.'] * 17) + '\tfree text'
+        expected_line = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t' + '\t'.join(['.'] * 17) + '\tfree text'
         expected = [report_filter.ReportFilter._report_line_to_dict(expected_line)]
         assert expected != [None]
         got = rf._filter_list_of_dicts([dict1, dict2])
