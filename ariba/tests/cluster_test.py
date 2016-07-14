@@ -36,7 +36,8 @@ class TestCluster(unittest.TestCase):
     def test_init_fail_files_missing(self):
         '''test init_fail_files_missing'''
         refdata_fa = os.path.join(data_dir, 'cluster_test_init_refdata.fa')
-        refdata = reference_data.ReferenceData(presence_absence_fa=refdata_fa)
+        meatadata_tsv = os.path.join(data_dir, 'cluster_test_init_refdata.tsv')
+        refdata = reference_data.ReferenceData([refdata_fa], [meatadata_tsv])
 
         dirs = [
             'cluster_test_init_no_refs_fa',
