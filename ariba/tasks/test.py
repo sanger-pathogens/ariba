@@ -39,7 +39,7 @@ def run():
     modules_dir = os.path.dirname(os.path.abspath(ariba.__file__))
     test_data_dir = os.path.join(modules_dir, 'test_run_data')
 
-    for filename in ['presence_absence.fa', 'non_coding.fa', 'variants_only.fa', 'metadata.tsv', 'reads_1.fq', 'reads_2.fq']:
+    for filename in ['ref_seqs.fa', 'metadata.tsv', 'reads_1.fq', 'reads_2.fq']:
         shutil.copy(os.path.join(test_data_dir, filename), filename)
         print('    copied', filename)
 
@@ -50,10 +50,8 @@ def run():
         ariba_exe,
         'prepareref',
         '--verbose',
-        '--presabs presence_absence.fa',
-        '--varonly variants_only.fa',
-        '--noncoding non_coding.fa',
-        '--metadata metadata.tsv',
+        '-f ref_seqs.fa',
+        '-m metadata.tsv',
         '--threads', str(options.threads),
         'PREPAREREF',
     ])
