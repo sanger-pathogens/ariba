@@ -39,10 +39,11 @@ class TestReportFilter(unittest.TestCase):
 
 
     def test_report_line_to_dict(self):
-        line = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t999\t23.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\ta:n:C42T:id1:foo\tfree text'
+        line = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t999\t23.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\ta:n:C42T:id1:foo\tfree text'
         expected = {
             'ref_name':           'cluster1',
-            'ref_type':           'non_coding',
+            'gene':               '0',
+            'var_only':           '0',
             'flag':               flag.Flag(27),
             'reads':              10000,
             'cluster':        'cluster1',
