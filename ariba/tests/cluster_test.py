@@ -222,11 +222,9 @@ class TestCluster(unittest.TestCase):
 
     def test_full_run_ok_variants_only_variant_is_present(self):
         '''test complete run of cluster on a variants only gene when variant is present'''
-        refdata = reference_data.ReferenceData(
-            variants_only_fa=os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.fa'),
-            metadata_tsv=os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.present.metadata.tsv'),
-        )
-
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.present.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.present'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
@@ -234,8 +232,8 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t65\t67\tC;G;C\t18;18;19\t.;.;.\t18;18;19\tvariants_only1:p:R3S:.:Ref and assembly have wild type\tGeneric description of variants_only1',
-            'variants_only1\tvariants_only\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tG;C;G\t71\t73\tG;C;G\t17;17;17\t.;.;.\t17;17;17\tvariants_only1:p:I5A:.:Ref and reads have variant so report\tGeneric description of variants_only1',
+            'variants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t65\t67\tC;G;C\t18;18;19\t.;.;.\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type\tGeneric description of variants_only1',
+            'variants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tvariants_only1.scaffold.1\t215\t15.3\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tG;C;G\t71\t73\tG;C;G\t17;17;17\t.;.;.\t17;17;17\tvariants_only1:1:1:I5A:.:Ref and reads have variant so report\tGeneric description of variants_only1',
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
