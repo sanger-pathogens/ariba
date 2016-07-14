@@ -161,12 +161,12 @@ class TestSummaryCluster(unittest.TestCase):
     def test_has_nonsynonymous(self):
         '''Test _has_nonsynonymous'''
         lines = [
-            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\tnon_coding\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\tpresence_absence\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
-            'refname\tpresence_absence\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
+            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
         ]
 
         dicts = [summary_cluster.SummaryCluster.line2dict(x) for x in lines]
