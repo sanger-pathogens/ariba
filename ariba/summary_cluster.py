@@ -100,7 +100,7 @@ class SummaryCluster:
         if len(self.data) == 0:
             return 'no'
 
-        if self.data[0]['ref_type'] == 'non_coding':
+        if self.data[0]['gene'] == '0':
             has_complete_gene = True
         else:
             has_complete_gene = self.flag.has('complete_gene')
