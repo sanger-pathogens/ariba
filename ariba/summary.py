@@ -19,7 +19,7 @@ class Summary:
       filter_rows=True,
       filter_columns=True,
       min_id=90.0,
-      cluster_cols='assembled,has_res,ref_seq,pct_id,known_var,novel_var',
+      cluster_cols='assembled,match,ref_seq,pct_id,known_var,novel_var',
       variant_cols='groups,grouped,ungrouped,novel',
       verbose=False,
     ):
@@ -55,7 +55,7 @@ class Summary:
 
     @staticmethod
     def _determine_cluster_cols(cols_string):
-        allowed_cols = {'assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
+        allowed_cols = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
         return Summary._determine_cols(cols_string, allowed_cols, 'cluster columns')
 
 
@@ -144,7 +144,7 @@ class Summary:
                 else:
                     rows[filename][cluster] = {
                         'assembled': 'no',
-                        'has_res': 'no',
+                        'match': 'no',
                         'ref_seq': 'NA',
                         'known_var': 'NA',
                         'novel_var': 'NA',
@@ -186,10 +186,10 @@ class Summary:
         matrix = []
         making_header_lines = True
         phandango_header = ['name']
-        phandago_suffixes = {'assembled': ':o1', 'has_res': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': 'o1'}
+        phandago_suffixes = {'assembled': ':o1', 'match': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': 'o1'}
         csv_header = ['name']
-        all_cluster_cols_in_order = ['assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
-        all_cluster_cols_in_order_set = set(['assembled', 'has_res', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
+        all_cluster_cols_in_order = ['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
+        all_cluster_cols_in_order_set = set(['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
         cluster_cols_in_order = [x for x in all_cluster_cols_in_order if cluster_cols[x]]
         cluster_cols_set = set(cluster_cols_in_order)
 

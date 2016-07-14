@@ -342,8 +342,8 @@ class TestSummaryCluster(unittest.TestCase):
         self.assertEqual(('ref', 'MULTIPLE', 'novel', None), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
 
-    def test_has_resistance(self):
-        '''Test _has_resistance'''
+    def test_has_match(self):
+        '''Test _has_match'''
         lines = [
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text',
@@ -364,9 +364,9 @@ class TestSummaryCluster(unittest.TestCase):
             cluster = summary_cluster.SummaryCluster()
             cluster.add_data_dict(data_dict)
             for assembled_summary in ['yes', 'yes_nonunique']:
-                self.assertEqual(expected[i], cluster._has_resistance(assembled_summary))
+                self.assertEqual(expected[i], cluster._has_match(assembled_summary))
             for assembled_summary in ['no', 'fragmented']:
-                self.assertEqual('no', cluster._has_resistance(assembled_summary))
+                self.assertEqual('no', cluster._has_match(assembled_summary))
 
 
     def test_has_var_groups(self):
@@ -402,7 +402,7 @@ class TestSummaryCluster(unittest.TestCase):
         cluster.add_data_dict(data_dict2)
         expected = {
             'assembled': 'yes',
-            'has_res': 'yes',
+            'match': 'yes',
             'ref_seq': 'ref1',
             'novel_var': 'no',
             'known_var': 'yes',
