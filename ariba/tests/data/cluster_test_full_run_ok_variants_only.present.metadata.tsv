@@ -1,3 +1,4 @@
-variants_only1	.	.	.	Generic description of variants_only1
-variants_only1	p	R3S	.	Ref and assembly have wild type
-variants_only1	p	I5A	.	Ref and reads have variant so report
+variants_only1	1	1	.	.	Generic description of variants_only1
+variants_only1	1	1	R3S	.	Ref and assembly have wild type
+variants_only1	1	1	I5A	.	Ref and reads have variant so report
+variants_only2	1	1	.	.	Generic description of variants_only2
