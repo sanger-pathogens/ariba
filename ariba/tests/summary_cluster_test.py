@@ -392,8 +392,8 @@ class TestSummaryCluster(unittest.TestCase):
 
     def test_column_summary_data(self):
         '''Test column_summary_data'''
-        line1 = 'ref1\tnon_coding\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:n:A14T:id1:foo_bar\tspam eggs'
-        line2 = 'ref1\tnon_coding\t531\t78\tcluster1\t120\t95\t98.42\tctg_name\t279\t24.4\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tsome free text'
+        line1 = 'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:n:A14T:id1:foo_bar\tspam eggs'
+        line2 = 'ref1\t0\t0\t531\t78\tcluster1\t120\t95\t98.42\tctg_name\t279\t24.4\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tsome free text'
 
         data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
         data_dict2 = summary_cluster.SummaryCluster.line2dict(line2)
