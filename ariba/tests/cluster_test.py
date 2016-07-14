@@ -131,7 +131,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=4, total_reads_bases=304)
         c.run()
 
-        expected = '\t'.join(['noncoding_ref_seq', 'non_coding', '64', '4', 'cluster_name'] + ['.'] * 24)
+        expected = '\t'.join(['noncoding_ref_seq', '1', '0', '64', '4', 'cluster_name'] + ['.'] * 24)
         self.assertEqual([expected], c.report_lines)
         self.assertFalse(c.status_flag.has('ref_seq_choose_fail'))
         self.assertTrue(c.status_flag.has('assembly_fail'))
