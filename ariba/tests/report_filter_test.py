@@ -215,8 +215,8 @@ class TestReportFilter(unittest.TestCase):
     def test_filter_list_of_dicts_all_fail(self):
         '''Test _filter_list_of_dicts where all fail'''
         rf = report_filter.ReportFilter()
-        line1 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t88.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
-        line2 = 'cluster1\tnon_coding\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line1 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t88.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
         dict2 = report_filter.ReportFilter._report_line_to_dict(line2)
         got = rf._filter_list_of_dicts([dict1, dict2])
