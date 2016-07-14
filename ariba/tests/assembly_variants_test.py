@@ -257,13 +257,13 @@ class TestAssemblyVariants(unittest.TestCase):
 
     def test_get_remaining_known_ref_variants_nucleotides(self):
         '''test _get_remaining_known_ref_variants with nucleotides'''
-        ref_var1 = sequence_metadata.SequenceMetadata('gene1\tn\tA2C\tid1\tfoo bar')
-        ref_var2 = sequence_metadata.SequenceMetadata('gene1\tn\tA3C\tid1\tfoo bar baz')
-        ref_var3 = sequence_metadata.SequenceMetadata('gene1\tn\tA3T\tid1\tfoo bar baz spam')
-        ref_var4 = sequence_metadata.SequenceMetadata('gene1\tn\tA10C\tid1\tfoo bar baz spam egg')
-        ref_var5 = sequence_metadata.SequenceMetadata('gene1\tn\tA14C\tid1\tfoo bar baz spam egg chips')
-        ref_var6 = sequence_metadata.SequenceMetadata('gene1\tn\tA15C\tid1\tfoo bar baz spam egg chips')
-        ref_var7 = sequence_metadata.SequenceMetadata('gene1\tn\tA40C\tid1\tfoo bar baz spam egg chips')
+        ref_var1 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA2C\tid1\tfoo bar')
+        ref_var2 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA3C\tid1\tfoo bar baz')
+        ref_var3 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA3T\tid1\tfoo bar baz spam')
+        ref_var4 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA10C\tid1\tfoo bar baz spam egg')
+        ref_var5 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA14C\tid1\tfoo bar baz spam egg chips')
+        ref_var6 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA15C\tid1\tfoo bar baz spam egg chips')
+        ref_var7 = sequence_metadata.SequenceMetadata('gene1\t0\t0\tA40C\tid1\tfoo bar baz spam egg chips')
 
         known_ref_variants = {
             1: {ref_var1},
