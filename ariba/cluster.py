@@ -399,10 +399,10 @@ class Cluster:
             for var_list in self.assembly_variants.values():
                 for var in var_list:
                     if var[3] not in ['.', 'SYN', None]:
-                        self.status_flag.add('has_nonsynonymous_variants')
+                        self.status_flag.add('has_variant')
                         break
 
-                if self.status_flag.has('has_nonsynonymous_variants'):
+                if self.status_flag.has('has_variant'):
                     break
 
 
