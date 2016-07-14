@@ -104,11 +104,9 @@ class TestAssemblyVariants(unittest.TestCase):
 
     def test_get_one_variant_for_one_contig_non_coding(self):
         '''test _get_one_variant_for_one_contig_non_coding'''
-        refdata = reference_data.ReferenceData(
-            non_coding_fa=os.path.join(data_dir, 'assembly_variants_test_get_variants_non_coding.fa'),
-            metadata_tsv=os.path.join(data_dir, 'assembly_variants_test_get_one_variant_for_one_contig_non_coding.metadata.tsv')
-        )
-
+        fasta_in = os.path.join(data_dir, 'assembly_variants_test_get_variants_non_coding.fa')
+        tsv_in = os.path.join(data_dir, 'assembly_variants_test_get_one_variant_for_one_contig_non_coding.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         ref_sequence_name = 'non_coding'
         refdata_var_dict = refdata.metadata[ref_sequence_name]
 
@@ -120,8 +118,8 @@ class TestAssemblyVariants(unittest.TestCase):
         # ref has T at position 5, which is wild type. This gives contig variant type A. Should report
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('5\tT\tA\t5\tx\tx\t42\t42\tx\tx\tnon_coding\tcontig'))
 
-        meta0 = sequence_metadata.SequenceMetadata('non_coding\tn\tC3A\tid1\tref has variant type A')
-        meta2 = sequence_metadata.SequenceMetadata('non_coding\tn\tT5A\tid1\tref has wild type T')
+        meta0 = sequence_metadata.SequenceMetadata('non_coding\t0\t0\tC3A\tid1\tref has variant type A')
+        meta2 = sequence_metadata.SequenceMetadata('non_coding\t0\t0\tT5A\tid1\tref has wild type T')
 
         mummer_variants = [v0, v1, v2]
 
