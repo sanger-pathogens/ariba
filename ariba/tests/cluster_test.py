@@ -164,11 +164,9 @@ class TestCluster(unittest.TestCase):
 
     def test_full_run_ok_presence_absence(self):
         '''test complete run of cluster on a presence absence gene'''
-        refdata = reference_data.ReferenceData(
-            presence_absence_fa=os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence.fa'),
-            metadata_tsv=os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence.metadata.tsv'),
-        )
-
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_presence_absence'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence'), tmpdir)
 
@@ -176,12 +174,12 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t28\tC\t83\t83\tT\t22\t.\t22\tpresence_absence1:p:A10V:.:Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
-            'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t0\t.\tp\t.\t0\t.\tSYN\t53\t53\tT\t108\t108\tC\t32\t.\t32\t.\tGeneric description of presence_absence1',
+            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t28\tC\t83\t83\tT\t22\t.\t22\tpresence_absence1:1:0:A10V:.:Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t0\t.\tp\t.\t0\t.\tSYN\t53\t53\tT\t108\t108\tC\t32\t.\t32\t.\tGeneric description of presence_absence1',
 
-            'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t62\t64\tC;G;C\t18;17;17\t.;.;.\t18;17;17\tpresence_absence1:p:R3S:.:Ref and assembly have wild type\tGeneric description of presence_absence1',
+            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t62\t64\tC;G;C\t18;17;17\t.;.;.\t18;17;17\tpresence_absence1:1:0:R3S:.:Ref and assembly have wild type\tGeneric description of presence_absence1',
 
-            'presence_absence1\tpresence_absence\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tG;C;G\t68\t70\tG;C;G\t18;20;20\t.;.;.\t18;20;20\tpresence_absence1:p:I5A:.:Ref and reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tpresence_absence1.scaffold.1\t213\t15.0\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tG;C;G\t68\t70\tG;C;G\t18;20;20\t.;.;.\t18;20;20\tpresence_absence1:1:0:I5A:.:Ref and reads have variant so report\tGeneric description of presence_absence1',
         ]
 
         self.assertEqual(expected, c.report_lines)
