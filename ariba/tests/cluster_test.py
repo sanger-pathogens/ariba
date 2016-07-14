@@ -122,9 +122,9 @@ class TestCluster(unittest.TestCase):
 
     def test_full_run_assembly_fail(self):
         '''test complete run of cluster when assembly fails'''
-        refdata = reference_data.ReferenceData(
-            non_coding_fa=os.path.join(data_dir, 'cluster_test_full_run_assembly_fail.noncoding.fa')
-        )
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_assembly_fail.in.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_assembly_fail.in.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_assembly_fail'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_assembly_fail'), tmpdir)
 
