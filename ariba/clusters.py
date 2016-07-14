@@ -77,8 +77,8 @@ class Clusters:
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
         self.extern_progs = extern_progs
-        self.clusters_tsv = os.path.join(refdata_dir, '02.cdhit.clusters.tsv')
-        self.all_ref_seqs_fasta = os.path.join(refdata_dir, '02.cdhit.all.fa')
+        self.clusters_tsv = os.path.abspath(os.path.join(refdata_dir, '02.cdhit.clusters.tsv'))
+        self.all_ref_seqs_fasta = os.path.abspath(os.path.join(refdata_dir, '02.cdhit.all.fa'))
 
         if version_report_lines is None:
             self.version_report_lines = []
@@ -236,7 +236,7 @@ class Clusters:
         return refdata, cluster_ids
 
 
-    def _map_and_cluster_reads(self, tool):
+    def _map_and_cluster_reads(self):
         if self.verbose:
             print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
 
@@ -375,54 +375,51 @@ class Clusters:
         counter = 0
         cluster_list = []
         self.log_files = []
+        cluster_numbers = [int(x) for x in self.cluster_to_dir.keys()]
+        cluster_numbers.sort()
 
-        for seq_type in sorted(self.cluster_ids):
-            if self.cluster_ids[seq_type] is None:
-                continue
+        for cluster_number in cluster_numbers:
+            cluster_name = str(cluster_number)
+            counter += 1
+            if self.verbose:
+                print('Constructing cluster ', cluster_name, ' (', counter, ' of ', len(self.cluster_to_dir), ')', sep='')
+            new_dir = self.cluster_to_dir[cluster_name]
+            self.log_files.append(os.path.join(self.logs_dir, cluster_name + '.log'))
 
-            for seq_name in sorted(self.cluster_ids[seq_type]):
-                if seq_name not in self.cluster_to_dir:
-                    continue
-                counter += 1
-                if self.verbose:
-                    print('Constructing cluster', seq_name + '.', counter, 'of', str(len(self.cluster_to_dir)))
-                new_dir = self.cluster_to_dir[seq_name]
-                self.log_files.append(os.path.join(self.logs_dir, seq_name + '.log'))
-
-                cluster_list.append(cluster.Cluster(
-                    new_dir,
-                    seq_name,
-                    self.refdata,
-                    self.cluster_read_counts[seq_name],
-                    self.cluster_base_counts[seq_name],
-                    fail_file=os.path.join(self.fails_dir, seq_name),
-                    read_store=self.read_store,
-                    reference_names=self.cluster_ids[seq_type][seq_name],
-                    logfile=self.log_files[-1],
-                    assembly_coverage=self.assembly_coverage,
-                    assembly_kmer=self.assembly_kmer,
-                    assembler=self.assembler,
-                    max_insert=self.insert_proper_pair_max,
-                    min_scaff_depth=self.min_scaff_depth,
-                    nucmer_min_id=self.nucmer_min_id,
-                    nucmer_min_len=self.nucmer_min_len,
-                    nucmer_breaklen=self.nucmer_breaklen,
-                    reads_insert=self.insert_size,
-                    sspace_k=self.min_scaff_depth,
-                    sspace_sd=self.insert_sspace_sd,
-                    threads=1, # clusters now run in parallel, so this should always be 1!
-                    bcf_min_dp=10,            # let the user change this in a future version?
-                    bcf_min_dv=5,             # let the user change this in a future version?
-                    bcf_min_dv_over_dp=0.3,   # let the user change this in a future version?
-                    bcf_min_qual=20,          # let the user change this in a future version?
-                    assembled_threshold=self.assembled_threshold,
-                    unique_threshold=self.unique_threshold,
-                    max_gene_nt_extend=self.max_gene_nt_extend,
-                    bowtie2_preset=self.bowtie2_preset,
-                    spades_other_options=self.spades_other,
-                    clean=self.clean,
-                    extern_progs=self.extern_progs,
-                ))
+            cluster_list.append(cluster.Cluster(
+                new_dir,
+                cluster_name,
+                self.refdata,
+                self.cluster_read_counts[cluster_name],
+                self.cluster_base_counts[cluster_name],
+                fail_file=os.path.join(self.fails_dir, cluster_name),
+                read_store=self.read_store,
+                reference_names=self.cluster_ids[cluster_name],
+                logfile=self.log_files[-1],
+                assembly_coverage=self.assembly_coverage,
+                assembly_kmer=self.assembly_kmer,
+                assembler=self.assembler,
+                max_insert=self.insert_proper_pair_max,
+                min_scaff_depth=self.min_scaff_depth,
+                nucmer_min_id=self.nucmer_min_id,
+                nucmer_min_len=self.nucmer_min_len,
+                nucmer_breaklen=self.nucmer_breaklen,
+                reads_insert=self.insert_size,
+                sspace_k=self.min_scaff_depth,
+                sspace_sd=self.insert_sspace_sd,
+                threads=1, # clusters now run in parallel, so this should always be 1!
+                bcf_min_dp=10,            # let the user change this in a future version?
+                bcf_min_dv=5,             # let the user change this in a future version?
+                bcf_min_dv_over_dp=0.3,   # let the user change this in a future version?
+                bcf_min_qual=20,          # let the user change this in a future version?
+                assembled_threshold=self.assembled_threshold,
+                unique_threshold=self.unique_threshold,
+                max_gene_nt_extend=self.max_gene_nt_extend,
+                bowtie2_preset=self.bowtie2_preset,
+                spades_other_options=self.spades_other,
+                clean=self.clean,
+                extern_progs=self.extern_progs,
+            ))
 
         try:
             if self.threads > 1:
@@ -546,7 +543,7 @@ class Clusters:
         cwd = os.getcwd()
         os.chdir(self.outdir)
         self.write_versions_file(cwd)
-        self._map_reads()
+        self._map_and_cluster_reads()
 
         if len(self.cluster_to_dir) > 0:
             got_insert_data_ok = self._set_insert_size_data()
