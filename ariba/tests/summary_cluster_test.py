@@ -10,11 +10,12 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 class TestSummaryCluster(unittest.TestCase):
     def test_line2dict(self):
         '''Test _line2dict'''
-        line = 'refname\treftype\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:var_group1:ref has wild type, foo bar\tsome free text'
+        line = 'refname\t1\t0\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:var_group1:ref has wild type, foo bar\tsome free text'
 
         expected = {
             'ref_name': 'refname',
-            'ref_type': 'reftype',
+            'gene': '1',
+            'var_only' : '0',
             'flag': flag.Flag(19),
             'reads': 78,
             'cluster': 'cluster',
