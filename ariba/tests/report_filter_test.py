@@ -13,10 +13,10 @@ class TestReportFilter(unittest.TestCase):
         '''test __init__ on good input file'''
         infile = os.path.join(data_dir, 'report_filter_test_init_good.tsv')
         rf = report_filter.ReportFilter(infile=infile)
-        line1 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', '.', '500', 'a:n:C42T:id1:foo', 'free_text'])
-        line2 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'a:n:A51G:id2:bar', 'free_text2'])
-        line3 = '\t'.join(['cluster1', 'non_coding', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '12.4', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'a:n:A51G:id3:spam', 'free_text3'])
-        line4 = '\t'.join(['cluster2', 'variants_only', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '20.2', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', '.', '290', 'a:v:I42L:id4:eggs', 'free_text3'])
+        line1 = '\t'.join(['cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', '.', '500', 'a:n:C42T:id1:foo', 'free_text'])
+        line2 = '\t'.join(['cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'a:n:A51G:id2:bar', 'free_text2'])
+        line3 = '\t'.join(['cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '12.4', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', '.', '542', 'a:n:A51G:id3:spam', 'free_text3'])
+        line4 = '\t'.join(['cluster2', '1', '0', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '20.2', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', '.', '290', 'a:v:I42L:id4:eggs', 'free_text3'])
 
         expected = {
             'cluster1': {
