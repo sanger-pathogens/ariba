@@ -219,7 +219,7 @@ class SummaryCluster:
     def _has_resistance(self, assembled_summary):
         '''assembled_summary should be output of _to_cluster_summary_assembled'''
         if assembled_summary.startswith('yes'):
-            if self.data[0]['ref_type'] in ['non_coding', 'presence_absence'] or self._to_cluster_summary_has_known_nonsynonymous(assembled_summary) == 'yes':
+            if self.data[0]['var_only'] == '0' or self._to_cluster_summary_has_known_nonsynonymous(assembled_summary) == 'yes':
                 return 'yes'
             else:
                 return 'no'
