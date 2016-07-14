@@ -150,17 +150,13 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t73\t73\tT\t19\t.\t19\tnoncoding1:n:A14T:.:ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\tnon_coding\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tG61T\tSNP\t60\t60\tG\t120\t120\tT\t24\t.\t24\t.\tgeneric description of noncoding1',
+            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t73\t73\tT\t19\t.\t19\tnoncoding1:0:0:A14T:.:ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
+            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tG61T\tSNP\t60\t60\tG\t120\t120\tT\t24\t.\t24\t.\tgeneric description of noncoding1',
             'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\t.82C\tINS\t81\t81\t.\t142\t142\tC\t23\t.\t23\t.\tgeneric description of noncoding1',
             'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tT108.\tDEL\t107\t107\tT\t167\t167\t.\t17\t.\t17\t.\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tA6G\t1\t.\t.\t6\t6\tG\t66\t66\tG\t19\t.\t19\tnoncoding1:n:A6G:.:variant in ref and reads so should report\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tG9T\t0\t.\t.\t9\t9\tG\t69\t69\tG\t19\t.\t19\tnoncoding1:n:G9T:.:wild type in ref and reads\tgeneric description of noncoding1'
+            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tA6G\t1\t.\t.\t6\t6\tG\t66\t66\tG\t19\t.\t19\tnoncoding1:0:0:A6G:.:variant in ref and reads so should report\tgeneric description of noncoding1',
+            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tnoncoding1.scaffold.1\t234\t15.4\t1\tSNP\tn\tG9T\t0\t.\t.\t9\t9\tG\t69\t69\tG\t19\t.\t19\tnoncoding1:0:0:G9T:.:wild type in ref and reads\tgeneric description of noncoding1'
         ]
-
-        print(c.report_lines[0], sep='\n')
-        print('\n\n')
-        print(expected[0], sep='\n')
 
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
