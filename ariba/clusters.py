@@ -218,18 +218,14 @@ class Clusters:
         if not os.path.exists(indir):
             raise Error('Error loading reference data. Input directory ' + indir + ' not found. Cannot continue')
 
-        variants_only_fa = os.path.join(indir, 'refcheck.01.check_variants.variants_only.fa')
-        presence_absence_fa = os.path.join(indir, 'refcheck.01.check_variants.presence_absence.fa')
-        non_coding_fa = os.path.join(indir, 'refcheck.01.check_variants.non_coding.fa')
-        metadata_tsv = os.path.join(indir, 'refcheck.01.check_variants.tsv')
-        info_file = os.path.join(indir, 'info.txt')
-        clusters_pickle_file = os.path.join(indir, 'cdhit.clusters.pickle')
+        fasta_file = os.path.join(indir, '02.cdhit.all.fa')
+        metadata_file = os.path.join(indir, '01.filter.check_metadata.tsv')
+        info_file = os.path.join(indir, '00.info.txt')
+        clusters_pickle_file = os.path.join(indir, '02.cdhit.clusters.pickle')
         params = Clusters._load_reference_data_info_file(info_file)
         refdata = reference_data.ReferenceData(
-            presence_absence_fa=presence_absence_fa if os.path.exists(presence_absence_fa) else None,
-            variants_only_fa=variants_only_fa if os.path.exists(variants_only_fa) else None,
-            non_coding_fa=non_coding_fa if os.path.exists(non_coding_fa) else None,
-            metadata_tsv=metadata_tsv if os.path.exists(metadata_tsv) else None,
+            [fasta_file],
+            [metadata_file],
             genetic_code=params['genetic_code'],
         )
 

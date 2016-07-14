@@ -24,12 +24,13 @@ class TestClusters(unittest.TestCase):
         self.cluster_dir = 'tmp.Cluster'
         self.refdata_dir = 'tmp.RefData'
         os.mkdir(self.refdata_dir)
-        shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.fa'), os.path.join(self.refdata_dir, 'refcheck.01.check_variants.non_coding.fa'))
-        with open(os.path.join(self.refdata_dir, 'info.txt'), 'w') as f:
+        shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.fa'), os.path.join(self.refdata_dir, '02.cdhit.all.fa'))
+        shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.tsv'), os.path.join(self.refdata_dir, '01.filter.check_metadata.tsv'))
+        with open(os.path.join(self.refdata_dir, '00.info.txt'), 'w') as f:
             print('genetic_code\t11', file=f)
 
-        with open(os.path.join(self.refdata_dir, 'cdhit.clusters.pickle'), 'wb') as f:
-            pickle.dump({'x': {'x'}}, f)
+        with open(os.path.join(self.refdata_dir, '02.cdhit.clusters.pickle'), 'wb') as f:
+            pickle.dump({'0': {'x'}}, f)
 
         reads1 = os.path.join(data_dir, 'clusters_test_dummy_reads_1.fq')
         reads2 = os.path.join(data_dir, 'clusters_test_dummy_reads_2.fq')
