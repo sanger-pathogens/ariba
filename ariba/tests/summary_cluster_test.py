@@ -53,9 +53,9 @@ class TestSummaryCluster(unittest.TestCase):
         '''Test add_data_dict'''
         cluster = summary_cluster.SummaryCluster()
         self.assertTrue(cluster.name is None)
-        line1 = 'refname\treftype\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text'
-        line2 = 'refname\treftype\t19\t78\tcluster2\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id2:ref has wild type, foo bar\tsome free text'
-        line3 = 'refname2\treftype\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id3:ref has wild type, foo bar\tsome free text'
+        line1 = 'refname\t1\t0\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line2 = 'refname\t1\t0\t19\t78\tcluster2\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id2:ref has wild type, foo bar\tsome free text'
+        line3 = 'refname2\t1\t0\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:n:A14T:id3:ref has wild type, foo bar\tsome free text'
         data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
         data_dict2 = summary_cluster.SummaryCluster.line2dict(line2)
         data_dict3 = summary_cluster.SummaryCluster.line2dict(line3)
