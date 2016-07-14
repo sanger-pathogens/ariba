@@ -113,7 +113,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=2, total_reads_bases=108)
         c.run()
 
-        expected = '\t'.join(['.', '.', '1088', '2', 'cluster_name'] + ['.'] * 25)
+        expected = '\t'.join(['.', '.', '.', '1088', '2', 'cluster_name'] + ['.'] * 24)
         self.assertEqual([expected], c.report_lines)
         self.assertTrue(c.status_flag.has('ref_seq_choose_fail'))
         self.assertTrue(c.status_flag.has('assembly_fail'))
