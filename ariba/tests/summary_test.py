@@ -290,7 +290,7 @@ class TestSummary(unittest.TestCase):
         filenames = ['file1', 'file2']
         cluster_cols = {'assembled': True, 'match': True, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False}
         got_phandago_header, got_csv_header, got_lines  = summary.Summary._to_matrix(filenames, rows, cluster_cols)
-        expected_phandango_header = ['name', 'cluster.n.1.assembled.:o1', 'cluster.n.1.match.:o1', 'cluster.n.1.noncoding1.A14T:o1', 'cluster.p.1.assembled.:o1', 'cluster.p.1.match.:o1', 'cluster.p.1.presence_absence1.I42L:o1', 'cluster.v.1.assembled.:o1', 'cluster.v.1.match.:o1']
+        expected_phandango_header = ['name', 'cluster.n.1.assembled:o1', 'cluster.n.1.match:o1', 'cluster.n.1.noncoding1.A14T:o1', 'cluster.p.1.assembled:o1', 'cluster.p.1.match:o1', 'cluster.p.1.presence_absence1.I42L:o1', 'cluster.v.1.assembled:o1', 'cluster.v.1.match:o1']
         expected_csv_header = ['name', 'cluster.n.1.assembled', 'cluster.n.1.match', 'cluster.n.1.noncoding1.A14T', 'cluster.p.1.assembled', 'cluster.p.1.match', 'cluster.p.1.presence_absence1.I42L', 'cluster.v.1.assembled', 'cluster.v.1.match']
         expected_lines = [
             ['file1', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes'],
