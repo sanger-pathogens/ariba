@@ -104,9 +104,9 @@ class TestCluster(unittest.TestCase):
 
     def test_full_run_choose_ref_fail(self):
         '''test complete run of cluster when choosing ref seq fails'''
-        refdata = reference_data.ReferenceData(
-            presence_absence_fa=os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail.presence_absence.fa')
-        )
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail.in.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail.in.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_choose_ref_fail'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail'), tmpdir)
 
