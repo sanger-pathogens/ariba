@@ -243,9 +243,9 @@ class AssemblyVariants:
                     variant_pos_matches_contig = False
                     pos = known_ref_variant.variant.position
 
-                    if known_ref_variant.variant_type == 'n':
+                    if known_ref_variant.seq_type == 'n':
                         ref_interval = intervals.Interval(pos, pos)
-                    elif known_ref_variant.variant_type == 'p':
+                    elif known_ref_variant.seq_type == 'p':
                         ref_interval = intervals.Interval(3 * pos, 3 * pos + 2)
                     else:
                         raise Error('Unexpected variant type "' + known_ref_variant.variant_type + '" in _get_remaining_known_ref_variants. Cannot continue')
@@ -256,7 +256,7 @@ class AssemblyVariants:
                             break
 
                     if variant_pos_matches_contig:
-                        variants.append((None, known_ref_variant.variant_type, None, None, None, {known_ref_variant}, set()))
+                        variants.append((None, known_ref_variant.seq_type, None, None, None, {known_ref_variant}, set()))
 
         return variants
 
