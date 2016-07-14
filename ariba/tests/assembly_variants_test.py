@@ -337,9 +337,9 @@ class TestAssemblyVariants(unittest.TestCase):
 
     def test_get_variants_variants_only(self):
         '''test get_variants variants only'''
-        meta1 = sequence_metadata.SequenceMetadata('variants_only\tp\tD2E\tid1\tref has wild type D (GAT=D, GAA=E)')
-        meta2 = sequence_metadata.SequenceMetadata('variants_only\tp\tS3R\tid1\tref has variant type R (AGA=R, AGT=S)')
-        meta3 = sequence_metadata.SequenceMetadata('variants_only\tp\tD4E\tid1\tref has variant type E (GAA=E, GAC=D)')
+        meta1 = sequence_metadata.SequenceMetadata('variants_only\t1\t0\tD2E\tid1\tref has wild type D (GAT=D, GAA=E)')
+        meta2 = sequence_metadata.SequenceMetadata('variants_only\t1\t0\tS3R\tid1\tref has variant type R (AGA=R, AGT=S)')
+        meta3 = sequence_metadata.SequenceMetadata('variants_only\t1\t0\tD4E\tid1\tref has variant type E (GAA=E, GAC=D)')
 
         metadata_tsv = 'tmp.test_get_variants_variants_only.metadata.tsv'
         with open(metadata_tsv, 'w') as f:
@@ -347,11 +347,8 @@ class TestAssemblyVariants(unittest.TestCase):
             print(meta2, file=f)
             print(meta3, file=f)
 
-        refdata = reference_data.ReferenceData(
-            variants_only_fa=os.path.join(data_dir, 'assembly_variants_test_get_variants_variants_only.fa'),
-            metadata_tsv=metadata_tsv
-        )
-
+        fasta_in = os.path.join(data_dir, 'assembly_variants_test_get_variants_variants_only.fa')
+        refdata = reference_data.ReferenceData([fasta_in], [metadata_tsv])
         os.unlink(metadata_tsv)
 
         nucmer_snp_file = os.path.join(data_dir, 'assembly_variants_test_get_variants_variants_only.snps')
