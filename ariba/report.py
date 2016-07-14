@@ -227,9 +227,6 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
 
                     lines.append('\t'.join(common_first_columns + variant_columns + samtools_columns + [matching_vars_column] + [free_text_column]))
             else:
-                print('common_first_columns', common_first_columns)
-                print('matching_vars_column:', matching_vars_column)
-                print('free_text_column:', free_text_column)
                 lines.append('\t'.join(
                     common_first_columns + variant_columns + \
                     samtools_columns + \
