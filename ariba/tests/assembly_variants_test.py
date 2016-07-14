@@ -147,11 +147,9 @@ class TestAssemblyVariants(unittest.TestCase):
 
     def test_get_one_variant_for_one_contig_coding(self):
         '''test _get_one_variant_for_one_contig_coding'''
-        refdata = reference_data.ReferenceData(
-            presence_absence_fa=os.path.join(data_dir, 'assembly_variants_test_get_one_variant_for_one_contig_coding_presence_absence.fa'),
-            metadata_tsv=os.path.join(data_dir, 'assembly_variants_test_get_one_variant_for_one_contig_coding_metadata.tsv')
-        )
-
+        fasta_in = os.path.join(data_dir, 'assembly_variants_test_get_one_variant_for_one_contig_coding_presence_absence.fa')
+        tsv_in = os.path.join(data_dir, 'assembly_variants_test_get_one_variant_for_one_contig_coding_metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         ref_sequence_name = 'presence_absence'
         ref_sequence = refdata.sequence(ref_sequence_name)
         refdata_var_dict = refdata.metadata[ref_sequence_name]
@@ -186,8 +184,8 @@ class TestAssemblyVariants(unittest.TestCase):
 
         mummer_variants = [[v0], [v1], [v2], [v3], [v4], [v5], [v6], [v7], [v8], [v9], [v10]]
 
-        meta0 = sequence_metadata.SequenceMetadata('presence_absence\tp\tD2E\tid1\tref has wild type D (GAT=D, GAA=E)')
-        meta4 = sequence_metadata.SequenceMetadata('presence_absence\tp\tS3R\tid1\tref has variant type R (AGA=R, AGT=S)')
+        meta0 = sequence_metadata.SequenceMetadata('presence_absence\t1\t0\tD2E\tid1\tref has wild type D (GAT=D, GAA=E)')
+        meta4 = sequence_metadata.SequenceMetadata('presence_absence\t1\t0\tS3R\tid1\tref has variant type R (AGA=R, AGT=S)')
 
         expected_tuples = [
             (1, 'p', 'D2E', 'NONSYN', [v0], {meta0}, set()),    #0
