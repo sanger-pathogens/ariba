@@ -16,7 +16,7 @@ c_files = [
 ]
 
 c_files = [os.path.join('third_party', 'minimap', x) for x in c_files]
-extension_mod = Extension("minimap_ariba", c_files)
+extension_mod = Extension("minimap_ariba", c_files, extra_link_args=['-lz'])
 
 setup(
     ext_modules=[extension_mod],
