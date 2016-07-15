@@ -27,6 +27,14 @@ class RefdataQuery:
         return clusters
 
 
+    @staticmethod
+    def _seq2cluster(clusters, seqname):
+        for cluster in clusters:
+            if seqname in clusters[cluster]:
+                return cluster
+        return None
+
+
     def _cluster2seqs(self, cluster_name):
         clusters = self._load_clusters(self.clusters_pickle)
         if cluster_name not in clusters:

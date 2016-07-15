@@ -37,6 +37,19 @@ class TestRefdataQuery(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_seq2cluster(self):
+        '''test _seq2cluster'''
+        clusters = {
+            '0': {'seq1', 'seq2'},
+            '1': {'seq3', 'seq4'},
+        }
+        self.assertEqual(None, refdata_query.RefdataQuery._seq2cluster(clusters, 'not_there'))
+        self.assertEqual('0', refdata_query.RefdataQuery._seq2cluster(clusters, 'seq1'))
+        self.assertEqual('0', refdata_query.RefdataQuery._seq2cluster(clusters, 'seq2'))
+        self.assertEqual('1', refdata_query.RefdataQuery._seq2cluster(clusters, 'seq3'))
+        self.assertEqual('1', refdata_query.RefdataQuery._seq2cluster(clusters, 'seq4'))
+
+
     def test_cluster2seqs(self):
         '''test _cluster2seqs'''
         expected = ['Sequences belonging to cluster 0:', 'noncoding1', 'noncoding2']
