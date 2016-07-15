@@ -50,9 +50,14 @@ class RefdataQuery:
 
         assert seqname in refdata.metadata
 
+        clusters = RefdataQuery._load_clusters(self.clusters_pickle)
+        cluster = RefdataQuery._seq2cluster(clusters, seqname)
+        assert cluster is not None
+
         return [
             'Name\t' + seqname,
-            'Sequence\t' + refdata.sequences[seqname].seq
+            'Cluster\t' + cluster,
+            'Sequence\t' + refdata.sequences[seqname].seq,
         ]
 
 
