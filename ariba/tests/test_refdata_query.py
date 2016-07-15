@@ -81,3 +81,14 @@ class TestRefdataQuery(unittest.TestCase):
         got = self.rquery._seqinfo('gene5.varonly')
         self.assertEqual(expected, got)
 
+        expected = [
+            'Name\tnoncoding1',
+            'Is gene\t0',
+            'Variant only\t0',
+            'Cluster\t0',
+            'Description\tGeneric description of noncoding1',
+            'Sequence\tTCGACGTCGTCAGTACGTCACGTACGTACGTACGTACGTAGTCAGTCAGTCAGTCGTTAATACCTACTGACTGACTGATCGACGTACGTCTGACTGAGTCAGTCAGTCAGTCAGTCTAAACATCTACTGATGTACGAGCAGCTACGTACCGTACGTACGTACGTACTCATATCGTCGTTAACACATACTCTGATCGATCACGTAGTCGTCGTACGTACGTAGTCATATAT',
+        ]
+        got = self.rquery._seqinfo('noncoding1')
+        self.assertEqual(expected, got)
+

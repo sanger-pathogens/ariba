@@ -72,7 +72,7 @@ class RefdataQuery:
         return [
             'Name\t' + seqname,
             'Is gene\t' + is_gene,
-            'Variant only\t' + '1' if refdata.metadata[seqname]['variant_only'] else '0',
+            'Variant only\t' + ('1' if refdata.metadata[seqname]['variant_only'] else '0'),
             'Cluster\t' + cluster,
         ] + description_lines + var_lines + ['Sequence\t' + refdata.sequences[seqname].seq]
 
