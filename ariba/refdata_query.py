@@ -61,6 +61,8 @@ class RefdataQuery:
             is_gene = '0'
             var_dict = refdata.metadata[seqname]['n']
 
+        description_lines = ['Description\t' + x.free_text for x in sorted(list(refdata.metadata[seqname]['.'])) if x.free_text != '.']
+
         var_lines = []
         for position in sorted(var_dict):
             for seq_meta in sorted(var_dict[position]):
@@ -72,8 +74,7 @@ class RefdataQuery:
             'Is gene\t' + is_gene,
             'Variant only\t' + '1' if refdata.metadata[seqname]['variant_only'] else '0',
             'Cluster\t' + cluster,
-            'Sequence\t' + refdata.sequences[seqname].seq,
-        ] + var_lines
+        ] + description_lines + var_lines + ['Sequence\t' + refdata.sequences[seqname].seq]
 
 
     def query(self, query_type, query_string):
