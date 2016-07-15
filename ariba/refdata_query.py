@@ -54,13 +54,26 @@ class RefdataQuery:
         cluster = RefdataQuery._seq2cluster(clusters, seqname)
         assert cluster is not None
 
+        if refdata.metadata[seqname]['seq_type'] == 'p':
+            is_gene = '1'
+            var_dict = refdata.metadata[seqname]['p']
+        else:
+            is_gene = '0'
+            var_dict = refdata.metadata[seqname]['n']
+
+        var_lines = []
+        for position in sorted(var_dict):
+            for seq_meta in sorted(var_dict[position]):
+                ident = '.' if seq_meta.variant.identifier is None else seq_meta.variant.identifier
+                var_lines.append('\t'.join(['Variant', str(seq_meta.variant), ident, seq_meta.free_text]))
+
         return [
             'Name\t' + seqname,
-            'Is gene\t' + '1' if refdata.metadata[seqname]['seq_type'] == 'p' else '0',
+            'Is gene\t' + is_gene,
             'Variant only\t' + '1' if refdata.metadata[seqname]['variant_only'] else '0',
             'Cluster\t' + cluster,
             'Sequence\t' + refdata.sequences[seqname].seq,
-        ]
+        ] + var_lines
 
 
     def query(self, query_type, query_string):
