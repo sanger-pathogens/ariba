@@ -14,6 +14,9 @@ class RefdataQuery:
             raise Error('Error querying refdata. Input directory "' + prepareref_dir + '" not found.')
 
         self.prepareref_dir = prepareref_dir
+        self.refdata_fa = os.path.join(self.prepareref_dir, '02.cdhit.all.fa')
+        self.refdata_tsv = os.path.join(self.prepareref_dir, '01.filter.check_metadata.tsv')
+        self.clusters_pickle = os.path.join(self.prepareref_dir, '02.cdhit.clusters.pickle')
 
 
     def _cluster2seqs(self, cluster_name):
@@ -21,9 +24,23 @@ class RefdataQuery:
         return lines
 
 
+    def _seqinfo(self, seqname):
+        refdata = reference_data.ReferenceData([self.refdata_fa], [self.refdata_tsv])
+        if seqname not in refdata.sequences:
+            return ['Sequence not found: ' + seqname]
+
+        assert seqname in refdata.metadata
+
+        return [
+            'Name\t' + seqname,
+            'Sequence\t' + refdata.sequences[seqname].seq
+        ]
+
+
     def query(self, query_type, query_string):
         queries = {
             'cluster2seqs': self._cluster2seqs,
+            'seqinfo': self._seqinfo,
         }
 
         if query_type not in queries:
