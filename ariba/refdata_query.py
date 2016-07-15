@@ -79,8 +79,8 @@ class RefdataQuery:
 
     def query(self, query_type, query_string):
         queries = {
-            'cluster2seqs': self._cluster2seqs,
-            'seqinfo': self._seqinfo,
+            'cluster': self._cluster2seqs,
+            'seq': self._seqinfo,
         }
 
         if query_type not in queries:
