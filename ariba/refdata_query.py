@@ -1,4 +1,5 @@
 import os
+import pickle
 import sys
 import pyfastaq
 from ariba import reference_data
@@ -19,15 +20,25 @@ class RefdataQuery:
         self.clusters_pickle = os.path.join(self.prepareref_dir, '02.cdhit.clusters.pickle')
 
 
+    @staticmethod
+    def _load_clusters(pickle_file):
+        with open(pickle_file, 'rb') as f:
+            clusters = pickle.load(f)
+        return clusters
+
+
     def _cluster2seqs(self, cluster_name):
-        lines = ['Sequences belonging to cluster ' + cluster_name + ':', '1', '2']
-        return lines
+        clusters = self._load_clusters(self.clusters_pickle)
+        if cluster_name not in clusters:
+            return ['Cluster name ' + cluster_name + ' not found']
+        else:
+            return ['Sequences belonging to cluster ' + cluster_name + ':'] + sorted(list(clusters[cluster_name]))
 
 
     def _seqinfo(self, seqname):
         refdata = reference_data.ReferenceData([self.refdata_fa], [self.refdata_tsv])
         if seqname not in refdata.sequences:
-            return ['Sequence not found: ' + seqname]
+            return ['Sequence ' + seqname + ' not found']
 
         assert seqname in refdata.metadata
 

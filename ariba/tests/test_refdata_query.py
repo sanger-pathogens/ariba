@@ -12,24 +12,48 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 class TestRefdataQuery(unittest.TestCase):
     def setUp(self):
-        prepareref_dir = os.path.join(data_dir, 'refdata_query_prepareref')
-        self.rquery = refdata_query.RefdataQuery(prepareref_dir)
+        self.prepareref_dir = os.path.join(data_dir, 'refdata_query_prepareref')
+        self.rquery = refdata_query.RefdataQuery(self.prepareref_dir)
 
 
     def test_query_with_unknown_query(self):
+        '''test query with unknown query'''
         with self.assertRaises(refdata_query.Error):
             self.rquery.query('notaquery', 'spam')
 
 
+    def test_load_clusters(self):
+        '''test _load_clusters'''
+        infile = os.path.join(self.prepareref_dir, '02.cdhit.clusters.pickle')
+        got = refdata_query.RefdataQuery._load_clusters(infile)
+        expected = {
+            '0': {'noncoding1', 'noncoding2'},
+            '1': {'noncoding3'},
+            '2': {'noncoding4.varonly'},
+            '3': {'gene4'},
+            '4': {'gene1_foo_', 'gene2', 'gene3'},
+            '5': {'gene5.varonly', 'gene6.varonly'},
+        }
+        self.assertEqual(expected, got)
+
+
     def test_cluster2seqs(self):
         '''test _cluster2seqs'''
-        expected = ['Sequences belonging to cluster 0:', '1', '2']
+        expected = ['Sequences belonging to cluster 0:', 'noncoding1', 'noncoding2']
         got = self.rquery._cluster2seqs('0')
+        self.assertEqual(expected, got)
+
+        expected = ['Cluster name fortytwo not found']
+        got = self.rquery._cluster2seqs('fortytwo')
         self.assertEqual(expected, got)
 
 
     def test_seqinfo(self):
         '''test _seqinfo'''
+        expected = ['Sequence fortytwo not found']
+        got = self.rquery._seqinfo('fortytwo')
+        self.assertEqual(expected, got)
+
         expected = ['Name\tgene5.varonly',
             'Sequence\tATGCTGCAATCACTCAACCATCTGACCCTCGCGGTCAGCGACCTGCAAAAAAGCGTTACCTTCTGGCACGAGCTGCTGGGGCTGACGCTGCACGCCCGCTGGAATACCGGGGCCTATCTTACCTGCGGCGATCTGTGGGTCTGCCTGTCCTATGACGAGGCGCGCGGTTACGTGCCGCCGCAGGAGAGCGACTATACCCATTACGCGTTTACCGTTGCGGCGGAAGATTTTGAGCCGTTCTCGCACAAGCTGGAGCAGGCGGGCGTTACCGTCTGGAAGCAAAACAAAAGTGAGGGGGCATCGTTCTATTTTCTCGACCCGGACGGGCACAAGCTGGAGCTGCACGTGGGCAGCCTCGCCGCGCGGCTGGCGGCGTGCCGGGAGAAACCCTATGCCGGAATGGTCTTCACCTCAGACGAGGCTTGA'
         ]
