@@ -1,0 +1,3 @@
+input fasta file:	refdata_query_prepareref.in.fa
+input tsv file:	refdata_query_prepareref.in.tsv
+genetic_code	11
