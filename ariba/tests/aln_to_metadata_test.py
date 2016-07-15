@@ -308,16 +308,16 @@ class TestAlnToMetadata(unittest.TestCase):
         }
 
         expected = [
-            'seq1\tp\tA2D\tid1\tdescription 1',
-            'seq2\tp\tA2D\tid1\tdescription 1',
-            'seq4\tp\tC3D\tid1\tdescription 1',
-            'seq5\tp\tA3D\tid1\tdescription 1',
-            'seq5\tp\tF2E\tid2\tdescription 2',
-            'seq3\tp\tF2E\tid2\tdescription 2',
-            'seq4\tp\tF2E\tid2\tdescription 2',
+            'seq1\t1\t0\tA2D\tid1\tdescription 1',
+            'seq2\t1\t0\tA2D\tid1\tdescription 1',
+            'seq4\t1\t0\tC3D\tid1\tdescription 1',
+            'seq5\t1\t0\tA3D\tid1\tdescription 1',
+            'seq5\t1\t0\tF2E\tid2\tdescription 2',
+            'seq3\t1\t0\tF2E\tid2\tdescription 2',
+            'seq4\t1\t0\tF2E\tid2\tdescription 2',
         ]
 
-        got = aln_to_metadata.AlnToMetadata._variants_to_tsv_lines(variants, unpadded_seqs, padded_seqs, insertions, True)
+        got = aln_to_metadata.AlnToMetadata._variants_to_tsv_lines(variants, unpadded_seqs, padded_seqs, insertions, True, False)
         self.assertEqual(expected, got)
 
 
