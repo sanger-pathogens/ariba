@@ -56,14 +56,14 @@ class TestRefdataQuery(unittest.TestCase):
         got = self.rquery._cluster2seqs('0')
         self.assertEqual(expected, got)
 
-        expected = ['Cluster name fortytwo not found']
+        expected = ['Cluster name "fortytwo" not found']
         got = self.rquery._cluster2seqs('fortytwo')
         self.assertEqual(expected, got)
 
 
     def test_seqinfo(self):
         '''test _seqinfo'''
-        expected = ['Sequence fortytwo not found']
+        expected = ['Sequence "fortytwo" not found']
         got = self.rquery._seqinfo('fortytwo')
         self.assertEqual(expected, got)
 

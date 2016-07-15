@@ -38,7 +38,7 @@ class RefdataQuery:
     def _cluster2seqs(self, cluster_name):
         clusters = self._load_clusters(self.clusters_pickle)
         if cluster_name not in clusters:
-            return ['Cluster name ' + cluster_name + ' not found']
+            return ['Cluster name "' + cluster_name + '" not found']
         else:
             return ['Sequences belonging to cluster ' + cluster_name + ':'] + sorted(list(clusters[cluster_name]))
 
@@ -46,7 +46,7 @@ class RefdataQuery:
     def _seqinfo(self, seqname):
         refdata = reference_data.ReferenceData([self.refdata_fa], [self.refdata_tsv])
         if seqname not in refdata.sequences:
-            return ['Sequence ' + seqname + ' not found']
+            return ['Sequence "' + seqname + '" not found']
 
         assert seqname in refdata.metadata
 
