@@ -8,7 +8,7 @@ def use_preset(options):
 
     preset_to_vals = {
         'minimal': {
-            'cluster_cols': 'has_res',
+            'cluster_cols': 'match',
             'variant_cols': '',
             'col_filter': 'y',
             'row_filter': 'y',
@@ -17,7 +17,7 @@ def use_preset(options):
             'novel_vars': 'n'
         },
         'cluster_small': {
-            'cluster_cols': 'assembled,has_res,ref_seq,known_var',
+            'cluster_cols': 'assembled,match,ref_seq,known_var',
             'variant_cols': '',
             'col_filter': 'y',
             'row_filter': 'y',
@@ -26,7 +26,7 @@ def use_preset(options):
             'novel_vars': 'n'
         },
         'cluster_all': {
-            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
+            'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
             'variant_cols': '',
             'col_filter': 'y',
             'row_filter': 'y',
@@ -35,7 +35,7 @@ def use_preset(options):
             'novel_vars': 'n'
         },
         'cluster_var_groups': {
-            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
+            'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
             'variant_cols': 'groups',
             'col_filter': 'y',
             'row_filter': 'y',
@@ -44,7 +44,7 @@ def use_preset(options):
             'novel_vars': 'n'
         },
         'cluster_known_vars': {
-            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
+            'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
             'variant_cols': 'groups,grouped,ungrouped',
             'col_filter': 'y',
             'row_filter': 'y',
@@ -53,7 +53,7 @@ def use_preset(options):
             'novel_vars': 'n'
         },
         'all': {
-            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
+            'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
             'variant_cols': 'groups,grouped,ungrouped,novel',
             'col_filter': 'y',
             'row_filter': 'y',
@@ -62,7 +62,7 @@ def use_preset(options):
             'novel_vars': 'y'
         },
         'all_no_filter': {
-            'cluster_cols': 'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
+            'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
             'variant_cols': 'groups,grouped,ungrouped,novel',
             'col_filter': 'n',
             'row_filter': 'n',
@@ -89,7 +89,7 @@ def run():
         epilog = 'Files must be listed after the output file and/or the option --fofn must be used. If both used, all files in the filename specified by --fofn AND the files listed after the output file will be used as input.')
     parser.add_argument('-f', '--fofn', help='File of filenames of ariba reports in tsv format (not xls) to be summarised. Must be used if no input files listed after the outfile.', metavar='FILENAME')
     parser.add_argument('--preset', choices=presets, help='Shorthand for setting --cluster_cols,--col_filter,--row_filter,--known_vars,--novel_vars. Using this overrides those options', metavar='|'.join(presets))
-    parser.add_argument('--cluster_cols', help='Comma separated list of cluster columns to include. Choose from: assembled, has_res, ref_seq, pct_id, known_var, novel_var [%(default)s]', default='has_res', metavar='col1,col2,...')
+    parser.add_argument('--cluster_cols', help='Comma separated list of cluster columns to include. Choose from: assembled, match, ref_seq, pct_id, known_var, novel_var [%(default)s]', default='match', metavar='col1,col2,...')
     parser.add_argument('--col_filter', choices=['y', 'n'], default='y', help='Choose whether columns where all values are "no" or "NA" are removed [%(default)s]', metavar='y|n')
     parser.add_argument('--row_filter', choices=['y', 'n'], default='y', help='Choose whether rows where all values are "no" or "NA" are removed [%(default)s]', metavar='y|n')
     parser.add_argument('--var_cols', help='Comma separated list of variant columns to include. Choose from: groups, grouped, ungrouped, novel [none by default]', metavar='col1,col2,...', default='')

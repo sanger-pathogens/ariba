@@ -100,7 +100,7 @@ class SummaryCluster:
         if len(self.data) == 0:
             return 'no'
 
-        if self.data[0]['ref_type'] == 'non_coding':
+        if self.data[0]['gene'] == '0':
             has_complete_gene = True
         else:
             has_complete_gene = self.flag.has('complete_gene')
@@ -216,10 +216,10 @@ class SummaryCluster:
 
             return (data_dict['ref_name'], var_change) + var_group
 
-    def _has_resistance(self, assembled_summary):
+    def _has_match(self, assembled_summary):
         '''assembled_summary should be output of _to_cluster_summary_assembled'''
         if assembled_summary.startswith('yes'):
-            if self.data[0]['ref_type'] in ['non_coding', 'presence_absence'] or self._to_cluster_summary_has_known_nonsynonymous(assembled_summary) == 'yes':
+            if self.data[0]['var_only'] == '0' or self._to_cluster_summary_has_known_nonsynonymous(assembled_summary) == 'yes':
                 return 'yes'
             else:
                 return 'no'
@@ -242,7 +242,7 @@ class SummaryCluster:
 
         columns = {
             'assembled': self._to_cluster_summary_assembled(),
-            'has_res': self._has_resistance(assembled_summary),
+            'match': self._has_match(assembled_summary),
             'ref_seq': self.ref_name,
             'pct_id': str(self.pc_id_of_longest()),
             'known_var': self._to_cluster_summary_has_known_nonsynonymous(assembled_summary),

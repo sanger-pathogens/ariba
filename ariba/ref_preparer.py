@@ -8,13 +8,10 @@ class Error (Exception): pass
 
 class RefPreparer:
     def __init__(self,
+        fasta_files,
+        metadata_tsv_files,
         extern_progs,
         version_report_lines=None,
-        ref_prefix=None,
-        presabs=None,
-        varonly=None,
-        noncoding=None,
-        metadata=None,
         min_gene_length=6,
         max_gene_length=10000,
         genetic_code=11,
@@ -32,11 +29,8 @@ class RefPreparer:
         else:
             self.version_report_lines = version_report_lines
 
-        self.ref_prefix = ref_prefix
-        self.presabs = presabs
-        self.varonly = varonly
-        self.noncoding = noncoding
-        self.metadata = metadata
+        self.fasta_files = fasta_files
+        self.metadata_tsv_files = metadata_tsv_files
         self.min_gene_length = min_gene_length
         self.max_gene_length = max_gene_length
         self.genetic_code = genetic_code
@@ -48,58 +42,13 @@ class RefPreparer:
         self.verbose = verbose
 
 
-    @staticmethod
-    def _get_ref_files(ref_prefix, presabs, varonly, noncoding, metadata, verbose=False):
-        if {None} == {ref_prefix, presabs, varonly, noncoding}:
-            raise Error('Error in RefPreparer._get_ref_files. All input files and ref_prefix were None. Cannot continue')
-
-        filenames = {
-            'presabs': presabs,
-            'varonly': varonly,
-            'noncoding': noncoding,
-            'metadata': metadata,
-        }
-
-        file_suffixes = {
-            'presabs': 'presence_absence.fa',
-            'varonly': 'variants_only.fa',
-            'noncoding': 'noncoding.fa',
-            'metadata': 'metadata.tsv',
-        }
-
-        if verbose:
-            print('\nLooking for input files ...')
-
-        for key in file_suffixes:
-            if ref_prefix is not None:
-                filename = os.path.abspath(ref_prefix + '.' + file_suffixes[key])
-
-                if os.path.exists(filename):
-                    if verbose:
-                        print('Found: ', filename, '.\n    ...treating it as if this was used: --', key, ' ', filename, sep='')
-                    filenames[key] = filename
-                else:
-                    if verbose:
-                        print('Not found:', filename)
-                    filenames[key] = None
-            elif filenames[key] is not None:
-                if os.path.exists(filenames[key]):
-                    filenames[key] = os.path.abspath(filenames[key])
-                    if verbose:
-                        print('Found: ', filenames[key], ' from option --', key, sep='')
-                else:
-                    raise Error('File not found! Cannot continue. Looked for: ' + filenames[key])
-
-        if {None} == {filenames['presabs'], filenames['varonly'], filenames['noncoding']}:
-            raise Error('Error in RefPreparer._get_ref_files. No FASTA files given! Cannot continue')
-
-        return filenames
-
-
     def _write_info_file(self, outfile):
         with open(outfile, 'w') as fout:
-            for key in ('presabs', 'varonly', 'noncoding', 'metadata'):
-                print('input_' + key, self.filenames[key], sep='\t', file=fout)
+            for filename in self.fasta_files:
+                print('input fasta file:', filename, sep='\t', file=fout)
+
+            for filename in self.metadata_tsv_files:
+                print('input tsv file:', filename, sep='\t', file=fout)
 
             print('genetic_code', self.genetic_code, sep='\t', file=fout)
 
@@ -115,21 +64,18 @@ class RefPreparer:
         except:
             raise Error('Error making output directory ' + outdir + '. Cannot continue')
 
-        with open(os.path.join(outdir, 'version_info.txt'), 'w') as f:
+        with open(os.path.join(outdir, '00.version_info.txt'), 'w') as f:
             print('ARIBA run with this command:', file=f)
             print(' '.join([sys.argv[0]] + ['prepareref'] + sys.argv[1:]), file=f)
             print('from this directory:', original_dir, file=f)
             print(file=f)
             print(*self.version_report_lines, sep='\n', file=f)
 
-        self.filenames = self._get_ref_files(self.ref_prefix, self.presabs, self.varonly, self.noncoding, self.metadata, self.verbose)
-        self._write_info_file(os.path.join(outdir, 'info.txt'))
+        self._write_info_file(os.path.join(outdir, '00.info.txt'))
 
         self.refdata = reference_data.ReferenceData(
-            presence_absence_fa=self.filenames['presabs'],
-            variants_only_fa=self.filenames['varonly'],
-            non_coding_fa=self.filenames['noncoding'],
-            metadata_tsv=self.filenames['metadata'],
+            self.fasta_files,
+            self.metadata_tsv_files,
             min_gene_length=self.min_gene_length,
             max_gene_length=self.max_gene_length,
             genetic_code=self.genetic_code,
@@ -138,23 +84,20 @@ class RefPreparer:
         if self.verbose:
             print('\nLoading and checking input data', flush=True)
 
-        refdata_outprefix = os.path.join(outdir, 'refcheck')
-        self.refdata.rename_sequences(refdata_outprefix + '.rename_info')
-        self.refdata.sanity_check(refdata_outprefix)
+        self.refdata.rename_sequences(os.path.join(outdir, '00.rename_info'))
+        self.refdata.sanity_check(os.path.join(outdir, '01.filter'))
 
         if self.verbose:
             print('\nRunning cdhit', flush=True)
-        cdhit_outprefix = os.path.join(outdir, 'cdhit')
+        cdhit_outprefix = os.path.join(outdir, '02.cdhit')
 
         clusters = self.refdata.cluster_with_cdhit(
-            refdata_outprefix + '.01.check_variants',
             cdhit_outprefix,
             seq_identity_threshold=self.cdhit_min_id,
             threads=self.threads,
             length_diff_cutoff=self.cdhit_min_length,
             nocluster=not self.run_cdhit,
             verbose=self.verbose,
-            cd_hit_est=self.extern_progs.exe('cdhit'),
             clusters_file=self.clusters_file,
         )
 
@@ -162,28 +105,7 @@ class RefPreparer:
             print('\nWriting clusters to file.', len(clusters), 'in total', flush=True)
 
         clusters_pickle_file = cdhit_outprefix + '.clusters.pickle'
+
         with open(clusters_pickle_file, 'wb') as f:
             pickle.dump(clusters, f)
 
-        cluster_representatives_fa = cdhit_outprefix + '.cluster_representatives.fa'
-
-        if self.verbose:
-            print('\nRunning bowtie2-build on FASTA of cluster representatives')
-
-        mapping.bowtie2_index(
-            cluster_representatives_fa,
-            cluster_representatives_fa,
-            bowtie2=self.extern_progs.exe('bowtie2'),
-            verbose=self.verbose,
-        )
-
-        if self.verbose:
-            print('\nRunning samtools faidx on FASTA of cluster representatives')
-
-        cmd = ' '.join([
-            self.extern_progs.exe('samtools'),
-            'faidx',
-            cluster_representatives_fa
-        ])
-
-        common.syscall(cmd, verbose=self.verbose)

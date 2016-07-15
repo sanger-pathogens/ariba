@@ -25,6 +25,7 @@ __all__ = [
     'link',
     'mapping',
     'read_store',
+    'refdata_query',
     'reference_data',
     'ref_genes_getter',
     'ref_preparer',

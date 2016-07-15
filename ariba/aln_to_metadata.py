@@ -12,11 +12,13 @@ class AlnToMetadata:
       aln_file,
       vars_file,
       refs_are_coding,
+      refs_are_variant_only,
       cluster_rep_name,
       genetic_code=11,
     ):
         self.padded_seqs = AlnToMetadata._load_aln_file(aln_file)
         self.refs_are_coding = refs_are_coding
+        self.refs_are_variant_only = refs_are_variant_only
         self.variants = AlnToMetadata._load_vars_file(vars_file, self.refs_are_coding)
         self.genetic_code = genetic_code
         self.cluster_rep_name = cluster_rep_name
@@ -188,9 +190,14 @@ class AlnToMetadata:
 
 
     @classmethod
-    def _variants_to_tsv_lines(cls, variants, unpadded_sequences, padded_sequences, insertions, seqs_are_coding):
+    def _variants_to_tsv_lines(cls, variants, unpadded_sequences, padded_sequences, insertions, seqs_are_coding, seqs_are_var_only):
         if seqs_are_coding:
             unpadded_aa_sequences = {x: unpadded_sequences[x].translate() for x in unpadded_sequences}
+            is_gene = '1'
+        else:
+            is_gene = '0'
+
+        is_var_only = '1' if seqs_are_var_only else '0'
 
         lines = []
         for refname in sorted(variants):
@@ -201,7 +208,7 @@ class AlnToMetadata:
                     ref_unpadded_nt_position = variant.position
 
                 padded_nt_position = AlnToMetadata._unpadded_to_padded_nt_position(ref_unpadded_nt_position, insertions[refname])
-                lines.append('\t'.join([refname, variant.variant_type, str(variant), variant.identifier, description]))
+                lines.append('\t'.join([refname, is_gene, is_var_only, str(variant), variant.identifier, description]))
 
                 for seqname, seq in sorted(padded_sequences.items()):
                     if seqname == refname:
@@ -231,19 +238,16 @@ class AlnToMetadata:
                             variant_string = unpadded_sequences[seqname][unpadded_nt_position]
                         variant_string += str(unpadded_nt_position + 1) + variant.variant_value
 
-                    lines.append('\t'.join([seqname, variant.variant_type, variant_string, variant.identifier, description]))
+                    lines.append('\t'.join([seqname, is_gene, is_var_only, variant_string, variant.identifier, description]))
 
         return lines
 
 
     @classmethod
-    def _make_cluster_file(cls, cluster_name, sequences, filename):
-        if cluster_name not in sequences:
-            raise Error('Sequence name "' + cluster_name + '" to be used as cluster representative not found. Cannot continue')
-        names = [x for x in sequences.keys() if x != cluster_name]
-        names.sort()
+    def _make_cluster_file(cls, sequences, filename):
+        names = sorted(sequences.keys())
         with open(filename, 'w') as f:
-            print(cluster_name, *names, sep='\t', file=f)
+            print(*names, sep='\t', file=f)
 
 
     def run(self, outprefix):
@@ -257,7 +261,7 @@ class AlnToMetadata:
         AlnToMetadata._variant_ids_are_unique(self.variants)
         AlnToMetadata._check_variants_match_sequences(unpadded_seqs, self.variants, self.refs_are_coding, genetic_code=self.genetic_code)
 
-        tsv_lines = AlnToMetadata._variants_to_tsv_lines(self.variants, unpadded_seqs, self.padded_seqs, insertions, self.refs_are_coding)
+        tsv_lines = AlnToMetadata._variants_to_tsv_lines(self.variants, unpadded_seqs, self.padded_seqs, insertions, self.refs_are_coding, self.refs_are_variant_only)
         with open(outprefix + '.tsv', 'w') as f:
             print(*tsv_lines, sep='\n', file=f)
 
@@ -265,5 +269,5 @@ class AlnToMetadata:
             for seqname in sorted(unpadded_seqs):
                 print(unpadded_seqs[seqname], sep='\n', file=f)
 
-        AlnToMetadata._make_cluster_file(self.cluster_rep_name, unpadded_seqs, outprefix + '.cluster')
+        AlnToMetadata._make_cluster_file(unpadded_seqs, outprefix + '.cluster')
         pyfastaq.sequences.genetic_code = original_code

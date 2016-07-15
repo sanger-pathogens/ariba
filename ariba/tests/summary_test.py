@@ -21,7 +21,7 @@ class TestSummary(unittest.TestCase):
 
     def test_determine_cluster_cols(self):
         col_strings = [
-            'assembled,has_res,ref_seq,pct_id,known_var,novel_var',
+            'assembled,match,ref_seq,pct_id,known_var,novel_var',
             'ref_seq,pct_id,known_var,novel_var',
             'assembled,pct_id,known_var,novel_var',
             'assembled',
@@ -30,12 +30,12 @@ class TestSummary(unittest.TestCase):
         ]
 
         expected = [
-            {'assembled': True, 'has_res': True, 'ref_seq': True, 'pct_id': True, 'known_var': True, 'novel_var': True},
-            {'assembled': False, 'has_res': False, 'ref_seq': True, 'pct_id': True, 'known_var': True, 'novel_var': True},
-            {'assembled': True, 'has_res': False, 'ref_seq': False, 'pct_id': True, 'known_var': True, 'novel_var': True},
-            {'assembled': True, 'has_res': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
-            {'assembled': False, 'has_res': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
-            {'assembled': False, 'has_res': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
+            {'assembled': True, 'match': True, 'ref_seq': True, 'pct_id': True, 'known_var': True, 'novel_var': True},
+            {'assembled': False, 'match': False, 'ref_seq': True, 'pct_id': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'match': False, 'ref_seq': False, 'pct_id': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'match': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'match': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'match': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
         ]
 
         assert len(col_strings) == len(expected)
@@ -137,7 +137,7 @@ class TestSummary(unittest.TestCase):
             infiles[0]: {
                 'noncoding1': {
                     'assembled': 'yes',
-                    'has_res': 'yes',
+                    'match': 'yes',
                     'ref_seq': 'noncoding1',
                     'known_var': 'yes',
                     'novel_var': 'no',
@@ -145,7 +145,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'presence_absence1': {
                     'assembled': 'yes',
-                    'has_res': 'yes',
+                    'match': 'yes',
                     'ref_seq': 'presence_absence1',
                     'known_var': 'no',
                     'novel_var': 'yes',
@@ -153,7 +153,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'variants_only1': {
                     'assembled': 'no',
-                    'has_res': 'no',
+                    'match': 'no',
                     'ref_seq': 'NA',
                     'known_var': 'NA',
                     'novel_var': 'NA',
@@ -163,7 +163,7 @@ class TestSummary(unittest.TestCase):
             infiles[1]: {
                 'noncoding1': {
                     'assembled': 'yes',
-                    'has_res': 'yes',
+                    'match': 'yes',
                     'ref_seq': 'noncoding1',
                     'known_var': 'yes',
                     'novel_var': 'no',
@@ -171,7 +171,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'presence_absence1': {
                     'assembled': 'yes',
-                    'has_res': 'yes',
+                    'match': 'yes',
                     'ref_seq': 'presence_absence1',
                     'pct_id': '98.96',
                     'known_var': 'no',
@@ -179,7 +179,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'variants_only1': {
                     'assembled': 'no',
-                    'has_res': 'no',
+                    'match': 'no',
                     'ref_seq': 'NA',
                     'known_var': 'NA',
                     'novel_var': 'NA',
@@ -220,7 +220,7 @@ class TestSummary(unittest.TestCase):
             for gene_type in expected[filename]:
                 del expected[filename][gene_type]['ref_seq']
 
-        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,has_res,pct_id,known_var,novel_var', variant_cols='ungrouped,grouped,novel')
+        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,match,pct_id,known_var,novel_var', variant_cols='ungrouped,grouped,novel')
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s.include_all_variant_columns = True
         got = s._gather_output_rows()
@@ -233,7 +233,7 @@ class TestSummary(unittest.TestCase):
             'file1': {
                 'cluster.n.1': {
                     'assembled': 'yes',
-                    'has_res': 'yes',
+                    'match': 'yes',
                     'ref_seq': 'noncoding1',
                     'known_var': 'yes',
                     'novel_var': 'no',
@@ -242,7 +242,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'cluster.p.1': {
                     'assembled': 'yes',
-                    'has_res': 'yes',
+                    'match': 'yes',
                     'ref_seq': 'presence_absence1',
                     'known_var': 'yes',
                     'novel_var': 'no',
@@ -251,7 +251,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'cluster.v.1': {
                     'assembled': 'yes',
-                    'has_res': 'yes',
+                    'match': 'yes',
                     'ref_seq': 'varonly1',
                     'known_var': 'no',
                     'novel_var': 'no',
@@ -261,7 +261,7 @@ class TestSummary(unittest.TestCase):
             'file2': {
                 'cluster.n.1': {
                     'assembled': 'yes',
-                    'has_res': 'yes',
+                    'match': 'yes',
                     'ref_seq': 'noncoding1',
                     'known_var': 'no',
                     'novel_var': 'no',
@@ -270,7 +270,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'cluster.p.1': {
                     'assembled': 'yes',
-                    'has_res': 'yes',
+                    'match': 'yes',
                     'ref_seq': 'presence_absence1',
                     'pct_id': '98.96',
                     'known_var': 'no',
@@ -279,7 +279,7 @@ class TestSummary(unittest.TestCase):
                 },
                 'cluster.v.1': {
                     'assembled': 'no',
-                    'has_res': 'NA',
+                    'match': 'NA',
                     'ref_seq': 'NA',
                     'known_var': 'NA',
                     'novel_var': 'NA',
@@ -288,10 +288,10 @@ class TestSummary(unittest.TestCase):
             },
         }
         filenames = ['file1', 'file2']
-        cluster_cols = {'assembled': True, 'has_res': True, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False}
+        cluster_cols = {'assembled': True, 'match': True, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False}
         got_phandago_header, got_csv_header, got_lines  = summary.Summary._to_matrix(filenames, rows, cluster_cols)
-        expected_phandango_header = ['name', 'cluster.n.1.assembled.:o1', 'cluster.n.1.has_res.:o1', 'cluster.n.1.noncoding1.A14T:o1', 'cluster.p.1.assembled.:o1', 'cluster.p.1.has_res.:o1', 'cluster.p.1.presence_absence1.I42L:o1', 'cluster.v.1.assembled.:o1', 'cluster.v.1.has_res.:o1']
-        expected_csv_header = ['name', 'cluster.n.1.assembled', 'cluster.n.1.has_res', 'cluster.n.1.noncoding1.A14T', 'cluster.p.1.assembled', 'cluster.p.1.has_res', 'cluster.p.1.presence_absence1.I42L', 'cluster.v.1.assembled', 'cluster.v.1.has_res']
+        expected_phandango_header = ['name', 'cluster.n.1.assembled:o1', 'cluster.n.1.match:o1', 'cluster.n.1.noncoding1.A14T:o1', 'cluster.p.1.assembled:o1', 'cluster.p.1.match:o1', 'cluster.p.1.presence_absence1.I42L:o1', 'cluster.v.1.assembled:o1', 'cluster.v.1.match:o1']
+        expected_csv_header = ['name', 'cluster.n.1.assembled', 'cluster.n.1.match', 'cluster.n.1.noncoding1.A14T', 'cluster.p.1.assembled', 'cluster.p.1.match', 'cluster.p.1.presence_absence1.I42L', 'cluster.v.1.assembled', 'cluster.v.1.match']
         expected_lines = [
             ['file1', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes'],
             ['file2', 'yes', 'yes', 'no', 'yes', 'yes', 'no', 'no', 'NA']

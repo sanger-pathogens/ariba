@@ -1,0 +1,5 @@
+cannot_make_into_a_gene Does not look like a gene (tried both strands and all reading frames) AAAAAAAAAAAAAAAA
+gene1 Made gene1 into gene. strand=+, frame=0
+gene2 Made gene2 into gene. strand=+, frame=0
+gene3 Made gene3 into gene. strand=+, frame=0
+gene4.var_only Made gene4.var_only into gene. strand=+, frame=0

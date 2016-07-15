@@ -1,0 +1,13 @@
+gene1_foo_	1	0	.	.	Generic description of gene1
+gene2	1	0	.	.	Generic description of gene2
+gene3	1	0	.	.	Generic description of gene3
+gene4	1	0	.	.	Generic description of gene4
+gene5.varonly	1	1	.	.	Generic description of gene5.varonly
+gene5.varonly	1	1	H7I	.	Generic description of gene5.varonly H7I
+gene5.varonly	1	1	H7J	.	Generic description of gene5.varonly H7J
+gene6.varonly	1	1	L8A	.	Generic description of gene6.varonly L8A
+noncoding1	0	0	.	.	Generic description of noncoding1
+noncoding2	0	0	.	.	Generic description of noncoding2
+noncoding3	0	0	.	.	Generic description of noncoding3
+noncoding4.varonly	0	1	.	.	Generic description of noncoding4.varonly
+noncoding4.varonly	0	1	T5G	.	Generic description of noncoding4.varonly T5G

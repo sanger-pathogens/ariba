@@ -49,8 +49,8 @@ class RefGenesGetter:
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
 
-        card_version = '1.0.6'
-        card_tarball_url = 'https://card.mcmaster.ca/download/0/broadsteet-v' + card_version + '.tar.gz'
+        card_version = '1.0.8'
+        card_tarball_url = 'https://card.mcmaster.ca/download/0/broadstreet-v' + card_version + '.tar.gz'
         card_tarball = 'card.tar.gz'
         print('Working in temporary directory', tmpdir)
         print('Downloading data from card:', card_tarball_url, flush=True)
@@ -65,15 +65,11 @@ class RefGenesGetter:
 
         print('Extracted json data file ', json_file,'. Reading its contents...', sep='')
 
-        variant_metadata_tsv = outprefix + '.metadata.tsv'
-        presence_absence_fa = outprefix + '.presence_absence.fa'
-        variants_only_fa = outprefix + '.variants_only.fa'
-        noncoding_fa = outprefix + '.noncoding.fa'
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
         log_file = outprefix + '.log'
-        f_out_tsv = pyfastaq.utils.open_file_write(variant_metadata_tsv)
-        f_out_presabs = pyfastaq.utils.open_file_write(presence_absence_fa)
-        f_out_var_only = pyfastaq.utils.open_file_write(variants_only_fa)
-        f_out_noncoding = pyfastaq.utils.open_file_write(noncoding_fa)
+        f_out_fa = pyfastaq.utils.open_file_write(final_fasta)
+        f_out_tsv = pyfastaq.utils.open_file_write(final_tsv)
         f_out_log = pyfastaq.utils.open_file_write(log_file)
 
         with open(json_file) as f:
@@ -102,7 +98,6 @@ class RefGenesGetter:
                     card_key
                 ])
                 fasta = pyfastaq.sequences.Fasta(fasta_id, dna_seq)
-                variant_type = 'p'
 
                 if gi != 'NA':
                     gene_tuple = fasta.make_into_gene()
@@ -118,40 +113,36 @@ class RefGenesGetter:
                             print('Translation of inferred gene dna sequence does not match protein sequence', fasta.id, sep='\t', file=f_out_log)
                             continue
 
+                print(fasta, file=f_out_fa)
+
                 if gi == 'NA':
-                    fasta_filehandle = f_out_noncoding
-                    variant_type = 'n'
+                    gene_or_not = '0'
+                    variant_only = '0'
                 elif len(data['snps']) == 0:
-                    fasta_filehandle = f_out_presabs
+                    gene_or_not = '1'
+                    variant_only = '0'
                 else:
-                    fasta_filehandle = f_out_var_only
+                    gene_or_not = '1'
+                    variant_only = '1'
 
-                print(fasta.id, '.', '.', '.', data['ARO_name'], sep='\t', file=f_out_tsv)
+                print(fasta.id, gene_or_not, variant_only, '.', '.', data['ARO_name'], sep='\t', file=f_out_tsv)
 
-                if len(data['snps']) == 0:
-                    print(fasta, file=fasta_filehandle)
-                    print(fasta.id, '.', '.', '.', data['ARO_description'], sep='\t', file=f_out_tsv)
+                if len(data['snps']) == 0 and data['ARO_description'] != '':
+                    print(fasta.id, gene_or_not, variant_only, '.', '.', data['ARO_description'], sep='\t', file=f_out_tsv)
                 else:
-                    print(fasta, file=fasta_filehandle)
                     for snp in data['snps']:
-                        print(fasta.id, variant_type, snp, '.', data['ARO_description'], sep='\t', file=f_out_tsv)
+                        if data['ARO_description'] != '':
+                            print(fasta.id, gene_or_not, variant_only, snp, '.', data['ARO_description'], sep='\t', file=f_out_tsv)
 
 
+        pyfastaq.utils.close(f_out_fa)
         pyfastaq.utils.close(f_out_tsv)
-        pyfastaq.utils.close(f_out_presabs)
-        pyfastaq.utils.close(f_out_var_only)
-        pyfastaq.utils.close(f_out_noncoding)
         pyfastaq.utils.close(f_out_log)
         os.chdir(current_dir)
         print('Extracted data and written ARIBA input files\n')
-        print('Final genes files and metadata file:')
-        print('   ', presence_absence_fa)
-        print('   ', variants_only_fa)
-        print('   ', variant_metadata_tsv)
-
-        print('\nYou can use those files with ARIBA like this:')
-        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
-
+        print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"The Comprehensive Antibiotic Resistance Database", McArthur et al 2013, PMID: 23650175')
         print('and in your methods say that version', card_version, 'of the database was used')
@@ -159,7 +150,8 @@ class RefGenesGetter:
 
     def _get_from_resfinder(self, outprefix):
         outprefix = os.path.abspath(outprefix)
-        final_fasta = outprefix + '.presence_absence.fa'
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
         tmpdir = outprefix + '.tmp.download'
         current_dir = os.getcwd()
 
@@ -176,7 +168,8 @@ class RefGenesGetter:
         common.syscall('unzip ' + zipfile)
 
         print('Combining downloaded fasta files...')
-        f = pyfastaq.utils.open_file_write(final_fasta)
+        fout_fa = pyfastaq.utils.open_file_write(final_fasta)
+        fout_tsv = pyfastaq.utils.open_file_write(final_tsv)
 
         for filename in os.listdir('database'):
             if filename.endswith('.fsa'):
@@ -185,16 +178,17 @@ class RefGenesGetter:
                 file_reader = pyfastaq.sequences.file_reader(os.path.join('database', filename))
                 for seq in file_reader:
                     seq.id = prefix + '.' + seq.id
-                    print(seq, file=f)
+                    print(seq, file=fout_fa)
+                    print(seq.id, '1', '0', '.', '.', '.', sep='\t', file=fout_tsv)
 
-        pyfastaq.utils.close(f)
-
-        print('\nCombined files. Final genes file is called', final_fasta, end='\n\n')
+        pyfastaq.utils.close(fout_fa)
+        pyfastaq.utils.close(fout_tsv)
+        print('\nFinished combining files\n')
         os.chdir(current_dir)
         shutil.rmtree(tmpdir)
-
-        print('You can use it with ARIBA like this:')
-        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
+        print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"Identification of acquired antimicrobial resistance genes", Zankari et al 2012, PMID: 22782487\n')
 
@@ -217,7 +211,7 @@ class RefGenesGetter:
         print('Extracted files.')
 
         genes_file = os.path.join(tmpdir, 'Database Nt Sequences File.txt')
-        final_fasta = outprefix + '.presence_absence.fa'
+        final_fasta = outprefix + '.fa'
 
         seq_reader = pyfastaq.sequences.file_reader(genes_file)
         ids = {}
@@ -231,40 +225,44 @@ class RefGenesGetter:
         pyfastaq.tasks.to_unique_by_id(genes_file, final_fasta)
         shutil.rmtree(tmpdir)
 
-        print('Finished. Final genes file is called', final_fasta, end='\n\n')
-        print('You can use it with ARIBA like this:')
-        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
+        final_tsv = outprefix + '.tsv'
+        f = pyfastaq.utils.open_file_write(final_tsv)
+        seq_reader = pyfastaq.sequences.file_reader(final_fasta)
+
+        for seq in seq_reader:
+            print(seq.id, '1', '0', '.', '.', '.', sep='\t', file=f)
+
+        pyfastaq.utils.close(f)
+
+        print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n')
 
-    def _get_from_vfdb_core(self, outprefix):
-        self._get_from_vfdb_common(self,'VFDB_setA_nt.fas.gz','core')
-		
-    def _get_from_vfdb_full(self, outprefix):
-        self._get_from_vfdb_common(self,'VFDB_setB_nt.fas.gz','full')
-	
-    def _get_from_vfdb_common(self,filename,info_text):
+
+    def _get_from_vfdb(self, outprefix):
         outprefix = os.path.abspath(outprefix)
         tmpdir = outprefix + '.tmp.download'
         current_dir = os.getcwd()
-        
+
         try:
             os.mkdir(tmpdir)
         except:
             raise Error('Error mkdir ' + tmpdir)
-        
-        zipfile = os.path.join(tmpdir, filename)
-        self._download_file('http://www.mgc.ac.cn/VFs/Down/'+filename, zipfile)
+
+        zipfile = os.path.join(tmpdir, 'VFDB_setA_nt.fas.gz')
+        self._download_file('http://www.mgc.ac.cn/VFs/Down/VFDB_setA_nt.fas.gz', zipfile)
         vparser = vfdb_parser.VfdbParser(zipfile, outprefix)
         vparser.run()
         shutil.rmtree(tmpdir)
         print('Extracted files.')
-        final_fasta = outprefix + '.presence_absence.fa'
-        final_tsv = outprefix + '.metadata.tsv'
-        
-        print('Extracted '+info_text+' DNA sequence dataset and metadata. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
-        print('You can use it with ARIBA like this:')
-        print('ariba prepareref --ref_prefix', outprefix, 'output_directory\n')
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
+
+        print('Extracted core DNA sequence dataset and metadata. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"VFDB 2016: hierarchical and refined dataset for big data analysis-10 years on",\nChen LH et al 2016, Nucleic Acids Res. 44(Database issue):D694-D697. PMID: 26578559\n')
 

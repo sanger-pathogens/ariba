@@ -5,6 +5,7 @@ import sys
 tasks = {
     'getref': 'Download reference data',
     'prepareref': 'Prepare reference data for running the pipeline',
+    'refquery': 'Get cluster or sequence info from output of prepareref',
     'reportfilter': 'Filter report.tsv file',
     'run': 'Run the ARIBA local assembly pipeline',
     'summary': 'Summarise multiple reports made by "run"',
@@ -23,6 +24,7 @@ ordered_tasks = [
     'summary',
     'flag',
     'aln2meta',
+    'refquery',
     'test',
     'version',
 ]

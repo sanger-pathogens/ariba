@@ -6,13 +6,10 @@ def run():
     parser = argparse.ArgumentParser(
         description = 'ARIBA: Antibiotic Resistance Identification By Assembly',
         usage = 'ariba prepareref [options] <outdir>',
-        epilog = 'REQUIRED: either --ref_prefix, or at least one of --presabs, --varonly, --noncoding')
+        epilog = 'REQUIRED: -f and -m must each be used at least once')
     input_group = parser.add_argument_group('input files options')
-    input_group.add_argument('--ref_prefix', help='Prefix of input files (same as was used with getref), to save listing --preseabs,--varonly ...etc. Will look for files called "ref_prefix." followed by: metadata.tsv,presence_absence.fa,noncoding.fa,variants_only.fa. Using this will cause these to be ignored if used: --presabs,--varonly,--noncoding,--metadata', metavar='FILENAME_PREFIX')
-    input_group.add_argument('--presabs', help='FASTA file of presence absence genes', metavar='FILENAME')
-    input_group.add_argument('--varonly', help='FASTA file of variants only genes', metavar='FILENAME')
-    input_group.add_argument('--noncoding', help='FASTA file of noncoding sequences', metavar='FILENAME')
-    input_group.add_argument('--metadata', help='tsv file of metadata about the reference sequences', metavar='FILENAME')
+    input_group.add_argument('-f', '--fasta', action='append', dest='fasta_files', required=True, help='REQUIRED. Name of fasta file. Can be used more than once if your sequences are spread over more than on file', metavar='FILENAME')
+    input_group.add_argument('-m', '--metadata', action='append', dest='tsv_files', required=True, help='REQUIRED. Name of tsv file of metadata about the input sequences. Can be used more than once if your metadata is spread over more than one file', metavar='FILENAME')
 
     cdhit_group = parser.add_argument_group('cd-hit options')
     cdhit_group.add_argument('--no_cdhit', action='store_true', help='Do not run cd-hit. Each input sequence is put into its own "cluster". Incompatible with --cdhit_clusters.')
@@ -38,13 +35,10 @@ def run():
         print(*version_report_lines, sep='\n')
 
     preparer = ref_preparer.RefPreparer(
+        options.fasta_files,
+        options.tsv_files,
         extern_progs,
         version_report_lines=version_report_lines,
-        ref_prefix=options.ref_prefix,
-        presabs=options.presabs,
-        varonly=options.varonly,
-        noncoding=options.noncoding,
-        metadata=options.metadata,
         min_gene_length=options.min_gene_length,
         max_gene_length=options.max_gene_length,
         genetic_code=options.genetic_code,

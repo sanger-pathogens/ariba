@@ -1,4 +1,4 @@
-seq1	seq2
-seq3	seq4	seq5
-seq6
-seq10	seq42
+0	cluster0.1	cluster0.2
+1	cluster1.1	cluster1.2
+11	cluster11.1	cluster11.2
+2	cluster2.1

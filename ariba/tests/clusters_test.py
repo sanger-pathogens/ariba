@@ -5,7 +5,7 @@ import pickle
 import pysam
 import pyfastaq
 import filecmp
-from ariba import clusters, external_progs, reference_data, sequence_metadata
+from ariba import clusters, external_progs, histogram, reference_data, sequence_metadata
 
 modules_dir = os.path.dirname(os.path.abspath(clusters.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -24,12 +24,13 @@ class TestClusters(unittest.TestCase):
         self.cluster_dir = 'tmp.Cluster'
         self.refdata_dir = 'tmp.RefData'
         os.mkdir(self.refdata_dir)
-        shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.fa'), os.path.join(self.refdata_dir, 'refcheck.01.check_variants.non_coding.fa'))
-        with open(os.path.join(self.refdata_dir, 'info.txt'), 'w') as f:
+        shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.fa'), os.path.join(self.refdata_dir, '02.cdhit.all.fa'))
+        shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.tsv'), os.path.join(self.refdata_dir, '01.filter.check_metadata.tsv'))
+        with open(os.path.join(self.refdata_dir, '00.info.txt'), 'w') as f:
             print('genetic_code\t11', file=f)
 
-        with open(os.path.join(self.refdata_dir, 'cdhit.clusters.pickle'), 'wb') as f:
-            pickle.dump({'x': {'x'}}, f)
+        with open(os.path.join(self.refdata_dir, '02.cdhit.clusters.pickle'), 'wb') as f:
+            pickle.dump({'0': {'x'}}, f)
 
         reads1 = os.path.join(data_dir, 'clusters_test_dummy_reads_1.fq')
         reads2 = os.path.join(data_dir, 'clusters_test_dummy_reads_2.fq')
@@ -53,78 +54,116 @@ class TestClusters(unittest.TestCase):
         '''test _load_reference_data_from_dir'''
         indir = os.path.join(data_dir, 'clusters_test_load_reference_data_from_dir')
         got_refdata, got_clusters = clusters.Clusters._load_reference_data_from_dir(indir)
-        expected_seq_dicts = {
-            'variants_only': {'variants_only1': pyfastaq.sequences.Fasta('variants_only1', 'atggcgtgcgatgaataa')},
-            'presence_absence': {'presabs1': pyfastaq.sequences.Fasta('presabs1', 'atgatgatgagcccggcgatggaaggcggctag')},
-            'non_coding': {'noncoding1': pyfastaq.sequences.Fasta('noncoding1', 'ACGTA')},
+        expected_seq_dict = {
+            'variants_only1': pyfastaq.sequences.Fasta('variants_only1', 'atggcgtgcgatgaataa'),
+            'presabs1': pyfastaq.sequences.Fasta('presabs1', 'atgatgatgagcccggcgatggaaggcggctag'),
+            'noncoding1': pyfastaq.sequences.Fasta('noncoding1', 'ACGTA'),
         }
-        self.assertEqual(expected_seq_dicts, got_refdata.seq_dicts)
+        self.assertEqual(expected_seq_dict, got_refdata.sequences)
         self.assertEqual(11, got_refdata.genetic_code)
 
         expected_metadata = {
             'presabs1': {
-                '.': {sequence_metadata.SequenceMetadata('presabs1\t.\t.\t.\tpresabs1 description')},
+                'seq_type': 'p',
+                'variant_only': False,
+                '.': {sequence_metadata.SequenceMetadata('presabs1\t1\t0\t.\t.\tpresabs1 description')},
                 'n': {},
                 'p': {}
             },
             'variants_only1': {
+                'seq_type': 'p',
+                'variant_only': True,
                 '.': set(),
                 'n': {},
-                'p': {1: {sequence_metadata.SequenceMetadata('variants_only1\tp\tC2I\t.\tdescription of variants_only1 C2I')}}
+                'p': {1: {sequence_metadata.SequenceMetadata('variants_only1\t1\t1\tC2I\t.\tdescription of variants_only1 C2I')}}
+            },
+            'noncoding1': {
+                'seq_type': 'n',
+                'variant_only': False,
+                '.': {sequence_metadata.SequenceMetadata('noncoding1\t0\t0\t.\t.\t.')},
+                'n': {},
+                'p': {},
             }
         }
         self.assertEqual(expected_metadata, got_refdata.metadata)
 
-        expected_clusters = {'key1': 1, 'key2': 2}
+        expected_clusters = {'0': {'presabs1'}, '1': {'variants_only1'}, '2': {'noncoding1'}}
         self.assertEqual(expected_clusters, got_clusters)
 
 
-    def test_bam_to_clusters_reads_no_reads_map(self):
-        '''test _bam_to_clusters_reads when no reads map'''
-        clusters_dir = 'tmp.Cluster.test_bam_to_clusters_reads_no_reads_map'
-        reads1 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads_no_reads_map_1.fq')
-        reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads_no_reads_map_2.fq')
-        ref = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.db.fa')
-        refdata = reference_data.ReferenceData(presence_absence_fa = ref)
-        c = clusters.Clusters(self.refdata_dir, reads1, reads2, clusters_dir, extern_progs, clean=False)
-        shutil.copyfile(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads_no_reads_map.bam'), c.bam)
-        c._bam_to_clusters_reads()
+    def test_minimap_reads_to_all_ref_seqs(self):
+        '''test test_minimap_reads_to_all_ref_seqs'''
+        clusters_tsv = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.clusters.tsv')
+        ref_fasta = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.ref.fa')
+        reads_1 = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.reads_1.fq')
+        reads_2 = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.reads_2.fq')
+        tmp_outprefix = 'tmp.clusters_test_minimap_reads_to_all_ref_seqs'
+        clusters.Clusters._minimap_reads_to_all_ref_seqs(clusters_tsv, ref_fasta, reads_1, reads_2, tmp_outprefix)
+        expected_cluster2rep = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.cluster2representative')
+        expected_cluster_counts = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.clusterCounts')
+        expected_proper_pairs = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.properPairs')
+        expected_insert_hist = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.insertHistogram')
 
-        self.assertEqual({}, c.insert_hist.bins)
-        self.assertEqual({}, c.cluster_read_counts)
-        self.assertEqual({}, c.cluster_base_counts)
-        self.assertEqual(0, c.proper_pairs)
+        # not sure that the reads order is preserved, so just check read store file exists
+        self.assertTrue(os.path.exists(os.path.join(tmp_outprefix + '.reads')))
 
-        shutil.rmtree(clusters_dir)
+        self.assertTrue(filecmp.cmp(expected_cluster2rep, tmp_outprefix + '.cluster2representative', shallow=False))
+        self.assertTrue(filecmp.cmp(expected_cluster_counts, tmp_outprefix + '.clusterCounts', shallow=False))
+        self.assertTrue(filecmp.cmp(expected_proper_pairs, tmp_outprefix + '.properPairs', shallow=False))
+        self.assertTrue(filecmp.cmp(expected_insert_hist, tmp_outprefix + '.insertHistogram', shallow=False))
+        os.unlink(tmp_outprefix + '.cluster2representative')
+        os.unlink(tmp_outprefix + '.clusterCounts')
+        os.unlink(tmp_outprefix + '.properPairs')
+        os.unlink(tmp_outprefix + '.insertHistogram')
+        os.unlink(tmp_outprefix + '.reads')
 
 
-    def test_bam_to_clusters_reads(self):
-        '''test _bam_to_clusters_reads'''
-        clusters_dir = 'tmp.Cluster.test_bam_to_clusters_reads'
-        reads1 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_1.fq')
-        reads2 = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.reads_2.fq')
-        ref = os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.db.fa')
-        refdata = reference_data.ReferenceData(presence_absence_fa = ref)
-        c = clusters.Clusters(self.refdata_dir, reads1, reads2, clusters_dir, extern_progs, clean=False)
-        shutil.copyfile(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.bam'), c.bam)
-        c._bam_to_clusters_reads()
-        expected = [
-            os.path.join(data_dir, 'clusters_test_bam_to_clusters.out.ref1.reads_1.fq'),
-            os.path.join(data_dir, 'clusters_test_bam_to_clusters.out.ref1.reads_2.fq'),
-            os.path.join(data_dir, 'clusters_test_bam_to_clusters.out.ref2.reads_1.fq'),
-            os.path.join(data_dir, 'clusters_test_bam_to_clusters.out.ref2.reads_2.fq'),
-        ]
+    def test_load_minimap_out_cluster2representative(self):
+        '''test _load_minimap_out_cluster2representative'''
+        infile = os.path.join(data_dir, 'clusters_test_load_minimap_out_cluster2representative.in')
+        got = clusters.Clusters._load_minimap_out_cluster2representative(infile)
+        expected = {'1': 'ref2', '2': 'ref42'}
+        self.assertEqual(expected, got)
 
-        got_reads_store_lines = file_to_list(os.path.join(clusters_dir, 'read_store.gz'))
-        expected_reads_store_lines = file_to_list(os.path.join(data_dir, 'clusters_test_bam_to_clusters_reads.read_store.gz'))
 
-        self.assertEqual(expected_reads_store_lines, got_reads_store_lines)
-        self.assertEqual({780:1}, c.insert_hist.bins)
-        self.assertEqual({'ref1': 4, 'ref2': 2}, c.cluster_read_counts)
-        self.assertEqual({'ref1': 240, 'ref2': 120}, c.cluster_base_counts)
-        self.assertEqual(1, c.proper_pairs)
+    def test_load_minimap_out_cluster_counts(self):
+        '''test _load_minimap_out_cluster_counts'''
+        infile = os.path.join(data_dir, 'clusters_test_load_minimap_out_cluster_counts.in')
+        got_read_count, got_base_count = clusters.Clusters._load_minimap_out_cluster_counts(infile)
+        expected_read_count = {'1': 42, '2': 43}
+        expected_base_count = {'1': 4242, '2': 4343}
+        self.assertEqual(got_read_count, expected_read_count)
+        self.assertEqual(got_base_count, expected_base_count)
 
-        shutil.rmtree(clusters_dir)
+
+    def test_load_minimap_insert_histogram(self):
+        '''test _load_minimap_insert_histogram'''
+        infile = os.path.join(data_dir, 'clusters_test_load_minimap_insert_histogram.in')
+        bin_size = 10
+        got = clusters.Clusters._load_minimap_insert_histogram(infile, bin_size)
+        expected = histogram.Histogram(bin_size)
+        expected.add(85, count=1)
+        expected.add(86, count=2)
+        expected.add(90, count=4)
+        expected.add(91, count=6)
+        expected.add(97, count=10)
+        expected.add(100, count=7)
+        expected.add(111, count=3)
+        self.assertEqual(expected, got)
+
+
+    def test_load_minimap_proper_pairs(self):
+        '''test _load_minimap_proper_pairs'''
+        infile = os.path.join(data_dir, 'clusters_test_load_minimap_proper_pairs.in')
+        got = clusters.Clusters._load_minimap_proper_pairs(infile)
+        self.assertEqual(42424242, got)
+
+
+    def test_load_minimap_files(self):
+        '''test _load_minimap_files'''
+        bin_size = 10
+        inprefix = os.path.join(data_dir, 'clusters_test_load_minimap_files')
+        got_clster2rep, got_cluster_read_count, got_cluster_base_count, got_insert_hist, got_proper_pairs = clusters.Clusters._load_minimap_files(inprefix, bin_size)
 
 
     def test_set_insert_size_data(self):

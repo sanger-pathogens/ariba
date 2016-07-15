@@ -319,8 +319,9 @@ class Cluster:
             made_reads = self._make_reads_for_assembly(wanted_reads, self.total_reads, self.all_reads1, self.all_reads2, self.reads_for_assembly1, self.reads_for_assembly2, random_seed=self.random_seed)
             print('\nUsing', made_reads, 'from a total of', self.total_reads, 'for assembly.', file=self.log_fh, flush=True)
             print('Assembling reads:', file=self.log_fh, flush=True)
-            self.ref_sequence_type = self.refdata.sequence_type(self.ref_sequence.id)
-            assert self.ref_sequence_type is not None
+            is_gene, is_variant_only = self.refdata.sequence_type(self.ref_sequence.id)
+            self.is_gene = '1' if is_gene == 'p' else '0'
+            self.is_variant_only = '1' if is_variant_only else '0'
             self.assembly = assembly.Assembly(
               self.reads_for_assembly1,
               self.reads_for_assembly2,
@@ -398,10 +399,10 @@ class Cluster:
             for var_list in self.assembly_variants.values():
                 for var in var_list:
                     if var[3] not in ['.', 'SYN', None]:
-                        self.status_flag.add('has_nonsynonymous_variants')
+                        self.status_flag.add('has_variant')
                         break
 
-                if self.status_flag.has('has_nonsynonymous_variants'):
+                if self.status_flag.has('has_variant'):
                     break
 
 

@@ -308,16 +308,16 @@ class TestAlnToMetadata(unittest.TestCase):
         }
 
         expected = [
-            'seq1\tp\tA2D\tid1\tdescription 1',
-            'seq2\tp\tA2D\tid1\tdescription 1',
-            'seq4\tp\tC3D\tid1\tdescription 1',
-            'seq5\tp\tA3D\tid1\tdescription 1',
-            'seq5\tp\tF2E\tid2\tdescription 2',
-            'seq3\tp\tF2E\tid2\tdescription 2',
-            'seq4\tp\tF2E\tid2\tdescription 2',
+            'seq1\t1\t0\tA2D\tid1\tdescription 1',
+            'seq2\t1\t0\tA2D\tid1\tdescription 1',
+            'seq4\t1\t0\tC3D\tid1\tdescription 1',
+            'seq5\t1\t0\tA3D\tid1\tdescription 1',
+            'seq5\t1\t0\tF2E\tid2\tdescription 2',
+            'seq3\t1\t0\tF2E\tid2\tdescription 2',
+            'seq4\t1\t0\tF2E\tid2\tdescription 2',
         ]
 
-        got = aln_to_metadata.AlnToMetadata._variants_to_tsv_lines(variants, unpadded_seqs, padded_seqs, insertions, True)
+        got = aln_to_metadata.AlnToMetadata._variants_to_tsv_lines(variants, unpadded_seqs, padded_seqs, insertions, True, False)
         self.assertEqual(expected, got)
 
 
@@ -343,16 +343,16 @@ class TestAlnToMetadata(unittest.TestCase):
         }
 
         expected = [
-            'seq1\tn\tC5T\tid1\tdescription 1',
-            'seq2\tn\tC5T\tid1\tdescription 1',
-            'seq4\tn\tG8T\tid1\tdescription 1',
-            'seq5\tn\tA8T\tid1\tdescription 1',
-            'seq5\tn\tA5T\tid2\tdescription 2',
-            'seq3\tn\tA5T\tid2\tdescription 2',
-            'seq4\tn\tG5T\tid2\tdescription 2',
+            'seq1\t0\t1\tC5T\tid1\tdescription 1',
+            'seq2\t0\t1\tC5T\tid1\tdescription 1',
+            'seq4\t0\t1\tG8T\tid1\tdescription 1',
+            'seq5\t0\t1\tA8T\tid1\tdescription 1',
+            'seq5\t0\t1\tA5T\tid2\tdescription 2',
+            'seq3\t0\t1\tA5T\tid2\tdescription 2',
+            'seq4\t0\t1\tG5T\tid2\tdescription 2',
         ]
 
-        got = aln_to_metadata.AlnToMetadata._variants_to_tsv_lines(variants, unpadded_seqs, padded_seqs, insertions, False)
+        got = aln_to_metadata.AlnToMetadata._variants_to_tsv_lines(variants, unpadded_seqs, padded_seqs, insertions, False, True)
         self.assertEqual(expected, got)
 
 
@@ -365,11 +365,7 @@ class TestAlnToMetadata(unittest.TestCase):
         }
         tmpfile = 'tmp.aln_to_meta_test_make_cluster_file.out'
         expected_file = os.path.join(data_dir, 'aln_to_metadata_make_cluster_file.out')
-
-        with self.assertRaises(aln_to_metadata.Error):
-            aln_to_metadata.AlnToMetadata._make_cluster_file('not_found', seqs, tmpfile)
-
-        aln_to_metadata.AlnToMetadata._make_cluster_file('seq2', seqs, tmpfile)
+        aln_to_metadata.AlnToMetadata._make_cluster_file(seqs, tmpfile)
         self.assertTrue(filecmp.cmp(expected_file, tmpfile, shallow=False))
         os.unlink(tmpfile)
 
@@ -381,7 +377,7 @@ class TestAlnToMetadata(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'aln_to_metadata_run_coding.in.tsv')
         tsv_expected = os.path.join(data_dir, 'aln_to_metadata_run_coding.out.tsv')
         cluster_expected = os.path.join(data_dir, 'aln_to_metadata_run_coding.out.cluster')
-        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, True, 'seq3')
+        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, True, False, 'seq3')
         outprefix = 'tmp.test.aln_to_metadata.run_coding'
         a_to_m.run(outprefix)
         self.assertTrue(filecmp.cmp(tsv_expected, outprefix + '.tsv', shallow=False))
@@ -399,7 +395,7 @@ class TestAlnToMetadata(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.in.tsv')
         tsv_expected = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.out.tsv')
         cluster_expected = os.path.join(data_dir, 'aln_to_metadata_run_noncoding.out.cluster')
-        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, False, 'seq2')
+        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, False, True, 'seq2')
         outprefix = 'tmp.test.aln_to_metadata.run_noncoding'
         a_to_m.run(outprefix)
         self.assertTrue(filecmp.cmp(tsv_expected, outprefix + '.tsv', shallow=False))

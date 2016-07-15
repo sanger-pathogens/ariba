@@ -14,28 +14,32 @@ class TestSequenceMetadata(unittest.TestCase):
             'only one column. There can NOT be only one\n',
             'two\tcolumns is not enough\n',
             'three\tcolumns\tis still not enough\n',
-            'four\tcolumns\tis\tis also not enough\n',
-            'six\tcolumns\tis\tone\ttoo\tmany\n',
+            'four\tcolumns\tis\talso not enough\n',
+            'five\tcolumns\tis\talso\tnot enough\n',
+            'seven\tcolumns\tis\tone\tmore\tthan\nwe want',
         ]
 
         for line in lines:
             with self.assertRaises(sequence_metadata.Error):
                 sequence_metadata.SequenceMetadata(line)
 
-        lines = [
-            'gene\tx\tI42L\tid\tfoo\n',
+        tests = [
+            ('gene\tx\t0\t.\t.\tfoo\n', sequence_metadata.Error),
+            ('gene\t1\t2\t.\t.\tfoo\n', sequence_metadata.Error),
+            ('gene\t1\t1\tI42\t.\tfoo\n', sequence_variant.Error),
         ]
 
-        for line in lines:
-            with self.assertRaises(sequence_variant.Error):
+        for line, err in tests:
+            with self.assertRaises(err):
                 sequence_metadata.SequenceMetadata(line)
 
 
     def test_init_on_good_input(self):
         '''test init ok on good input'''
-        data = sequence_metadata.SequenceMetadata('gene\tn\tI42L\tid\tspam spam wonderful spam')
+        data = sequence_metadata.SequenceMetadata('gene\t1\t0\tI42L\tid\tspam spam wonderful spam')
         self.assertEqual(data.name, 'gene')
-        self.assertEqual(data.variant_type, 'n')
+        self.assertEqual(data.seq_type, 'p')
+        self.assertEqual(data.variant_only, False)
         self.assertEqual(data.variant.wild_value, 'I')
         self.assertEqual(data.variant.variant_value, 'L')
         self.assertEqual(data.variant.identifier, 'id')
@@ -45,10 +49,10 @@ class TestSequenceMetadata(unittest.TestCase):
     def test_str(self):
         '''test __str__'''
         lines = [
-            'gene1\tn\tA42G\tid1\tspam',
-            'gene2\t.\t.\t.\t.',
-            'gene3\t.\t.\t.\teggs',
-            'gene4\tp\tI42K\tid\tthis mutation kills tardigrades',
+            'gene1\t1\t1\tA42G\tid1\tspam',
+            'gene2\t0\t0\t.\t.\t.',
+            'gene3\t0\t0\t.\t.\teggs',
+            'gene4\t1\t0\tI42K\tid\tthis mutation kills tardigrades',
         ]
 
         for line in lines:
@@ -58,11 +62,11 @@ class TestSequenceMetadata(unittest.TestCase):
     def test_has_variant(self):
         '''test has_variant'''
         tests = [
-            ('gene1\t.\t.\t.\t.', False),
-            ('gene1\tn\tA2T\t.\t,', True),
-            ('gene1\tn\tT2A\t.\t.', False),
-            ('gene1\tp\tI2Y\t.\t.', True),
-            ('gene1\tp\tY2I\t.\t.', False),
+            ('gene1\t0\t0\t.\t.\t.', False),
+            ('gene1\t0\t0\tA2T\t.\t,', True),
+            ('gene1\t0\t0\tT2A\t.\t.', False),
+            ('gene1\t1\t0\tI2Y\t.\t.', True),
+            ('gene1\t1\t0\tY2I\t.\t.', False),
         ]
 
         seq = pyfastaq.sequences.Fasta('name', 'ATGTATTGCTGA') # translation: MYC*
@@ -75,10 +79,10 @@ class TestSequenceMetadata(unittest.TestCase):
     def test_to_string(self):
         '''test to_string'''
         lines = [
-            ('gene1', 'n', 'A42G', 'id1', 'spam'),
-            ('gene2', '.', '.', '.', '.'),
-            ('gene3', '.', '.', '.', 'eggs'),
-            ('gene4', 'p', 'I42K', 'id', 'this mutation kills tardigrades'),
+            ('gene1', '0', '0', 'A42G', 'id1', 'spam'),
+            ('gene2', '0', '0', '.', '.', '.'),
+            ('gene3', '0', '0', '.', '.', 'eggs'),
+            ('gene4', '1', '0', 'I42K', 'id', 'this mutation kills tardigrades'),
         ]
 
         for line in lines:

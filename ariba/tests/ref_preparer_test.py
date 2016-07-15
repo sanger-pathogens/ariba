@@ -1,6 +1,7 @@
 import unittest
 import sys
 import os
+import shutil
 import filecmp
 from ariba import external_progs, ref_preparer
 
@@ -9,113 +10,40 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 
 class TestRefPreparer(unittest.TestCase):
-    def test_get_ref_files_ref_prefix(self):
-        '''test _get_ref_files using ref_prefix'''
-        ref_prefix = os.path.abspath('tmp.test.ref_preparer')
-        presabs = ref_prefix + '.presence_absence.fa'
-        varonly = ref_prefix + '.variants_only.fa'
-        noncoding = ref_prefix + '.noncoding.fa'
-        metadata = ref_prefix + '.metadata.tsv'
+    def test_run(self):
+        '''test run'''
+        fasta_in = [
+            os.path.join(data_dir, 'ref_preparer_test_run.in.1.fa'),
+            os.path.join(data_dir, 'ref_preparer_test_run.in.2.fa'),
+            os.path.join(data_dir, 'ref_preparer_test_run.in.3.fa'),
+        ]
+        tsv_in = [
+            os.path.join(data_dir, 'ref_preparer_test_run.in.1.tsv'),
+            os.path.join(data_dir, 'ref_preparer_test_run.in.2.tsv'),
+        ]
 
-        for filename in (presabs, varonly, noncoding, metadata):
-            with open(filename, 'w') as f:
-                pass
-
-        got = ref_preparer.RefPreparer._get_ref_files(ref_prefix, None, None, None, None)
-        expected = {
-            'presabs': presabs,
-            'varonly': varonly,
-            'noncoding': noncoding,
-            'metadata': metadata,
-        }
-
-        self.assertEqual(expected, got)
-
-        os.unlink(metadata)
-        got = ref_preparer.RefPreparer._get_ref_files(ref_prefix, None, None, None, None)
-        expected['metadata'] = None
-        self.assertEqual(expected, got)
-
-        os.unlink(presabs)
-        got = ref_preparer.RefPreparer._get_ref_files(ref_prefix, None, None, None, None)
-        expected['presabs'] = None
-        self.assertEqual(expected, got)
-
-        os.unlink(varonly)
-        got = ref_preparer.RefPreparer._get_ref_files(ref_prefix, None, None, None, None)
-        expected['varonly'] = None
-        self.assertEqual(expected, got)
-
-        os.unlink(noncoding)
-        with self.assertRaises(ref_preparer.Error):
-            ref_preparer.RefPreparer._get_ref_files(ref_prefix, None, None, None, None)
-
-
-    def test_get_ref_files_naming_each_file(self):
-        ref_prefix = os.path.abspath('tmp.test.ref_preparer')
-        presabs = ref_prefix + '.presence_absence.fa'
-        varonly = ref_prefix + '.variants_only.fa'
-        noncoding = ref_prefix + '.noncoding.fa'
-        metadata = ref_prefix + '.metadata.tsv'
-        not_a_file = 'notafile'
-        self.assertFalse(os.path.exists(not_a_file))
-
-        for filename in (presabs, varonly, noncoding, metadata):
-            with open(filename, 'w') as f:
-                pass
-
-        got = ref_preparer.RefPreparer._get_ref_files(None, presabs, varonly, noncoding, metadata)
-        expected = {
-            'presabs': presabs,
-            'varonly': varonly,
-            'noncoding': noncoding,
-            'metadata': metadata,
-        }
-
-        self.assertEqual(expected, got)
-
-        got = ref_preparer.RefPreparer._get_ref_files(None, presabs, varonly, noncoding, None)
-        expected['metadata'] = None
-        self.assertEqual(expected, got)
-
-        got = ref_preparer.RefPreparer._get_ref_files(None, None, varonly, noncoding, None)
-        expected['presabs'] = None
-        self.assertEqual(expected, got)
-
-        got = ref_preparer.RefPreparer._get_ref_files(None, None, None, noncoding, None)
-        expected['varonly'] = None
-        self.assertEqual(expected, got)
-
-        with self.assertRaises(ref_preparer.Error):
-            got = ref_preparer.RefPreparer._get_ref_files(None, None, None, None, None)
-
-        with self.assertRaises(ref_preparer.Error):
-            got = ref_preparer.RefPreparer._get_ref_files(None, not_a_file, None, noncoding, None)
-
-        with self.assertRaises(ref_preparer.Error):
-            got = ref_preparer.RefPreparer._get_ref_files(None, presabs, not_a_file, None, None)
-
-        with self.assertRaises(ref_preparer.Error):
-            got = ref_preparer.RefPreparer._get_ref_files(None, presabs, None, not_a_file, None)
-
-        os.unlink(presabs)
-        os.unlink(varonly)
-        os.unlink(noncoding)
-        os.unlink(metadata)
-
-
-    def test_write_info_file(self):
-        '''test _write_info_file'''
         extern_progs = external_progs.ExternalProgs()
-        refprep = ref_preparer.RefPreparer(extern_progs, genetic_code=1)
-        refprep.filenames = {
-            'presabs': 'presabs.fa',
-            'varonly': None,
-            'noncoding': None,
-            'metadata': 'metadata.tsv',
-        }
-        tmpfile = 'tmp.test_write_info_file.out'
-        refprep._write_info_file(tmpfile)
-        expected = os.path.join(data_dir, 'ref_preparer_test_write_info_file.out')
-        self.assertTrue(filecmp.cmp(expected, tmpfile, shallow=False))
-        os.unlink(tmpfile)
+        refprep = ref_preparer.RefPreparer(fasta_in, tsv_in, extern_progs, genetic_code=1)
+        tmp_out = 'tmp.ref_preparer_test_run'
+        refprep.run(tmp_out)
+        expected_outdir = os.path.join(data_dir, 'ref_preparer_test_run.out')
+
+        test_files = [
+            '01.filter.check_metadata.tsv',
+            '01.filter.check_genes.log',
+            '01.filter.check_metadata.log',
+            '02.cdhit.all.fa',
+            '02.cdhit.clusters.tsv',
+            '02.cdhit.gene.fa',
+            '02.cdhit.gene.varonly.fa',
+            '02.cdhit.noncoding.fa',
+            '02.cdhit.noncoding.varonly.fa',
+        ]
+
+        for filename in test_files:
+            expected = os.path.join(expected_outdir, filename)
+            got = os.path.join(tmp_out, filename)
+            self.assertTrue(filecmp.cmp(expected, got, shallow=False))
+
+        shutil.rmtree(tmp_out)
+

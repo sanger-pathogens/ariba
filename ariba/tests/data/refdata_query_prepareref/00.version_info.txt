@@ -1,0 +1,33 @@
+ARIBA run with this command:
+/home/ubuntu/git/ariba/scripts/ariba_test prepareref -f refdata_query_prepareref.in.fa -m refdata_query_prepareref.in.tsv refdata_query_prepareref
+from this directory: /home/ubuntu/git/ariba/ariba/tests/data
+
+ARIBA version: local
+
+External dependencies:
+bcftools	1.3	/home/ubuntu/bin/bcftools
+bowtie2	2.2.9	/home/ubuntu/bin/bowtie2
+cdhit	4.6	/home/ubuntu/bin/cd-hit-est
+gapfiller	v1-11_Final	/home/ubuntu/bin/GapFiller_v1-11_linux-x86_64/GapFiller.pl
+nucmer	3.1	/usr/bin/nucmer
+r	3.2.3	/usr/bin/Rscript
+samtools	1.3	/home/ubuntu/bin/samtools
+spades	3.8.2	python2 /home/ubuntu/bin/spades.py
+sspace	Basic_v2.0_linux	/home/ubuntu/bin/SSPACE-BASIC-2.0_linux-x86_64/SSPACE_Basic_v2.0.pl
+
+External dependencies OK: True
+
+Python version:
+3.5.1+ (default, Mar 30 2016, 22:46:26) 
+[GCC 5.3.1 20160330]
+
+Python packages:
+ariba	local	/home/ubuntu/git/ariba/scripts/ariba/__init__.py
+openpyxl	2.3.5	/home/ubuntu/.local/lib/python3.5/site-packages/openpyxl/__init__.py
+pyfastaq	3.12.1	/home/ubuntu/.local/lib/python3.5/site-packages/pyfastaq/__init__.py
+pymummer	0.7.1	/home/ubuntu/.local/lib/python3.5/site-packages/pymummer/__init__.py
+pysam	0.9.1	/home/ubuntu/.local/lib/python3.5/site-packages/pysam/__init__.py
+
+Python packages OK: True
+
+Everything looks OK: True

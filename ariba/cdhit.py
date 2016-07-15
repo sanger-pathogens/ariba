@@ -2,7 +2,7 @@ import tempfile
 import shutil
 import os
 import pyfastaq
-from ariba import common
+from ariba import common, external_progs
 
 class Error (Exception): pass
 
@@ -10,165 +10,112 @@ class Runner:
     def __init__(
       self,
       infile,
-      outfile,
       seq_identity_threshold=0.9,
       threads=1,
       length_diff_cutoff=0.9,
       verbose=False,
-      cd_hit_est='cd-hit-est',
-      rename_suffix='x',
+      min_cluster_number=0
     ):
 
         if not os.path.exists(infile):
             raise Error('File not found: "' + infile + '". Cannot continue')
 
         self.infile = os.path.abspath(infile)
-        self.outfile = os.path.abspath(outfile)
         self.seq_identity_threshold = seq_identity_threshold
         self.threads = threads
         self.length_diff_cutoff = length_diff_cutoff
         self.verbose = verbose
-        self.cd_hit_est = cd_hit_est
-        self.rename_suffix = rename_suffix
+        self.min_cluster_number = min_cluster_number
+        extern_progs = external_progs.ExternalProgs(fail_on_error=True)
+        self.cd_hit_est = extern_progs.exe('cdhit')
 
 
     def fake_run(self):
         '''Doesn't actually run cd-hit. Instead, puts each input sequence into its own cluster. So it's as if cdhit was run, but didn't cluster anything'''
-        tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
-        tmp_fa = os.path.join(tmpdir, 'cdhit.fa')
         clusters = {}
+        used_names = set()
         seq_reader = pyfastaq.sequences.file_reader(self.infile)
-        f = pyfastaq.utils.open_file_write(tmp_fa)
 
         for seq in seq_reader:
-            if seq.id in clusters:
-                pyfastaq.utils.close(f)
-                shutil.rmtree(tmpdir)
+            if seq.id in used_names:
                 raise Error('Sequence name "' + seq.id + '" not unique. Cannot continue')
 
-            clusters[seq.id] = {seq.id}
-            print(seq, file=f)
+            clusters[str(len(clusters) + self.min_cluster_number)] = {seq.id}
+            used_names.add(seq.id)
 
-        pyfastaq.utils.close(f)
-        clusters = self._rename_clusters(clusters, tmp_fa, self.outfile, rename_suffix=self.rename_suffix)
-        shutil.rmtree(tmpdir)
         return clusters
 
 
     @staticmethod
     def _load_user_clusters_file(filename):
         f = pyfastaq.utils.open_file_read(filename)
-        seq_to_cluster = {}
-        for line in f:
-            data = line.rstrip().split()
+        clusters = {}
+        used_names = set()
 
-            for seq_name in data:
-                if seq_name in seq_to_cluster:
-                    pyfastaq.utils.close(f)
-                    raise Error('Error reading clusters file. The sequence "' + seq_name + '" was found more than once in the file ' + filename)
-                seq_to_cluster[seq_name] = data[0]
+        for line in f:
+            names_list = line.rstrip().split()
+            new_names = set(names_list)
+            if len(names_list) != len(new_names) or not new_names.isdisjoint(used_names):
+                pyfastaq.utils.close(f)
+                raise Error('Error in user-provided clusters file ' + filename + '. Non unique name found at this line:\n' + line)
+
+            clusters[str(len(clusters))] = new_names
+            used_names.update(new_names)
 
         pyfastaq.utils.close(f)
-        return seq_to_cluster
+        return clusters
 
 
-    def run_get_clusters_from_file(self, infile):
-        '''Instead of running cdhit, gets the clusters info from the input dict.
-           Dict expected to be key=sequence name, value=name of cluster'''
-        seq_to_cluster = self._load_user_clusters_file(infile)
-        cluster_names = set(seq_to_cluster.values())
-        tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
-        tmp_fa = os.path.join(tmpdir, 'cdhit.fa')
-        clusters = {}
+    def run_get_clusters_from_file(self, clusters_infile):
+        '''Instead of running cdhit, gets the clusters info from the input file.'''
+        clusters = self._load_user_clusters_file(clusters_infile)
+
+        # check that every sequence in the clusters file can be
+        # found in the fasta file
         seq_reader = pyfastaq.sequences.file_reader(self.infile)
-        f = pyfastaq.utils.open_file_write(tmp_fa)
+        names_list_from_fasta_file = [seq.id for seq in seq_reader]
+        names_set_from_fasta_file = set(names_list_from_fasta_file)
 
-        for seq in seq_reader:
-            if seq.id in clusters and seq.id in clusters[seq.id]:
+        if len(names_set_from_fasta_file) != len(names_list_from_fasta_file):
+            raise Error('At least one duplicate name in fasta file ' + self.infile + '. Cannot continue')
+
+        names_from_clusters_file = set()
+        for new_names in clusters.values():
+            names_from_clusters_file.update(new_names)
+
+        if not names_set_from_fasta_file.issubset(names_from_clusters_file):
+            raise Error('Some names in fasta file "' + self.infile + '" not given in cluster file. Cannot continue')
+
+        return clusters
+
+
+    @staticmethod
+    def _get_clusters_from_bak_file(filename, min_cluster_number=0):
+        f = pyfastaq.utils.open_file_read(filename)
+        clusters = {}
+
+        for line in f:
+            try:
+                cluster_number, length, name, *spam = line.rstrip().split()
+                cluster_number = int(cluster_number) + min_cluster_number
+            except:
                 pyfastaq.utils.close(f)
-                shutil.rmtree(tmpdir)
-                raise Error('Sequence name "' + seq.id + '" not unique. Cannot continue')
+                raise Error('Error parsing cdhit output at this line:\n' + line)
 
-            if seq.id not in seq_to_cluster:
-                raise Error('Error forcing cdhit clustering. Found sequence ' + seq.id + ' in FASTA file, but not in provided clusters info from file ' + infile)
+            # keep cluster names as strings in case we want to change them
+            # at a later date.
+            cluster = str(cluster_number)
 
-            cluster = seq_to_cluster[seq.id]
+            if not (name.startswith('>') and name.endswith('...')):
+                pyfastaq.utils.close(f)
+                raise Error('Error getting sequence name from cdhit output at this line:\n' + line)
+
             if cluster not in clusters:
                 clusters[cluster] = set()
-
-            clusters[cluster].add(seq.id)
-            if seq.id in cluster_names:
-                print(seq, file=f)
+            clusters[str(cluster)].add(name[1:-3])
 
         pyfastaq.utils.close(f)
-        clusters = self._rename_clusters(clusters, tmp_fa, self.outfile, rename_suffix=self.rename_suffix)
-        shutil.rmtree(tmpdir)
         return clusters
-
-
-    def _get_ids(self, infile):
-        seq_reader = pyfastaq.sequences.file_reader(infile)
-        return set([seq.id for seq in seq_reader])
-
-
-    @staticmethod
-    def _parse_cluster_info_file(infile, cluster_representatives):
-        f = pyfastaq.utils.open_file_read(infile)
-        cluster_sets = {}
-        found_representatives = {}  # store cluster number -> representative name
-
-        for line in f:
-            data = line.rstrip().split()
-            seqname = data[2]
-            if not (seqname.startswith('>') and seqname.endswith('...')):
-                raise Error('Unexpected format of line from cdhit output file "' + infile + '". Line is:\n' + line)
-            seqname = seqname[1:-3]
-
-            cluster_number = int(data[0]) # this is the cluster number used by cdhit
-            if cluster_number not in cluster_sets:
-                cluster_sets[cluster_number] = set()
-
-            cluster_sets[cluster_number].add(seqname)
-
-            if data[3] == '*':
-                found_representatives[cluster_number] = seqname
-
-        pyfastaq.utils.close(f)
-
-        if set(found_representatives.values()) != cluster_representatives:
-            raise Error('Mismatch in cdhit output sequence names between fasta file and clusters file. Cannot continue')
-
-        clusters = {}
-        for cluster_number, cluster_name in found_representatives.items():
-            clusters[cluster_name] = cluster_sets[cluster_number]
-
-        return clusters
-
-
-    @staticmethod
-    def _rename_clusters(clusters_dict, infile, outfile, rename_suffix='x'):
-        new_clusters_dict = {}
-        freader = pyfastaq.sequences.file_reader(infile)
-        f_out = pyfastaq.utils.open_file_write(outfile)
-
-        for seq in freader:
-            original_name = seq.id
-            assert original_name in clusters_dict
-            new_name = original_name.split('.')[0] + '.' + rename_suffix
-
-            if new_name in new_clusters_dict:
-                suffix = 2
-                while new_name + '.' + str(suffix) in new_clusters_dict:
-                    suffix += 1
-                new_name += '.' + str(suffix)
-
-            new_clusters_dict[new_name] = clusters_dict[original_name]
-            seq.id = new_name
-            print(seq, file=f_out)
-
-        pyfastaq.utils.close(f_out)
-
-        return new_clusters_dict
 
 
     def run(self):
@@ -188,10 +135,7 @@ class Runner:
         ])
 
         common.syscall(cmd, verbose=self.verbose)
-        cluster_representatives = self._get_ids(cdhit_fasta)
-        clusters = self._parse_cluster_info_file(cluster_info_outfile, cluster_representatives)
-        clusters = self._rename_clusters(clusters, cdhit_fasta, self.outfile, rename_suffix=self.rename_suffix)
-
+        clusters = self._get_clusters_from_bak_file(cluster_info_outfile, self.min_cluster_number)
         shutil.rmtree(tmpdir)
         return clusters
 

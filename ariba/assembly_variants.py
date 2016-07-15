@@ -243,9 +243,9 @@ class AssemblyVariants:
                     variant_pos_matches_contig = False
                     pos = known_ref_variant.variant.position
 
-                    if known_ref_variant.variant_type == 'n':
+                    if known_ref_variant.seq_type == 'n':
                         ref_interval = intervals.Interval(pos, pos)
-                    elif known_ref_variant.variant_type == 'p':
+                    elif known_ref_variant.seq_type == 'p':
                         ref_interval = intervals.Interval(3 * pos, 3 * pos + 2)
                     else:
                         raise Error('Unexpected variant type "' + known_ref_variant.variant_type + '" in _get_remaining_known_ref_variants. Cannot continue')
@@ -256,7 +256,7 @@ class AssemblyVariants:
                             break
 
                     if variant_pos_matches_contig:
-                        variants.append((None, known_ref_variant.variant_type, None, None, None, {known_ref_variant}, set()))
+                        variants.append((None, known_ref_variant.seq_type, None, None, None, {known_ref_variant}, set()))
 
         return variants
 
@@ -278,8 +278,7 @@ class AssemblyVariants:
         '''
         mummer_variants = self._get_mummer_variants(self.nucmer_snp_file)
         variants = {}
-        ref_sequence_type = self.refdata.sequence_type(ref_sequence_name)
-        assert ref_sequence_type is not None
+        seq_type, is_variant_only = self.refdata.sequence_type(ref_sequence_name)
         ref_sequence = self.refdata.sequence(ref_sequence_name)
 
         if ref_sequence_name in self.refdata.metadata:
@@ -295,11 +294,11 @@ class AssemblyVariants:
 
             if contig in mummer_variants:
                 for mummer_variant_list in mummer_variants[contig]:
-                    if ref_sequence_type == 'non_coding':
+                    if seq_type == 'p':
+                        new_variant, used_variants = self._get_one_variant_for_one_contig_coding(ref_sequence, refdata_var_dict, mummer_variant_list)
+                    else:
                         for mummer_variant in mummer_variant_list:
                             new_variant, used_variants = self._get_one_variant_for_one_contig_non_coding(refdata_var_dict, mummer_variant)
-                    else:
-                        new_variant, used_variants = self._get_one_variant_for_one_contig_coding(ref_sequence, refdata_var_dict, mummer_variant_list)
 
                     if new_variant is not None:
                             variants[contig].append(new_variant)
@@ -307,13 +306,14 @@ class AssemblyVariants:
 
             # for this contig, need to know all the ref sequence and coords it maps to.
             # Then report just the unused known variants, as the contig also has these variants
-            if ref_sequence_type == 'non_coding':
-                new_variants = self._get_remaining_known_ref_variants(known_non_wild_variants_in_ref['n'], used_known_variants, nucmer_coords[contig])
-            else:
+            if seq_type == 'p':
                 new_variants = self._get_remaining_known_ref_variants(known_non_wild_variants_in_ref['p'], used_known_variants, nucmer_coords[contig])
 
-                if ref_sequence_type == 'variants_only':
-                    new_variants = [x for x in new_variants if len(x[5]) > 0]
+            else:
+                new_variants = self._get_remaining_known_ref_variants(known_non_wild_variants_in_ref['n'], used_known_variants, nucmer_coords[contig])
+
+            if is_variant_only:
+                new_variants = [x for x in new_variants if len(x[5]) > 0]
 
             variants[contig].extend(new_variants)
             if len(variants[contig]) == 0:

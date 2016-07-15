@@ -2,10 +2,24 @@ import os
 import shutil
 import sys
 import glob
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
 
+c_files = [
+    'minimap_ariba.cpp',
+    'bseq.c',
+    'index.c',
+    'kthread.c',
+    'map.c',
+    'misc.c',
+    'sdust.c',
+    'sketch.c',
+]
+
+c_files = [os.path.join('third_party', 'minimap', x) for x in c_files]
+extension_mod = Extension("minimap_ariba", c_files, extra_link_args=['-lz'])
 
 setup(
+    ext_modules=[extension_mod],
     name='ariba',
     version='1.0.1',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
@@ -20,7 +34,7 @@ setup(
     install_requires=[
         'openpyxl >= 1.6.2',
         'pyfastaq >= 3.12.0',
-        'pysam >= 0.8.1, <= 0.8.3',
+        'pysam >= 0.8.1',
         'pymummer>=0.6.1',
     ],
     license='GPLv3',

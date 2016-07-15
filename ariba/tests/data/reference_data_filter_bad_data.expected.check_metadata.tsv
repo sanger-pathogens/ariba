@@ -1,0 +1,10 @@
+non_coding_1	0	0	.	.	non_coding_1 description1
+non_coding_1	0	0	.	.	should be in output because this field is here
+non_coding_1	0	0	C5A	id1	dna variant ok
+presence_absence_1	1	0	.	.	.
+presence_absence_1	1	0	.	.	should be in output because this field is here
+presence_absence_2	1	0	.	.	should be in output because this field is here
+presence_absence_3	1	0	R3S	.	amino acid variant ok
+variants_only_1	1	1	.	.	.
+variants_only_1	1	1	.	.	should be kept as a generic description of variants_only_1
+variants_only_1	1	1	S2T	.	amino acid variant ok

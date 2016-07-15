@@ -12,6 +12,7 @@ import openpyxl
 import multiprocessing
 import pysam
 import pyfastaq
+import minimap_ariba
 from ariba import cluster, common, mapping, histogram, read_store, report, report_filter, reference_data
 
 class Error (Exception): pass
@@ -77,6 +78,8 @@ class Clusters:
         self.reads_2 = os.path.abspath(reads_2)
         self.outdir = os.path.abspath(outdir)
         self.extern_progs = extern_progs
+        self.clusters_tsv = os.path.abspath(os.path.join(refdata_dir, '02.cdhit.clusters.tsv'))
+        self.all_ref_seqs_fasta = os.path.abspath(os.path.join(refdata_dir, '02.cdhit.all.fa'))
 
         if version_report_lines is None:
             self.version_report_lines = []
@@ -129,6 +132,7 @@ class Clusters:
         self.pool = None
         self.fails_dir = os.path.join(self.outdir ,'.fails')
         self.clusters_all_ran_ok = True
+        self.inital_mapping_tool = 'bowtie2'
 
         for d in [self.outdir, self.logs_dir, self.fails_dir]:
             try:
@@ -216,87 +220,45 @@ class Clusters:
         if not os.path.exists(indir):
             raise Error('Error loading reference data. Input directory ' + indir + ' not found. Cannot continue')
 
-        variants_only_fa = os.path.join(indir, 'refcheck.01.check_variants.variants_only.fa')
-        presence_absence_fa = os.path.join(indir, 'refcheck.01.check_variants.presence_absence.fa')
-        non_coding_fa = os.path.join(indir, 'refcheck.01.check_variants.non_coding.fa')
-        metadata_tsv = os.path.join(indir, 'refcheck.01.check_variants.tsv')
-        info_file = os.path.join(indir, 'info.txt')
-        clusters_file = os.path.join(indir, 'cdhit.clusters.pickle')
+        fasta_file = os.path.join(indir, '02.cdhit.all.fa')
+        metadata_file = os.path.join(indir, '01.filter.check_metadata.tsv')
+        info_file = os.path.join(indir, '00.info.txt')
+        clusters_pickle_file = os.path.join(indir, '02.cdhit.clusters.pickle')
         params = Clusters._load_reference_data_info_file(info_file)
         refdata = reference_data.ReferenceData(
-            presence_absence_fa=presence_absence_fa if os.path.exists(presence_absence_fa) else None,
-            variants_only_fa=variants_only_fa if os.path.exists(variants_only_fa) else None,
-            non_coding_fa=non_coding_fa if os.path.exists(non_coding_fa) else None,
-            metadata_tsv=metadata_tsv if os.path.exists(metadata_tsv) else None,
+            [fasta_file],
+            [metadata_file],
             genetic_code=params['genetic_code'],
         )
 
-        with open(clusters_file, 'rb') as f:
+        with open(clusters_pickle_file, 'rb') as f:
             cluster_ids = pickle.load(f)
 
         return refdata, cluster_ids
 
 
-    def _map_reads_to_clustered_genes(self):
-        mapping.run_bowtie2(
+    def _map_and_cluster_reads(self):
+        if self.verbose:
+            print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
+
+        minimap_prefix = 'minimap'
+
+        self._minimap_reads_to_all_ref_seqs(
+            self.clusters_tsv,
+            self.all_ref_seqs_fasta,
             self.reads_1,
             self.reads_2,
-            self.cdhit_cluster_representatives_fa,
-            self.bam_prefix,
-            threads=self.threads,
-            samtools=self.extern_progs.exe('samtools'),
-            bowtie2=self.extern_progs.exe('bowtie2'),
-            bowtie2_preset=self.bowtie2_preset,
-            verbose=self.verbose,
-            remove_both_unmapped=True,
+            minimap_prefix,
+            verbose=self.verbose
         )
 
+        if self.verbose:
+            print('Finished mapping\n')
+            print('{:_^79}'.format(' Generating clusters '), flush=True)
 
-    def _bam_to_clusters_reads(self):
-        '''Sets up ReadStore of reads for all the clusters. Also gathers histogram data of insert size'''
-        reads_file_for_read_store = os.path.join(self.outdir, 'reads')
-        f_out = pyfastaq.utils.open_file_write(reads_file_for_read_store)
-
-        sam_reader = pysam.Samfile(self.bam, "rb")
-        sam1 = None
-        self.proper_pairs = 0
-
-        for s in sam_reader.fetch(until_eof=True):
-            if sam1 is None:
-                sam1 = s
-                continue
-
-            ref_seqs = set()
-            if not s.is_unmapped:
-                ref_seqs.add(sam_reader.getrname(s.tid))
-            if not sam1.is_unmapped:
-                ref_seqs.add(sam_reader.getrname(sam1.tid))
-
-            read1 = mapping.sam_to_fastq(sam1)
-            read2 = mapping.sam_to_fastq(s)
-            if read1.id.endswith('/2'):
-                read1, read2 = read2, read1
-
-            insert = mapping.sam_pair_to_insert(s, sam1)
-            if insert is not None:
-                self.insert_hist.add(insert)
-                self.proper_pairs += 1
-
-            for ref in ref_seqs:
-                if ref not in self.cluster_to_dir:
-                    new_dir = os.path.join(self.tmp_dir, ref)
-                    self.cluster_to_dir[ref] = new_dir
-                    if self.verbose:
-                        print('New cluster with reads that hit:', ref, flush=True)
-
-                self.cluster_read_counts[ref] = self.cluster_read_counts.get(ref, 0) + 2
-                self.cluster_base_counts[ref] = self.cluster_base_counts.get(ref, 0) + len(read1) + len(read2)
-                print(ref, self.cluster_read_counts[ref] - 1, read1.seq, read1.qual, sep='\t', file=f_out)
-                print(ref, self.cluster_read_counts[ref], read2.seq, read2.qual, sep='\t', file=f_out)
-
-            sam1 = None
-
-        pyfastaq.utils.close(f_out)
+        self.cluster_to_rep, self.cluster_read_counts, self.cluster_base_counts, self.insert_hist, self.proper_pairs = self._load_minimap_files(minimap_prefix, self.insert_hist_bin)
+        self.cluster_to_dir = {x: os.path.join(self.tmp_dir, x) for x in self.cluster_to_rep}
+        reads_file_for_read_store = minimap_prefix + '.reads'
 
         if len(self.cluster_read_counts):
             if self.verbose:
@@ -315,6 +277,70 @@ class Clusters:
         if self.verbose:
             print('Found', self.proper_pairs, 'proper read pairs')
             print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)
+
+
+    @staticmethod
+    def _minimap_reads_to_all_ref_seqs(clusters_tsv, ref_fasta, reads_1, reads_2, outprefix, verbose=False):
+        got = minimap_ariba.minimap_ariba(clusters_tsv, ref_fasta, reads_1, reads_2, outprefix)
+        if (got != 0):
+            raise Error('Error running minimap. Cannot continue')
+
+
+    @classmethod
+    def _load_minimap_out_cluster2representative(cls, infile):
+        cluster2rep = {}
+
+        with open(infile) as f:
+            for line in f:
+                cluster, rep = line.rstrip().split('\t')
+                cluster2rep[cluster] = rep
+
+        return cluster2rep
+
+
+    @classmethod
+    def _load_minimap_out_cluster_counts(cls, infile):
+        reads = {}
+        bases = {}
+
+        with open(infile) as f:
+            for line in f:
+                cluster, read, base = line.rstrip().split('\t')
+                reads[cluster] = int(read)
+                bases[cluster] = int(base)
+
+        return reads, bases
+
+
+    @classmethod
+    def _load_minimap_insert_histogram(cls, infile, bin_size):
+        hist = histogram.Histogram(bin_size)
+
+        with open(infile) as f:
+            for line in f:
+                value, count = line.rstrip().split('\t')
+                hist.add(int(value), count=int(count))
+
+        return hist
+
+
+    @classmethod
+    def _load_minimap_proper_pairs(cls, infile):
+        with open(infile) as f:
+            for line in f:
+                pairs = int(line.rstrip())
+                break
+
+        return pairs
+
+
+    @staticmethod
+    def _load_minimap_files(inprefix, hist_bin_size):
+        cluster2rep = Clusters._load_minimap_out_cluster2representative(inprefix + '.cluster2representative')
+        cluster_read_count, cluster_base_count = Clusters._load_minimap_out_cluster_counts(inprefix + '.clusterCounts')
+        insert_hist = Clusters._load_minimap_insert_histogram(inprefix + '.insertHistogram', hist_bin_size)
+        proper_pairs = Clusters._load_minimap_proper_pairs(inprefix + '.properPairs')
+        return cluster2rep, cluster_read_count, cluster_base_count, insert_hist, proper_pairs
 
 
     def _set_insert_size_data(self):
@@ -340,54 +366,51 @@ class Clusters:
         counter = 0
         cluster_list = []
         self.log_files = []
+        cluster_numbers = [int(x) for x in self.cluster_to_dir.keys()]
+        cluster_numbers.sort()
 
-        for seq_type in sorted(self.cluster_ids):
-            if self.cluster_ids[seq_type] is None:
-                continue
+        for cluster_number in cluster_numbers:
+            cluster_name = str(cluster_number)
+            counter += 1
+            if self.verbose:
+                print('Constructing cluster ', cluster_name, ' (', counter, ' of ', len(self.cluster_to_dir), ')', sep='')
+            new_dir = self.cluster_to_dir[cluster_name]
+            self.log_files.append(os.path.join(self.logs_dir, cluster_name + '.log'))
 
-            for seq_name in sorted(self.cluster_ids[seq_type]):
-                if seq_name not in self.cluster_to_dir:
-                    continue
-                counter += 1
-                if self.verbose:
-                    print('Constructing cluster', seq_name + '.', counter, 'of', str(len(self.cluster_to_dir)))
-                new_dir = self.cluster_to_dir[seq_name]
-                self.log_files.append(os.path.join(self.logs_dir, seq_name + '.log'))
-
-                cluster_list.append(cluster.Cluster(
-                    new_dir,
-                    seq_name,
-                    self.refdata,
-                    self.cluster_read_counts[seq_name],
-                    self.cluster_base_counts[seq_name],
-                    fail_file=os.path.join(self.fails_dir, seq_name),
-                    read_store=self.read_store,
-                    reference_names=self.cluster_ids[seq_type][seq_name],
-                    logfile=self.log_files[-1],
-                    assembly_coverage=self.assembly_coverage,
-                    assembly_kmer=self.assembly_kmer,
-                    assembler=self.assembler,
-                    max_insert=self.insert_proper_pair_max,
-                    min_scaff_depth=self.min_scaff_depth,
-                    nucmer_min_id=self.nucmer_min_id,
-                    nucmer_min_len=self.nucmer_min_len,
-                    nucmer_breaklen=self.nucmer_breaklen,
-                    reads_insert=self.insert_size,
-                    sspace_k=self.min_scaff_depth,
-                    sspace_sd=self.insert_sspace_sd,
-                    threads=1, # clusters now run in parallel, so this should always be 1!
-                    bcf_min_dp=10,            # let the user change this in a future version?
-                    bcf_min_dv=5,             # let the user change this in a future version?
-                    bcf_min_dv_over_dp=0.3,   # let the user change this in a future version?
-                    bcf_min_qual=20,          # let the user change this in a future version?
-                    assembled_threshold=self.assembled_threshold,
-                    unique_threshold=self.unique_threshold,
-                    max_gene_nt_extend=self.max_gene_nt_extend,
-                    bowtie2_preset=self.bowtie2_preset,
-                    spades_other_options=self.spades_other,
-                    clean=self.clean,
-                    extern_progs=self.extern_progs,
-                ))
+            cluster_list.append(cluster.Cluster(
+                new_dir,
+                cluster_name,
+                self.refdata,
+                self.cluster_read_counts[cluster_name],
+                self.cluster_base_counts[cluster_name],
+                fail_file=os.path.join(self.fails_dir, cluster_name),
+                read_store=self.read_store,
+                reference_names=self.cluster_ids[cluster_name],
+                logfile=self.log_files[-1],
+                assembly_coverage=self.assembly_coverage,
+                assembly_kmer=self.assembly_kmer,
+                assembler=self.assembler,
+                max_insert=self.insert_proper_pair_max,
+                min_scaff_depth=self.min_scaff_depth,
+                nucmer_min_id=self.nucmer_min_id,
+                nucmer_min_len=self.nucmer_min_len,
+                nucmer_breaklen=self.nucmer_breaklen,
+                reads_insert=self.insert_size,
+                sspace_k=self.min_scaff_depth,
+                sspace_sd=self.insert_sspace_sd,
+                threads=1, # clusters now run in parallel, so this should always be 1!
+                bcf_min_dp=10,            # let the user change this in a future version?
+                bcf_min_dv=5,             # let the user change this in a future version?
+                bcf_min_dv_over_dp=0.3,   # let the user change this in a future version?
+                bcf_min_qual=20,          # let the user change this in a future version?
+                assembled_threshold=self.assembled_threshold,
+                unique_threshold=self.unique_threshold,
+                max_gene_nt_extend=self.max_gene_nt_extend,
+                bowtie2_preset=self.bowtie2_preset,
+                spades_other_options=self.spades_other,
+                clean=self.clean,
+                extern_progs=self.extern_progs,
+            ))
 
         try:
             if self.threads > 1:
@@ -511,19 +534,7 @@ class Clusters:
         cwd = os.getcwd()
         os.chdir(self.outdir)
         self.write_versions_file(cwd)
-
-        if self.verbose:
-            print('{:_^79}'.format(' Mapping reads to clustered genes '), flush=True)
-        self._map_reads_to_clustered_genes()
-
-        if self.verbose:
-            print('Finished mapping\n')
-            print('{:_^79}'.format(' Generating clusters '), flush=True)
-        self._bam_to_clusters_reads()
-        if self.clean:
-            if self.verbose:
-                print('Deleting BAM', self.bam, flush=True)
-            os.unlink(self.bam)
+        self._map_and_cluster_reads()
 
         if len(self.cluster_to_dir) > 0:
             got_insert_data_ok = self._set_insert_size_data()
