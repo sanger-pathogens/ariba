@@ -2,10 +2,24 @@ import os
 import shutil
 import sys
 import glob
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
 
+c_files = [
+    'minimap_ariba.cpp',
+    'bseq.c',
+    'index.c',
+    'kthread.c',
+    'map.c',
+    'misc.c',
+    'sdust.c',
+    'sketch.c',
+]
+
+c_files = [os.path.join('third_party', 'minimap', x) for x in c_files]
+extension_mod = Extension("minimap_ariba", c_files)
 
 setup(
+    ext_modules=[extension_mod],
     name='ariba',
     version='1.0.1',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',

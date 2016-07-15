@@ -12,8 +12,8 @@
 #include <algorithm>
 #include "minimap.h"
 #include "kseq.h"
+#include "Python.h"
 KSEQ_INIT(gzFile, gzread)
-
 
 
 typedef std::vector<std::pair<uint32_t, bool> > MapPositionVector;
@@ -24,47 +24,96 @@ void writeClusterCountsFile(std::string outfile, const std::map<std::string, uin
 void writeInsertHistogramFile(std::string outfile, const std::map<uint32_t, uint32_t>& insertHist);
 void writeProperPairsFile(std::string outfile, uint32_t properPairs);
 
+int run_minimap(char *clustersFileIn, char *refFileIn, char *readsFile1In, char *readsFile2In, char *outprefixIn);
 
-int main(int argc, char *argv[])
+static PyObject * main_wrapper(PyObject * self, PyObject * args)
 {
-    if (argc < 6) {
-        std::cerr << "Usage: minimap_ariba <clusters> <target.fa> <query_fwd> <query_rev> <outprefix>\n"
-                  << "This is NOT intended to be run directly! Should be called during ARIBA pipeline\n";
-        return 1;
-    }
+  char *clustersFile;
+  char *refFile;
+  char *readsFile1;
+  char *readsFile2;
+  char *outprefix;
+  int gotFromMain = 1;
 
+  // parse arguments
+  if (!PyArg_ParseTuple(args, "sssss", &clustersFile, &refFile, &readsFile1, &readsFile2, &outprefix)) {
+      return NULL;
+  }
+
+  gotFromMain = run_minimap(clustersFile, refFile, readsFile1, readsFile2, outprefix);
+  return PyLong_FromLong((long) gotFromMain);
+}
+
+
+static PyMethodDef minimapMethods[] = {
+   { "minimap_ariba", main_wrapper, METH_VARARGS, "minimap ariba" },
+   { NULL, NULL, 0, NULL }
+};
+
+
+static struct PyModuleDef minimapModule = {
+   PyModuleDef_HEAD_INIT,
+   "minimap_ariba",   /* name of module */
+   NULL, /* module documentation, may be NULL */
+   -1,       /* size of per-interpreter state of the module,
+                or -1 if the module keeps state in global variables. */
+   minimapMethods
+};
+
+PyMODINIT_FUNC
+PyInit_minimap_ariba(void)
+{
+    return PyModule_Create(&minimapModule);
+}
+
+
+
+int run_minimap(char *clustersFileIn, char *refFileIn, char *readsFile1In, char *readsFile2In, char *outprefixIn)
+{
     mm_verbose = 0;
     std::map<std::string, uint64_t> refnameToScore;
     std::map<std::string, std::string> refnameToCluster;
-    std::string clustersFile(argv[1]);
+    std::string clustersFile(clustersFileIn);
     loadClusters(clustersFile, refnameToCluster);
     std::map<std::string, uint64_t> readCounters;
     std::map<std::string, uint64_t> baseCounters;
     std::map<uint32_t, uint32_t> insertHist;
     uint32_t properPairs = 0;
-    std::string outprefix(argv[5]);
+    std::string outprefix(outprefixIn);
     std::string readsOutfile = outprefix + ".reads";
     std::ofstream ofs;
     ofs.open(readsOutfile.c_str());
     if (!ofs.good())
     {
-        std::cerr << "Error opening reads output file '" << readsOutfile << "'. Cannot continue" << std::endl;
+        std::cerr << "[ariba_minimap] Error opening reads output file '" << readsOutfile << "'. Cannot continue" << std::endl;
         return 1;
     }
 
     // open query file for reading; you may use your favorite FASTA/Q parser
-    gzFile infile1 = gzopen(argv[3], "r");
-    assert(infile1);
-    gzFile infile2 = gzopen(argv[4], "r");
-    assert(infile2);
+    gzFile infile1 = gzopen(readsFile1In, "r");
+    if (!infile1)
+    {
+        std::cerr << "[ariba_minimap] Error opening file " << readsFile1In << std::endl;
+        return 1;
+    }
+    gzFile infile2 = gzopen(readsFile2In, "r");
+    if (!infile2)
+    {
+        std::cerr << "[ariba_minimap] Error opening file " << readsFile2In << std::endl;
+        return 1;
+    }
     kseq_t *ks1 = kseq_init(infile1);
     kseq_t *ks2 = kseq_init(infile2);
 
     // create index for target; we are creating one index for all target sequence
     int n_threads = 1;
     int w = 10, k = 15;
-    mm_idx_t *mi = mm_idx_build(argv[2], w, k, n_threads);
-    assert(mi);
+    mm_idx_t *mi = mm_idx_build(refFileIn, w, k, n_threads);
+    if (!mi)
+    {
+        std::cerr << "[ariba_minimap] Error indexing" << std::endl;
+        return 1;
+    }
 
     // mapping
     mm_mapopt_t opt;
@@ -72,9 +121,15 @@ int main(int argc, char *argv[])
     mm_tbuf_t *tbuf1 = mm_tbuf_init(); // thread buffer; for multi-threading, allocate one tbuf for each thread
     mm_tbuf_t *tbuf2 = mm_tbuf_init(); // thread buffer; for multi-threading, allocate one tbuf for each thread
     while (kseq_read(ks1) >= 0) { // each kseq_read() call reads one query sequence
-        assert(kseq_read(ks2) >= 0);
         const mm_reg1_t *reg1, *reg2;
         int j, n_reg1, n_reg2;
+        int ks2ok = kseq_read(ks2);
+        if (ks2ok == 0)
+        {
+            std::cerr << "Error getting mate of read. Cannot continue" << std::endl;
+            return 1;
+        }
+
         std::map<std::string, MapPositionVector> positions1;
         std::map<std::string, MapPositionVector> positions2;
 
@@ -180,7 +235,13 @@ void loadClusters(std::string& filename, std::map<std::string, std::string>& ref
         std::stringstream ss(line);
         std::string cluster;
         std::string seqname;
-        assert(getline(ss, cluster, '\t'));
+        getline(ss, cluster, '\t');
+        if (cluster.size() == 0)
+        {
+            std::cerr << "Error reading clusters file at the following line\n" << line << std::endl;
+            exit(1);
+        }
+
         while (getline(ss, seqname, '\t'))
         {
             refnameToCluster[seqname] = cluster;
@@ -235,7 +296,11 @@ void writeClusterCountsFile(std::string outfile, const std::map<std::string, uin
 
     for (std::map<std::string, uint64_t>::const_iterator iter = readCounters.begin(); iter != readCounters.end(); iter++)
     {
-        assert ( baseCounters.find(iter->first) != baseCounters.end());
+        if (baseCounters.find(iter->first) == baseCounters.end())
+        {
+            std::cerr << "Error writing cluster counts file" << std::endl;
+            exit(1);
+        }
         ofs << iter->first << '\t' << iter->second << '\t' << baseCounters.find(iter->first)->second << '\n';
     }
 
