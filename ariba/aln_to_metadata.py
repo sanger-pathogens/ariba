@@ -261,7 +261,7 @@ class AlnToMetadata:
         AlnToMetadata._variant_ids_are_unique(self.variants)
         AlnToMetadata._check_variants_match_sequences(unpadded_seqs, self.variants, self.refs_are_coding, genetic_code=self.genetic_code)
 
-        tsv_lines = AlnToMetadata._variants_to_tsv_lines(self.variants, unpadded_seqs, self.padded_seqs, insertions, self.refs_are_coding)
+        tsv_lines = AlnToMetadata._variants_to_tsv_lines(self.variants, unpadded_seqs, self.padded_seqs, insertions, self.refs_are_coding, self.refs_are_variant_only)
         with open(outprefix + '.tsv', 'w') as f:
             print(*tsv_lines, sep='\n', file=f)
 
@@ -269,5 +269,5 @@ class AlnToMetadata:
             for seqname in sorted(unpadded_seqs):
                 print(unpadded_seqs[seqname], sep='\n', file=f)
 
-        AlnToMetadata._make_cluster_file(self.cluster_rep_name, unpadded_seqs, outprefix + '.cluster')
+        AlnToMetadata._make_cluster_file(unpadded_seqs, outprefix + '.cluster')
         pyfastaq.sequences.genetic_code = original_code

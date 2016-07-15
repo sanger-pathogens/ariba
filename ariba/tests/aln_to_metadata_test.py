@@ -377,7 +377,7 @@ class TestAlnToMetadata(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'aln_to_metadata_run_coding.in.tsv')
         tsv_expected = os.path.join(data_dir, 'aln_to_metadata_run_coding.out.tsv')
         cluster_expected = os.path.join(data_dir, 'aln_to_metadata_run_coding.out.cluster')
-        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, True, 'seq3')
+        a_to_m = aln_to_metadata.AlnToMetadata(fa_in, tsv_in, True, False, 'seq3')
         outprefix = 'tmp.test.aln_to_metadata.run_coding'
         a_to_m.run(outprefix)
         self.assertTrue(filecmp.cmp(tsv_expected, outprefix + '.tsv', shallow=False))

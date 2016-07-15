@@ -1,7 +1,7 @@
-seq1	p	A2D	id1	description 1
-seq2	p	A2D	id1	description 1
-seq4	p	C3D	id1	description 1
-seq5	p	A3D	id1	description 1
-seq5	p	F2E	id2	description 2
-seq3	p	F2E	id2	description 2
-seq4	p	F2E	id2	description 2
+seq1	1	0	A2D	id1	description 1
+seq2	1	0	A2D	id1	description 1
+seq4	1	0	C3D	id1	description 1
+seq5	1	0	A3D	id1	description 1
+seq5	1	0	F2E	id2	description 2
+seq3	1	0	F2E	id2	description 2
+seq4	1	0	F2E	id2	description 2
