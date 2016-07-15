@@ -31,7 +31,7 @@ class SequenceMetadata:
 
 
     def __lt__(self, other):
-        return self.name < other.name or (self.name == other.name and {None} != {self.variant, other.variant} and self.variant < other.variant)
+        return self.name < other.name or (self.name == other.name and self.variant is not None and other.variant is not None and self.variant < other.variant)
 
 
     def __hash__(self):
