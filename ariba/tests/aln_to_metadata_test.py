@@ -365,11 +365,7 @@ class TestAlnToMetadata(unittest.TestCase):
         }
         tmpfile = 'tmp.aln_to_meta_test_make_cluster_file.out'
         expected_file = os.path.join(data_dir, 'aln_to_metadata_make_cluster_file.out')
-
-        with self.assertRaises(aln_to_metadata.Error):
-            aln_to_metadata.AlnToMetadata._make_cluster_file('not_found', seqs, tmpfile)
-
-        aln_to_metadata.AlnToMetadata._make_cluster_file('seq2', seqs, tmpfile)
+        aln_to_metadata.AlnToMetadata._make_cluster_file(seqs, tmpfile)
         self.assertTrue(filecmp.cmp(expected_file, tmpfile, shallow=False))
         os.unlink(tmpfile)
 

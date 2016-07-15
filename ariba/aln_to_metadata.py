@@ -244,13 +244,10 @@ class AlnToMetadata:
 
 
     @classmethod
-    def _make_cluster_file(cls, cluster_name, sequences, filename):
-        if cluster_name not in sequences:
-            raise Error('Sequence name "' + cluster_name + '" to be used as cluster representative not found. Cannot continue')
-        names = [x for x in sequences.keys() if x != cluster_name]
-        names.sort()
+    def _make_cluster_file(cls, sequences, filename):
+        names = sorted(sequences.keys())
         with open(filename, 'w') as f:
-            print(cluster_name, *names, sep='\t', file=f)
+            print(*names, sep='\t', file=f)
 
 
     def run(self, outprefix):
