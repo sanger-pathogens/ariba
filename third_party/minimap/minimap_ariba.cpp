@@ -157,10 +157,18 @@ int run_minimap(char *clustersFileIn, char *refFileIn, char *readsFile1In, char 
             }
 
             bool foundProperPair = false;
-
+            std::set<std::string> usedClusters;
             for (std::set<std::string>::const_iterator iter = refnames.begin(); iter != refnames.end(); iter++)
             {
                 std::string cluster = refnameToCluster[*iter];
+
+                // do not write a read pair to the same cluster more than once
+                if (usedClusters.find(cluster) != usedClusters.end())
+                {
+                    continue;
+                }
+
+                usedClusters.insert(cluster);
                 readCounters[cluster]++;
                 ofs << cluster << '\t' << readCounters[cluster] << '\t' << ks1->seq.s << '\t' << ks1->qual.s << '\n';
                 readCounters[cluster]++;
