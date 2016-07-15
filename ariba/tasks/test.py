@@ -70,6 +70,7 @@ def run():
     ariba_command = ' '.join([
         ariba_exe,
         'run',
+        '--spades_other "--only-assembler -m 4"',
         '--verbose',
         '--threads', str(options.threads),
         'PREPAREREF',
