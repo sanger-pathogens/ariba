@@ -1,7 +1,7 @@
-seq1	n	C5T	id1	description 1
-seq2	n	C5T	id1	description 1
-seq4	n	G8T	id1	description 1
-seq5	n	A8T	id1	description 1
-seq5	n	A5T	id2	description 2
-seq3	n	A5T	id2	description 2
-seq4	n	G5T	id2	description 2
+seq1	0	1	C5T	id1	description 1
+seq2	0	1	C5T	id1	description 1
+seq4	0	1	G8T	id1	description 1
+seq5	0	1	A8T	id1	description 1
+seq5	0	1	A5T	id2	description 2
+seq3	0	1	A5T	id2	description 2
+seq4	0	1	G5T	id2	description 2
