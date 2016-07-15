@@ -251,8 +251,8 @@ class RefGenesGetter:
         except:
             raise Error('Error mkdir ' + tmpdir)
 
-        zipfile = os.path.join(tmpdir, 'VFDB_setA_nt.fas.gz')
-        self._download_file('http://www.mgc.ac.cn/VFs/Down/VFDB_setA_nt.fas.gz', zipfile)
+        zipfile = os.path.join(tmpdir, filename)
+        self._download_file('http://www.mgc.ac.cn/VFs/Down/'+filename, zipfile)
         vparser = vfdb_parser.VfdbParser(zipfile, outprefix)
         vparser.run()
         shutil.rmtree(tmpdir)
