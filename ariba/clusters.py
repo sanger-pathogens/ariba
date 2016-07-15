@@ -281,23 +281,9 @@ class Clusters:
 
     @staticmethod
     def _minimap_reads_to_all_ref_seqs(clusters_tsv, ref_fasta, reads_1, reads_2, outprefix, verbose=False):
-        print('start of _minimap_reads_to_all_ref_seqs', flush=True)
-        #modules_dir = os.path.dirname(os.path.abspath(cluster.__file__))
-        #minimap_ariba = os.path.abspath(os.path.join(modules_dir, os.pardir, 'third_party', 'minimap', 'minimap_ariba'))
-        #if not os.path.exists(minimap_ariba):
-        #    raise Error('Error finding minimap_ariba. Cannot continue')
-        #cmd = ' '.join([
-        #    minimap_ariba,
-        #    clusters_tsv,
-        #    ref_fasta,
-        #    reads_1,
-        #    reads_2,
-        #    outprefix
-        #])
-        #common.syscall(cmd, verbose=verbose)
-
         got = minimap_ariba.minimap_ariba(clusters_tsv, ref_fasta, reads_1, reads_2, outprefix)
-        print('\n\n--------------------------\n\n', 'got:', got)
+        if (got != 0):
+            raise Error('Error running minimap. Cannot continue')
 
 
     @classmethod
