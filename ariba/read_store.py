@@ -35,7 +35,7 @@ class ReadStore:
         pysam.tabix_index(infile + '.gz', seq_col=0, start_col=1, end_col=1)
 
 
-    def get_reads(self, cluster_name, out1, out2, log_fh=None):
+    def get_reads(self, cluster_name, out1, out2, fasta=False, log_fh=None):
         if log_fh is not None:
             print('Getting reads for', cluster_name, 'from', self.outfile, file=log_fh)
         tabix_file = pysam.TabixFile(self.outfile)
@@ -46,9 +46,15 @@ class ReadStore:
             cluster, number, seq, qual = line.rstrip().split()
             number = int(number)
             if number % 2 == 0:
-                print('@' + str(number - 1) + '/2', seq, '+', qual, sep='\n', file=f_out2)
+                if fasta:
+                    print('>' + str(number - 1) + '/2', seq, sep='\n', file=f_out2)
+                else:
+                    print('@' + str(number - 1) + '/2', seq, '+', qual, sep='\n', file=f_out2)
             else:
-                print('@' + str(number) + '/1', seq, '+', qual, sep='\n', file=f_out1)
+                if fasta:
+                    print('>' + str(number) + '/1', seq, sep='\n', file=f_out1)
+                else:
+                    print('@' + str(number) + '/1', seq, '+', qual, sep='\n', file=f_out1)
 
         pyfastaq.utils.close(f_out1)
         pyfastaq.utils.close(f_out2)
