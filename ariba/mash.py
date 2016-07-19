@@ -53,8 +53,13 @@ class Masher:
 
         try:
             with open(outfile) as f:
-                line = f.readline()
-                best_seq = line.split()[0]
+                line = f.readline().rstrip()
+                print('best mash match:\t', line, file=self.log_fh)
+                matching_hashes = int(line.split()[-1].split('/')[0])
+                if matching_hashes == 0:
+                    best_seq = None
+                else:
+                    best_seq = line.split()[0]
         except:
             best_seq = None
 
