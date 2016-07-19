@@ -95,18 +95,23 @@ class TestReadStore(unittest.TestCase):
         os.unlink(reads2)
 
 
-    def test_get_reads_fa_interleave(self):
-        '''Test get_reads fasta interleaved'''
+    def test_get_reads_subset(self):
+        '''Test get_reads subset'''
         infile = os.path.join(data_dir, 'read_store_test_get_reads.in')
-        expected = os.path.join(data_dir, 'read_store_test_get_reads.expected.reads.fa')
+        expected1 = os.path.join(data_dir, 'read_store_test_get_reads.expected.reads_subset.1.fq')
+        expected2 = os.path.join(data_dir, 'read_store_test_get_reads.expected.reads_subset.2.fq')
+        wanted_ids = {1, 11}
         outprefix = 'tmp.read_store_test_get_reads'
-        reads = outprefix + '.reads_1.fa'
+        reads1 = outprefix + '.reads_1.fq'
+        reads2 = outprefix + '.reads_2.fq'
         rstore = read_store.ReadStore(infile, outprefix)
-        rstore.get_reads('cluster2', reads, fasta=True)
-        self.assertTrue(filecmp.cmp(expected, reads))
+        rstore.get_reads('cluster2', reads1, out2=reads2, wanted_ids=wanted_ids)
+        self.assertTrue(filecmp.cmp(expected1, reads1))
+        self.assertTrue(filecmp.cmp(expected2, reads2))
         os.unlink(outprefix + '.gz')
         os.unlink(outprefix + '.gz.tbi')
-        os.unlink(reads)
+        os.unlink(reads1)
+        os.unlink(reads2)
 
 
     def test_clean(self):
