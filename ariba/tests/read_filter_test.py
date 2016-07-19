@@ -34,3 +34,21 @@ class TestReadFilter(unittest.TestCase):
         got = read_filter.ReadFilter._cdhit_clstr_to_reads(infile)
         self.assertEqual(expected, got)
 
+
+    def test_run(self):
+        '''test run'''
+        rstore_infile = os.path.join(data_dir, 'read_filter_test_run.in.read_store')
+        ref_fasta = os.path.join(data_dir, 'read_filter_test_run.in.ref.fa')
+        expected_reads1 = os.path.join(data_dir, 'read_filter_test_run.expected.reads_1.fq')
+        expected_reads2 = os.path.join(data_dir, 'read_filter_test_run.expected.reads_2.fq')
+        tmp_rstore_prefix = 'tmp.filter_test_run.read_store'
+        tmp_reads1 = 'tmp.filter_test_run.reads_1.fq'
+        tmp_reads2 = 'tmp.filter_test_run.reads_2.fq'
+        rstore = read_store.ReadStore(rstore_infile, tmp_rstore_prefix)
+        rfilter = read_filter.ReadFilter(rstore, ref_fasta, '1', sys.stdout)
+        rfilter.run(tmp_reads1, tmp_reads2)
+        self.assertTrue(filecmp.cmp(expected_reads1, tmp_reads1, shallow=False))
+        self.assertTrue(filecmp.cmp(expected_reads2, tmp_reads2, shallow=False))
+        os.unlink(tmp_reads1)
+        os.unlink(tmp_reads2)
+        rstore.clean()
