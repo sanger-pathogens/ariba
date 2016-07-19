@@ -3,7 +3,7 @@ import sys
 import shutil
 import pyfastaq
 import pymummer
-from ariba import common, mapping, bam_parse, external_progs
+from ariba import common, mapping, bam_parse, external_progs, mash
 
 class Error (Exception): pass
 
@@ -12,6 +12,7 @@ class Assembly:
       reads1,
       reads2,
       ref_fasta,
+      ref_fastas,
       working_dir,
       final_assembly_fa,
       final_assembly_bam,
@@ -36,6 +37,7 @@ class Assembly:
         self.reads1 = os.path.abspath(reads1)
         self.reads2 = os.path.abspath(reads2)
         self.ref_fasta = os.path.abspath(ref_fasta)
+        self.ref_fastas = os.path.abspath(ref_fastas)
         self.working_dir = os.path.abspath(working_dir)
         self.final_assembly_fa = os.path.abspath(final_assembly_fa)
         self.final_assembly_bam = os.path.abspath(final_assembly_bam)
@@ -74,6 +76,7 @@ class Assembly:
         self.gapfill_dir = os.path.join(self.working_dir, 'Gapfill')
         self.gapfilled_scaffolds = os.path.join(self.working_dir, 'scaffolds.gapfilled.fa')
         self.gapfilled_length_filtered = os.path.join(self.working_dir, 'scaffolds.gapfilled.length_filtered.fa')
+        self.mash_dist_file = os.path.join(self.working_dir, 'mash_dist_to_ref_seqs')
 
 
     @staticmethod
@@ -343,6 +346,11 @@ class Assembly:
                 # This is to make this object picklable, to keep multithreading happy
                 self.log_fh = None
                 return
+
+            self.ref_seq_name = masher.mash.Masher(self.ref_fastas, self.final_assembly_fa, self.log_fh, self.extern_progs)
+            masher.run(self.mash_dist_file)
+            faidx.write_fa_subset({self.ref_seq_name}, self.ref_fastas, self.ref_fasta, samtools_exe=self.extern_progs.exe('samtools'), verbose=True, verbose_filehandle=self.log_fh)
+            print('Closest reference sequence according to mash: ', self.ref_seq_name, file=self.log_fh)
 
             contigs_both_strands = self._fix_contig_orientation(self.gapfilled_length_filtered, self.ref_fasta, self.final_assembly_fa, min_id=self.nucmer_min_id, min_length=self.nucmer_min_len, breaklen=self.nucmer_breaklen)
             self.has_contigs_on_both_strands = len(contigs_both_strands) > 0

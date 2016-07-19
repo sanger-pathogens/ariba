@@ -36,7 +36,7 @@ class TestAssembly(unittest.TestCase):
         reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
         ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')
         tmp_dir = 'tmp.test_assemble_with_spades'
-        a = assembly.Assembly(reads1, reads2, ref_fasta, tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
+        a = assembly.Assembly(reads1, reads2, 'not needed', ref_fasta, tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
         a._assemble_with_spades(unittest=True)
         self.assertTrue(a.assembled_ok)
         shutil.rmtree(tmp_dir)
@@ -48,7 +48,7 @@ class TestAssembly(unittest.TestCase):
         reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
         ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')
         tmp_dir = 'tmp.test_assemble_with_spades'
-        a = assembly.Assembly(reads1, reads2, ref_fasta, tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
+        a = assembly.Assembly(reads1, reads2, 'not needed', ref_fasta, tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
         a._assemble_with_spades(unittest=False)
         self.assertFalse(a.assembled_ok)
         shutil.rmtree(tmp_dir)
@@ -60,7 +60,7 @@ class TestAssembly(unittest.TestCase):
         reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
         ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')
         tmp_dir = 'tmp.test_scaffold_with_sspace'
-        a = assembly.Assembly(reads1, reads2, ref_fasta, tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
+        a = assembly.Assembly(reads1, reads2, 'not needed', ref_fasta, tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
         a.assembly_contigs = os.path.join(data_dir, 'assembly_test_scaffold_with_sspace_contigs.fa')
         a._scaffold_with_sspace()
         self.assertTrue(os.path.exists(a.scaffolder_scaffolds))
@@ -90,7 +90,7 @@ class TestAssembly(unittest.TestCase):
         reads1 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_1.fq')
         reads2 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_2.fq')
         tmp_dir = 'tmp.gap_fill_with_gapfiller_no_gaps'
-        a = assembly.Assembly(reads1, reads2, 'ref.fa', tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
+        a = assembly.Assembly(reads1, reads2, 'not needed', 'ref.fa', tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
         a.scaffolder_scaffolds = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller.scaffolds_no_gaps.fa')
         a._gap_fill_with_gapfiller()
         self.assertTrue(os.path.exists(a.gapfilled_scaffolds))
@@ -102,7 +102,7 @@ class TestAssembly(unittest.TestCase):
         reads1 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_1.fq')
         reads2 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_2.fq')
         tmp_dir = 'tmp.gap_fill_with_gapfiller_with_gaps'
-        a = assembly.Assembly(reads1, reads2, 'ref.fa', tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
+        a = assembly.Assembly(reads1, reads2, 'not needed', 'ref.fa', tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', sys.stdout)
         a.scaffolder_scaffolds = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller.scaffolds_with_gaps.fa')
         a._gap_fill_with_gapfiller()
         self.assertTrue(os.path.exists(a.gapfilled_scaffolds))
