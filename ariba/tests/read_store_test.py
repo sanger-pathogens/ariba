@@ -54,7 +54,9 @@ class TestReadStore(unittest.TestCase):
         reads1 = outprefix + '.reads_1.fq'
         reads2 = outprefix + '.reads_2.fq'
         rstore = read_store.ReadStore(infile, outprefix)
-        rstore.get_reads('cluster2', reads1, out2=reads2)
+        got_reads, got_bases = rstore.get_reads('cluster2', reads1, out2=reads2)
+        self.assertEqual(6, got_reads)
+        self.assertEqual(24, got_bases)
         self.assertTrue(filecmp.cmp(expected1, reads1))
         self.assertTrue(filecmp.cmp(expected2, reads2))
         os.unlink(outprefix + '.gz')
@@ -70,7 +72,9 @@ class TestReadStore(unittest.TestCase):
         outprefix = 'tmp.read_store_test_get_reads'
         reads = outprefix + '.reads_1.fq'
         rstore = read_store.ReadStore(infile, outprefix)
-        rstore.get_reads('cluster2', reads)
+        got_reads, got_bases = rstore.get_reads('cluster2', reads)
+        self.assertEqual(6, got_reads)
+        self.assertEqual(24, got_bases)
         self.assertTrue(filecmp.cmp(expected, reads))
         os.unlink(outprefix + '.gz')
         os.unlink(outprefix + '.gz.tbi')
@@ -86,7 +90,9 @@ class TestReadStore(unittest.TestCase):
         reads1 = outprefix + '.reads_1.fa'
         reads2 = outprefix + '.reads_2.fa'
         rstore = read_store.ReadStore(infile, outprefix)
-        rstore.get_reads('cluster2', reads1, out2=reads2, fasta=True)
+        got_reads, got_bases = rstore.get_reads('cluster2', reads1, out2=reads2, fasta=True)
+        self.assertEqual(6, got_reads)
+        self.assertEqual(24, got_bases)
         self.assertTrue(filecmp.cmp(expected1, reads1))
         self.assertTrue(filecmp.cmp(expected2, reads2))
         os.unlink(outprefix + '.gz')
@@ -105,7 +111,9 @@ class TestReadStore(unittest.TestCase):
         reads1 = outprefix + '.reads_1.fq'
         reads2 = outprefix + '.reads_2.fq'
         rstore = read_store.ReadStore(infile, outprefix)
-        rstore.get_reads('cluster2', reads1, out2=reads2, wanted_ids=wanted_ids)
+        got_reads, got_bases = rstore.get_reads('cluster2', reads1, out2=reads2, wanted_ids=wanted_ids)
+        self.assertEqual(4, got_reads)
+        self.assertEqual(16, got_bases)
         self.assertTrue(filecmp.cmp(expected1, reads1))
         self.assertTrue(filecmp.cmp(expected2, reads2))
         os.unlink(outprefix + '.gz')
