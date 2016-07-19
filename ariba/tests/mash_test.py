@@ -10,7 +10,7 @@ modules_dir = os.path.dirname(os.path.abspath(mash.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 
-class TestReadFilter(unittest.TestCase):
+class TestMash(unittest.TestCase):
     def test_run(self):
         '''test run'''
         ref_in = os.path.join(data_dir, 'mash_test_run.in.ref.fa')
