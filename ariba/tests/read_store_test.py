@@ -95,6 +95,20 @@ class TestReadStore(unittest.TestCase):
         os.unlink(reads2)
 
 
+    def test_get_reads_fa_interleave(self):
+        '''Test get_reads fasta interleaved'''
+        infile = os.path.join(data_dir, 'read_store_test_get_reads.in')
+        expected = os.path.join(data_dir, 'read_store_test_get_reads.expected.reads.fa')
+        outprefix = 'tmp.read_store_test_get_reads'
+        reads = outprefix + '.reads_1.fa'
+        rstore = read_store.ReadStore(infile, outprefix)
+        rstore.get_reads('cluster2', reads, fasta=True)
+        self.assertTrue(filecmp.cmp(expected, reads))
+        os.unlink(outprefix + '.gz')
+        os.unlink(outprefix + '.gz.tbi')
+        os.unlink(reads)
+
+
     def test_clean(self):
         '''Test clean'''
         infile = os.path.join(data_dir, 'read_store_test_clean.in')
