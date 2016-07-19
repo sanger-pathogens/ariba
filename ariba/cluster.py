@@ -295,30 +295,11 @@ class Cluster:
 
     def _run(self):
         print('{:_^79}'.format(' LOG FILE START ' + self.name + ' '), file=self.log_fh, flush=True)
-
-        #print('Choosing best reference sequence:', file=self.log_fh, flush=True)
-        #seq_chooser = best_seq_chooser.BestSeqChooser(
-        #    self.all_reads1,
-        #    self.all_reads2,
-        #    self.references_fa,
-        #    self.log_fh,
-        #    samtools_exe=self.extern_progs.exe('samtools'),
-        #    bowtie2_exe=self.extern_progs.exe('bowtie2'),
-        #    bowtie2_preset=self.bowtie2_preset,
-        #    threads=1,
-        #)
-        #self.ref_sequence = seq_chooser.best_seq(self.reference_fa)
-        #self._clean_file(self.references_fa)
-        #self._clean_file(self.references_fa + '.fai')
-
-        #if self.ref_sequence is None:
-        #    self.status_flag.add('ref_seq_choose_fail')
-        #    self.assembled_ok = False
-
         wanted_reads = self._number_of_reads_for_assembly(self.longest_ref_length, self.reads_insert, self.total_reads_bases, self.total_reads, self.assembly_coverage)
         made_reads = self._make_reads_for_assembly(wanted_reads, self.total_reads, self.all_reads1, self.all_reads2, self.reads_for_assembly1, self.reads_for_assembly2, random_seed=self.random_seed)
         print('\nUsing', made_reads, 'from a total of', self.total_reads, 'for assembly.', file=self.log_fh, flush=True)
         print('Assembling reads:', file=self.log_fh, flush=True)
+
         self.assembly = assembly.Assembly(
           self.reads_for_assembly1,
           self.reads_for_assembly2,
