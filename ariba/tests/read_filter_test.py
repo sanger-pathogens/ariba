@@ -26,3 +26,11 @@ class TestReadFilter(unittest.TestCase):
         self.assertTrue(filecmp.cmp(got_clustr, expected_clstr, shallow=False))
         os.unlink(got_clustr)
 
+
+    def test_cdhit_clstr_to_reads(self):
+        '''test _cdhit_clstr_to_reads'''
+        infile = os.path.join(data_dir, 'read_filter_cdhit_clstr_to_reads.in.clstr')
+        expected = {1, 3, 5, 7, 9, 11}
+        got = read_filter.ReadFilter._cdhit_clstr_to_reads(infile)
+        self.assertEqual(expected, got)
+

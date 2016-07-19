@@ -1,8 +1,9 @@
 import os
 import tempfile
 
-from ariba import common
+from ariba import common, external_progs
 
+class Error (Exception): pass
 
 class ReadFilter:
     def __init__(self,
@@ -34,4 +35,22 @@ class ReadFilter:
         ])
         common.syscall(cmd, verbose=verbose, verbose_filehandle=verbose_fh)
         os.unlink(outfile)
+
+
+    @staticmethod
+    def _cdhit_clstr_to_reads(infile):
+        reads = set()
+
+        with open(infile) as f:
+            for line in f:
+                if line.startswith('>') or line.endswith('*\n'):
+                    continue
+
+                fields = line.split()
+                if not (fields[2].startswith('>') and fields[2].endswith('...')):
+                    raise Error('Error parsing the following line of cd-hit-est-2d output from file "' + infile + '":\n' + line)
+
+                reads.add(int(fields[2][1:-5]))
+
+        return reads
 
