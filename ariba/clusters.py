@@ -68,7 +68,6 @@ class Clusters:
       assembled_threshold=0.95,
       unique_threshold=0.03,
       max_gene_nt_extend=30,
-      bowtie2_preset='very-sensitive-local',
       clean=True,
       tmp_dir=None,
     ):
@@ -108,7 +107,6 @@ class Clusters:
         self.verbose = verbose
 
         self.max_insert = max_insert
-        self.bowtie2_preset = bowtie2_preset
 
         self.insert_hist_bin = 10
         self.insert_hist = histogram.Histogram(self.insert_hist_bin)
@@ -132,7 +130,6 @@ class Clusters:
         self.pool = None
         self.fails_dir = os.path.join(self.outdir ,'.fails')
         self.clusters_all_ran_ok = True
-        self.inital_mapping_tool = 'bowtie2'
 
         for d in [self.outdir, self.logs_dir, self.fails_dir]:
             try:
@@ -275,7 +272,7 @@ class Clusters:
         os.unlink(reads_file_for_read_store)
 
         if self.verbose:
-            print('Found', self.proper_pairs, 'proper read pairs')
+            print('Found', self.proper_pairs, 'proper read pairs from minimap')
             print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)
 
 
@@ -381,8 +378,6 @@ class Clusters:
                 new_dir,
                 cluster_name,
                 self.refdata,
-                self.cluster_read_counts[cluster_name],
-                self.cluster_base_counts[cluster_name],
                 fail_file=os.path.join(self.fails_dir, cluster_name),
                 read_store=self.read_store,
                 reference_names=self.cluster_ids[cluster_name],
@@ -406,7 +401,6 @@ class Clusters:
                 assembled_threshold=self.assembled_threshold,
                 unique_threshold=self.unique_threshold,
                 max_gene_nt_extend=self.max_gene_nt_extend,
-                bowtie2_preset=self.bowtie2_preset,
                 spades_other_options=self.spades_other,
                 clean=self.clean,
                 extern_progs=self.extern_progs,

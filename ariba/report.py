@@ -244,7 +244,7 @@ def report_lines(cluster):
         assert len(fields) == len(columns)
         return ['\t'.join(fields)]
     elif cluster.status_flag.has('assembly_fail'):
-        fields = [cluster.ref_sequence.id, cluster.is_gene, cluster.is_variant_only, str(cluster.status_flag), str(cluster.total_reads), cluster.name] + ['.'] * (len(columns) - 6)
+        fields = ['.', '.', '.', str(cluster.status_flag), str(cluster.total_reads), cluster.name] + ['.'] * (len(columns) - 6)
         assert len(fields) == len(columns)
         return ['\t'.join(fields)]
 

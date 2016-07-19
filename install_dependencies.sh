@@ -7,6 +7,7 @@ start_dir=$(pwd)
 BCFTOOLS_VERSION=1.3
 BOWTIE2_VERSION=2.2.8
 CDHIT_VERSION=4.6.5
+MASH_VERSION=1.1
 SAMTOOLS_VERSION=1.3
 MUMMER_VERSION=3.23
 SPADES_VERSION=3.6.0
@@ -14,6 +15,7 @@ SPADES_VERSION=3.6.0
 BCFTOOLS_DOWNLOAD_URL="https://github.com/samtools/bcftools/releases/download/1.3/bcftools-${BCFTOOLS_VERSION}.tar.bz2"
 BOWTIE2_DOWNLOAD_URL="http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip"
 CDHIT_DOWNLOAD_URL="https://github.com/weizhongli/cdhit/archive/V${CDHIT_VERSION}.tar.gz"
+MASH_DOWNLOAD_URL="https://github.com/marbl/Mash/releases/download/v${MASH_VERSION}/mash-Linux64-v${MASH_VERSION}.tar.gz"
 SAMTOOLS_DOWNLOAD_URL="https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VERSION}/samtools-${SAMTOOLS_VERSION}.tar.bz2"
 MUMMER_DOWNLOAD_URL="http://downloads.sourceforge.net/project/mummer/mummer/${MUMMER_VERSION}/MUMmer${MUMMER_VERSION}.tar.gz"
 SPADES_DOWNLOAD_URL="http://spades.bioinf.spbau.ru/release${SPADES_VERSION}/SPAdes-${SPADES_VERSION}-Linux.tar.gz"
@@ -65,13 +67,11 @@ cd $cdhit_dir
 make
 
 
-# --------------- samtools -----------------
+# --------------- mash --------------------
 cd $build_dir
-download $SAMTOOLS_DOWNLOAD_URL "samtools-${SAMTOOLS_VERSION}.tar.bz2"
-samtools_dir="$build_dir/samtools-${SAMTOOLS_VERSION}"
-tar -xjf samtools-${SAMTOOLS_VERSION}.tar.bz2
-cd $samtools_dir
-make
+download $MASH_DOWNLOAD_URL "mash-Linux64-v${MASH_VERSION}.tar.gz"
+mash_dir="$build_dir/mash-Linux64-v${MASH_VERSION}"
+tar zxf mash-Linux64-v${MASH_VERSION}.tar.gz
 
 
 # --------------- mummer ------------------
@@ -80,6 +80,15 @@ download $MUMMER_DOWNLOAD_URL "MUMmer${MUMMER_VERSION}.tar.gz"
 mummer_dir="$build_dir/MUMmer${MUMMER_VERSION}"
 tar -zxf MUMmer${MUMMER_VERSION}.tar.gz
 cd $mummer_dir
+make
+
+
+# --------------- samtools -----------------
+cd $build_dir
+download $SAMTOOLS_DOWNLOAD_URL "samtools-${SAMTOOLS_VERSION}.tar.bz2"
+samtools_dir="$build_dir/samtools-${SAMTOOLS_VERSION}"
+tar -xjf samtools-${SAMTOOLS_VERSION}.tar.bz2
+cd $samtools_dir
 make
 
 
@@ -102,6 +111,7 @@ update_path () {
 update_path ${bcftools_dir}
 update_path ${bowtie2_dir}
 update_path ${cdhit_dir}
+update_path ${mash_dir}
 update_path ${mummer_dir}
 update_path ${samtools_dir}
 update_path ${spades_dir}
