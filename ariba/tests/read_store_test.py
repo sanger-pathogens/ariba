@@ -54,13 +54,27 @@ class TestReadStore(unittest.TestCase):
         reads1 = outprefix + '.reads_1.fq'
         reads2 = outprefix + '.reads_2.fq'
         rstore = read_store.ReadStore(infile, outprefix)
-        rstore.get_reads('cluster2', reads1, reads2)
+        rstore.get_reads('cluster2', reads1, out2=reads2)
         self.assertTrue(filecmp.cmp(expected1, reads1))
         self.assertTrue(filecmp.cmp(expected2, reads2))
         os.unlink(outprefix + '.gz')
         os.unlink(outprefix + '.gz.tbi')
         os.unlink(reads1)
         os.unlink(reads2)
+
+
+    def test_get_reads_fq_interleave(self):
+        '''Test get_reads fastq interleaved'''
+        infile = os.path.join(data_dir, 'read_store_test_get_reads.in')
+        expected = os.path.join(data_dir, 'read_store_test_get_reads.expected.reads.fq')
+        outprefix = 'tmp.read_store_test_get_reads'
+        reads = outprefix + '.reads_1.fq'
+        rstore = read_store.ReadStore(infile, outprefix)
+        rstore.get_reads('cluster2', reads)
+        self.assertTrue(filecmp.cmp(expected, reads))
+        os.unlink(outprefix + '.gz')
+        os.unlink(outprefix + '.gz.tbi')
+        os.unlink(reads)
 
 
     def test_get_reads_fa_pair(self):
@@ -72,7 +86,7 @@ class TestReadStore(unittest.TestCase):
         reads1 = outprefix + '.reads_1.fa'
         reads2 = outprefix + '.reads_2.fa'
         rstore = read_store.ReadStore(infile, outprefix)
-        rstore.get_reads('cluster2', reads1, reads2, fasta=True)
+        rstore.get_reads('cluster2', reads1, out2=reads2, fasta=True)
         self.assertTrue(filecmp.cmp(expected1, reads1))
         self.assertTrue(filecmp.cmp(expected2, reads2))
         os.unlink(outprefix + '.gz')
