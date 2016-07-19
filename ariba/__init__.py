@@ -24,6 +24,7 @@ __all__ = [
     'histogram',
     'link',
     'mapping',
+    'read_filter',
     'read_store',
     'refdata_query',
     'reference_data',
