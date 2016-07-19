@@ -20,7 +20,6 @@ class Assembly:
       scaff_name_prefix='scaffold',
       kmer=0,
       assembler='spades',
-      bowtie2_preset='very-sensitive-local',
       max_insert=1000,
       min_scaff_depth=10,
       min_scaff_length=50,
@@ -47,7 +46,6 @@ class Assembly:
         self.ref_seq_name = None
         self.assembly_kmer = self._get_assembly_kmer(kmer, reads1, reads2)
         self.assembler = assembler
-        self.bowtie2_preset = bowtie2_preset
         self.max_insert = max_insert
         self.min_scaff_depth = min_scaff_depth
         self.min_scaff_length = min_scaff_length
@@ -371,7 +369,6 @@ class Assembly:
                 sort=True,
                 samtools=self.extern_progs.exe('samtools'),
                 bowtie2=self.extern_progs.exe('bowtie2'),
-                bowtie2_preset=self.bowtie2_preset,
                 verbose=True,
                 verbose_filehandle=self.log_fh
             )

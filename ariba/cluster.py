@@ -42,7 +42,6 @@ class Cluster:
       assembled_threshold=0.95,
       unique_threshold=0.03,
       max_gene_nt_extend=30,
-      bowtie2_preset='very-sensitive-local',
       spades_other_options=None,
       clean=True,
       extern_progs=None,
@@ -89,8 +88,6 @@ class Cluster:
         self.bcf_min_dv = bcf_min_dv
         self.bcf_min_dv_over_dp = bcf_min_dv_over_dp
         self.bcf_min_qual = bcf_min_qual
-
-        self.bowtie2_preset = bowtie2_preset
 
         self.threads = threads
         self.assembled_threshold = assembled_threshold
@@ -368,7 +365,7 @@ class Cluster:
                 sort=True,
                 samtools=self.extern_progs.exe('samtools'),
                 bowtie2=self.extern_progs.exe('bowtie2'),
-                bowtie2_preset=self.bowtie2_preset,
+                bowtie2_preset='very-sensitive-local',
                 verbose=True,
                 verbose_filehandle=self.log_fh
             )

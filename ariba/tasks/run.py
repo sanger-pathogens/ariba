@@ -26,8 +26,6 @@ def run():
 
     other_group = parser.add_argument_group('Other options')
     other_group.add_argument('--threads', type=int, help='Number of threads [%(default)s]', default=1, metavar='INT')
-    bowtie2_presets = ['very-fast-local', 'fast-local', 'sensitive-local', 'very-sensitive-local']
-    other_group.add_argument('--bowtie2_preset', choices=bowtie2_presets, help='Preset option for bowtie2 mapping [%(default)s]', default='very-sensitive-local', metavar='|'.join(bowtie2_presets))
     other_group.add_argument('--assembled_threshold', type=float, help='If proportion of gene assembled (regardless of into how many contigs) is at least this value then the flag gene_assembled is set [%(default)s]', default=0.95, metavar='FLOAT (between 0 and 1)')
     other_group.add_argument('--gene_nt_extend', type=int, help='Max number of nucleotides to extend ends of gene matches to look for start/stop codons [%(default)s]', default=30, metavar='INT')
     other_group.add_argument('--unique_threshold', type=float, help='If proportion of bases in gene assembled more than once is <= this value, then the flag unique_contig is set [%(default)s]', default=0.03, metavar='FLOAT (between 0 and 1)')
@@ -79,7 +77,6 @@ def run():
           assembled_threshold=options.assembled_threshold,
           unique_threshold=options.unique_threshold,
           max_gene_nt_extend=options.gene_nt_extend,
-          bowtie2_preset=options.bowtie2_preset,
           clean=(not options.noclean),
           tmp_dir=options.tmp_dir,
         )
