@@ -71,7 +71,7 @@ class ReadFilter:
         )
 
         wanted_read_ids = ReadFilter._cdhit_clstr_to_reads(cdhit_out + '.clstr')
-        self.readstore.get_reads(
+        total_reads, total_bases = self.readstore.get_reads(
             self.cluster_name,
             reads_out1,
             out2=reads_out2,
@@ -80,3 +80,4 @@ class ReadFilter:
         )
 
         shutil.rmtree(tmpdir)
+        return total_reads, total_bases

@@ -46,7 +46,9 @@ class TestReadFilter(unittest.TestCase):
         tmp_reads2 = 'tmp.filter_test_run.reads_2.fq'
         rstore = read_store.ReadStore(rstore_infile, tmp_rstore_prefix)
         rfilter = read_filter.ReadFilter(rstore, ref_fasta, '1', sys.stdout)
-        rfilter.run(tmp_reads1, tmp_reads2)
+        got_reads, got_bases = rfilter.run(tmp_reads1, tmp_reads2)
+        self.assertEqual(12, got_reads)
+        self.assertEqual(912, got_bases)
         self.assertTrue(filecmp.cmp(expected_reads1, tmp_reads1, shallow=False))
         self.assertTrue(filecmp.cmp(expected_reads2, tmp_reads2, shallow=False))
         os.unlink(tmp_reads1)
