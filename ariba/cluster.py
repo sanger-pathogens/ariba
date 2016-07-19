@@ -6,7 +6,7 @@ import math
 import shutil
 import sys
 import pyfastaq
-from ariba import assembly, assembly_compare, assembly_variants, bam_parse, best_seq_chooser, external_progs, flag, mapping, report, samtools_variants
+from ariba import assembly, assembly_compare, assembly_variants, bam_parse, external_progs, flag, mapping, mash, read_filter, report, samtools_variants
 
 class Error (Exception): pass
 
@@ -17,8 +17,8 @@ class Cluster:
       root_dir,
       name,
       refdata,
-      total_reads,
-      total_reads_bases,
+      total_reads=None,
+      total_reads_bases=None,
       fail_file=None,
       read_store=None,
       reference_names=None,
@@ -155,8 +155,6 @@ class Cluster:
 
     def _input_files_exist(self):
         assert self.read_store is None
-        if not (os.path.exists(self.all_reads1) and os.path.exists(self.all_reads2)):
-            raise Error('Error making cluster. Reads files not found')
         if not os.path.exists(self.references_fa):
             raise Error('Error making cluster. References fasta not found')
 
@@ -164,6 +162,8 @@ class Cluster:
     def _set_up_input_files(self):
         if os.path.exists(self.root_dir):
             self._input_files_exist()
+            seqreader = pyfastaq.sequences.file_reader(self.references_fa)
+            self.reference_names = set([x.id for x in seqreader])
         else:
             assert self.read_store is not None
             assert self.reference_names is not None
@@ -171,8 +171,13 @@ class Cluster:
                 os.mkdir(self.root_dir)
             except:
                 raise Error('Error making directory ' + self.root_dir)
+
             self.read_store.get_reads(self.name, self.all_reads1, self.all_reads2)
+            rfilter = read_filter.ReadFilter(self.read_store, self.references_fa, self.name, self.log_fh, self.extern_progs)
+            self.total_reads, self.total_reads_bases = rfilter.run(self.all_reads1, self.all_reads2)
             self.refdata.write_seqs_to_fasta(self.references_fa, self.reference_names)
+
+        self.longest_ref_length = max([len(self.refdata.sequence(name)) for name in self.reference_names])
 
 
     def _clean_file(self, filename):
@@ -210,9 +215,7 @@ class Cluster:
 
 
     @staticmethod
-    def _number_of_reads_for_assembly(reference_fa, insert_size, total_bases, total_reads, coverage):
-        file_reader = pyfastaq.sequences.file_reader(reference_fa)
-        ref_length = sum([len(x) for x in file_reader])
+    def _number_of_reads_for_assembly(ref_length, insert_size, total_bases, total_reads, coverage):
         assert ref_length > 0
         ref_length += 2 * insert_size
         mean_read_length = total_bases / total_reads
@@ -296,60 +299,64 @@ class Cluster:
     def _run(self):
         print('{:_^79}'.format(' LOG FILE START ' + self.name + ' '), file=self.log_fh, flush=True)
 
-        print('Choosing best reference sequence:', file=self.log_fh, flush=True)
-        seq_chooser = best_seq_chooser.BestSeqChooser(
-            self.all_reads1,
-            self.all_reads2,
-            self.references_fa,
-            self.log_fh,
-            samtools_exe=self.extern_progs.exe('samtools'),
-            bowtie2_exe=self.extern_progs.exe('bowtie2'),
-            bowtie2_preset=self.bowtie2_preset,
-            threads=1,
-        )
-        self.ref_sequence = seq_chooser.best_seq(self.reference_fa)
-        self._clean_file(self.references_fa)
-        self._clean_file(self.references_fa + '.fai')
+        #print('Choosing best reference sequence:', file=self.log_fh, flush=True)
+        #seq_chooser = best_seq_chooser.BestSeqChooser(
+        #    self.all_reads1,
+        #    self.all_reads2,
+        #    self.references_fa,
+        #    self.log_fh,
+        #    samtools_exe=self.extern_progs.exe('samtools'),
+        #    bowtie2_exe=self.extern_progs.exe('bowtie2'),
+        #    bowtie2_preset=self.bowtie2_preset,
+        #    threads=1,
+        #)
+        #self.ref_sequence = seq_chooser.best_seq(self.reference_fa)
+        #self._clean_file(self.references_fa)
+        #self._clean_file(self.references_fa + '.fai')
 
-        if self.ref_sequence is None:
-            self.status_flag.add('ref_seq_choose_fail')
-            self.assembled_ok = False
-        else:
-            wanted_reads = self._number_of_reads_for_assembly(self.reference_fa, self.reads_insert, self.total_reads_bases, self.total_reads, self.assembly_coverage)
-            made_reads = self._make_reads_for_assembly(wanted_reads, self.total_reads, self.all_reads1, self.all_reads2, self.reads_for_assembly1, self.reads_for_assembly2, random_seed=self.random_seed)
-            print('\nUsing', made_reads, 'from a total of', self.total_reads, 'for assembly.', file=self.log_fh, flush=True)
-            print('Assembling reads:', file=self.log_fh, flush=True)
+        #if self.ref_sequence is None:
+        #    self.status_flag.add('ref_seq_choose_fail')
+        #    self.assembled_ok = False
+
+        wanted_reads = self._number_of_reads_for_assembly(self.longest_ref_length, self.reads_insert, self.total_reads_bases, self.total_reads, self.assembly_coverage)
+        made_reads = self._make_reads_for_assembly(wanted_reads, self.total_reads, self.all_reads1, self.all_reads2, self.reads_for_assembly1, self.reads_for_assembly2, random_seed=self.random_seed)
+        print('\nUsing', made_reads, 'from a total of', self.total_reads, 'for assembly.', file=self.log_fh, flush=True)
+        print('Assembling reads:', file=self.log_fh, flush=True)
+        self.assembly = assembly.Assembly(
+          self.reads_for_assembly1,
+          self.reads_for_assembly2,
+          self.reference_fa,
+          self.references_fa,
+          self.assembly_dir,
+          self.final_assembly_fa,
+          self.final_assembly_bam,
+          self.log_fh,
+          scaff_name_prefix=self.name,
+          kmer=self.assembly_kmer,
+          assembler=self.assembler,
+          spades_other_options=self.spades_other_options,
+          sspace_k=self.sspace_k,
+          sspace_sd=self.sspace_sd,
+          reads_insert=self.reads_insert,
+          extern_progs=self.extern_progs,
+          clean=self.clean
+        )
+
+        self.assembly.run()
+        self.assembled_ok = self.assembly.assembled_ok
+        self._clean_file(self.reads_for_assembly1)
+        self._clean_file(self.reads_for_assembly2)
+        if self.clean:
+            print('Deleting Assembly directory', self.assembly_dir, file=self.log_fh, flush=True)
+            shutil.rmtree(self.assembly_dir)
+
+
+        if self.assembled_ok and self.assembly.ref_seq_name is not None:
+            self.ref_sequence = self.refdata.sequence(self.assembly.ref_seq_name)
             is_gene, is_variant_only = self.refdata.sequence_type(self.ref_sequence.id)
             self.is_gene = '1' if is_gene == 'p' else '0'
             self.is_variant_only = '1' if is_variant_only else '0'
-            self.assembly = assembly.Assembly(
-              self.reads_for_assembly1,
-              self.reads_for_assembly2,
-              self.reference_fa,
-              self.assembly_dir,
-              self.final_assembly_fa,
-              self.final_assembly_bam,
-              self.log_fh,
-              scaff_name_prefix=self.ref_sequence.id,
-              kmer=self.assembly_kmer,
-              assembler=self.assembler,
-              spades_other_options=self.spades_other_options,
-              sspace_k=self.sspace_k,
-              sspace_sd=self.sspace_sd,
-              reads_insert=self.reads_insert,
-              extern_progs=self.extern_progs,
-              clean=self.clean
-            )
 
-            self.assembly.run()
-            self.assembled_ok = self.assembly.assembled_ok
-            self._clean_file(self.reads_for_assembly1)
-            self._clean_file(self.reads_for_assembly2)
-            if self.clean:
-                print('Deleting Assembly directory', self.assembly_dir, file=self.log_fh, flush=True)
-                shutil.rmtree(self.assembly_dir)
-
-        if self.assembled_ok:
             print('\nAssembly was successful\n\nMapping reads to assembly:', file=self.log_fh, flush=True)
 
             mapping.run_bowtie2(
@@ -426,9 +433,12 @@ class Cluster:
 
             if self.samtools_vars.variants_in_coords(self.assembly_compare.assembly_match_coords(), self.samtools_vars.vcf_file):
                 self.status_flag.add('variants_suggest_collapsed_repeat')
-        else:
+        elif not self.assembled_ok:
             print('\nAssembly failed\n', file=self.log_fh, flush=True)
             self.status_flag.add('assembly_fail')
+        elif self.assembly.ref_seq_name is None:
+            print('\nCould not get closest reference sequence\n', file=self.log_fh, flush=True)
+            self.status_flag.add('ref_seq_choose_fail')
 
 
         print('\nMaking report lines', file=self.log_fh, flush=True)

@@ -275,7 +275,7 @@ class Clusters:
         os.unlink(reads_file_for_read_store)
 
         if self.verbose:
-            print('Found', self.proper_pairs, 'proper read pairs')
+            print('Found', self.proper_pairs, 'proper read pairs from minimap')
             print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)
 
 
@@ -381,8 +381,6 @@ class Clusters:
                 new_dir,
                 cluster_name,
                 self.refdata,
-                self.cluster_read_counts[cluster_name],
-                self.cluster_base_counts[cluster_name],
                 fail_file=os.path.join(self.fails_dir, cluster_name),
                 read_store=self.read_store,
                 reference_names=self.cluster_ids[cluster_name],
