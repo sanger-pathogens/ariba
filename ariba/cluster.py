@@ -157,10 +157,14 @@ class Cluster:
 
 
     def _set_up_input_files(self):
+        if self.logfile is None:
+            self.logfile = os.path.join(self.root_dir, 'log.txt')
+
         if os.path.exists(self.root_dir):
             self._input_files_exist()
             seqreader = pyfastaq.sequences.file_reader(self.references_fa)
             self.reference_names = set([x.id for x in seqreader])
+            self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
         else:
             assert self.read_store is not None
             assert self.reference_names is not None
@@ -169,6 +173,8 @@ class Cluster:
             except:
                 raise Error('Error making directory ' + self.root_dir)
 
+            self.refdata.write_seqs_to_fasta(self.references_fa, self.reference_names)
+            self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
             self.read_store.get_reads(self.name, self.all_reads1, self.all_reads2)
             rfilter = read_filter.ReadFilter(self.read_store, self.references_fa, self.name, self.log_fh, self.extern_progs)
             self.total_reads, self.total_reads_bases = rfilter.run(self.all_reads1, self.all_reads2)
@@ -265,11 +271,6 @@ class Cluster:
         for fname in [self.all_reads1, self.all_reads2, self.references_fa]:
             if not os.path.exists(fname):
                 raise Error('File ' + fname + ' not found. Cannot continue')
-
-        if self.logfile is None:
-            self.logfile = os.path.join(self.root_dir, 'log.txt')
-
-        self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
 
         original_dir = os.getcwd()
         os.chdir(self.root_dir)
