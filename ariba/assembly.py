@@ -3,7 +3,7 @@ import sys
 import shutil
 import pyfastaq
 import pymummer
-from ariba import common, mapping, bam_parse, external_progs, mash
+from ariba import common, faidx, mapping, bam_parse, external_progs, mash
 
 class Error (Exception): pass
 
@@ -44,6 +44,7 @@ class Assembly:
         self.log_fh = log_fh
         self.scaff_name_prefix = scaff_name_prefix
 
+        self.ref_seq_name = None
         self.assembly_kmer = self._get_assembly_kmer(kmer, reads1, reads2)
         self.assembler = assembler
         self.bowtie2_preset = bowtie2_preset
@@ -347,8 +348,13 @@ class Assembly:
                 self.log_fh = None
                 return
 
-            self.ref_seq_name = masher.mash.Masher(self.ref_fastas, self.final_assembly_fa, self.log_fh, self.extern_progs)
-            masher.run(self.mash_dist_file)
+            masher = mash.Masher(self.ref_fastas, self.gapfilled_length_filtered, self.log_fh, self.extern_progs)
+            self.ref_seq_name = masher.run(self.mash_dist_file)
+            if self.ref_seq_name is None:
+                print('Could not determine closest reference sequence', file=self.log_fh)
+                self.log_fh = None
+                return
+
             faidx.write_fa_subset({self.ref_seq_name}, self.ref_fastas, self.ref_fasta, samtools_exe=self.extern_progs.exe('samtools'), verbose=True, verbose_filehandle=self.log_fh)
             print('Closest reference sequence according to mash: ', self.ref_seq_name, file=self.log_fh)
 
