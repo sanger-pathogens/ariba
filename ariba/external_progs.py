@@ -20,7 +20,6 @@ prog_to_default = {
     'samtools': 'samtools',
     'spades': 'spades.py',
     'sspace': 'SSPACE_Basic_v2.0.pl',
-    'r': 'Rscript',
 }
 
 
@@ -38,7 +37,6 @@ prog_to_version_cmd = {
     'samtools': ('', re.compile('^Version: ([0-9\.]+)')),
     'spades': ('', re.compile('^SPAdes genome assembler v\.?([0-9\.]+)')),
     'sspace': ('', re.compile('^Usage: .*pl \[SSPACE_(.*)\]')),
-    'r': ('--version', re.compile('^R .*version ([0-9\.]+)')),
 }
 
 
@@ -47,11 +45,10 @@ min_versions = {
     'bowtie2': '2.1.0',
     'cdhit': '4.6',
     'cdhit2d': '4.6',
-    'mash': '1.1',
+    'mash': '1.0.2',
     'nucmer': '3.1',
     'samtools': '1.2',
     'spades': '3.5.0',
-    'r': '2.14.0'
 }
 
 
