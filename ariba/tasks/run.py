@@ -4,37 +4,7 @@ import sys
 import ariba
 
 
-def run():
-    parser = argparse.ArgumentParser(
-        description = 'ARIBA: Antibiotic Resistance Identification By Assembly',
-        usage = 'ariba run [options] <prepareref_dir> <reads1.fq> <reads2.fq> <outdir>')
-    parser.add_argument('prepareref_dir', help='Name of output directory when "ariba prepareref" was run')
-    parser.add_argument('reads_1', help='Name of fwd reads fastq file')
-    parser.add_argument('reads_2', help='Name of rev reads fastq file')
-    parser.add_argument('outdir', help='Output directory (must not already exist)')
-
-    nucmer_group = parser.add_argument_group('nucmer options')
-    nucmer_group.add_argument('--nucmer_min_id', type=int, help='Minimum alignment identity (delta-filter -i) [%(default)s]', default=90, metavar='INT')
-    nucmer_group.add_argument('--nucmer_min_len', type=int, help='Minimum alignment length (delta-filter -i) [%(default)s]', default=20, metavar='INT')
-    nucmer_group.add_argument('--nucmer_breaklen', type=int, help='Value to use for -breaklen when running nucmer [%(default)s]', default=200, metavar='INT')
-
-    assembly_group = parser.add_argument_group('Assembly options')
-    assembly_group.add_argument('--assembly_cov', type=int, help='Target read coverage when sampling reads for assembly [%(default)s]', default=50, metavar='INT')
-    assembly_group.add_argument('--assembler_k', type=int, help='kmer size to use with assembler. You can use 0 to set kmer to 2/3 of the read length. Warning - lower kmers are usually better. [%(default)s]', metavar='INT', default=21)
-    assembly_group.add_argument('--spades_other', help='Put options string to be used with spades in quotes. This will NOT be sanity checked. Do not use -k (see --assembler_k), or -t (use ariba option --threads) [%(default)s]', default="-m 4 --careful", metavar="OPTIONS")
-    assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs. This is also the value used for sspace -k when scaffolding [%(default)s]', default=10, metavar='INT')
-
-    other_group = parser.add_argument_group('Other options')
-    other_group.add_argument('--threads', type=int, help='Number of threads [%(default)s]', default=1, metavar='INT')
-    other_group.add_argument('--assembled_threshold', type=float, help='If proportion of gene assembled (regardless of into how many contigs) is at least this value then the flag gene_assembled is set [%(default)s]', default=0.95, metavar='FLOAT (between 0 and 1)')
-    other_group.add_argument('--gene_nt_extend', type=int, help='Max number of nucleotides to extend ends of gene matches to look for start/stop codons [%(default)s]', default=30, metavar='INT')
-    other_group.add_argument('--unique_threshold', type=float, help='If proportion of bases in gene assembled more than once is <= this value, then the flag unique_contig is set [%(default)s]', default=0.03, metavar='FLOAT (between 0 and 1)')
-    other_group.add_argument('--noclean', action='store_true', help='Do not clean up intermediate files')
-    other_group.add_argument('--tmp_dir', help='Existing directory in which to create a temporary directory used for local assemblies')
-    other_group.add_argument('--verbose', action='store_true', help='Be verbose')
-
-    options = parser.parse_args()
-
+def run(options):
     reads_not_found = []
 
     for filename in [options.reads_1, options.reads_2]:

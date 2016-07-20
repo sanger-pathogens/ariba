@@ -14,12 +14,7 @@ def boxymcboxface(message):
     print('-' * 79)
 
 
-def run():
-    parser = argparse.ArgumentParser(
-        description = 'Run ARIBA on a small test dataset',
-        usage = 'ariba test [options] <outdir>')
-    parser.add_argument('--threads', type=int, help='Number of threads [%(default)s]', default=1, metavar='INT')
-    parser.add_argument('outdir', help='Name of output directory')
+def run(options):
     options = parser.parse_args()
     ariba_exe = os.path.abspath(sys.argv[0])
 
