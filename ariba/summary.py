@@ -4,6 +4,7 @@ import re
 import sys
 import openpyxl
 import pyfastaq
+import dendropy
 from ariba import flag, common, report, summary_cluster, summary_sample
 
 class Error (Exception): pass
@@ -328,10 +329,10 @@ class Summary:
                 scores[j][i] = scores[i][j]
 
         with open(outfile, 'w') as f:
-            sample_names = [x[0] for x in lines]
+            sample_names = [''] + [x[0] for x in lines]
             print(*sample_names, sep='\t', file=f)
             for i in range(len(scores)):
-                print(lines[i][0], *scores[i][1:], sep='\t', file=f)
+                print(lines[i][0], *scores[i], sep='\t', file=f)
 
 
     @classmethod
