@@ -337,18 +337,11 @@ class Summary:
 
     @classmethod
     def _newick_from_dist_matrix(cls, distance_file, outfile):
-        r_script = outfile + '.tmp.R'
-
-        with open(r_script, 'w') as f:
-            print('library(ape)', file=f)
-            print('a=read.table("', distance_file, '", header=TRUE, row.names=1, comment.char="")', sep='', file=f)
-            print('h=hclust(dist(a))', file=f)
-            print('write.tree(as.phylo(h), file="', outfile, '")', sep='', file=f)
-
-        common.syscall('Rscript --no-save ' + r_script)
-        if os.path.exists(r_script + 'out'):
-            os.unlink(r_script + 'out')
-        os.unlink(r_script)
+        with open(distance_file) as f:
+            pdm = dendropy.PhylogeneticDistanceMatrix.from_csv(src=f, delimiter='\t')
+        upgma_tree = pdm.upgma_tree()
+        with open(outfile, 'w') as f:
+            print(upgma_tree.as_string("newick"), end='', file=f)
 
 
     def run(self):
