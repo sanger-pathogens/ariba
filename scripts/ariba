@@ -1,53 +1,202 @@
 #!/usr/bin/env python3
 
-import sys
-
-tasks = {
-    'getref': 'Download reference data',
-    'prepareref': 'Prepare reference data for running the pipeline',
-    'refquery': 'Get cluster or sequence info from output of prepareref',
-    'reportfilter': 'Filter report.tsv file',
-    'run': 'Run the ARIBA local assembly pipeline',
-    'summary': 'Summarise multiple reports made by "run"',
-    'flag': 'Translate the meaning of a flag output by the pipeline',
-    'aln2meta': 'Make metadata input to preparef, using multialignment and SNPs',
-    'test': 'Run on small test dataset',
-    'version': 'Print version and exit',
-}
+import ariba
+import argparse
 
 
-ordered_tasks = [
-    'getref',
-    'prepareref',
-    'run',
-    'reportfilter',
-    'summary',
-    'flag',
+parser = argparse.ArgumentParser(
+    prog='ariba',
+    usage='ariba <command> <options>',
+    description='ARIBA: Antibiotic Resistance Identification By Assembly',
+    add_help=False
+)
+subparsers = parser.add_subparsers(title='Available commands', help='', metavar='')
+
+#---------------------------- aln2meta ------------------------------------
+coding_choices = ['coding', 'noncoding']
+subparser_aln2meta = subparsers.add_parser(
     'aln2meta',
+    help='Converts multi-aln fasta and SNPs to metadata',
+    usage='ariba aln2meta [options] <aln_fasta> <variants_tsv> <(non)coding> <cluster_rep> <outprefix>',
+    description='Make metadata input to prepareref, using multialignment and SNPs',
+)
+
+subparser_aln2meta.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
+subparser_aln2meta.add_argument('aln_fasta', help='Multi-fasta file of alignments')
+subparser_aln2meta.add_argument('variants_tsv', help='TSV file of variants information')
+subparser_aln2meta.add_argument('coding_or_non', help='Sequences are coding or noncoding. Must be one of: ' + ' '.join(coding_choices), choices=coding_choices, metavar='(non)coding')
+subparser_aln2meta.add_argument('cluster_rep', help='Name of sequence to be used as cluster representative. Must exactly match a sequence in aln_fasta file')
+subparser_aln2meta.add_argument('outprefix', help='Prefix of output filenames')
+subparser_aln2meta.set_defaults(func=ariba.tasks.aln2meta.run)
+
+
+
+#---------------------------- flag ------------------------------------
+subparser_flag = subparsers.add_parser(
+    'flag',
+    help='Translate the meaning of a flag',
+    usage='ariba flag <flag>',
+    description='Translate the meaning of a flag output by ARIBA, found in the report tsv file',
+)
+subparser_flag.add_argument('flag_in', type=int, help='Flag to be translated (an integer)', metavar='flag')
+subparser_flag.set_defaults(func=ariba.tasks.flag.run)
+
+
+#---------------------------- getref ------------------------------------
+allowed_dbs = ['argannot', 'card', 'resfinder','vfdb']
+subparser_getref = subparsers.add_parser(
+    'getref',
+    help='Download reference data',
+    usage='ariba getref [options] <db> <outprefix>',
+    description='Download reference data from one of a few supported public resources',
+)
+subparser_getref.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
+subparser_getref.add_argument('db', help='Database to download. Must be one of: ' + ' '.join(allowed_dbs), choices=allowed_dbs)
+subparser_getref.add_argument('outprefix', help='Prefix of output filenames')
+subparser_getref.set_defaults(func=ariba.tasks.getref.run)
+
+
+#----------------------------- prepareref -------------------------------
+subparser_prepareref = subparsers.add_parser(
+    'prepareref',
+    help='Prepare reference data for input to "run"',
+    usage='ariba prepareref [options] <outdir>',
+    description='Prepare reference data for running the pipeline with "ariba run"',
+    epilog='REQUIRED: -f and -m must each be used at least once',
+)
+input_group = subparser_prepareref.add_argument_group('input files options')
+input_group.add_argument('-f', '--fasta', action='append', dest='fasta_files', required=True, help='REQUIRED. Name of fasta file. Can be used more than once if your sequences are spread over more than on file', metavar='FILENAME')
+input_group.add_argument('-m', '--metadata', action='append', dest='tsv_files', required=True, help='REQUIRED. Name of tsv file of metadata about the input sequences. Can be used more than once if your metadata is spread over more than one file', metavar='FILENAME')
+
+cdhit_group = subparser_prepareref.add_argument_group('cd-hit options')
+cdhit_group.add_argument('--no_cdhit', action='store_true', help='Do not run cd-hit. Each input sequence is put into its own "cluster". Incompatible with --cdhit_clusters.')
+cdhit_group.add_argument('--cdhit_clusters', help='File specifying how the sequences should be clustered. Will be used instead of running cdhit. Format is one cluster per line. Sequence names separated by whitespace. First name in line is the cluster representative. Incompatible with --no_cdhit', metavar='FILENAME')
+cdhit_group.add_argument('--cdhit_min_id', type=float, help='Sequence identity threshold (cd-hit option -c) [%(default)s]', default=0.9, metavar='FLOAT')
+cdhit_group.add_argument('--cdhit_min_length', type=float, help='length difference cutoff (cd-hit option -s) [%(default)s]', default=0.9, metavar='FLOAT')
+
+other_group = subparser_prepareref.add_argument_group('other options')
+other_group.add_argument('--min_gene_length', type=int, help='Minimum allowed length in nucleotides of reference genes [%(default)s]', metavar='INT', default=6)
+other_group.add_argument('--max_gene_length', type=int, help='Maximum allowed length in nucleotides of reference genes [%(default)s]', metavar='INT', default=10000)
+other_group.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
+other_group.add_argument('--threads', type=int, help='Number of threads (currently only applies to cdhit) [%(default)s]', default=1, metavar='INT')
+other_group.add_argument('--verbose', action='store_true', help='Be verbose')
+
+subparser_prepareref.add_argument('outdir', help='Output directory (must not already exist)')
+subparser_prepareref.set_defaults(func=ariba.tasks.prepareref.run)
+
+
+
+#----------------------------- refquery -------------------------------
+subparser_refquery = subparsers.add_parser(
     'refquery',
+    help='Get cluster or sequence info from prepareref output',
+    usage='ariba refquery <prepareref directory> <cluster|seq> <cluster name|sequence name>',
+    description='Get cluster or sequence info from the output directory made by prepareref',
+)
+subparser_refquery.add_argument('prepareref_dir', help='Name of directory output by prepareref')
+subparser_refquery.add_argument('query_type', choices=['cluster', 'seq'], help='Use "cluster" to get the sequences in a cluster, or "seq" to get information about a sequence')
+subparser_refquery.add_argument('search_name', help='Name of cluster or sequence to search for')
+subparser_refquery.set_defaults(func=ariba.tasks.refquery.run)
+
+
+#----------------------------- reportfilter -------------------------------
+subparser_reportfilter = subparsers.add_parser(
+    'reportfilter',
+    help='Filters a report tsv file',
+    description='Filters an ARIBA report tsv file made by "ariba run"',
+    usage='ariba reportfilter [options] <infile> <outfile>'
+)
+subparser_reportfilter.add_argument('--exclude_flags', help='Comma-separated list of flags to exclude. [%(default)s]', default='assembly_fail,ref_seq_choose_fail')
+subparser_reportfilter.add_argument('--min_pc_id', type=float, help='Minimum percent identity of nucmer match between contig and reference [%(default)s]', default=90.0, metavar='FLOAT')
+subparser_reportfilter.add_argument('--min_ref_base_asm', type=int, help='Minimum number of reference bases matching assembly [%(default)s]', default=1, metavar='INT')
+subparser_reportfilter.add_argument('--keep_syn', action='store_true', help='Keep synonymous variants (by default they are removed')
+subparser_reportfilter.add_argument('--discard_without_known_var', action='store_true', help='Applies to variant only genes. Filter out where there is a known variant, but the assembly has the wild type. By default these rows are kept.')
+subparser_reportfilter.add_argument('infile', help='Name of input tsv file')
+subparser_reportfilter.add_argument('outfile', help='Name of output tsv file')
+subparser_reportfilter.set_defaults(func=ariba.tasks.reportfilter.run)
+
+
+#----------------------------- run -------------------------------
+subparser_run = subparsers.add_parser(
+    'run',
+    help='Run the local assembly pipeline',
+    usage='ariba run [options] <prepareref_dir> <reads1.fq> <reads2.fq> <outdir>',
+    description='Runs the local assembly pipeline. Input is dir made by prepareref, and paired reads'
+)
+
+subparser_run.add_argument('prepareref_dir', help='Name of output directory when "ariba prepareref" was run')
+subparser_run.add_argument('reads_1', help='Name of fwd reads fastq file')
+subparser_run.add_argument('reads_2', help='Name of rev reads fastq file')
+subparser_run.add_argument('outdir', help='Output directory (must not already exist)')
+
+nucmer_group = subparser_run.add_argument_group('nucmer options')
+nucmer_group.add_argument('--nucmer_min_id', type=int, help='Minimum alignment identity (delta-filter -i) [%(default)s]', default=90, metavar='INT')
+nucmer_group.add_argument('--nucmer_min_len', type=int, help='Minimum alignment length (delta-filter -i) [%(default)s]', default=20, metavar='INT')
+nucmer_group.add_argument('--nucmer_breaklen', type=int, help='Value to use for -breaklen when running nucmer [%(default)s]', default=200, metavar='INT')
+
+assembly_group = subparser_run.add_argument_group('Assembly options')
+assembly_group.add_argument('--assembly_cov', type=int, help='Target read coverage when sampling reads for assembly [%(default)s]', default=50, metavar='INT')
+assembly_group.add_argument('--assembler_k', type=int, help='kmer size to use with assembler. You can use 0 to set kmer to 2/3 of the read length. Warning - lower kmers are usually better. [%(default)s]', metavar='INT', default=21)
+assembly_group.add_argument('--spades_other', help='Put options string to be used with spades in quotes. This will NOT be sanity checked. Do not use -k (see --assembler_k), or -t (use ariba option --threads) [%(default)s]', default="-m 4 --careful", metavar="OPTIONS")
+assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs. This is also the value used for sspace -k when scaffolding [%(default)s]', default=10, metavar='INT')
+
+other_group = subparser_run.add_argument_group('Other options')
+other_group.add_argument('--threads', type=int, help='Number of threads [%(default)s]', default=1, metavar='INT')
+other_group.add_argument('--assembled_threshold', type=float, help='If proportion of gene assembled (regardless of into how many contigs) is at least this value then the flag gene_assembled is set [%(default)s]', default=0.95, metavar='FLOAT (between 0 and 1)')
+other_group.add_argument('--gene_nt_extend', type=int, help='Max number of nucleotides to extend ends of gene matches to look for start/stop codons [%(default)s]', default=30, metavar='INT')
+other_group.add_argument('--unique_threshold', type=float, help='If proportion of bases in gene assembled more than once is <= this value, then the flag unique_contig is set [%(default)s]', default=0.03, metavar='FLOAT (between 0 and 1)')
+other_group.add_argument('--noclean', action='store_true', help='Do not clean up intermediate files')
+other_group.add_argument('--tmp_dir', help='Existing directory in which to create a temporary directory used for local assemblies')
+other_group.add_argument('--verbose', action='store_true', help='Be verbose')
+subparser_run.set_defaults(func=ariba.tasks.run.run)
+
+
+#----------------------------- summary -------------------------------
+summary_presets = ['minimal', 'cluster_small', 'cluster_all', 'cluster_var_groups', 'cluster_known_vars', 'all', 'all_no_filter']
+subparser_summary = subparsers.add_parser(
+    'summary',
+    help='Summarise multiple reports made by "run"',
+    usage='ariba summary [options] <outprefix> [report1.tsv report2.tsv ...]',
+    description='Make a summary of multiple ARIBA report files, and also make Phandango files',
+    epilog='Files must be listed after the output file and/or the option --fofn must be used. If both used, all files in the filename specified by --fofn AND the files listed after the output file will be used as input.'
+)
+
+subparser_summary.add_argument('-f', '--fofn', help='File of filenames of ariba reports in tsv format (not xls) to be summarised. Must be used if no input files listed after the outfile.', metavar='FILENAME')
+subparser_summary.add_argument('--preset', choices=summary_presets, help='Shorthand for setting --cluster_cols,--col_filter,--row_filter,--known_vars,--novel_vars. Using this overrides those options', metavar='|'.join(summary_presets))
+subparser_summary.add_argument('--cluster_cols', help='Comma separated list of cluster columns to include. Choose from: assembled, match, ref_seq, pct_id, known_var, novel_var [%(default)s]', default='match', metavar='col1,col2,...')
+subparser_summary.add_argument('--col_filter', choices=['y', 'n'], default='y', help='Choose whether columns where all values are "no" or "NA" are removed [%(default)s]', metavar='y|n')
+subparser_summary.add_argument('--row_filter', choices=['y', 'n'], default='y', help='Choose whether rows where all values are "no" or "NA" are removed [%(default)s]', metavar='y|n')
+subparser_summary.add_argument('--var_cols', help='Comma separated list of variant columns to include. Choose from: groups, grouped, ungrouped, novel [none by default]', metavar='col1,col2,...', default='')
+subparser_summary.add_argument('--min_id', type=float, help='Minimum percent identity cutoff to count as assembled [%(default)s]', default=90, metavar='FLOAT')
+subparser_summary.add_argument('--verbose', action='store_true', help='Be verbose')
+subparser_summary.add_argument('outprefix', help='Prefix of output files')
+subparser_summary.add_argument('infiles', nargs='*', help='Files to be summarised')
+subparser_summary.set_defaults(func=ariba.tasks.summary.run)
+
+#----------------------------- test -------------------------------
+subparser_test = subparsers.add_parser(
     'test',
+    help='Run small built-in test dataset',
+    usage='ariba test [options] <outdir>',
+    description='Run ARIBA on a small made up built-in test dataset'
+)
+
+subparser_test.add_argument('--threads', type=int, help='Number of threads [%(default)s]', default=1, metavar='INT')
+subparser_test.add_argument('outdir', help='Name of output directory')
+subparser_test.set_defaults(func=ariba.tasks.test.run)
+
+#----------------------------- version -------------------------------
+subparser_version = subparsers.add_parser(
     'version',
-]
+    help='Get versions and exit',
+    usage='ariba version',
+    description='This reports the version of ARIBA, and also looks for all the dependencies (including python modules) and reports all their versions. Tells you if all looks OK or not'
+)
+subparser_version.set_defaults(func=ariba.tasks.version.run)
 
+args = parser.parse_args()
 
-def print_usage_and_exit():
-    print('Usage: ariba <command> [options] <required arguments>', file=sys.stderr)
-    print('\nTo get minimal usage for a command use:\nariba command', file=sys.stderr)
-    print('\nTo get full help for a command use one of:\nariba command -h\nariba command --help\n', file=sys.stderr)
-    print('\nAvailable commands:\n', file=sys.stderr)
-    max_task_length = max([len(x) for x in list(tasks.keys())]) + 1
-    for task in ordered_tasks:
-        print('{{0: <{}}}'.format(max_task_length).format(task), tasks[task], sep=' ', file=sys.stderr)
-    sys.exit(1)
-
-if len(sys.argv) == 1 or sys.argv[1] in ['-h', '-help', '--help']:
-    print_usage_and_exit()
-
-task = sys.argv.pop(1)
-
-if task not in tasks:
-    print('Task "' + task + '" not recognised. Cannot continue.\n', file=sys.stderr)
-    print_usage_and_exit()
-
-exec('import ariba.tasks.' + task)
-exec('ariba.tasks.' + task + '.run()')
+if hasattr(args, 'func'):
+    args.func(args)
+else:
+    parser.print_help()

@@ -100,7 +100,7 @@ class Clusters:
         self.bam = self.bam_prefix + '.bam'
         self.report_file_all_tsv = os.path.join(self.outdir, 'report.all.tsv')
         self.report_file_all_xls = os.path.join(self.outdir, 'report.all.xls')
-        self.report_file_filtered_prefix = os.path.join(self.outdir, 'report')
+        self.report_file_filtered = os.path.join(self.outdir, 'report.tsv')
         self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa.gz')
         self.catted_genes_matching_refs_fasta = os.path.join(self.outdir, 'assembled_genes.fa.gz')
         self.threads = threads
@@ -558,9 +558,9 @@ class Clusters:
         self._write_reports(self.clusters, self.report_file_all_tsv)
 
         if self.verbose:
-            print('Making', self.report_file_filtered_prefix + '.tsv')
+            print('Making', self.report_file_filtered)
         rf = report_filter.ReportFilter(infile=self.report_file_all_tsv)
-        rf.run(self.report_file_filtered_prefix)
+        rf.run(self.report_file_filtered)
 
         if self.verbose:
             print()
