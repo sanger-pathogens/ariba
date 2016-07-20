@@ -18,5 +18,5 @@ def run(options):
         ignore_not_has_known_variant=options.discard_without_known_var,
         remove_synonymous_snps=not options.keep_syn,
     )
-    rf.run(options.outprefix)
+    rf.run(options.outfile)
 

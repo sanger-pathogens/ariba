@@ -329,9 +329,9 @@ class TestReportFilter(unittest.TestCase):
         '''Test run'''
         infile = os.path.join(data_dir, 'report_filter_test_run.in.tsv')
         expected_file = os.path.join(data_dir, 'report_filter_test_run.expected.tsv')
-        tmpprefix = 'tmp.test.report_filter.run.out'
+        tmpfile = 'tmp.test.report_filter.run.out.tsv'
         rf = report_filter.ReportFilter(infile=infile)
-        rf.run(tmpprefix)
-        self.assertTrue(filecmp.cmp(expected_file, tmpprefix + '.tsv', shallow=False))
-        os.unlink(tmpprefix + '.tsv')
+        rf.run(tmpfile)
+        self.assertTrue(filecmp.cmp(expected_file, tmpfile, shallow=False))
+        os.unlink(tmpfile)
 

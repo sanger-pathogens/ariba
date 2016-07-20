@@ -210,7 +210,7 @@ class ReportFilter:
         workbook.save(outfile)
 
 
-    def run(self, outprefix):
+    def run(self, outfile):
         self._filter_dicts()
-        self._write_report_tsv(outprefix + '.tsv')
+        self._write_report_tsv(outfile)
 

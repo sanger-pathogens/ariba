@@ -103,8 +103,8 @@ subparser_refquery.set_defaults(func=ariba.tasks.refquery.run)
 subparser_reportfilter = subparsers.add_parser(
     'reportfilter',
     help='Filters a report tsv file',
-    description='Filters an ARIBA report tsv file',
-    usage='ariba reportfilter [options] <infile> <outprefix>'
+    description='Filters an ARIBA report tsv file made by "ariba run"',
+    usage='ariba reportfilter [options] <infile> <outfile>'
 )
 subparser_reportfilter.add_argument('--exclude_flags', help='Comma-separated list of flags to exclude. [%(default)s]', default='assembly_fail,ref_seq_choose_fail')
 subparser_reportfilter.add_argument('--min_pc_id', type=float, help='Minimum percent identity of nucmer match between contig and reference [%(default)s]', default=90.0, metavar='FLOAT')
@@ -112,7 +112,7 @@ subparser_reportfilter.add_argument('--min_ref_base_asm', type=int, help='Minimu
 subparser_reportfilter.add_argument('--keep_syn', action='store_true', help='Keep synonymous variants (by default they are removed')
 subparser_reportfilter.add_argument('--discard_without_known_var', action='store_true', help='Applies to variant only genes. Filter out where there is a known variant, but the assembly has the wild type. By default these rows are kept.')
 subparser_reportfilter.add_argument('infile', help='Name of input tsv file')
-subparser_reportfilter.add_argument('outprefix', help='Prefix of output files. outprefix.tsv and outprefix.xls will be made')
+subparser_reportfilter.add_argument('outfile', help='Name of output tsv file')
 subparser_reportfilter.set_defaults(func=ariba.tasks.reportfilter.run)
 
 
