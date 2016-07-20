@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     add_help=False
 )
-subparsers = parser.add_subparsers(help='Name of command to run')
+subparsers = parser.add_subparsers(title='Available commands', help='', metavar='')
 
 #---------------------------- aln2meta ------------------------------------
 coding_choices = ['coding', 'noncoding']
