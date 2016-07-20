@@ -45,7 +45,7 @@ min_versions = {
     'bowtie2': '2.1.0',
     'cdhit': '4.6',
     'cdhit2d': '4.6',
-    'mash': '1.1',
+    'mash': '1.0.2',
     'nucmer': '3.1',
     'samtools': '1.2',
     'spades': '3.5.0',
