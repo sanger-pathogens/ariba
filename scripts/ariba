@@ -5,7 +5,12 @@ import ariba
 import argparse
 
 
-parser = argparse.ArgumentParser(prog='ariba', usage='ariba <command> <options>')
+parser = argparse.ArgumentParser(
+    prog='ariba',
+    usage='ariba <command> <options>',
+    description='ARIBA: Antibiotic Resistance Identification By Assembly',
+    add_help=False
+)
 subparsers = parser.add_subparsers(help='Name of command to run')
 
 #---------------------------- aln2meta ------------------------------------
@@ -14,7 +19,7 @@ subparser_aln2meta = subparsers.add_parser(
     'aln2meta',
     help='Converts multi-aln fasta and SNPs to metadata',
     usage='ariba aln2meta [options] <aln_fasta> <variants_tsv> <(non)coding> <cluster_rep> <outprefix>',
-    description='Make metadata input to preparef, using multialignment and SNPs',
+    description='Make metadata input to prepareref, using multialignment and SNPs',
 )
 
 subparser_aln2meta.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
@@ -186,7 +191,7 @@ subparser_version = subparsers.add_parser(
     'version',
     help='Get versions and exit',
     usage='ariba version',
-    description='This reports the version of ARIBA, and also looks for all the dependcies (including python modules) and reports all their versions. Tells you if all looks OK or not'
+    description='This reports the version of ARIBA, and also looks for all the dependencies (including python modules) and reports all their versions. Tells you if all looks OK or not'
 )
 subparser_version.set_defaults(func=ariba.tasks.version.run)
 
@@ -195,4 +200,4 @@ args = parser.parse_args()
 if hasattr(args, 'func'):
     args.func(args)
 else:
-    parser.parse_args(['-h'])
+    parser.print_help()
