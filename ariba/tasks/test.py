@@ -15,7 +15,6 @@ def boxymcboxface(message):
 
 
 def run(options):
-    options = parser.parse_args()
     ariba_exe = os.path.abspath(sys.argv[0])
 
     print('Running ARIBA on test data...')
