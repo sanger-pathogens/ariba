@@ -8,7 +8,6 @@ parser = argparse.ArgumentParser(
     prog='ariba',
     usage='ariba <command> <options>',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
-    add_help=False
 )
 subparsers = parser.add_subparsers(title='Available commands', help='', metavar='')
 
