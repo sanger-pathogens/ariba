@@ -130,15 +130,16 @@ int run_minimap(char *clustersFileIn, char *refFileIn, char *readsFile1In, char 
             return 1;
         }
 
-        std::map<std::string, MapPositionVector> positions1;
-        std::map<std::string, MapPositionVector> positions2;
-
         // get all hits for the forward and reverse reads
         reg1 = mm_map(mi, ks1->seq.l, ks1->seq.s, &n_reg1, tbuf1, &opt, 0);
         reg2 = mm_map(mi, ks2->seq.l, ks2->seq.s, &n_reg2, tbuf2, &opt, 0);
+
         if (n_reg1 > 0 || n_reg2 > 0)
         {
+            std::map<std::string, MapPositionVector> positions1;
+            std::map<std::string, MapPositionVector> positions2;
             std::set<std::string> refnames;
+
             for (j  =0; j < n_reg1; ++j)
             {
                 const mm_reg1_t *r = &reg1[j];

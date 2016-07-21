@@ -244,7 +244,6 @@ class RefGenesGetter:
     def _get_from_vfdb(self, outprefix):
         outprefix = os.path.abspath(outprefix)
         tmpdir = outprefix + '.tmp.download'
-        current_dir = os.getcwd()
 
         try:
             os.mkdir(tmpdir)

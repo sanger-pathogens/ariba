@@ -1,6 +1,5 @@
 import unittest
 import os
-import copy
 import pyfastaq
 import pysam
 from ariba import bam_parse, link
@@ -96,7 +95,6 @@ class TestBamParse(unittest.TestCase):
         expected_soft_clipped = {'ref1': {2: [1, 0], 58: [0, 1]}}
         expected_unmapped_mates = {'ref1': {2: 1}}
         l = link.Link(None, None, None, s='\t'.join(['ref1', '500', 'R', '240', 'ref2', '500', 'L', '299']))
-        expected_links = {('ref1', 'ref2'): [l]}
         expected_link_keys = [('ref1', 'ref2')]
         self.assertEqual(expected_soft_clipped, bp.soft_clipped)
         self.assertEqual(expected_unmapped_mates, bp.unmapped_mates)

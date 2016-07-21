@@ -1,6 +1,5 @@
 import unittest
 import os
-import copy
 import filecmp
 import pyfastaq
 import pysam
@@ -45,7 +44,7 @@ class TestScaffoldGraph(unittest.TestCase):
 
         g._make_graph(10)
         self.assertEqual(len(g.contig_links), 0)
- 
+
         g._make_graph(1000)
         self.assertEqual(len(g.contig_links), 1)
         expected_contig_links = {
@@ -70,7 +69,7 @@ class TestScaffoldGraph(unittest.TestCase):
             ('ref1', 'ref2'): {'LR': 42, 'RL':41},
             ('ref2', 'ref3'): {'LR': 43, 'RL':42},
             ('ref3', 'ref4'): {'LR': 1, 'RL':2}
-        } 
+        }
 
         g._remove_low_cov_links(42)
         expected = {
@@ -114,11 +113,11 @@ class TestScaffoldGraph(unittest.TestCase):
             link.Link(None, None, None, '\t'.join(['ref1', '100', 'R', '50', 'ref2', '200', 'L', '10']))
         ]
 
-         
+
         g.links[('ref1', 'ref2')].append(link.Link(None, None, None, '\t'.join(['ref1', '100', 'R', '50', 'ref2', '200', 'L', '10'])))
         g.links[('ref1', 'ref2')].append(link.Link(None, None, None, '\t'.join(['ref1', '100', 'L', '50', 'ref2', '200', 'R', '10'])))
 
-       
+
         g.links[('ref3', 'ref4')] = [
             link.Link(None, None, None, '\t'.join(['ref3', '100', 'R', '42', 'ref4', '200', 'L', '42']))
         ]

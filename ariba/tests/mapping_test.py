@@ -1,6 +1,5 @@
 import unittest
 import os
-import shutil
 import pysam
 import pyfastaq
 from ariba import mapping, external_progs

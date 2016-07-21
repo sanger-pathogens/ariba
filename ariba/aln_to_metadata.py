@@ -1,7 +1,5 @@
-import os
 import re
 import sys
-import shutil
 import pyfastaq
 from ariba import sequence_variant
 
@@ -224,14 +222,13 @@ class AlnToMetadata:
                     if seqs_are_coding:
                         assert unpadded_nt_position % 3 == 0
                         unpadded_aa_position = unpadded_nt_position // 3
-                        pos_string = str(unpadded_aa_position)
+
                         if unpadded_aa_sequences[seqname][unpadded_aa_position] in {variant.wild_value, variant.variant_value}:
                             variant_string = variant.wild_value
                         else:
                             variant_string = unpadded_aa_sequences[seqname][unpadded_aa_position]
                         variant_string += str(unpadded_aa_position + 1) + variant.variant_value
                     else:
-                        pos_string = str(unpadded_nt_position)
                         if unpadded_sequences[seqname][unpadded_nt_position] in {variant.wild_value, variant.variant_value}:
                             variant_string = variant.wild_value
                         else:

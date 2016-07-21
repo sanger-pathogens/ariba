@@ -19,8 +19,16 @@ def run(options):
         print('Cannot continue', file=sys.stderr)
         sys.exit(1)
 
+    if (options.reads_1 == options.reads_2):
+        print('Same file provided for forwards and reverse reads. Cannot continue', file=sys.stderr)
+        sys.exit(1)
+
     if not os.path.exists(options.prepareref_dir):
         print('Input directory', options.prepareref_dir, 'not found. Cannot continue', file=sys.stderr)
+        sys.exit(1)
+
+    if os.path.exists(options.outdir):
+        print('Output directory already exists. ARIBA makes the output directory. Cannot continue.', file=sys.stderr)
         sys.exit(1)
 
     extern_progs, version_report_lines = ariba.versions.get_all_versions()

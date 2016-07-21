@@ -1,6 +1,5 @@
 import signal
 import time
-import atexit
 import os
 import copy
 import tempfile
@@ -8,12 +7,10 @@ import pickle
 import itertools
 import sys
 import shutil
-import openpyxl
 import multiprocessing
-import pysam
 import pyfastaq
 import minimap_ariba
-from ariba import cluster, common, mapping, histogram, read_store, report, report_filter, reference_data
+from ariba import cluster, common, histogram, read_store, report, report_filter, reference_data
 
 class Error (Exception): pass
 
@@ -423,18 +420,13 @@ class Clusters:
 
 
     @staticmethod
-    def _write_reports(clusters_in, tsv_out, xls_out=None):
+    def _write_report(clusters_in, tsv_out):
         columns = copy.copy(report.columns)
         columns[0] = '#' + columns[0]
 
         f = pyfastaq.utils.open_file_write(tsv_out)
         print('\t'.join(columns), file=f)
-
         columns[0] = columns[0][1:]
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.worksheets[0]
-        worksheet.title = 'ARIBA_report'
-        worksheet.append(columns)
 
         for seq_name in sorted(clusters_in):
             if clusters_in[seq_name].report_lines is None:
@@ -442,11 +434,8 @@ class Clusters:
 
             for line in clusters_in[seq_name].report_lines:
                 print(line, file=f)
-                worksheet.append(line.split('\t'))
 
         pyfastaq.utils.close(f)
-        if xls_out is not None:
-            workbook.save(xls_out)
 
 
     def _write_catted_assembled_seqs_fasta(self, outfile):
@@ -555,7 +544,7 @@ class Clusters:
         if self.verbose:
             print('{:_^79}'.format(' Writing reports '), flush=True)
             print('Making', self.report_file_all_tsv)
-        self._write_reports(self.clusters, self.report_file_all_tsv)
+        self._write_report(self.clusters, self.report_file_all_tsv)
 
         if self.verbose:
             print('Making', self.report_file_filtered)

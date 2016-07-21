@@ -1,11 +1,9 @@
 import os
 import copy
-import re
 import sys
-import openpyxl
 import pyfastaq
 import dendropy
-from ariba import flag, common, report, summary_cluster, summary_sample
+from ariba import summary_sample
 
 class Error (Exception): pass
 
@@ -193,7 +191,6 @@ class Summary:
         all_cluster_cols_in_order = ['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
         all_cluster_cols_in_order_set = set(['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
         cluster_cols_in_order = [x for x in all_cluster_cols_in_order if cluster_cols[x]]
-        cluster_cols_set = set(cluster_cols_in_order)
 
         for filename in filenames:
             assert filename in rows

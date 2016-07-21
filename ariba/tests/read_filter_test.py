@@ -1,9 +1,7 @@
 import unittest
 import sys
 import os
-import shutil
 import filecmp
-import pyfastaq
 from ariba import read_filter, read_store, external_progs
 
 modules_dir = os.path.dirname(os.path.abspath(read_filter.__file__))

@@ -1,7 +1,7 @@
 import sys
 import os
 import pickle
-from ariba import common, mapping, reference_data
+from ariba import reference_data
 
 class Error (Exception): pass
 

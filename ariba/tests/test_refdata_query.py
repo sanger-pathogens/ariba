@@ -1,9 +1,5 @@
 import unittest
 import os
-import copy
-import shutil
-import filecmp
-import pyfastaq
 from ariba import refdata_query
 
 modules_dir = os.path.dirname(os.path.abspath(refdata_query.__file__))

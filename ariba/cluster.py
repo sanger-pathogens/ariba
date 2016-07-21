@@ -6,7 +6,7 @@ import math
 import shutil
 import sys
 import pyfastaq
-from ariba import assembly, assembly_compare, assembly_variants, bam_parse, external_progs, flag, mapping, mash, read_filter, report, samtools_variants
+from ariba import assembly, assembly_compare, assembly_variants, external_progs, flag, mapping, read_filter, report, samtools_variants
 
 class Error (Exception): pass
 
@@ -296,38 +296,43 @@ class Cluster:
 
     def _run(self):
         print('{:_^79}'.format(' LOG FILE START ' + self.name + ' '), file=self.log_fh, flush=True)
-        wanted_reads = self._number_of_reads_for_assembly(self.longest_ref_length, self.reads_insert, self.total_reads_bases, self.total_reads, self.assembly_coverage)
-        made_reads = self._make_reads_for_assembly(wanted_reads, self.total_reads, self.all_reads1, self.all_reads2, self.reads_for_assembly1, self.reads_for_assembly2, random_seed=self.random_seed)
-        print('\nUsing', made_reads, 'from a total of', self.total_reads, 'for assembly.', file=self.log_fh, flush=True)
-        print('Assembling reads:', file=self.log_fh, flush=True)
 
-        self.assembly = assembly.Assembly(
-          self.reads_for_assembly1,
-          self.reads_for_assembly2,
-          self.reference_fa,
-          self.references_fa,
-          self.assembly_dir,
-          self.final_assembly_fa,
-          self.final_assembly_bam,
-          self.log_fh,
-          scaff_name_prefix=self.name,
-          kmer=self.assembly_kmer,
-          assembler=self.assembler,
-          spades_other_options=self.spades_other_options,
-          sspace_k=self.sspace_k,
-          sspace_sd=self.sspace_sd,
-          reads_insert=self.reads_insert,
-          extern_progs=self.extern_progs,
-          clean=self.clean
-        )
+        if self.total_reads == 0:
+            print('No reads left after filtering with cdhit', file=self.log_fh, flush=True)
+            self.assembled_ok = False
+        else:
+            wanted_reads = self._number_of_reads_for_assembly(self.longest_ref_length, self.reads_insert, self.total_reads_bases, self.total_reads, self.assembly_coverage)
+            made_reads = self._make_reads_for_assembly(wanted_reads, self.total_reads, self.all_reads1, self.all_reads2, self.reads_for_assembly1, self.reads_for_assembly2, random_seed=self.random_seed)
+            print('\nUsing', made_reads, 'from a total of', self.total_reads, 'for assembly.', file=self.log_fh, flush=True)
+            print('Assembling reads:', file=self.log_fh, flush=True)
 
-        self.assembly.run()
-        self.assembled_ok = self.assembly.assembled_ok
-        self._clean_file(self.reads_for_assembly1)
-        self._clean_file(self.reads_for_assembly2)
-        if self.clean:
-            print('Deleting Assembly directory', self.assembly_dir, file=self.log_fh, flush=True)
-            shutil.rmtree(self.assembly_dir)
+            self.assembly = assembly.Assembly(
+              self.reads_for_assembly1,
+              self.reads_for_assembly2,
+              self.reference_fa,
+              self.references_fa,
+              self.assembly_dir,
+              self.final_assembly_fa,
+              self.final_assembly_bam,
+              self.log_fh,
+              scaff_name_prefix=self.name,
+              kmer=self.assembly_kmer,
+              assembler=self.assembler,
+              spades_other_options=self.spades_other_options,
+              sspace_k=self.sspace_k,
+              sspace_sd=self.sspace_sd,
+              reads_insert=self.reads_insert,
+              extern_progs=self.extern_progs,
+              clean=self.clean
+            )
+
+            self.assembly.run()
+            self.assembled_ok = self.assembly.assembled_ok
+            self._clean_file(self.reads_for_assembly1)
+            self._clean_file(self.reads_for_assembly2)
+            if self.clean:
+                print('Deleting Assembly directory', self.assembly_dir, file=self.log_fh, flush=True)
+                shutil.rmtree(self.assembly_dir)
 
 
         if self.assembled_ok and self.assembly.ref_seq_name is not None:

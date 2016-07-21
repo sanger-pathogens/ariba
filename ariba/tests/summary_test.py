@@ -1,8 +1,7 @@
 import unittest
-import copy
 import filecmp
 import os
-from ariba import flag, summary, summary_cluster, summary_sample
+from ariba import summary, summary_sample
 
 modules_dir = os.path.dirname(os.path.abspath(summary.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')

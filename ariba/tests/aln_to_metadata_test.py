@@ -1,7 +1,5 @@
 import unittest
 import os
-import copy
-import shutil
 import filecmp
 import pyfastaq
 from ariba import aln_to_metadata, sequence_variant
@@ -77,7 +75,6 @@ class TestAlnToMetadata(unittest.TestCase):
 
     def test_insertion_coords(self):
         '''test _insertion_coords'''
-        ivl = pyfastaq.intervals.Interval
         tests = [
             ('acgt', []),
             ('-a', [pyfastaq.intervals.Interval(0, 0)]),
@@ -332,7 +329,6 @@ class TestAlnToMetadata(unittest.TestCase):
         }
 
         unpadded_seqs = aln_to_metadata.AlnToMetadata._make_unpadded_seqs(padded_seqs)
-        unpadded_aa_seqs = {x: unpadded_seqs[x].translate() for x in unpadded_seqs}
         insertions = aln_to_metadata.AlnToMetadata._make_unpadded_insertion_coords(padded_seqs)
 
         variant1 = sequence_variant.Variant('n', 'C5T', 'id1')

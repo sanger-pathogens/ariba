@@ -16,8 +16,8 @@ class TestReferenceData(unittest.TestCase):
         fasta = os.path.join(data_dir, 'reference_data_init_fails.in.fa')
 
         with self.assertRaises(reference_data.Error):
-            ref_data = reference_data.ReferenceData([empty_fasta], [empty_tsv])
-            ref_data = reference_data.ReferenceData([fasta], [empty_tsv])
+            reference_data.ReferenceData([empty_fasta], [empty_tsv])
+            reference_data.ReferenceData([fasta], [empty_tsv])
 
 
     def test_init_ok(self):
