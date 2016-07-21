@@ -94,6 +94,24 @@ class TestCluster(unittest.TestCase):
         os.unlink(reads_out2)
 
 
+    def test_full_run_no_reads_after_filtering(self):
+        '''test complete run of cluster when filtering removes all reads'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_no_reads_after_filtering.in.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_no_reads_after_filtering.in.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.test_full_run_no_reads_after_filtering'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_no_reads_after_filtering'), tmpdir)
+
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=0, total_reads_bases=0)
+        c.run()
+
+        expected = '\t'.join(['.', '.', '.', '64', '0', 'cluster_name'] + ['.'] * 24)
+        self.assertEqual([expected], c.report_lines)
+        self.assertFalse(c.status_flag.has('ref_seq_choose_fail'))
+        self.assertTrue(c.status_flag.has('assembly_fail'))
+        shutil.rmtree(tmpdir)
+
+
     def test_full_run_choose_ref_fail(self):
         '''test complete run of cluster when choosing ref seq fails'''
         fasta_in = os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail.in.fa')
