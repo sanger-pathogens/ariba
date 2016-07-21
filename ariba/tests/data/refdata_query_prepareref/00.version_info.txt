@@ -18,12 +18,11 @@ sspace	Basic_v2.0_linux	/home/ubuntu/bin/SSPACE-BASIC-2.0_linux-x86_64/SSPACE_Ba
 External dependencies OK: True
 
 Python version:
-3.5.1+ (default, Mar 30 2016, 22:46:26) 
+3.5.1+ (default, Mar 30 2016, 22:46:26)
 [GCC 5.3.1 20160330]
 
 Python packages:
 ariba	local	/home/ubuntu/git/ariba/scripts/ariba/__init__.py
-openpyxl	2.3.5	/home/ubuntu/.local/lib/python3.5/site-packages/openpyxl/__init__.py
 pyfastaq	3.12.1	/home/ubuntu/.local/lib/python3.5/site-packages/pyfastaq/__init__.py
 pymummer	0.7.1	/home/ubuntu/.local/lib/python3.5/site-packages/pymummer/__init__.py
 pysam	0.9.1	/home/ubuntu/.local/lib/python3.5/site-packages/pysam/__init__.py

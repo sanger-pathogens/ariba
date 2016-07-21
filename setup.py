@@ -33,7 +33,6 @@ setup(
     tests_require=['nose >= 1.3'],
     install_requires=[
         'dendropy >= 4.1.0',
-        'openpyxl >= 1.6.2',
         'pyfastaq >= 3.12.0',
         'pysam >= 0.8.1',
         'pymummer>=0.6.1',

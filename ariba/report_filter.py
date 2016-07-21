@@ -1,4 +1,3 @@
-import openpyxl
 import pyfastaq
 from ariba import report, flag
 
@@ -194,20 +193,6 @@ class ReportFilter:
                     print(ReportFilter._dict_to_report_line(d), file=f)
 
         pyfastaq.utils.close(f)
-
-
-    def _write_report_xls(self, outfile):
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.worksheets[0]
-        worksheet.title = 'ARIBA_report'
-        worksheet.append(report.columns)
-
-        for ref_name in sorted(self.report):
-            for ctg_name, report_dicts in sorted(self.report[ref_name].items()):
-                for d in report_dicts:
-                    worksheet.append([str(d[x]) for x in report.columns])
-
-        workbook.save(outfile)
 
 
     def run(self, outfile):

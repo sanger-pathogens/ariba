@@ -187,7 +187,7 @@ class TestClusters(unittest.TestCase):
         self.assertEqual(self.clusters.insert_sspace_sd, 0.91)
 
 
-    def test_write_reports(self):
+    def test_write_report(self):
         class FakeCluster:
             def __init__(self, lines):
                 self.report_lines = lines
@@ -197,15 +197,12 @@ class TestClusters(unittest.TestCase):
             'gene2': FakeCluster(['gene2\tline2'])
         }
 
-        tmp_tsv = 'tmp.test_write_reports.tsv'
-        tmp_xls = 'tmp.test_write_reports.xls'
-        clusters.Clusters._write_reports(clusters_dict, tmp_tsv, tmp_xls)
+        tmp_tsv = 'tmp.test_write_report.tsv'
+        clusters.Clusters._write_report(clusters_dict, tmp_tsv)
 
         expected = os.path.join(data_dir, 'clusters_test_write_report.tsv')
         self.assertTrue(filecmp.cmp(expected, tmp_tsv, shallow=False))
-        self.assertTrue(os.path.exists(tmp_xls))
         os.unlink(tmp_tsv)
-        os.unlink(tmp_xls)
 
 
     def test_write_catted_assembled_seqs_fasta(self):
