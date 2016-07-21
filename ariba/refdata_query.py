@@ -1,7 +1,5 @@
 import os
 import pickle
-import sys
-import pyfastaq
 from ariba import reference_data
 
 

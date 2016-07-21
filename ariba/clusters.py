@@ -1,6 +1,5 @@
 import signal
 import time
-import atexit
 import os
 import copy
 import tempfile
@@ -10,10 +9,9 @@ import sys
 import shutil
 import openpyxl
 import multiprocessing
-import pysam
 import pyfastaq
 import minimap_ariba
-from ariba import cluster, common, mapping, histogram, read_store, report, report_filter, reference_data
+from ariba import cluster, common, histogram, read_store, report, report_filter, reference_data
 
 class Error (Exception): pass
 
