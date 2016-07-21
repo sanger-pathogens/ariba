@@ -15,10 +15,9 @@ class TestLink(unittest.TestCase):
         sam_reader = pysam.Samfile(os.path.join(data_dir, 'link_test_init.reads.no_link.bam'), "rb")
         ref_lengths = {}
         pyfastaq.tasks.lengths_from_fai(os.path.join(data_dir, 'link_test_init.ref.fa.fai'), ref_lengths)
-        links_from_bam = []
         for sam in sam_reader.fetch(until_eof=True):
             with self.assertRaises(link.Error):
-                l = link.Link(sam, sam_reader, ref_lengths)
+                link.Link(sam, sam_reader, ref_lengths)
 
 
     def test_init_with_link(self):
@@ -85,7 +84,7 @@ class TestLink(unittest.TestCase):
         for i in range(len(links)):
             links[i].sort()
             self.assertEqual(links[i], expected[i])
-      
+
 
     def test_merge(self):
         '''test merge'''
@@ -95,7 +94,7 @@ class TestLink(unittest.TestCase):
         with self.assertRaises(link.Error):
             link1.merge(link1)
             link2.merge(link2)
-         
+
         link1.merge(link2)
         self.assertEqual(link1, merged)
 

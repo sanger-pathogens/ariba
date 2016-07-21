@@ -1,12 +1,8 @@
 import unittest
 import os
-import copy
 import shutil
 import filecmp
-import pyfastaq
-import pysam
-import pymummer
-from ariba import cluster, flag, reference_data
+from ariba import cluster, reference_data
 
 modules_dir = os.path.dirname(os.path.abspath(cluster.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -49,7 +45,7 @@ class TestCluster(unittest.TestCase):
             tmpdir = 'tmp.cluster_test_init_fail_files_missing'
             shutil.copytree(d, tmpdir)
             with self.assertRaises(cluster.Error):
-                c = cluster.Cluster(tmpdir, 'name', refdata=refdata, total_reads=42, total_reads_bases=4242)
+                cluster.Cluster(tmpdir, 'name', refdata=refdata, total_reads=42, total_reads_bases=4242)
             shutil.rmtree(tmpdir)
 
 
@@ -86,8 +82,6 @@ class TestCluster(unittest.TestCase):
         '''Test _make_reads_for_assembly when just makes symlinks'''
         reads_in1 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.in1.fq')
         reads_in2 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.in2.fq')
-        expected_out1 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.out1.fq')
-        expected_out2 = os.path.join(data_dir, 'cluster_test_make_reads_for_assembly.out2.fq')
         reads_out1 = 'tmp.test_make_reads_for_assembly.reads.out1.fq'
         reads_out2 = 'tmp.test_make_reads_for_assembly.reads.out2.fq'
         reads_written = cluster.Cluster._make_reads_for_assembly(20, 20, reads_in1, reads_in2, reads_out1, reads_out2, random_seed=42)

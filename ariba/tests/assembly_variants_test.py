@@ -2,7 +2,7 @@ import unittest
 import os
 import pymummer
 import pyfastaq
-from ariba import assembly_variants, reference_data, sequence_variant, sequence_metadata
+from ariba import assembly_variants, reference_data, sequence_metadata
 
 modules_dir = os.path.dirname(os.path.abspath(assembly_variants.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -139,7 +139,6 @@ class TestAssemblyVariants(unittest.TestCase):
 
 
         for i in range(len(mummer_variants)):
-            used_known_variants = set()
             got_tuple, got_used_variants = assembly_variants.AssemblyVariants._get_one_variant_for_one_contig_non_coding(refdata_var_dict, mummer_variants[i])
             self.assertEqual(expected_tuples[i], got_tuple)
             self.assertEqual(expected_used_variants[i], got_used_variants)
@@ -218,7 +217,6 @@ class TestAssemblyVariants(unittest.TestCase):
         assert len(mummer_variants) == len(expected_tuples) == len(expected_used_variants)
 
         for i in range(len(mummer_variants)):
-            used_known_variants = set()
             got_tuple, got_used_variants = assembly_variants.AssemblyVariants._get_one_variant_for_one_contig_coding(ref_sequence, refdata_var_dict, mummer_variants[i])
             self.assertEqual(expected_tuples[i], got_tuple)
             self.assertEqual(expected_used_variants[i], got_used_variants)
@@ -308,7 +306,6 @@ class TestAssemblyVariants(unittest.TestCase):
         os.unlink(metadata_tsv)
 
         nucmer_snp_file = os.path.join(data_dir, 'assembly_variants_test_get_variants_presence_absence.snps')
-        v1 = pymummer.variant.Variant(pymummer.snp.Snp('9\tA\tT\t9\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig1'))
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('14\tC\tA\t14\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig1'))
         v3 = pymummer.variant.Variant(pymummer.snp.Snp('15\tG\tC\t15\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig1'))
 
@@ -352,7 +349,6 @@ class TestAssemblyVariants(unittest.TestCase):
         os.unlink(metadata_tsv)
 
         nucmer_snp_file = os.path.join(data_dir, 'assembly_variants_test_get_variants_variants_only.snps')
-        v1 = pymummer.variant.Variant(pymummer.snp.Snp('9\tA\tT\t9\tx\tx\t42\t42\tx\tx\tvariants_only\tcontig1'))
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('14\tC\tA\t14\tx\tx\t42\t42\tx\tx\tvariants_only\tcontig1'))
         v3 = pymummer.variant.Variant(pymummer.snp.Snp('15\tG\tC\t15\tx\tx\t42\t42\tx\tx\tvariants_only\tcontig1'))
 

@@ -1,6 +1,5 @@
 import unittest
 import os
-import filecmp
 from ariba import cdhit, external_progs
 
 modules_dir = os.path.dirname(os.path.abspath(cdhit.__file__))
@@ -11,7 +10,7 @@ class TestCdhit(unittest.TestCase):
     def test_init_fail_infile_missing(self):
         '''test init_fail_infile_missing'''
         with self.assertRaises(cdhit.Error):
-            r = cdhit.Runner('oopsnotafile', 'out')
+            cdhit.Runner('oopsnotafile', 'out')
 
 
     def test_get_clusters_from_bak_file(self):
@@ -37,7 +36,6 @@ class TestCdhit(unittest.TestCase):
     def test_run(self):
         '''test run'''
         infile = os.path.join(data_dir, 'cdhit_test_run.in.fa')
-        expected_outfile = os.path.join(data_dir, 'cdhit_test_run.out.fa')
         r = cdhit.Runner(infile)
         clusters = r.run()
         expected_clusters = {
@@ -92,7 +90,7 @@ class TestCdhit(unittest.TestCase):
         infile = os.path.join(data_dir, 'cdhit_test_fake_run.non-unique.in.fa')
         r = cdhit.Runner(infile)
         with self.assertRaises(cdhit.Error):
-            clusters = r.fake_run()
+            r.fake_run()
 
 
     def test_load_user_clusters_file_good_file(self):

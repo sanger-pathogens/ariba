@@ -1,7 +1,6 @@
 import unittest
 import os
 import pyfastaq
-import pymummer
 from ariba import samtools_variants, external_progs
 
 modules_dir = os.path.dirname(os.path.abspath(samtools_variants.__file__))
@@ -137,7 +136,6 @@ class TestSamtoolsVariants(unittest.TestCase):
         '''test variants_in_coords'''
         vcf_file = os.path.join(data_dir, 'samtools_variants_test_variants_in_coords.vcf')
 
-        hit = ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'gene', 'scaff1']
         nucmer_hits = {
             'scaff1': [pyfastaq.intervals.Interval(0, 41)]
         }

@@ -1,7 +1,6 @@
 import unittest
 import os
 import filecmp
-import pyfastaq
 from ariba import flag, report_filter, report
 
 modules_dir = os.path.dirname(os.path.abspath(report_filter.__file__))
@@ -35,7 +34,7 @@ class TestReportFilter(unittest.TestCase):
         '''test __init__ on bad input file'''
         infile = os.path.join(data_dir, 'report_filter_test_init_bad.tsv')
         with self.assertRaises(report_filter.Error):
-            rf = report_filter.ReportFilter(infile=infile)
+            report_filter.ReportFilter(infile=infile)
 
 
     def test_report_line_to_dict(self):

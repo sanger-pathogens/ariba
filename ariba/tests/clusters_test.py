@@ -2,10 +2,9 @@ import unittest
 import shutil
 import os
 import pickle
-import pysam
 import pyfastaq
 import filecmp
-from ariba import clusters, external_progs, histogram, reference_data, sequence_metadata
+from ariba import clusters, external_progs, histogram, sequence_metadata
 
 modules_dir = os.path.dirname(os.path.abspath(clusters.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')

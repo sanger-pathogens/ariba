@@ -21,7 +21,7 @@ class TestSequenceVariant(unittest.TestCase):
 
         for var in bad_variants:
             with self.assertRaises(sequence_variant.Error):
-                v = sequence_variant.Variant('p', var, '.')
+                sequence_variant.Variant('p', var, '.')
 
 
     def test_init_ok(self):

@@ -1,10 +1,6 @@
 import unittest
 import os
-import copy
-import shutil
-import filecmp
 import pyfastaq
-import pysam
 import pymummer
 from ariba import assembly_compare
 
@@ -334,7 +330,6 @@ class TestAssemblyCompare(unittest.TestCase):
 
     def test_ref_covered_by_at_least_one_full_length_contig(self):
         '''test _ref_covered_by_at_least_one_full_length_contig'''
-        ref = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
         hits = [
             ['1', '100', '1', '100', '100', '100', '100.00', '100', '100', '1', '1', 'ref', 'contig1'],
             ['1', '99', '1', '99', '99', '99', '100.00', '100', '100', '1', '1', 'ref', 'contig1'],

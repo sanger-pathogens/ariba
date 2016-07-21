@@ -1,9 +1,5 @@
 import unittest
-import sys
 import os
-import shutil
-import filecmp
-import pyfastaq
 from ariba import mash
 
 modules_dir = os.path.dirname(os.path.abspath(mash.__file__))

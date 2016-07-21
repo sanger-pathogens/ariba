@@ -1,6 +1,4 @@
 import unittest
-import copy
-import filecmp
 import os
 from ariba import flag, summary_cluster
 
