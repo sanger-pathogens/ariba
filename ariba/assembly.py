@@ -20,7 +20,7 @@ class Assembly:
       log_fh,
       scaff_name_prefix='scaffold',
       kmer=0,
-      assembler='spades',
+      assembler='fermilite',
       max_insert=1000,
       min_scaff_depth=10,
       min_scaff_length=50,
@@ -351,7 +351,7 @@ class Assembly:
 
 
     def run(self):
-        self._assemble_with_spades()
+        self._assemble_with_fermilite()
         self.sequences = {}
 
         # double-check we got some contigs
