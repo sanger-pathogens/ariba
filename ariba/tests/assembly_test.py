@@ -30,14 +30,14 @@ class TestAssembly(unittest.TestCase):
             self.assertTrue(assembly.Assembly._check_spades_log_file(bad_file))
 
 
-    def test_assemble_with_fermilite(self):
-        '''test _assemble_with_fermilite'''
-        reads = os.path.join(data_dir, 'assembly_test_assemble_with_fermilite.reads.fq')
-        tmp_fa = 'tmp.test_assemble_with_fermilite.fa'
-        tmp_log = 'tmp.test_assemble_with_fermilite.log'
-        expected_fa = os.path.join(data_dir, 'assembly_test_assemble_with_fermilite.expected.fa')
-        expected_log = os.path.join(data_dir, 'assembly_test_assemble_with_fermilite.expected.log')
-        assembly.Assembly._assemble_with_fermilite(reads, tmp_fa, tmp_log)
+    def test_run_fermilite(self):
+        '''test _run_fermilite'''
+        reads = os.path.join(data_dir, 'assembly_run_fermilite.reads.fq')
+        tmp_fa = 'tmp.test_run_fermilite.fa'
+        tmp_log = 'tmp.test_run_fermilite.log'
+        expected_fa = os.path.join(data_dir, 'assembly_run_fermilite.expected.fa')
+        expected_log = os.path.join(data_dir, 'assembly_run_fermilite.expected.log')
+        assembly.Assembly._run_fermilite(reads, tmp_fa, tmp_log)
         self.assertTrue(filecmp.cmp(expected_fa, tmp_fa, shallow=False))
         self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
         os.unlink(tmp_fa)
