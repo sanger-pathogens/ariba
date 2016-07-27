@@ -37,10 +37,24 @@ class TestAssembly(unittest.TestCase):
         tmp_log = 'tmp.test_run_fermilite.log'
         expected_fa = os.path.join(data_dir, 'assembly_run_fermilite.expected.fa')
         expected_log = os.path.join(data_dir, 'assembly_run_fermilite.expected.log')
-        assembly.Assembly._run_fermilite(reads, tmp_fa, tmp_log)
+        got = assembly.Assembly._run_fermilite(reads, tmp_fa, tmp_log)
+        self.assertEqual(0, got)
         self.assertTrue(filecmp.cmp(expected_fa, tmp_fa, shallow=False))
         self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
         os.unlink(tmp_fa)
+        os.unlink(tmp_log)
+
+
+    def test_run_fermilite_fails(self):
+        '''test _run_fermilite when it fails'''
+        reads = os.path.join(data_dir, 'assembly_run_fermilite_fails.reads.fq')
+        tmp_fa = 'tmp.test_run_fermilite_fails.fa'
+        tmp_log = 'tmp.test_run_fermilite_fails.log'
+        expected_log = os.path.join(data_dir, 'assembly_run_fermilite_fails.expected.log')
+        got = assembly.Assembly._run_fermilite(reads, tmp_fa, tmp_log)
+        self.assertEqual(1, got)
+        self.assertFalse(os.path.exists(tmp_fa))
+        self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
         os.unlink(tmp_log)
 
 

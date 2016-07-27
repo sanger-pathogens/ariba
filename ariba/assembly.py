@@ -112,10 +112,7 @@ class Assembly:
 
     @staticmethod
     def _run_fermilite(reads_in, fasta_out, log_out):
-        got = fermilite_ariba.fermilite_ariba(reads_in, fasta_out, log_out)
-        if (got != 0):
-            raise Error('Error running fermilite. Cannot continue. Error code: ' + str(got))
-        return got
+        return fermilite_ariba.fermilite_ariba(reads_in, fasta_out, log_out)
 
 
     def _assemble_with_fermilite(self):
