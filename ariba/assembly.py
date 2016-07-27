@@ -127,18 +127,14 @@ class Assembly:
         fermilite_log = self.assembly_contigs + '.log'
         got_from_fermilite = self._run_fermilite(interleaved_reads, self.assembly_contigs, fermilite_log)
         os.unlink(interleaved_reads)
-        if got_from_fermilite == 0:
-            self.assembled_ok = True
-            if os.path.exists(fermilite_log):
-                with open(fermilite_log) as f:
-                    for line in f:
-                        print(line, end='', file=self.log_fh)
+        if os.path.exists(fermilite_log):
+            with open(fermilite_log) as f:
+                for line in f:
+                    print(line, end='', file=self.log_fh)
 
-                os.unlink(fermilite_log)
-        else:
-            self.assembled_ok = False
+            os.unlink(fermilite_log)
 
-
+        self.assembled_ok = (got_from_fermilite == 0)
         os.chdir(cwd)
 
 
