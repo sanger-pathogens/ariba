@@ -4,7 +4,7 @@ import sys
 import glob
 from setuptools import setup, find_packages, Extension
 
-c_files = [
+minimap_c_files = [
     'minimap_ariba.cpp',
     'bseq.c',
     'index.c',
@@ -15,11 +15,31 @@ c_files = [
     'sketch.c',
 ]
 
-c_files = [os.path.join('third_party', 'minimap', x) for x in c_files]
-extension_mod = Extension("minimap_ariba", c_files, extra_link_args=['-lz'])
+minimap_c_files = [os.path.join('third_party', 'minimap', x) for x in minimap_c_files]
+minimap_mod = Extension("minimap_ariba", minimap_c_files, extra_link_args=['-lz'])
+
+fermilite_c_files = [
+    'bfc.c',
+    'bseq.c',
+    'bubble.c',
+    'fml-asm_ariba.cpp',
+    'htab.c',
+    'ksw.c',
+    'kthread.c',
+    'mag.c',
+    'misc.c',
+    'mrope.c',
+    'rld0.c',
+    'rle.c',
+    'rope.c',
+    'unitig.c'
+]
+fermilite_c_files = [os.path.join('third_party', 'fermi-lite-0.1', x) for x in fermilite_c_files]
+fermilite_mod = Extension("fermilite_ariba", fermilite_c_files, extra_link_args=['-lz'])
+
 
 setup(
-    ext_modules=[extension_mod],
+    ext_modules=[minimap_mod, fermilite_mod],
     name='ariba',
     version='1.0.1',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',

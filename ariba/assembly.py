@@ -3,6 +3,7 @@ import sys
 import shutil
 import pyfastaq
 import pymummer
+import fermilite_ariba
 from ariba import common, faidx, mapping, bam_parse, external_progs, mash
 
 class Error (Exception): pass
@@ -107,6 +108,13 @@ class Assembly:
 
         pyfastaq.utils.close(f)
         return True
+
+
+    @staticmethod
+    def _assemble_with_fermilite(reads_in, fasta_out, log_out):
+        got = fermilite_ariba.fermilite_ariba(reads_in, fasta_out, log_out)
+        if (got != 0):
+            raise Error('Error running fermilite. Cannot continue')
 
 
     def _assemble_with_spades(self, unittest=False):
