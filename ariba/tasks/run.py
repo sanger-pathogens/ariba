@@ -44,7 +44,7 @@ def run(options):
           version_report_lines=version_report_lines,
           assembly_kmer=options.assembler_k,
           assembly_coverage=options.assembly_cov,
-          assembler='spades',
+          assembler='fermilite',
           threads=options.threads,
           verbose=options.verbose,
           min_scaff_depth=options.min_scaff_depth,
