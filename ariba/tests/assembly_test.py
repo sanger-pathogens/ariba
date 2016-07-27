@@ -99,6 +99,7 @@ class TestAssembly(unittest.TestCase):
 
     def test_assemble_with_spades(self):
         '''test _assemble_with_spades'''
+        return # but leave code here in case we decide to use spades later
         reads1 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_1.fq')
         reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
         ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')
@@ -111,6 +112,7 @@ class TestAssembly(unittest.TestCase):
 
     def test_assemble_with_spades_fail(self):
         '''test _assemble_with_spades handles spades fail'''
+        return # but leave code here in case we decide to use spades later
         reads1 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_1.fq')
         reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
         ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')
