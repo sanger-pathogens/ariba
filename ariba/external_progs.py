@@ -18,7 +18,7 @@ prog_to_default = {
     'mash': 'mash',
     'nucmer' : 'nucmer',
     'samtools': 'samtools',
-    'spades': 'spades.py',
+    #'spades': 'spades.py',
     'sspace': 'SSPACE_Basic_v2.0.pl',
 }
 
@@ -35,7 +35,7 @@ prog_to_version_cmd = {
     'mash': ('', re.compile('^Mash version (.*)$')),
     'nucmer': ('--version', re.compile('^NUCmer \(NUCleotide MUMmer\) version ([0-9\.]+)')),
     'samtools': ('', re.compile('^Version: ([0-9\.]+)')),
-    'spades': ('', re.compile('^SPAdes genome assembler v\.?([0-9\.]+)')),
+    #'spades': ('', re.compile('^SPAdes genome assembler v\.?([0-9\.]+)')),
     'sspace': ('', re.compile('^Usage: .*pl \[SSPACE_(.*)\]')),
 }
 
@@ -48,7 +48,7 @@ min_versions = {
     'mash': '1.0.2',
     'nucmer': '3.1',
     'samtools': '1.2',
-    'spades': '3.5.0',
+    #'spades': '3.5.0',
 }
 
 

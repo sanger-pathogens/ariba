@@ -30,8 +30,76 @@ class TestAssembly(unittest.TestCase):
             self.assertTrue(assembly.Assembly._check_spades_log_file(bad_file))
 
 
+    def test_run_fermilite(self):
+        '''test _run_fermilite'''
+        reads = os.path.join(data_dir, 'assembly_run_fermilite.reads.fq')
+        tmp_fa = 'tmp.test_run_fermilite.fa'
+        tmp_log = 'tmp.test_run_fermilite.log'
+        expected_fa = os.path.join(data_dir, 'assembly_run_fermilite.expected.fa')
+        expected_log = os.path.join(data_dir, 'assembly_run_fermilite.expected.log')
+        got = assembly.Assembly._run_fermilite(reads, tmp_fa, tmp_log)
+        self.assertEqual(0, got)
+        self.assertTrue(filecmp.cmp(expected_fa, tmp_fa, shallow=False))
+        self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
+        os.unlink(tmp_fa)
+        os.unlink(tmp_log)
+
+
+    def test_run_fermilite_fails(self):
+        '''test _run_fermilite when it fails'''
+        reads = os.path.join(data_dir, 'assembly_run_fermilite_fails.reads.fq')
+        tmp_fa = 'tmp.test_run_fermilite_fails.fa'
+        tmp_log = 'tmp.test_run_fermilite_fails.log'
+        expected_log = os.path.join(data_dir, 'assembly_run_fermilite_fails.expected.log')
+        got = assembly.Assembly._run_fermilite(reads, tmp_fa, tmp_log)
+        self.assertEqual(1, got)
+        self.assertFalse(os.path.exists(tmp_fa))
+        self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
+        os.unlink(tmp_log)
+
+
+    def test_assemble_with_fermilite(self):
+        '''test _assemble_with_fermilite'''
+        reads1 = os.path.join(data_dir, 'assembly_assemble_with_fermilite.reads_1.fq')
+        reads2 = os.path.join(data_dir, 'assembly_assemble_with_fermilite.reads_2.fq')
+        expected_log = os.path.join(data_dir, 'assembly_assemble_with_fermilite.expected.log')
+        expected_fa = os.path.join(data_dir, 'assembly_assemble_with_fermilite.expected.fa')
+        tmp_dir = 'tmp.test_assemble_with_fermilite'
+        tmp_log = 'tmp.test_assemble_with_fermilite.log'
+        tmp_log_fh = open(tmp_log, 'w')
+        print('First line', file=tmp_log_fh)
+        a = assembly.Assembly(reads1, reads2, 'not needed', 'not needed', tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', tmp_log_fh)
+        a._assemble_with_fermilite()
+        self.assertTrue(a.assembled_ok)
+        tmp_log_fh.close()
+        self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
+        self.assertTrue(filecmp.cmp(expected_fa, os.path.join(tmp_dir, 'contigs.fa'), shallow=False))
+        shutil.rmtree(tmp_dir)
+        os.unlink(tmp_log)
+
+
+    def test_assemble_with_fermilite_fails(self):
+        '''test _assemble_with_fermilite fails'''
+        reads1 = os.path.join(data_dir, 'assembly_assemble_with_fermilite_fails.reads_1.fq')
+        reads2 = os.path.join(data_dir, 'assembly_assemble_with_fermilite_fails.reads_2.fq')
+        expected_log = os.path.join(data_dir, 'assembly_assemble_with_fermilite_fails.expected.log')
+        tmp_dir = 'tmp.test_assemble_with_fermilite_fails'
+        tmp_log = 'tmp.test_assemble_with_fermilite_fails.log'
+        tmp_log_fh = open(tmp_log, 'w')
+        print('First line', file=tmp_log_fh)
+        a = assembly.Assembly(reads1, reads2, 'not needed', 'not needed', tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', tmp_log_fh)
+        a._assemble_with_fermilite()
+        self.assertFalse(a.assembled_ok)
+        tmp_log_fh.close()
+        self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
+        self.assertFalse(os.path.exists(os.path.join(tmp_dir, 'contigs.fa')))
+        shutil.rmtree(tmp_dir)
+        os.unlink(tmp_log)
+
+
     def test_assemble_with_spades(self):
         '''test _assemble_with_spades'''
+        return # but leave code here in case we decide to use spades later
         reads1 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_1.fq')
         reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
         ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')
@@ -44,6 +112,7 @@ class TestAssembly(unittest.TestCase):
 
     def test_assemble_with_spades_fail(self):
         '''test _assemble_with_spades handles spades fail'''
+        return # but leave code here in case we decide to use spades later
         reads1 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_1.fq')
         reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
         ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')

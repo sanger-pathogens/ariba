@@ -199,7 +199,7 @@ int run_minimap(char *clustersFileIn, char *refFileIn, char *readsFile1In, char 
                         continue;
                     }
 
-                    insertHist[insertSize]++;
+                    insertHist[insertSize + 2*k]++;
                     foundProperPair = true;
                 }
             }

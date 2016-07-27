@@ -3,6 +3,7 @@ import sys
 import shutil
 import pyfastaq
 import pymummer
+import fermilite_ariba
 from ariba import common, faidx, mapping, bam_parse, external_progs, mash
 
 class Error (Exception): pass
@@ -19,7 +20,7 @@ class Assembly:
       log_fh,
       scaff_name_prefix='scaffold',
       kmer=0,
-      assembler='spades',
+      assembler='fermilite',
       max_insert=1000,
       min_scaff_depth=10,
       min_scaff_length=50,
@@ -107,6 +108,34 @@ class Assembly:
 
         pyfastaq.utils.close(f)
         return True
+
+
+    @staticmethod
+    def _run_fermilite(reads_in, fasta_out, log_out):
+        return fermilite_ariba.fermilite_ariba(reads_in, fasta_out, log_out)
+
+
+    def _assemble_with_fermilite(self):
+        cwd = os.getcwd()
+        try:
+            os.chdir(self.working_dir)
+        except:
+            raise Error('Error chdir ' + self.working_dir)
+
+        interleaved_reads = 'reads.fq'
+        pyfastaq.tasks.interleave(self.reads1, self.reads2, interleaved_reads)
+        fermilite_log = self.assembly_contigs + '.log'
+        got_from_fermilite = self._run_fermilite(interleaved_reads, self.assembly_contigs, fermilite_log)
+        os.unlink(interleaved_reads)
+        if os.path.exists(fermilite_log):
+            with open(fermilite_log) as f:
+                for line in f:
+                    print(line, end='', file=self.log_fh)
+
+            os.unlink(fermilite_log)
+
+        self.assembled_ok = (got_from_fermilite == 0)
+        os.chdir(cwd)
 
 
     def _assemble_with_spades(self, unittest=False):
@@ -322,7 +351,7 @@ class Assembly:
 
 
     def run(self):
-        self._assemble_with_spades()
+        self._assemble_with_fermilite()
         self.sequences = {}
 
         # double-check we got some contigs
