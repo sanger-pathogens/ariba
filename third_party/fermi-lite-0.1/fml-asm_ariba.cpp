@@ -178,7 +178,7 @@ int assemble(char *readsFile, char *fastaOut, char* logfileOut)
         fml_utg_destroy(n_utg, utg);
     }
 
-    if (assemblies.size() == 0)
+    if (assemblies.size() == 0 || assemblies[0].numberOfContigs == 0)
     {
         ofs << "Didn't get any assemblies!\n";
         return 1;
