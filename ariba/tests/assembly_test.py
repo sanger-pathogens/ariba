@@ -44,6 +44,26 @@ class TestAssembly(unittest.TestCase):
         os.unlink(tmp_log)
 
 
+    def test_assemble_with_fermilite(self):
+        '''test _assemble_with_fermilite'''
+        reads1 = os.path.join(data_dir, 'assembly_assemble_with_fermilite.reads_1.fq')
+        reads2 = os.path.join(data_dir, 'assembly_assemble_with_fermilite.reads_2.fq')
+        expected_log = os.path.join(data_dir, 'assembly_assemble_with_fermilite.expected.log')
+        expected_fa = os.path.join(data_dir, 'assembly_assemble_with_fermilite.expected.fa')
+        tmp_dir = 'tmp.test_assemble_with_fermilite'
+        tmp_log = 'tmp.test_assemble_with_fermilite.log'
+        tmp_log_fh = open(tmp_log, 'w')
+        print('First line', file=tmp_log_fh)
+        a = assembly.Assembly(reads1, reads2, 'not needed', 'not needed', tmp_dir, 'not_needed_for_this_test.fa', 'not_needed_for_this_test.bam', tmp_log_fh)
+        a._assemble_with_fermilite()
+        self.assertTrue(a.assembled_ok)
+        tmp_log_fh.close()
+        self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
+        self.assertTrue(filecmp.cmp(expected_fa, os.path.join(tmp_dir, 'contigs.fa'), shallow=False))
+        shutil.rmtree(tmp_dir)
+        os.unlink(tmp_log)
+
+
     def test_assemble_with_spades(self):
         '''test _assemble_with_spades'''
         reads1 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_1.fq')

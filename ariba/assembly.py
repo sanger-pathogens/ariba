@@ -114,7 +114,35 @@ class Assembly:
     def _run_fermilite(reads_in, fasta_out, log_out):
         got = fermilite_ariba.fermilite_ariba(reads_in, fasta_out, log_out)
         if (got != 0):
-            raise Error('Error running fermilite. Cannot continue')
+            raise Error('Error running fermilite. Cannot continue. Error code: ' + str(got))
+        return got
+
+
+    def _assemble_with_fermilite(self):
+        cwd = os.getcwd()
+        try:
+            os.chdir(self.working_dir)
+        except:
+            raise Error('Error chdir ' + self.working_dir)
+
+        interleaved_reads = 'reads.fq'
+        pyfastaq.tasks.interleave(self.reads1, self.reads2, interleaved_reads)
+        fermilite_log = self.assembly_contigs + '.log'
+        got_from_fermilite = self._run_fermilite(interleaved_reads, self.assembly_contigs, fermilite_log)
+        os.unlink(interleaved_reads)
+        if got_from_fermilite == 0:
+            self.assembled_ok = True
+            if os.path.exists(fermilite_log):
+                with open(fermilite_log) as f:
+                    for line in f:
+                        print(line, end='', file=self.log_fh)
+
+                os.unlink(fermilite_log)
+        else:
+            self.assembled_ok = False
+
+
+        os.chdir(cwd)
 
 
     def _assemble_with_spades(self, unittest=False):

@@ -1,0 +1,11 @@
+First line
+Fermilite assembly stats:
+Min_count	Contig_number	Mean_length	Longest
+4	3	230.333	428
+8	1	499	499
+12	1	428	428
+16	1	428	428
+20	1	384	384
+25	1	303	303
+30	1	304	304
+Best assembly is from min_count 8
