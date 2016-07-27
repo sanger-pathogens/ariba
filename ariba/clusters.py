@@ -55,7 +55,7 @@ class Clusters:
       assembly_coverage=100,
       threads=1,
       verbose=False,
-      assembler='spades',
+      assembler='fermilite',
       spades_other=None,
       max_insert=1000,
       min_scaff_depth=10,
@@ -86,7 +86,7 @@ class Clusters:
         self.logs_dir = os.path.join(self.outdir, 'Logs')
 
         self.assembler = assembler
-        assert self.assembler in ['spades']
+        assert self.assembler in ['fermilite']
         self.assembly_kmer = assembly_kmer
         self.assembly_coverage = assembly_coverage
         self.spades_other = spades_other

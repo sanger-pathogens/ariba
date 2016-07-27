@@ -25,7 +25,7 @@ class Cluster:
       logfile=None,
       assembly_coverage=50,
       assembly_kmer=21,
-      assembler='spades',
+      assembler='fermilite',
       max_insert=1000,
       min_scaff_depth=10,
       nucmer_min_id=90,
