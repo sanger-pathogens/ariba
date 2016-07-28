@@ -144,6 +144,7 @@ int assemble(char *readsFile, char *fastaOut, char* logfileOut)
     fml_opt_init(&opt);
     opt.max_cnt = 10000;
     opt.min_asm_ovlp = 15;
+    opt.mag_opt.flag |= MAG_F_AGGRESSIVE;
     std::vector<unsigned short> minCounts;
     minCounts.push_back(4);
     minCounts.push_back(8);

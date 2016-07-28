@@ -9,6 +9,39 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 
 class TestRefPreparer(unittest.TestCase):
+    def test_rename_clusters(self):
+        '''test _rename_clusters'''
+        clusters_in = {
+           '0': {'no_dot_in_name'},
+           '1': {'another_no_dot_in_name'},
+           '2': {'foo.blah_blah_blah', 'foo.xyz'},
+           '3': {'foo.abc', 'foo.def'},
+           '4': {'pre1.abc', 'pre2.abc'},
+           '5': {'pre1.def', 'pre2.pqr', 'pre2.zxy'},
+           '6': {'prefix1.abc', 'prefix1.def', 'something_else.abc'},
+           '7': {'prefix1.fgh', 'prefix1.ijk', 'something_else_again.abc'},
+           '8': {'xyz.1', 'xyz.2', 'abcdefgh'},
+           '9': {'a.foo', 'a.bar'},
+        }
+
+        expected = {
+            'cluster_1': {'no_dot_in_name'},
+            'cluster_2': {'another_no_dot_in_name'},
+            'foo_1': {'foo.blah_blah_blah', 'foo.xyz'},
+            'foo_2': {'foo.abc', 'foo.def'},
+            'pre-_1': {'pre1.abc', 'pre2.abc'},
+            'pre-_2': {'pre1.def', 'pre2.pqr', 'pre2.zxy'},
+            'prefix1+_1': {'prefix1.abc', 'prefix1.def', 'something_else.abc'},
+            'prefix1+_2': {'prefix1.fgh', 'prefix1.ijk', 'something_else_again.abc'},
+            'xyz+': {'xyz.1', 'xyz.2', 'abcdefgh'},
+            'cluster_3': {'a.foo', 'a.bar'},
+        }
+
+        self.maxDiff = None
+        got = ref_preparer.RefPreparer._rename_clusters(clusters_in)
+        self.assertEqual(expected, got)
+
+
     def test_run(self):
         '''test run'''
         fasta_in = [
