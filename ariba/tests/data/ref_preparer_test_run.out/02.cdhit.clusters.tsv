@@ -1,5 +1,5 @@
-0	noncoding1	noncoding2.var_only	noncoding3.var_only
-1	noncoding4.var_only
-2	gene1	gene2
-3	gene3
-4	gene4.var_only
+cluster-1	gene1	gene2
+cluster-2	gene3
+gene4	gene4.var_only
+noncoding*	noncoding1	noncoding2.var_only	noncoding3.var_only
+noncoding4	noncoding4.var_only

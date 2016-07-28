@@ -149,6 +149,9 @@ class RefPreparer:
             clusters_file=self.clusters_file,
         )
 
+        clusters = self._rename_clusters(clusters)
+        reference_data.ReferenceData.write_cluster_allocation_file(clusters, cdhit_outprefix + '.clusters.tsv')
+
         if self.verbose:
             print('\nWriting clusters to file.', len(clusters), 'in total', flush=True)
 
