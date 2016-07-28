@@ -86,12 +86,12 @@ class RefPreparer:
             if new_key in key_count:
                 if new_key in new_clusters:
                     assert key_count[new_key] == 1
-                    assert new_key + '-1' not in new_clusters
-                    new_clusters[new_key + '-1'] = new_clusters[new_key]
+                    assert new_key + '_1' not in new_clusters
+                    new_clusters[new_key + '_1'] = new_clusters[new_key]
                     del new_clusters[new_key]
 
                 key_count[new_key] += 1
-                new_name = new_key + '-' + str(key_count[new_key])
+                new_name = new_key + '_' + str(key_count[new_key])
             else:
                 key_count[new_key] = 1
                 new_name = new_key

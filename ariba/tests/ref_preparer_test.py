@@ -25,16 +25,16 @@ class TestRefPreparer(unittest.TestCase):
         }
 
         expected = {
-            'cluster-1': {'no_dot_in_name'},
-            'cluster-2': {'another_no_dot_in_name'},
-            'foo-1': {'foo.blah_blah_blah', 'foo.xyz'},
-            'foo-2': {'foo.abc', 'foo.def'},
-            'pre*-1': {'pre1.abc', 'pre2.abc'},
-            'pre*-2': {'pre1.def', 'pre2.pqr', 'pre2.zxy'},
-            'prefix1!-1': {'prefix1.abc', 'prefix1.def', 'something_else.abc'},
-            'prefix1!-2': {'prefix1.fgh', 'prefix1.ijk', 'something_else_again.abc'},
+            'cluster_1': {'no_dot_in_name'},
+            'cluster_2': {'another_no_dot_in_name'},
+            'foo_1': {'foo.blah_blah_blah', 'foo.xyz'},
+            'foo_2': {'foo.abc', 'foo.def'},
+            'pre*_1': {'pre1.abc', 'pre2.abc'},
+            'pre*_2': {'pre1.def', 'pre2.pqr', 'pre2.zxy'},
+            'prefix1!_1': {'prefix1.abc', 'prefix1.def', 'something_else.abc'},
+            'prefix1!_2': {'prefix1.fgh', 'prefix1.ijk', 'something_else_again.abc'},
             'xyz!': {'xyz.1', 'xyz.2', 'abcdefgh'},
-            'cluster-3': {'a.foo', 'a.bar'},
+            'cluster_3': {'a.foo', 'a.bar'},
         }
 
         got = ref_preparer.RefPreparer._rename_clusters(clusters_in)
