@@ -360,11 +360,8 @@ class Clusters:
         counter = 0
         cluster_list = []
         self.log_files = []
-        cluster_numbers = [int(x) for x in self.cluster_to_dir.keys()]
-        cluster_numbers.sort()
 
-        for cluster_number in cluster_numbers:
-            cluster_name = str(cluster_number)
+        for cluster_name in sorted(self.cluster_to_dir):
             counter += 1
             if self.verbose:
                 print('Constructing cluster ', cluster_name, ' (', counter, ' of ', len(self.cluster_to_dir), ')', sep='')
