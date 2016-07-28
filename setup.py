@@ -5,7 +5,6 @@ import glob
 from setuptools import setup, find_packages, Extension
 
 minimap_c_files = [
-    'minimap_ariba.cpp',
     'bseq.c',
     'index.c',
     'kthread.c',
@@ -16,13 +15,18 @@ minimap_c_files = [
 ]
 
 minimap_c_files = [os.path.join('third_party', 'minimap', x) for x in minimap_c_files]
-minimap_mod = Extension("minimap_ariba", minimap_c_files, extra_link_args=['-lz'])
+minimap_c_files.append(os.path.join('ariba', 'ext', 'minimap_ariba.cpp'))
+minimap_mod = Extension(
+    "minimap_ariba",
+    minimap_c_files,
+    extra_link_args=['-lz'],
+    include_dirs=[os.path.join('third_party', 'minimap')],
+)
 
 fermilite_c_files = [
     'bfc.c',
     'bseq.c',
     'bubble.c',
-    'fml-asm_ariba.cpp',
     'htab.c',
     'ksw.c',
     'kthread.c',
@@ -35,7 +39,13 @@ fermilite_c_files = [
     'unitig.c'
 ]
 fermilite_c_files = [os.path.join('third_party', 'fermi-lite-0.1', x) for x in fermilite_c_files]
-fermilite_mod = Extension("fermilite_ariba", fermilite_c_files, extra_link_args=['-lz'])
+fermilite_c_files.append(os.path.join('ariba', 'ext', 'fml-asm_ariba.cpp'))
+fermilite_mod = Extension(
+    "fermilite_ariba",
+    fermilite_c_files,
+    extra_link_args=['-lz'],
+    include_dirs=[os.path.join('third_party', 'fermi-lite-0.1')],
+)
 
 
 setup(
