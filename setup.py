@@ -14,13 +14,13 @@ minimap_c_files = [
     'sketch.c',
 ]
 
-minimap_c_files = [os.path.join('third_party', 'minimap', x) for x in minimap_c_files]
+minimap_c_files = [os.path.join('third_party', 'minimap-0.2', x) for x in minimap_c_files]
 minimap_c_files.append(os.path.join('ariba', 'ext', 'minimap_ariba.cpp'))
 minimap_mod = Extension(
     "minimap_ariba",
     minimap_c_files,
     extra_link_args=['-lz'],
-    include_dirs=[os.path.join('third_party', 'minimap')],
+    include_dirs=[os.path.join('third_party', 'minimap-0.2')],
 )
 
 fermilite_c_files = [
