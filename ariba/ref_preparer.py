@@ -53,6 +53,54 @@ class RefPreparer:
             print('genetic_code', self.genetic_code, sep='\t', file=fout)
 
 
+    @staticmethod
+    def _rename_clusters(clusters_in):
+        new_clusters = {}
+        key_count = {}
+
+        for old_name, name_set in sorted(clusters_in.items()):
+            names_before_dots = {}
+            for name in name_set:
+                if '.' in name:
+                    prefix = name.split('.')[0]
+                    names_before_dots[prefix] = names_before_dots.get(prefix, 0) + 1
+
+            if len(names_before_dots) == 0:
+                new_key = 'cluster'
+            elif len(names_before_dots) == 1:
+                new_key = list(names_before_dots.keys())[0]
+                if sum(list(names_before_dots.values())) < len(name_set):
+                    new_key += '!'
+            else:
+                common_prefix = os.path.commonprefix(list(names_before_dots.keys()))
+                if common_prefix == '':
+                    max_value = max(list(names_before_dots.values()))
+                    possible_keys = [x for x in names_before_dots if names_before_dots[x] == max_value]
+                    possible_keys.sort()
+                    new_key = possible_keys[0] + '!'
+                else:
+                    new_key = common_prefix + '*'
+
+            if new_key in key_count:
+                if new_key in new_clusters:
+                    assert key_count[new_key] == 1
+                    assert new_key + '-1' not in new_clusters
+                    new_clusters[new_key + '-1'] = new_clusters[new_key]
+                    del new_clusters[new_key]
+
+                key_count[new_key] += 1
+                new_name = new_key + '-' + str(key_count[new_key])
+            else:
+                key_count[new_key] = 1
+                new_name = new_key
+
+            assert new_name not in new_clusters
+            new_clusters[new_name] = name_set
+
+
+        return new_clusters
+
+
     def run(self, outdir):
         original_dir = os.getcwd()
 
