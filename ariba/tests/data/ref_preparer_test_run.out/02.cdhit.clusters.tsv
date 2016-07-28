@@ -1,5 +1,5 @@
 cluster_1	gene1	gene2
 cluster_2	gene3
 gene4	gene4.var_only
-noncoding*	noncoding1	noncoding2.var_only	noncoding3.var_only
+noncoding-	noncoding1	noncoding2.var_only	noncoding3.var_only
 noncoding4	noncoding4.var_only

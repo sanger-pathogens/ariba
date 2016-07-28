@@ -72,16 +72,16 @@ class RefPreparer:
             elif len(names_before_dots) == 1:
                 new_key = list(names_before_dots.keys())[0]
                 if sum(list(names_before_dots.values())) < len(name_set):
-                    new_key += '!'
+                    new_key += '+'
             else:
                 common_prefix = os.path.commonprefix(list(names_before_dots.keys()))
                 if common_prefix == '' or len(common_prefix) < min_prefix_length:
                     max_value = max(list(names_before_dots.values()))
                     possible_keys = [x for x in names_before_dots if names_before_dots[x] == max_value]
                     possible_keys.sort()
-                    new_key = possible_keys[0] + '!'
+                    new_key = possible_keys[0] + '+'
                 else:
-                    new_key = common_prefix + '*'
+                    new_key = common_prefix + '-'
 
             if new_key in key_count:
                 if new_key in new_clusters:
