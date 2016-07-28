@@ -33,6 +33,7 @@ class AssemblyCompare:
         self.assembled_threshold = assembled_threshold
         self.unique_threshold = unique_threshold
         self.max_gene_nt_extend = max_gene_nt_extend
+        self.scaff_name_matching_ref = None
         self.gene_matching_ref = None
         self.gene_matching_ref_type = None
         self.gene_start_bases_added = None
@@ -309,7 +310,7 @@ class AssemblyCompare:
         if longest_match is None:
             return None, 'NO_MATCH', None, None
         else:
-            return AssemblyCompare._gene_from_nucmer_match(longest_match, contigs[longest_match.qry_name], max_end_nt_extend)
+            return (longest_match.qry_name,) + AssemblyCompare._gene_from_nucmer_match(longest_match, contigs[longest_match.qry_name], max_end_nt_extend)
 
 
     @staticmethod
@@ -334,8 +335,8 @@ class AssemblyCompare:
         if self._ref_has_region_assembled_twice(self.nucmer_hits, self.ref_sequence, self.unique_threshold):
             flag.add('region_assembled_twice')
 
-        ref_seq_type = self.refdata.sequence_type(self.ref_sequence.id)
-        if ref_seq_type != 'non_coding' and self.gene_matching_ref_type == 'GENE_FOUND':
+        ref_seq_type, is_variant_only = self.refdata.sequence_type(self.ref_sequence.id)
+        if ref_seq_type == 'p' and self.gene_matching_ref_type == 'GENE_FOUND':
             flag.add('complete_gene')
 
         if len(self.nucmer_hits) == 1:
@@ -362,10 +363,10 @@ class AssemblyCompare:
         self.nucmer_hits = self._parse_nucmer_coords_file(self.nucmer_coords_file, self.ref_sequence.id)
         self.percent_identities = self._nucmer_hits_to_percent_identity(self.nucmer_hits)
         self.assembled_reference_sequences = self._get_assembled_reference_sequences(self.nucmer_hits, self.ref_sequence, self.assembly_sequences)
-        ref_seq_type = self.refdata.sequence_type(self.ref_sequence.id)
+        ref_seq_type, is_variant_only = self.refdata.sequence_type(self.ref_sequence.id)
         if self._ref_covered_by_at_least_one_full_length_contig(self.nucmer_hits, self.assembled_threshold, self.max_gene_nt_extend):
             self.assembled_into_one_contig = True
-            if ref_seq_type != 'non_coding':
-                self.gene_matching_ref, self.gene_matching_ref_type, self.gene_start_bases_added, self.gene_end_bases_added = self._get_gene_matching_ref(self.nucmer_hits, self.assembly_sequences, self.max_gene_nt_extend)
+            if ref_seq_type == 'p':
+                self.scaff_name_matching_ref, self.gene_matching_ref, self.gene_matching_ref_type, self.gene_start_bases_added, self.gene_end_bases_added = self._get_gene_matching_ref(self.nucmer_hits, self.assembly_sequences, self.max_gene_nt_extend)
         else:
             self.assembled_into_one_contig = False

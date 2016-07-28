@@ -247,3 +247,20 @@ class TestCluster(unittest.TestCase):
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_gene_start_mismatch(self):
+        '''test complete run where gene extended because too different at end for full nucmer match'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_gene_start_mismatch.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_gene_start_mismatch.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_gene_start_mismatch'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_gene_start_mismatch'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=112, total_reads_bases=1080)
+        c.run()
+        expected = [
+            'gene\t1\t0\t27\t112\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t364\t27.0\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of gene'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+

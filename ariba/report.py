@@ -136,6 +136,13 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
     lines = []
     contig_length = len(cluster.assembly.sequences[contig_name])
     assert contig_length != 0
+    if contig_name in ref_cov_per_contig:
+        if contig_name == cluster.assembly_compare.scaff_name_matching_ref:
+            ref_cov = len(cluster.ref_sequence)
+        else:
+            ref_cov = ref_cov_per_contig[contig_name]
+    else:
+        ref_cov = 0
 
     common_first_columns = [
         cluster.ref_sequence.id,
@@ -145,7 +152,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
         str(cluster.total_reads),
         cluster.name,
         str(len(cluster.ref_sequence)),
-        str(ref_cov_per_contig[contig_name]) if contig_name in ref_cov_per_contig else '0', # 6 ref bases assembled
+        str(ref_cov),
         str(cluster.assembly_compare.percent_identities[contig_name]) if contig_name in cluster.assembly_compare.percent_identities else '0',
         contig_name,
         str(contig_length),  # 9 length of scaffold matching reference
