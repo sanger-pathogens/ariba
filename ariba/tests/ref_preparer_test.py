@@ -21,6 +21,7 @@ class TestRefPreparer(unittest.TestCase):
            '6': {'prefix1.abc', 'prefix1.def', 'something_else.abc'},
            '7': {'prefix1.fgh', 'prefix1.ijk', 'something_else_again.abc'},
            '8': {'xyz.1', 'xyz.2', 'abcdefgh'},
+           '9': {'a.foo', 'a.bar'},
         }
 
         expected = {
@@ -33,6 +34,7 @@ class TestRefPreparer(unittest.TestCase):
             'prefix1!-1': {'prefix1.abc', 'prefix1.def', 'something_else.abc'},
             'prefix1!-2': {'prefix1.fgh', 'prefix1.ijk', 'something_else_again.abc'},
             'xyz!': {'xyz.1', 'xyz.2', 'abcdefgh'},
+            'cluster-3': {'a.foo', 'a.bar'},
         }
 
         got = ref_preparer.RefPreparer._rename_clusters(clusters_in)

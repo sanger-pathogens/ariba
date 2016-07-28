@@ -57,13 +57,15 @@ class RefPreparer:
     def _rename_clusters(clusters_in):
         new_clusters = {}
         key_count = {}
+        min_prefix_length = 3
 
         for old_name, name_set in sorted(clusters_in.items()):
             names_before_dots = {}
             for name in name_set:
                 if '.' in name:
                     prefix = name.split('.')[0]
-                    names_before_dots[prefix] = names_before_dots.get(prefix, 0) + 1
+                    if len(prefix) >= min_prefix_length:
+                        names_before_dots[prefix] = names_before_dots.get(prefix, 0) + 1
 
             if len(names_before_dots) == 0:
                 new_key = 'cluster'
@@ -73,7 +75,7 @@ class RefPreparer:
                     new_key += '!'
             else:
                 common_prefix = os.path.commonprefix(list(names_before_dots.keys()))
-                if common_prefix == '':
+                if common_prefix == '' or len(common_prefix) < min_prefix_length:
                     max_value = max(list(names_before_dots.values()))
                     possible_keys = [x for x in names_before_dots if names_before_dots[x] == max_value]
                     possible_keys.sort()
