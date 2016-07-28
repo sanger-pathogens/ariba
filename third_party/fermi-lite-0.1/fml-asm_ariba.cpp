@@ -143,6 +143,7 @@ int assemble(char *readsFile, char *fastaOut, char* logfileOut)
     bseq1_t *seqs;
     fml_opt_init(&opt);
     opt.max_cnt = 10000;
+    opt.min_asm_ovlp = 15;
     std::vector<unsigned short> minCounts;
     minCounts.push_back(4);
     minCounts.push_back(8);

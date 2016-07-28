@@ -324,7 +324,7 @@ class TestAssemblyCompare(unittest.TestCase):
         }
 
         got = assembly_compare.AssemblyCompare._get_gene_matching_ref(nucmer_hits, contigs, 10)
-        expected = (pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 1, 2)
+        expected = ('contig', pyfastaq.sequences.Fasta('contig.2-16', 'ATGAAATTTCCCTAG'), 'GENE_FOUND', 1, 2)
         self.assertEqual(expected, got)
 
 

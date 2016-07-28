@@ -441,7 +441,7 @@ class TestReferenceData(unittest.TestCase):
             ('gene', ('p', False)),
             ('gene.var_only', ('p', True)),
             ('noncoding', ('n', False)),
-            ('noncogind.var_only', ('n', True)),
+            ('noncoding.var_only', ('n', True)),
         ]
 
         for name, expected in tests:

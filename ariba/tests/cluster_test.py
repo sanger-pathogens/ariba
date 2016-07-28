@@ -184,12 +184,12 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t158\t17.4\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t28\tC\t83\t83\tT\t22\t.\t22\tpresence_absence1:1:0:A10V:.:Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
-            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t158\t17.4\t0\t.\tp\t.\t0\t.\tSYN\t53\t53\tT\t108\t108\tC\t32\t.\t32\t.\tGeneric description of presence_absence1',
+            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t28\tC\t83\t83\tT\t22\t.\t22\tpresence_absence1:1:0:A10V:.:Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t0\t.\tp\t.\t0\t.\tSYN\t53\t53\tT\t108\t108\tC\t32\t.\t32\t.\tGeneric description of presence_absence1',
 
-            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t158\t17.4\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t62\t64\tC;G;C\t18;17;17\t.;.;.\t18;17;17\tpresence_absence1:1:0:R3S:.:Ref and assembly have wild type\tGeneric description of presence_absence1',
+            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t62\t64\tC;G;C\t18;17;17\t.;.;.\t18;17;17\tpresence_absence1:1:0:R3S:.:Ref and assembly have wild type\tGeneric description of presence_absence1',
 
-            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t158\t17.4\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tG;C;G\t68\t70\tG;C;G\t18;20;20\t.;.;.\t18;20;20\tpresence_absence1:1:0:I5A:.:Ref and reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tG;C;G\t68\t70\tG;C;G\t18;20;20\t.;.;.\t18;20;20\tpresence_absence1:1:0:I5A:.:Ref and reads have variant so report\tGeneric description of presence_absence1',
         ]
 
         self.assertEqual(expected, c.report_lines)
@@ -247,3 +247,20 @@ class TestCluster(unittest.TestCase):
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_gene_start_mismatch(self):
+        '''test complete run where gene extended because too different at end for full nucmer match'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_gene_start_mismatch.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_gene_start_mismatch.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_gene_start_mismatch'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_gene_start_mismatch'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=112, total_reads_bases=1080)
+        c.run()
+        expected = [
+            'gene\t1\t0\t27\t112\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t364\t27.0\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of gene'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+

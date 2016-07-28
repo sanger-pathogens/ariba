@@ -1,4 +1,4 @@
 gene	1	0	.	.	.
 gene.var_only	1	1	.	.	.
 noncoding	0	0	.	.	.
-noncogind.var_only	0	1	.	.	.
+noncoding.var_only	0	1	.	.	.
