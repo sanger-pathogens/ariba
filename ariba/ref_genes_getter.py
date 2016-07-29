@@ -49,7 +49,7 @@ class RefGenesGetter:
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
 
-        card_version = '1.0.8'
+        card_version = '1.0.9'
         card_tarball_url = 'https://card.mcmaster.ca/download/0/broadstreet-v' + card_version + '.tar.gz'
         card_tarball = 'card.tar.gz'
         print('Working in temporary directory', tmpdir)
