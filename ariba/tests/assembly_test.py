@@ -125,6 +125,7 @@ class TestAssembly(unittest.TestCase):
 
     def test_scaffold_with_sspace(self):
         '''test _scaffold_with_sspace'''
+        return # but leave code here in case we decide to use sspace later
         reads1 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_1.fq')
         reads2 = os.path.join(data_dir, 'assembly_test_assemble_with_spades_reads_2.fq')
         ref_fasta = os.path.join(data_dir, 'assembly_test_assemble_with_spades_ref.fa')
@@ -138,6 +139,7 @@ class TestAssembly(unittest.TestCase):
 
     def test_has_gaps_to_fill(self):
         '''test _has_gaps_to_fill'''
+        return # but leave code here in case we decide to use gapfiller later
         no_gaps = os.path.join(data_dir, 'assembly_test_has_gaps_to_fill.no_gaps.fa')
         has_gaps = os.path.join(data_dir, 'assembly_test_has_gaps_to_fill.has_gaps.fa')
         self.assertTrue(assembly.Assembly._has_gaps_to_fill(has_gaps))
@@ -155,6 +157,7 @@ class TestAssembly(unittest.TestCase):
 
 
     def test_gap_fill_with_gapfiller_no_gaps(self):
+        return # but leave code here in case we decide to use gapfiller later
         '''test _gap_fill_with_gapfiller no gaps'''
         reads1 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_1.fq')
         reads2 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_2.fq')
@@ -167,6 +170,7 @@ class TestAssembly(unittest.TestCase):
 
 
     def test_gap_fill_with_gapfiller_with_gaps(self):
+        return # but leave code here in case we decide to use gapfiller later
         '''test _gap_fill_with_gapfiller with gaps'''
         reads1 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_1.fq')
         reads2 = os.path.join(data_dir, 'assembly_test_gapfill_with_gapfiller_reads_2.fq')

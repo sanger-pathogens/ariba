@@ -207,7 +207,8 @@ class Assembly:
 
         cwd = os.getcwd()
 
-        if self.extern_progs.exe('sspace') is None:
+        #if self.extern_progs.exe('sspace') is None:
+        if True:  # no longer use sspace, but leave the option here just in case
             os.chdir(self.working_dir)
             os.symlink(self.assembly_contigs, os.path.basename(self.scaffolder_scaffolds))
             os.chdir(cwd)
@@ -269,7 +270,8 @@ class Assembly:
 
         cwd = os.getcwd()
 
-        if self.extern_progs.exe('gapfiller') is None or not self._has_gaps_to_fill(self.scaffolder_scaffolds):
+        #if self.extern_progs.exe('gapfiller') is None or not self._has_gaps_to_fill(self.scaffolder_scaffolds):
+        if True: # no longer use gapfiller, but leave the option in, just in case
             self._rename_scaffolds(self.scaffolder_scaffolds, self.gapfilled_scaffolds, self.scaff_name_prefix)
             return
 
