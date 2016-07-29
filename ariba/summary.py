@@ -338,7 +338,7 @@ class Summary:
             pdm = dendropy.PhylogeneticDistanceMatrix.from_csv(src=f, delimiter='\t')
         upgma_tree = pdm.upgma_tree()
         with open(outfile, 'w') as f:
-            print(upgma_tree.as_string("newick"), end='', file=f)
+            print(upgma_tree.as_string("newick").replace("'", ''), end='', file=f)
 
 
     def run(self):
