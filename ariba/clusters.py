@@ -268,6 +268,14 @@ class Clusters:
 
         os.unlink(reads_file_for_read_store)
 
+        if self.clean:
+            for suffix in ['cluster2representative', 'clusterCounts', 'insertHistogram', 'properPairs']:
+                filename = minimap_prefix + '.' + suffix
+                try:
+                    os.unlink(filename)
+                except:
+                    pass
+
         if self.verbose:
             print('Found', self.proper_pairs, 'proper read pairs from minimap')
             print('Total clusters to perform local assemblies:', len(self.cluster_to_dir), flush=True)

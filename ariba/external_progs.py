@@ -14,12 +14,12 @@ prog_to_default = {
     'bowtie2': 'bowtie2',
     'cdhit': 'cd-hit-est',
     'cdhit2d': 'cd-hit-est-2d',
-    'gapfiller': 'GapFiller.pl',
+    #'gapfiller': 'GapFiller.pl',
     'mash': 'mash',
     'nucmer' : 'nucmer',
     'samtools': 'samtools',
     #'spades': 'spades.py',
-    'sspace': 'SSPACE_Basic_v2.0.pl',
+    #'sspace': 'SSPACE_Basic_v2.0.pl',
 }
 
 
@@ -31,12 +31,12 @@ prog_to_version_cmd = {
     'bowtie2': ('--version', re.compile('.*bowtie2.*version (.*)$')),
     'cdhit': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
     'cdhit2d': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
-    'gapfiller': ('', re.compile('^Usage: .*pl \[GapFiller_(.*)\]')),
+    #'gapfiller': ('', re.compile('^Usage: .*pl \[GapFiller_(.*)\]')),
     'mash': ('', re.compile('^Mash version (.*)$')),
     'nucmer': ('--version', re.compile('^NUCmer \(NUCleotide MUMmer\) version ([0-9\.]+)')),
     'samtools': ('', re.compile('^Version: ([0-9\.]+)')),
     #'spades': ('', re.compile('^SPAdes genome assembler v\.?([0-9\.]+)')),
-    'sspace': ('', re.compile('^Usage: .*pl \[SSPACE_(.*)\]')),
+    #'sspace': ('', re.compile('^Usage: .*pl \[SSPACE_(.*)\]')),
 }
 
 

@@ -21,21 +21,12 @@ Installation
 
 ARIBA has the following dependencies, which need to be installed:
   * [Python3][python] version >= 3.4
-  * [R][r] version >= 2.14.0
-  * The R package [ape][ape] version >= 3.1
   * [Bowtie2][bowtie2] version >= 2.1.0
   * [CD-HIT][cdhit] version >= 4.6
-  * [Samtools and BCFtools][samtools]  version >= 1.2
+  * [MASH][mash] version >= 1.0.2
   * [MUMmer][mummer] version >= 3.23
-  * [SPAdes][spades] version >= 3.5.0
-  * [Python2][python] version >= 2.7 (SPAdes needs python2)
+  * [Samtools and BCFtools][samtools]  version >= 1.2
 
-
-ARIBA has the following optional dependencies. If they are installed,
-they will be used. Otherwise scaffolding and gap filling will be
-skipped.
-  * [SSPACE-basic scaffolder][sspace]
-  * [GapFiller][gapfiller]
 
 Once the dependencies are installed, install ARIBA using pip:
 
@@ -64,18 +55,17 @@ to the following dependencies.
 |----------------|------------------------|---------------------------|
 | BCFtools       | `bcftools`             | `$ARIBA_BCFTOOLS`         |
 | Bowtie2        | `bowtie2`              | `$ARIBA_BOWTIE2`          |
-| CD-HIT         | `cd-hit-est`           | `$ARIBA_CDHIT`            |
-| GapFiller      | `GapFiller.pl`         | `$ARIBA_GAPFILLER`        |
-| R              | `Rscript`              | `$ARIBA_R`                |
+| CD-HIT (est)   | `cd-hit-est`           | `$ARIBA_CDHIT`            |
+| CD-HIT (est-2d)| `cd-hit-est-2d`        | `$ARIBA_CDHIT2D`          |
+| MASH           | `mash`                 | `$ARIBA_MASH`             |
 | Samtools       | `samtools`             | `$ARIBA_SAMTOOLS`         |
-| SPAdes         | `spades.py`            | `$ARIBA_SPADES`           |
-| SSPACE         | `SSPACE_Basic_v2.0.pl` | `$ARIBA_SSPACE`           |
 
 
 For example, you could specify an exact version of a Samtools executable
 that you compiled and downloaded in your home directory (assuming BASH):
 
     export ARIBA_SAMTOOLS=$HOME/samtools-1.2/samtools
+
 
 ### Temporary files
 
@@ -131,13 +121,9 @@ Build status: [![Build Status](https://travis-ci.org/sanger-pathogens/ariba.svg?
   [bowtie2]: http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
   [cdhit]: http://weizhongli-lab.org/cd-hit/
   [ARIBA wiki]: https://github.com/sanger-pathogens/ariba/wiki
-  [gapfiller]: http://www.baseclear.com/genomics/bioinformatics/basetools/gapfiller
+  [mash]: https://mash.readthedocs.io/en/latest/
   [mummer]: http://mummer.sourceforge.net/
   [samtools]: http://www.htslib.org/
-  [spades]: http://bioinf.spbau.ru/spades
-  [sspace]: http://www.baseclear.com/genomics/bioinformatics/basetools/SSPACE
-  [ape]: https://cran.r-project.org/web/packages/ape/index.html
-  [r]: https://www.r-project.org/
   [python]: https://www.python.org/
 
 

@@ -135,7 +135,7 @@ nucmer_group.add_argument('--nucmer_breaklen', type=int, help='Value to use for 
 
 assembly_group = subparser_run.add_argument_group('Assembly options')
 assembly_group.add_argument('--assembly_cov', type=int, help='Target read coverage when sampling reads for assembly [%(default)s]', default=50, metavar='INT')
-assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs. This is also the value used for sspace -k when scaffolding [%(default)s]', default=10, metavar='INT')
+assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs [%(default)s]', default=10, metavar='INT')
 
 other_group = subparser_run.add_argument_group('Other options')
 other_group.add_argument('--threads', type=int, help='Number of threads [%(default)s]', default=1, metavar='INT')
