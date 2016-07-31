@@ -172,12 +172,14 @@ int assemble(char *readsFile, char *fastaOut, char* logfileOut)
         // need to get the reads from the file every time, instead of before
         // the loop because fml_assemble() destroys them :(
         seqs = bseq_read(readsFile, &n_seqs);
-        fml_utg_t *utg;
-        utg = fml_assemble(&opt, n_seqs, seqs, &n_utg);
-        Assembly a(n_utg, utg, *minCountIter);
-        assemblies.push_back(a);
-        a.printStats(ofs);
-        fml_utg_destroy(n_utg, utg);
+        if (seqs && n_seqs > 0) {
+            fml_utg_t *utg;
+            utg = fml_assemble(&opt, n_seqs, seqs, &n_utg);
+            Assembly a(n_utg, utg, *minCountIter);
+            assemblies.push_back(a);
+            a.printStats(ofs);
+            fml_utg_destroy(n_utg, utg);
+        }
     }
 
     if (assemblies.size() == 0 || assemblies[0].numberOfContigs == 0)
