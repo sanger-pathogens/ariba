@@ -47,7 +47,7 @@ class TestAssembly(unittest.TestCase):
 
     def test_run_fermilite_fails(self):
         '''test _run_fermilite when it fails'''
-        reads = os.path.join(data_dir, 'assembly_run_fermilite_fails.reads.fq')
+        reads = os.path.join(data_dir, 'assembly_run_fermilite_fail.reads.fq')
         tmp_fa = 'tmp.test_run_fermilite_fails.fa'
         tmp_log = 'tmp.test_run_fermilite_fails.log'
         expected_log = os.path.join(data_dir, 'assembly_run_fermilite_fails.expected.log')
