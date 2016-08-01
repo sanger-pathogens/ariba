@@ -175,8 +175,8 @@ class SamtoolsVariants:
                 intersects = len([x for x in nucmer_matches[scaff] if x.intersects(i)]) > 0
                 if intersects:
                     if scaff not in found_variants:
-                        found_variants[scaff] = []
-                    found_variants[scaff].append(position)
+                        found_variants[scaff] = set()
+                    found_variants[scaff].add(position)
 
         pyfastaq.utils.close(f)
         return found_variants

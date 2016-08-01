@@ -140,7 +140,7 @@ class TestSamtoolsVariants(unittest.TestCase):
             'scaff1': [pyfastaq.intervals.Interval(0, 41)]
         }
 
-        expected = {'scaff1': [22]}
+        expected = {'scaff1': {22}}
         got = samtools_variants.SamtoolsVariants.variants_in_coords(nucmer_hits, vcf_file)
         self.assertEqual(expected, got)
 
