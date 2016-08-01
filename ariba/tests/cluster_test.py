@@ -318,11 +318,11 @@ class TestCluster(unittest.TestCase):
 
     def test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var(self):
         '''test complete run where samtools calls a snp at a known snp location in a variant only gene, gene does not have variant'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_gene'), tmpdir)
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_gene_does_not_have_var'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
 
@@ -330,6 +330,25 @@ class TestCluster(unittest.TestCase):
         # included in the report of the known snp
         expected = [
             'ref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tM6I\t0\t.\t.\t16\t18\tA;T;G\t135\t137\tA;T;G\t65;64;63\t.;.;A\t65;64;32,31\tref_gene:1:1:M6I:.:Description of M6I snp\t.'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var(self):
+        '''test complete run where samtools calls a snp at a known snp location in a variant only gene, gene does have variant'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_gene_does_have_var'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+
+        # We shouldn't get an extra 'HET' line because we already know about the snp, so
+        # included in the report of the known snp
+        expected = [
+            'ref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tI6M\t1\t.\t.\t16\t18\tA;T;G\t135\t137\tA;T;G\t65;64;63\t.;.;A\t65;64;32,31\tref_gene:1:1:I6M:.:Description of I6M snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
