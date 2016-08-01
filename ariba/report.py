@@ -1,3 +1,4 @@
+import copy
 import sys
 import pymummer
 
@@ -169,6 +170,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
     else:
         free_text_column = ';'.join(['.'])
 
+    remaining_samtools_variants = copy.copy(cluster.variants_from_samtools)
     if cluster.assembled_ok and contig_name in cluster.assembly_variants and len(cluster.assembly_variants[contig_name]) > 0:
         for (position, var_seq_type, ref_ctg_change, var_effect, contributing_vars, matching_vars_set, metainfo_set) in cluster.assembly_variants[contig_name]:
             if len(matching_vars_set) > 0:
@@ -196,7 +198,11 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 smtls_alt_depth = []
 
                 for var in contributing_vars:
+                    if contig_name in remaining_samtools_variants and var.qry_start in remaining_samtools_variants[contig_name]:
+                        del remaining_samtools_variants[contig_name][var.qry_start]
+
                     depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, var.qry_start)
+
                     if depths_tuple is not None:
                         smtls_alt_nt.append(depths_tuple[1])
                         smtls_total_depth.append(str(depths_tuple[2]))
@@ -239,7 +245,26 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                     samtools_columns + \
                     [matching_vars_column] + [free_text_column]
                 ))
-    else:
+
+    for contig_name in remaining_samtools_variants:
+        for var_position in remaining_samtools_variants[contig_name]:
+            depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, var_position)
+            if depths_tuple is not None:
+                new_cols = [
+                    '0',  # known_var column
+                    'HET', # var_type
+                    '.', '.', '.', '.', '.', '.', '.', '.', # var_seq_type ... ref_nt
+                    str(var_position + 1), str(var_position + 1), # ctg_start, ctg_end
+                    depths_tuple[0], # ctg_nt
+                    str(depths_tuple[2]), # smtls_total_depth
+                    depths_tuple[1], # smtls_alt_nt
+                    str(depths_tuple[3]), # smtls_alt_depth
+                    '.',
+                    free_text_column,
+                ]
+                lines.append('\t'.join(common_first_columns + new_cols))
+
+    if len(lines) == 0:
         lines.append('\t'.join(common_first_columns + ['.'] * (len(columns) - len(common_first_columns) - 1) + [free_text_column]))
 
     return lines
