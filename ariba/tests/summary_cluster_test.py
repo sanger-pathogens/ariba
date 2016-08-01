@@ -296,6 +296,32 @@ class TestSummaryCluster(unittest.TestCase):
             self.assertEqual('NA', cluster._to_cluster_summary_has_nonsynonymous('no'))
 
 
+    def test_get_known_noncoding_het_snp(self):
+        '''Test _get_known_noncoding_het_snp'''
+        d = {'gene': '1'}
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+        d['gene'] = '0'
+        d['known_var'] = '0'
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+
+        d['known_var'] = '1'
+        d['ref_ctg_effect'] = 'not_a_snp'
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+
+        d['ref_ctg_effect'] = 'SNP'
+        d['smtls_alt_nt'] = '.'
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+
+        d['smtls_alt_nt'] = 'A;G;T'
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+
+        d['known_var_change'] = 'A42T'
+        d['ctg_nt'] = 'A'
+        d['smtls_alt_nt'] = 'T'
+        d['smtls_alt_depth'] = '52,48'
+        self.assertEqual(('A42T', 48.0), summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+
+
     def test_get_nonsynonymous_var(self):
         '''Test _get_nonsynonymous_var'''
         d = {

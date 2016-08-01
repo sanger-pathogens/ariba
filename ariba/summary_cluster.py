@@ -187,6 +187,38 @@ class SummaryCluster:
 
 
     @staticmethod
+    def _get_known_noncoding_het_snp(data_dict):
+        '''If ref is coding, return None. If the data dict has a known snp, and
+           samtools made a call, then return the string ref_name_change and the
+           % of reads supporting the variant type. If noncoding, but no
+           samtools call, then return None'''
+        if data_dict['gene'] == '1':
+            return None
+
+        if data_dict['known_var'] == '1' and data_dict['ref_ctg_effect'] == 'SNP' \
+          and data_dict['smtls_alt_nt'] != '.' and ';' not in data_dict['smtls_alt_nt']:
+            nucleotides = [data_dict['ctg_nt']] + data_dict['smtls_alt_nt'].split(',')
+            depths = data_dict['smtls_alt_depth'].split(',')
+
+            if len(nucleotides) != len(depths):
+                raise Error('Mismatch in number of inferred nucleotides from ctg_nt, smtls_alt_nt, smtls_alt_depth columns. Cannot continue\n' + str(data_dict))
+
+            try:
+                var_nucleotide = data_dict['known_var_change'][-1]
+                depths = [int(x) for x in depths]
+                nuc_to_depth = dict(zip(nucleotides, depths))
+                total_depth = sum(depths)
+                var_depth = nuc_to_depth.get(var_nucleotide, 0)
+                percent_depth = 100 * var_depth / total_depth
+            except:
+                return None
+
+            return data_dict['known_var_change'], percent_depth
+        else:
+            return None
+
+
+    @staticmethod
     def _get_nonsynonymous_var(data_dict):
         '''if data_dict has a non synonymous variant, return string:
         ref_name.change. Otherwise return None'''
