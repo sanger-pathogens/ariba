@@ -288,3 +288,9 @@ class SummaryCluster:
         variants = {self._get_nonsynonymous_var(d) for d in self.data}
         variants.discard(None)
         return variants
+
+
+    def known_noncoding_het_snps(self):
+        snps = {self._get_known_noncoding_het_snp(d) for d in self.data}
+        snps.discard(None)
+        return snps
