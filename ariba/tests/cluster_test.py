@@ -281,3 +281,20 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
+    def test_full_run_ok_samtools_snp_known_position_pres_abs_gene(self):
+        '''test complete run where samtools calls a snp at a known snp location in a presence/absence gene'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_pres_abs_gene'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+
+        # We shouldn't get an extra 'HET' line because we already know about the snp, so
+        # included in the report of the known snp
+        expected = [
+            'ref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tM6I\t0\t.\t.\t16\t18\tA;T;G\t135\t137\tA;T;G\t65;64;63\t.;.;A\t65;64;32,31\tref_gene:1:0:M6I:.:Description of M6I snp\t.'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)

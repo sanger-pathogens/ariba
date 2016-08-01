@@ -198,8 +198,8 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 smtls_alt_depth = []
 
                 for var in contributing_vars:
-                    if contig_name in remaining_samtools_variants and var.qry_start in remaining_samtools_variants[contig_name]:
-                        del remaining_samtools_variants[contig_name][var.qry_start]
+                    if contig_name in remaining_samtools_variants:
+                        remaining_samtools_variants[contig_name].discard(var.qry_start)
 
                     depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, var.qry_start)
 
@@ -237,6 +237,10 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
 
                     if samtools_columns is None:
                         samtools_columns = [['.'] * 9]
+                    else:
+                        for ctg_pos in range(int(samtools_columns[3]) - 1, int(samtools_columns[4]), 1):
+                            if contig_name in remaining_samtools_variants:
+                                remaining_samtools_variants[contig_name].discard(ctg_pos)
 
                     lines.append('\t'.join(common_first_columns + variant_columns + samtools_columns + [matching_vars_column] + [free_text_column]))
             else:
