@@ -415,7 +415,9 @@ class Cluster:
 
             self.total_contig_depths = self.samtools_vars.total_depth_per_contig(self.samtools_vars.read_depths_file)
 
-            if self.samtools_vars.variants_in_coords(self.assembly_compare.assembly_match_coords(), self.samtools_vars.vcf_file):
+            variants_from_samtools =  self.samtools_vars.variants_in_coords(self.assembly_compare.assembly_match_coords(), self.samtools_vars.vcf_file)
+            if len(variants_from_samtools):
+                print('DEBUG 3')
                 self.status_flag.add('variants_suggest_collapsed_repeat')
         elif not self.assembled_ok:
             print('\nAssembly failed\n', file=self.log_fh, flush=True)
