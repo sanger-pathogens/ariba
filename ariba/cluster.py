@@ -103,6 +103,7 @@ class Cluster:
         self.final_assembly_vcf = os.path.join(self.root_dir, 'assembly.reads_mapped.bam.vcf')
         self.samtools_vars_prefix = self.final_assembly_bam
         self.assembly_compare = None
+        self.variants_from_samtools = {}
         self.assembly_compare_prefix = os.path.join(self.root_dir, 'assembly_compare')
 
         self.mummer_variants = {}
@@ -417,7 +418,6 @@ class Cluster:
 
             self.variants_from_samtools =  self.samtools_vars.variants_in_coords(self.assembly_compare.assembly_match_coords(), self.samtools_vars.vcf_file)
             if len(self.variants_from_samtools):
-                print('DEBUG 3')
                 self.status_flag.add('variants_suggest_collapsed_repeat')
         elif not self.assembled_ok:
             print('\nAssembly failed\n', file=self.log_fh, flush=True)
