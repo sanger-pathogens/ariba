@@ -314,3 +314,23 @@ class TestCluster(unittest.TestCase):
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding(self):
+        '''test complete run where samtools calls a snp at a known snp location in a presence/absence noncoding'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_pres_abs_noncoding'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+
+        # We shouldn't get an extra 'HET' line because we already know about the snp, so
+        # included in the report of the known snp
+        expected = [
+            'ref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tA\t32,31\tref_seq:0:0:G18A:.:Description of G18A snp\t.'
+        ]
+        print(*c.report_lines)
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
