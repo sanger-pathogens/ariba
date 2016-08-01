@@ -120,6 +120,7 @@ class ReportFilter:
         return ReportFilter._flag_passes_filter(report_dict['flag'], self.exclude_flags) \
                    and report_dict['pc_ident'] >= self.min_pc_ident \
                    and report_dict['ref_base_assembled'] >= self.min_ref_base_assembled \
+                   and report_dict['var_type'] != 'HET'
 
 
     def _filter_list_of_dicts(self, dicts_list):
