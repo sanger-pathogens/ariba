@@ -160,7 +160,7 @@ class SamtoolsVariants:
     def variants_in_coords(nucmer_matches, vcf_file):
         '''nucmer_matches = made by assembly_compare.assembly_match_coords().
            Returns number of variants that lie in nucmer_matches'''
-        vcf_variant_counts = {}
+        found_variants = {}
         f = pyfastaq.utils.open_file_read(vcf_file)
         for line in f:
             if line.startswith('#'):
@@ -174,10 +174,12 @@ class SamtoolsVariants:
                 i = pyfastaq.intervals.Interval(position, position)
                 intersects = len([x for x in nucmer_matches[scaff] if x.intersects(i)]) > 0
                 if intersects:
-                    vcf_variant_counts[scaff] = vcf_variant_counts.get(scaff, 0) + 1
+                    if scaff not in found_variants:
+                        found_variants[scaff] = []
+                    found_variants[scaff].append(position)
 
         pyfastaq.utils.close(f)
-        return sum(list(vcf_variant_counts.values()))
+        return found_variants
 
 
     def get_depths_at_position(self, seq_name, position):
