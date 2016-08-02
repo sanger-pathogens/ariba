@@ -7,10 +7,6 @@ addons:
     - liblapack-dev
     - libgfortran3
     - libncurses5-dev
-cache:
-  directories:
-  - "build"
-  - "$HOME/.cache/pip"
 python:
   - "3.4"
 sudo: false
