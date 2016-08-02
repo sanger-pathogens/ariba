@@ -225,9 +225,9 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
         s.show_known_het = True
-        expected[infiles[0]]['noncoding1']['noncoding1.A14T%'] = 'NA'
+        expected[infiles[0]]['noncoding1']['noncoding1.A14T.%'] = 'NA'
         expected[infiles[1]]['noncoding1']['noncoding1.A14T'] = 'het'
-        expected[infiles[1]]['noncoding1']['noncoding1.A14T%'] = 80.0
+        expected[infiles[1]]['noncoding1']['noncoding1.A14T.%'] = 80.0
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 

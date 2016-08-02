@@ -186,12 +186,12 @@ class Summary:
                             if self.show_known_het:
                                 if cluster in sample.het_snps and variant in sample.het_snps[cluster]:
                                     rows[filename][cluster][key] = 'het'
-                                    rows[filename][cluster][key + '%'] = sample.het_snps[cluster][variant]
+                                    rows[filename][cluster][key + '.%'] = sample.het_snps[cluster][variant]
                         else:
                             rows[filename][cluster][key] = 'no'
 
-                        if self.show_known_het and (ref_name, variant) in all_het_snps and key + '%' not in rows[filename][cluster]:
-                            rows[filename][cluster][key + '%'] = 'NA'
+                        if self.show_known_het and (ref_name, variant) in all_het_snps and key + '.%' not in rows[filename][cluster]:
+                            rows[filename][cluster][key + '.%'] = 'NA'
 
                 for key, wanted in self.cluster_columns.items():
                     if not wanted:
