@@ -91,13 +91,13 @@ class TestSummarySample(unittest.TestCase):
         sample_summary.clusters = sample_summary._load_file(infile, 90)
         sample_summary.column_summary_data = sample_summary._column_summary_data()
         expected_column_names = {
-            'cluster.v': {('variants_only1', 'S5T', 'ungrouped', None, None)},
+            'cluster.v': {('variants_only1', 'S5T', 'ungrouped', None)},
             'cluster.n': {
-                ('noncoding1', 'A6G', 'grouped', 'id2', None),
-                ('noncoding1', 'A14T', 'ungrouped', None, 'A14T%'),
-                ('noncoding1', 'G15T', 'novel', None, None)
+                ('noncoding1', 'A6G', 'grouped', 'id2'),
+                ('noncoding1', 'A14T', 'ungrouped', None),
+                ('noncoding1', 'G15T', 'novel', None)
              },
-            'cluster.p': {('presence_absence1', 'A10V', 'grouped', 'id3', None)}
+            'cluster.p': {('presence_absence1', 'A10V', 'grouped', 'id3')}
         }
         got_column_names, got_het_snps = sample_summary._variant_column_names_tuples_and_het_snps()
         self.assertEqual(expected_column_names, got_column_names)

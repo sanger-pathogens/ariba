@@ -52,7 +52,6 @@ class SummarySample:
             cluster_noncoding_het_snps = cluster.known_noncoding_het_snps()
 
             if len(cluster_vars):
-                cluster_vars = {x + (x[1] + '%' if x[1] in cluster_noncoding_het_snps else None, ) for x in cluster_vars}
                 variants[cluster_name] = cluster_vars
                 het_snps[cluster_name] = cluster_noncoding_het_snps
         return variants, het_snps
