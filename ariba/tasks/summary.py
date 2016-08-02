@@ -93,6 +93,7 @@ def run(options):
         filter_rows=options.col_filter == 'y',
         filter_columns=options.row_filter == 'y',
         min_id=options.min_id,
+        show_known_het=options.het,
         cluster_cols=options.cluster_cols,
         variant_cols=options.var_cols,
         verbose=options.verbose
