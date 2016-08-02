@@ -100,6 +100,7 @@ class Clusters:
         self.report_file_filtered = os.path.join(self.outdir, 'report.tsv')
         self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa.gz')
         self.catted_genes_matching_refs_fasta = os.path.join(self.outdir, 'assembled_genes.fa.gz')
+        self.catted_assemblies_fasta = os.path.join(self.outdir, 'assemblies.fa.gz')
         self.threads = threads
         self.verbose = verbose
 
@@ -443,6 +444,21 @@ class Clusters:
         pyfastaq.utils.close(f)
 
 
+    def _write_catted_assemblies_fasta(self, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
+
+        for gene in sorted(self.clusters):
+            try:
+                seq_dict = self.clusters[gene].assembly.sequences
+            except:
+                continue
+
+            for seq_name in sorted(seq_dict):
+                print(seq_dict[seq_name], file=f)
+
+        pyfastaq.utils.close(f)
+
+
     def _write_catted_assembled_seqs_fasta(self, outfile):
         f = pyfastaq.utils.open_file_write(outfile)
 
@@ -563,6 +579,7 @@ class Clusters:
             print(self.catted_assembled_seqs_fasta, 'and', self.catted_genes_matching_refs_fasta, flush=True)
         self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
         self._write_catted_genes_matching_refs_fasta(self.catted_genes_matching_refs_fasta)
+        self._write_catted_assemblies_fasta(self.catted_assemblies_fasta)
 
         if self.log_files is not None:
             clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
