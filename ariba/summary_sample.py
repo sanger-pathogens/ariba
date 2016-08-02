@@ -61,6 +61,6 @@ class SummarySample:
     def run(self):
         self.clusters = self._load_file(self.report_tsv, self.min_pc_id)
         self.column_summary_data = self._column_summary_data()
-        self.variant_column_names_tuples = self._variant_column_names_tuples()
+        self.variant_column_names_tuples, self.het_snps = self._variant_column_names_tuples_and_het_snps()
         self.var_groups = self._var_groups()
 
