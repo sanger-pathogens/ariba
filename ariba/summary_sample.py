@@ -44,13 +44,18 @@ class SummarySample:
         return {c: self.clusters[c].has_var_groups() for c in self.clusters}
 
 
-    def _variant_column_names_tuples(self):
+    def _variant_column_names_tuples_and_het_snps(self):
         variants = {}
+        het_snps = {}
         for cluster_name, cluster in self.clusters.items():
             cluster_vars = cluster.non_synon_variants()
+            cluster_noncoding_het_snps = cluster.known_noncoding_het_snps()
+
             if len(cluster_vars):
+                cluster_vars = {x + (x[1] + '%' if x[1] in cluster_noncoding_het_snps else None, ) for x in cluster_vars}
                 variants[cluster_name] = cluster_vars
-        return variants
+                het_snps[cluster_name] = cluster_noncoding_het_snps
+        return variants, het_snps
 
 
     def run(self):

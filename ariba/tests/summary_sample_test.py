@@ -84,21 +84,28 @@ class TestSummarySample(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_variant_column_names_tuples(self):
-        '''Test _variant_column_names_tuples'''
-        infile = os.path.join(data_dir, 'summary_sample_test_column_names_tuples.tsv')
+    def test_variant_column_names_tuples_and_het_snps(self):
+        '''Test _variant_column_names_tuples_and_het_snps'''
+        infile = os.path.join(data_dir, 'summary_sample_test_column_names_tuples_and_het_snps.tsv')
         sample_summary = summary_sample.SummarySample(infile)
         sample_summary.clusters = sample_summary._load_file(infile, 90)
         sample_summary.column_summary_data = sample_summary._column_summary_data()
-        expected = {
-            'cluster.v': {('variants_only1', 'S5T', 'ungrouped', None)},
+        expected_column_names = {
+            'cluster.v': {('variants_only1', 'S5T', 'ungrouped', None, None)},
             'cluster.n': {
-                ('noncoding1', 'A6G', 'grouped', 'id2'),
-                ('noncoding1', 'A14T', 'ungrouped', None),
-                ('noncoding1', 'G15T', 'novel', None)
+                ('noncoding1', 'A6G', 'grouped', 'id2', None),
+                ('noncoding1', 'A14T', 'ungrouped', None, 'A14T%'),
+                ('noncoding1', 'G15T', 'novel', None, None)
              },
-            'cluster.p': {('presence_absence1', 'A10V', 'grouped', 'id3')}
+            'cluster.p': {('presence_absence1', 'A10V', 'grouped', 'id3', None)}
         }
-        got = sample_summary._variant_column_names_tuples()
-        self.assertEqual(expected, got)
+        got_column_names, got_het_snps = sample_summary._variant_column_names_tuples_and_het_snps()
+        self.assertEqual(expected_column_names, got_column_names)
+
+        expected_het_snps = {
+            'cluster.v': {},
+            'cluster.n': {'A14T': 80.0},
+            'cluster.p': {},
+        }
+        self.assertEqual(expected_het_snps, got_het_snps)
 
