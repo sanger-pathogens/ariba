@@ -395,6 +395,11 @@ class Summary:
         if len(matrix) == 0 or len(matrix[0]) == 0:
             print('No columns left after filtering columns. Cannot continue', file=sys.stderr)
 
+        # sanity check same number of columns in headers and matrix
+        lengths = {len(x) for x in matrix}
+        assert len(lengths) == 1
+        assert len(matrix[0]) == len(phandango_header) == len(csv_header)
+
         csv_file = self.outprefix + '.csv'
         if self.verbose:
             print('Writing csv file', csv_file, flush=True)
