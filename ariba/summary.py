@@ -192,7 +192,7 @@ class Summary:
                             if self.show_known_het and (cluster, variant) in all_het_snps:
                                 rows[filename][cluster][key + '.%'] = 'NA'
 
-                        if self.show_known_het and (ref_name, variant) in all_het_snps and key + '.%' not in rows[filename][cluster]:
+                        if self.show_known_het and (cluster, variant) in all_het_snps and key + '.%' not in rows[filename][cluster]:
                             rows[filename][cluster][key + '.%'] = 'NA'
 
                 for key, wanted in self.cluster_columns.items():
