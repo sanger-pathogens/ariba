@@ -490,9 +490,9 @@ class Clusters:
             except:
                 pass
 
-            if self.verbose:
-                print('Deleting reads store files', self.read_store.outfile + '[.tbi]')
             try:
+                if self.verbose:
+                    print('Deleting reads store files', self.read_store.outfile + '[.tbi]')
                 self.read_store.clean()
             except:
                 pass
@@ -523,6 +523,7 @@ class Clusters:
         os.chdir(self.outdir)
         self.write_versions_file(cwd)
         self._map_and_cluster_reads()
+        self.log_files = None
 
         if len(self.cluster_to_dir) > 0:
             got_insert_data_ok = self._set_insert_size_data()
@@ -563,12 +564,13 @@ class Clusters:
         self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
         self._write_catted_genes_matching_refs_fasta(self.catted_genes_matching_refs_fasta)
 
-        clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
-        if self.verbose:
-            print()
-            print('{:_^79}'.format(' Catting cluster log files '), flush=True)
-            print('Writing file', clusters_log_file, flush=True)
-        common.cat_files(self.log_files, clusters_log_file)
+        if self.log_files is not None:
+            clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
+            if self.verbose:
+                print()
+                print('{:_^79}'.format(' Catting cluster log files '), flush=True)
+                print('Writing file', clusters_log_file, flush=True)
+            common.cat_files(self.log_files, clusters_log_file)
 
         if self.verbose:
             print()
