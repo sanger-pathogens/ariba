@@ -378,6 +378,12 @@ class Summary:
         self.rows = self._gather_output_rows()
         phandango_header, csv_header, matrix = Summary._to_matrix(self.filenames, self.rows, self.cluster_columns)
 
+        # sanity check same number of columns in headers and matrix
+        lengths = {len(x) for x in matrix}
+        print(lengths, len(phandango_header), len(csv_header))
+        assert len(lengths) == 1
+        assert len(matrix[0]) == len(phandango_header) == len(csv_header)
+
         if self.filter_rows:
             if self.verbose:
                 print('Filtering rows', flush=True)
