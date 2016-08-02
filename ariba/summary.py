@@ -18,6 +18,7 @@ class Summary:
       filter_rows=True,
       filter_columns=True,
       min_id=90.0,
+      show_known_het=False,
       cluster_cols='assembled,match,ref_seq,pct_id,known_var,novel_var',
       variant_cols='groups,grouped,ungrouped,novel',
       verbose=False,
@@ -33,6 +34,7 @@ class Summary:
         if fofn is not None:
             self.filenames.extend(self._load_fofn(fofn))
 
+        self.show_known_het = show_known_het
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
         self.var_columns = self._determine_var_cols(variant_cols)
         self.filter_rows = filter_rows
@@ -113,6 +115,17 @@ class Summary:
 
 
     @classmethod
+    def _get_all_het_snps(cls, samples_dict):
+        snps = set()
+        for filename, sample in samples_dict.items():
+            for cluster, snp_dict in sample.het_snps.items():
+                if len(snp_dict):
+                    for snp in snp_dict:
+                        snps.add((cluster, snp))
+
+        return snps
+
+    @classmethod
     def _get_all_var_groups(cls, samples_dict):
         groups = {}
         for filename, sample in samples_dict.items():
@@ -126,6 +139,8 @@ class Summary:
     def _gather_output_rows(self):
         all_cluster_names = Summary._get_all_cluster_names(self.samples)
         all_var_columns = Summary._get_all_variant_columns(self.samples)
+        all_het_snps = Summary._get_all_het_snps(self.samples)
+
         if self.var_columns['groups']:
             var_groups = Summary._get_all_var_groups(self.samples)
         else:
@@ -158,17 +173,25 @@ class Summary:
                             rows[filename][cluster]['vgroup.' + group_name] = 'no'
 
                 if cluster in all_var_columns:
-                    for (ref_name, variant, grouped_or_novel, group_name, het_percent) in all_var_columns[cluster]:
+                    for (ref_name, variant, grouped_or_novel, group_name) in all_var_columns[cluster]:
                         if not self.var_columns[grouped_or_novel]:
                             continue
 
                         key = ref_name + '.' + variant
+
                         if rows[filename][cluster]['assembled'] == 'no':
                             rows[filename][cluster][key] = 'NA'
-                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant, grouped_or_novel, group_name, het_percent) in sample.variant_column_names_tuples[cluster]:
+                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant, grouped_or_novel, group_name) in sample.variant_column_names_tuples[cluster]:
                             rows[filename][cluster][key] = 'yes'
+                            if self.show_known_het:
+                                if cluster in sample.het_snps and variant in sample.het_snps[cluster]:
+                                    rows[filename][cluster][key] = 'het'
+                                    rows[filename][cluster][key + '%'] = sample.het_snps[cluster][variant]
                         else:
                             rows[filename][cluster][key] = 'no'
+
+                        if self.show_known_het and (ref_name, variant) in all_het_snps and key + '%' not in rows[filename][cluster]:
+                            rows[filename][cluster][key + '%'] = 'NA'
 
                 for key, wanted in self.cluster_columns.items():
                     if not wanted:
