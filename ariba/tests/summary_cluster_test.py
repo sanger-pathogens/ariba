@@ -464,6 +464,6 @@ class TestSummaryCluster(unittest.TestCase):
         for line in lines:
             cluster.add_data_dict(summary_cluster.SummaryCluster.line2dict(line))
         got = cluster.known_noncoding_het_snps()
-        expected = {('A42T', 25.0), ('A62T', 75.0), ('A82T', 40.0)}
+        expected = {'A42T': 25.0, 'A62T': 75.0, 'A82T': 40.0}
         self.assertEqual(expected, got)
 

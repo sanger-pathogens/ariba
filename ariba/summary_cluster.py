@@ -291,6 +291,9 @@ class SummaryCluster:
 
 
     def known_noncoding_het_snps(self):
-        snps = {self._get_known_noncoding_het_snp(d) for d in self.data}
-        snps.discard(None)
+        snps = {}
+        for d in self.data:
+            snp_tuple = self._get_known_noncoding_het_snp(d)
+            if snp_tuple is not None:
+                snps[snp_tuple[0]] = snp_tuple[1]
         return snps
