@@ -22,6 +22,15 @@ class TestRefPreparer(unittest.TestCase):
            '7': {'prefix1.fgh', 'prefix1.ijk', 'something_else_again.abc'},
            '8': {'xyz.1', 'xyz.2', 'abcdefgh'},
            '9': {'a.foo', 'a.bar'},
+           '10': {'abc_1.1'},
+           '11': {'abc.2'},
+           '12': {'abc.3'},
+           '13': {'abc.4'},
+           '14': {'def.1'},
+           '15': {'def_1.2'},
+           '16': {'def_2.3'},
+           '17': {'def.4'},
+           '18': {'def.5'},
         }
 
         expected = {
@@ -35,9 +44,17 @@ class TestRefPreparer(unittest.TestCase):
             'prefix1+_2': {'prefix1.fgh', 'prefix1.ijk', 'something_else_again.abc'},
             'xyz+': {'xyz.1', 'xyz.2', 'abcdefgh'},
             'cluster_3': {'a.foo', 'a.bar'},
+            'abc_1': {'abc_1.1'},
+            'abc_2': {'abc.2'},
+            'abc_3': {'abc.3'},
+            'abc_4': {'abc.4'},
+            'def_1': {'def_1.2'},
+            'def_2': {'def_2.3'},
+            'def_3': {'def.1'},
+            'def_4': {'def.4'},
+            'def_5': {'def.5'},
         }
 
-        self.maxDiff = None
         got = ref_preparer.RefPreparer._rename_clusters(clusters_in)
         self.assertEqual(expected, got)
 
