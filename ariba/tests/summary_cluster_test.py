@@ -296,6 +296,32 @@ class TestSummaryCluster(unittest.TestCase):
             self.assertEqual('NA', cluster._to_cluster_summary_has_nonsynonymous('no'))
 
 
+    def test_get_known_noncoding_het_snp(self):
+        '''Test _get_known_noncoding_het_snp'''
+        d = {'gene': '1'}
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+        d['gene'] = '0'
+        d['known_var'] = '0'
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+
+        d['known_var'] = '1'
+        d['ref_ctg_effect'] = 'not_a_snp'
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+
+        d['ref_ctg_effect'] = 'SNP'
+        d['smtls_alt_nt'] = '.'
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+
+        d['smtls_alt_nt'] = 'A;G;T'
+        self.assertEqual(None, summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+
+        d['known_var_change'] = 'A42T'
+        d['ctg_nt'] = 'A'
+        d['smtls_alt_nt'] = 'T'
+        d['smtls_alt_depth'] = '52,48'
+        self.assertEqual(('A42T', 48.0), summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
+
+
     def test_get_nonsynonymous_var(self):
         '''Test _get_nonsynonymous_var'''
         d = {
@@ -423,3 +449,21 @@ class TestSummaryCluster(unittest.TestCase):
         got = cluster.non_synon_variants()
         expected = {('ref1', 'A14T', 'grouped', 'id1')}
         self.assertEqual(expected, got)
+
+
+    def test_known_noncoding_het_snps(self):
+        '''test known_noncoding_het_snps'''
+        lines = [
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:n:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA42T\t1\tA42T\tSNP\t42\t42\tA\t84\t84\tT\t40\tA\t10,30\tnon_coding1:n:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA62T\t1\tA62T\tSNP\t62\t62\tA\t84\t84\tA\t40\tT\t10,30\tnon_coding1:n:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA82T\t1\tA82T\tSNP\t82\t82\tA\t84\t84\tA\t100\tT,G\t10,40,50\tnon_coding1:n:A14T:id1:foo_bar\tspam eggs'
+        ]
+
+        cluster = summary_cluster.SummaryCluster()
+        for line in lines:
+            cluster.add_data_dict(summary_cluster.SummaryCluster.line2dict(line))
+        got = cluster.known_noncoding_het_snps()
+        expected = {'A42T': 25.0, 'A62T': 75.0, 'A82T': 40.0}
+        self.assertEqual(expected, got)
+

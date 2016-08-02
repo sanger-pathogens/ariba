@@ -18,6 +18,7 @@ class Summary:
       filter_rows=True,
       filter_columns=True,
       min_id=90.0,
+      show_known_het=False,
       cluster_cols='assembled,match,ref_seq,pct_id,known_var,novel_var',
       variant_cols='groups,grouped,ungrouped,novel',
       verbose=False,
@@ -33,6 +34,7 @@ class Summary:
         if fofn is not None:
             self.filenames.extend(self._load_fofn(fofn))
 
+        self.show_known_het = show_known_het
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
         self.var_columns = self._determine_var_cols(variant_cols)
         self.filter_rows = filter_rows
@@ -113,6 +115,17 @@ class Summary:
 
 
     @classmethod
+    def _get_all_het_snps(cls, samples_dict):
+        snps = set()
+        for filename, sample in samples_dict.items():
+            for cluster, snp_dict in sample.het_snps.items():
+                if len(snp_dict):
+                    for snp in snp_dict:
+                        snps.add((cluster, snp))
+
+        return snps
+
+    @classmethod
     def _get_all_var_groups(cls, samples_dict):
         groups = {}
         for filename, sample in samples_dict.items():
@@ -126,6 +139,8 @@ class Summary:
     def _gather_output_rows(self):
         all_cluster_names = Summary._get_all_cluster_names(self.samples)
         all_var_columns = Summary._get_all_variant_columns(self.samples)
+        all_het_snps = Summary._get_all_het_snps(self.samples)
+
         if self.var_columns['groups']:
             var_groups = Summary._get_all_var_groups(self.samples)
         else:
@@ -163,12 +178,22 @@ class Summary:
                             continue
 
                         key = ref_name + '.' + variant
+
                         if rows[filename][cluster]['assembled'] == 'no':
                             rows[filename][cluster][key] = 'NA'
                         elif cluster in sample.variant_column_names_tuples and (ref_name, variant, grouped_or_novel, group_name) in sample.variant_column_names_tuples[cluster]:
                             rows[filename][cluster][key] = 'yes'
+                            if self.show_known_het:
+                                if cluster in sample.het_snps and variant in sample.het_snps[cluster]:
+                                    rows[filename][cluster][key] = 'het'
+                                    rows[filename][cluster][key + '.%'] = sample.het_snps[cluster][variant]
                         else:
                             rows[filename][cluster][key] = 'no'
+                            if self.show_known_het and (cluster, variant) in all_het_snps:
+                                rows[filename][cluster][key + '.%'] = 'NA'
+
+                        if self.show_known_het and (cluster, variant) in all_het_snps and key + '.%' not in rows[filename][cluster]:
+                            rows[filename][cluster][key + '.%'] = 'NA'
 
                 for key, wanted in self.cluster_columns.items():
                     if not wanted:
@@ -213,7 +238,8 @@ class Summary:
 
                     if making_header_lines:
                         csv_header.append(cluster_name + '.' + col)
-                        phandango_header.append(cluster_name + '.' + col + ':o1')
+                        suffix = ':c2' if col.endswith('.%') else ':o1'
+                        phandango_header.append(cluster_name + '.' + col + suffix)
 
                     line.append(rows[filename][cluster_name][col])
 
@@ -270,6 +296,7 @@ class Summary:
             'yes_nonunique': '#a6cee3',
             'no': '#33a02c',
             'NA': '#b2df8a',
+            'het': '#fb9a99',
         }
 
         cols_to_add_colour_col.reverse()
@@ -351,6 +378,12 @@ class Summary:
         self.rows = self._gather_output_rows()
         phandango_header, csv_header, matrix = Summary._to_matrix(self.filenames, self.rows, self.cluster_columns)
 
+        # sanity check same number of columns in headers and matrix
+        lengths = {len(x) for x in matrix}
+        print(lengths, len(phandango_header), len(csv_header))
+        assert len(lengths) == 1
+        assert len(matrix[0]) == len(phandango_header) == len(csv_header)
+
         if self.filter_rows:
             if self.verbose:
                 print('Filtering rows', flush=True)
@@ -367,6 +400,11 @@ class Summary:
 
         if len(matrix) == 0 or len(matrix[0]) == 0:
             print('No columns left after filtering columns. Cannot continue', file=sys.stderr)
+
+        # sanity check same number of columns in headers and matrix
+        lengths = {len(x) for x in matrix}
+        assert len(lengths) == 1
+        assert len(matrix[0]) == len(phandango_header) == len(csv_header)
 
         csv_file = self.outprefix + '.csv'
         if self.verbose:

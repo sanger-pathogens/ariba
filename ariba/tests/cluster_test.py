@@ -264,3 +264,180 @@ class TestCluster(unittest.TestCase):
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
 
+
+    def test_full_run_ok_samtools_snp_pres_abs_gene(self):
+        '''test complete run where samtools calls a snp in a presence/absence gene'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_gene.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_gene.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_pres_abs_gene'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_gene'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+        expected = [
+            'ref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t.\t.\t.\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_gene'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_var_only_gene(self):
+        '''test complete run where samtools calls a snp in a variant only gene'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_gene.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_gene.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_var_only_gene'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_gene'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+        expected = [
+            'ref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t.\t.\t.\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_gene'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_known_position_pres_abs_gene(self):
+        '''test complete run where samtools calls a snp at a known snp location in a presence/absence gene'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_pres_abs_gene'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+
+        # We shouldn't get an extra 'HET' line because we already know about the snp, so
+        # included in the report of the known snp
+        expected = [
+            'ref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tM6I\t0\t.\t.\t16\t18\tA;T;G\t135\t137\tA;T;G\t65;64;63\t.;.;A\t65;64;32,31\tref_gene:1:0:M6I:.:Description of M6I snp\t.'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var(self):
+        '''test complete run where samtools calls a snp at a known snp location in a variant only gene, gene does not have variant'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_gene_does_not_have_var'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+
+        # We shouldn't get an extra 'HET' line because we already know about the snp, so
+        # included in the report of the known snp
+        expected = [
+            'ref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tM6I\t0\t.\t.\t16\t18\tA;T;G\t135\t137\tA;T;G\t65;64;63\t.;.;A\t65;64;32,31\tref_gene:1:1:M6I:.:Description of M6I snp\t.'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var(self):
+        '''test complete run where samtools calls a snp at a known snp location in a variant only gene, gene does have variant'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_gene_does_have_var'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+
+        # We shouldn't get an extra 'HET' line because we already know about the snp, so
+        # included in the report of the known snp
+        expected = [
+            'ref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tI6M\t1\t.\t.\t16\t18\tA;T;G\t135\t137\tA;T;G\t65;64;63\t.;.;A\t65;64;32,31\tref_gene:1:1:I6M:.:Description of I6M snp\t.'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_pres_abs_noncoding(self):
+        '''test complete run where samtools calls a snp in a presence/absence noncoding sequence'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_noncoding.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_noncoding.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_pres_abs_noncoding'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_noncoding'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+        expected = [
+            'ref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t.\t.\t.\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_seq'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_var_only_noncoding(self):
+        '''test complete run where samtools calls a snp in a presence/absence noncoding sequence'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_noncoding.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_noncoding.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_var_only_noncoding'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_noncoding'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+        expected = [
+            'ref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t.\t.\t.\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_seq'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding(self):
+        '''test complete run where samtools calls a snp at a known snp location in a presence/absence noncoding'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_pres_abs_noncoding'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+
+        # We shouldn't get an extra 'HET' line because we already know about the snp, so
+        # included in the report of the known snp
+        expected = [
+            'ref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tA\t32,31\tref_seq:0:0:G18A:.:Description of G18A snp\t.'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_not_have_var(self):
+        '''test complete run where samtools calls a snp at a known snp location in a presence/absence noncoding and sample does not have the var'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_not_have_var.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_not_have_var.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_noncoding_does_not_have_var'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+
+        # We shouldn't get an extra 'HET' line because we already know about the snp, so
+        # included in the report of the known snp
+        expected = [
+            'ref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tA\t32,31\tref_seq:0:1:G18A:.:Description of G18A snp\t.'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_have_var(self):
+        '''test complete run where samtools calls a snp at a known snp location in a presence/absence noncoding and sample has the var'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_have_var.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_have_var.metadata.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_noncoding_does_have_var'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c.run()
+
+        # We shouldn't get an extra 'HET' line because we already know about the snp, so
+        # included in the report of the known snp
+        expected = [
+            'ref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tA18G\t1\t.\t.\t18\t18\tG\t137\t137\tG\t63\tA\t32,31\tref_seq:0:1:A18G:.:Description of A18G snp\t.'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)

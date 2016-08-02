@@ -109,6 +109,16 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_get_all_het_snps(self):
+        '''test _get_all_het_snps'''
+        file1 = os.path.join(data_dir, 'summary_test_get_all_het_snps.1.tsv')
+        file2 = os.path.join(data_dir, 'summary_test_get_all_het_snps.2.tsv')
+        samples = summary.Summary._load_input_files([file1, file2], 90)
+        got = summary.Summary._get_all_het_snps(samples)
+        expected = {('noncoding1', 'A14T')}
+        self.assertEqual(expected, got)
+
+
     def test_get_all_var_groups(self):
         '''test _get_all_var_groups'''
         file1 = os.path.join(data_dir, 'summary_test_get_all_var_groups.1.tsv')
@@ -204,12 +214,20 @@ class TestSummary(unittest.TestCase):
         expected[infiles[0]]['noncoding1']['noncoding1.A6G'] = 'no'
         expected[infiles[1]]['noncoding1']['noncoding1.A14T'] = 'yes'
         expected[infiles[1]]['noncoding1']['noncoding1.A6G'] = 'yes'
+        self.maxDiff = None
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 
         s.var_columns['novel'] = True
         expected[infiles[0]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
         expected[infiles[1]]['presence_absence1']['presence_absence1.A10V'] = 'yes'
+        got = s._gather_output_rows()
+        self.assertEqual(expected, got)
+
+        s.show_known_het = True
+        expected[infiles[0]]['noncoding1']['noncoding1.A14T.%'] = 'NA'
+        expected[infiles[1]]['noncoding1']['noncoding1.A14T'] = 'het'
+        expected[infiles[1]]['noncoding1']['noncoding1.A14T.%'] = 80.0
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 
@@ -222,6 +240,7 @@ class TestSummary(unittest.TestCase):
         s = summary.Summary('out', filenames=infiles, cluster_cols='assembled,match,pct_id,known_var,novel_var', variant_cols='ungrouped,grouped,novel')
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s.include_all_variant_columns = True
+        s.show_known_het = True
         got = s._gather_output_rows()
         self.assertEqual(expected, got)
 
