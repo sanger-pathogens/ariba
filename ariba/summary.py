@@ -158,14 +158,14 @@ class Summary:
                             rows[filename][cluster]['vgroup.' + group_name] = 'no'
 
                 if cluster in all_var_columns:
-                    for (ref_name, variant, grouped_or_novel, group_name) in all_var_columns[cluster]:
+                    for (ref_name, variant, grouped_or_novel, group_name, het_percent) in all_var_columns[cluster]:
                         if not self.var_columns[grouped_or_novel]:
                             continue
 
                         key = ref_name + '.' + variant
                         if rows[filename][cluster]['assembled'] == 'no':
                             rows[filename][cluster][key] = 'NA'
-                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant, grouped_or_novel, group_name) in sample.variant_column_names_tuples[cluster]:
+                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant, grouped_or_novel, group_name, het_percent) in sample.variant_column_names_tuples[cluster]:
                             rows[filename][cluster][key] = 'yes'
                         else:
                             rows[filename][cluster][key] = 'no'

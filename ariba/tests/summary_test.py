@@ -102,9 +102,9 @@ class TestSummary(unittest.TestCase):
         samples = summary.Summary._load_input_files([file1, file2], 90)
         got = summary.Summary._get_all_variant_columns(samples)
         expected = {
-            'cluster.p.2': {('presence_absence1', 'A10V', 'grouped', 'id3')},
-            'cluster.n.1': {('noncoding1', 'A6G', 'grouped', 'id2'), ('noncoding1', 'A14T', 'grouped', 'id1')},
-            'cluster.p.1': {('presence_absence1', 'A10V', 'grouped', 'id2')},
+            'cluster.p.2': {('presence_absence1', 'A10V', 'grouped', 'id3', None)},
+            'cluster.n.1': {('noncoding1', 'A6G', 'grouped', 'id2', None), ('noncoding1', 'A14T', 'grouped', 'id1', None)},
+            'cluster.p.1': {('presence_absence1', 'A10V', 'grouped', 'id2', None)},
         }
         self.assertEqual(expected, got)
 
