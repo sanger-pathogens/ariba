@@ -236,7 +236,8 @@ class Summary:
 
                     if making_header_lines:
                         csv_header.append(cluster_name + '.' + col)
-                        phandango_header.append(cluster_name + '.' + col + ':o1')
+                        suffix = ':c2' if col.endswith('.%') else ':o1'
+                        phandango_header.append(cluster_name + '.' + col + suffix)
 
                     line.append(rows[filename][cluster_name][col])
 
@@ -293,6 +294,7 @@ class Summary:
             'yes_nonunique': '#a6cee3',
             'no': '#33a02c',
             'NA': '#b2df8a',
+            'het': '#fb9a99',
         }
 
         cols_to_add_colour_col.reverse()
