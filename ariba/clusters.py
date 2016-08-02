@@ -504,7 +504,7 @@ class Clusters:
     def write_versions_file(self, original_dir):
         with open('version_info.txt', 'w') as f:
             print('ARIBA run with this command:', file=f)
-            print(' '.join([sys.argv[0]] + ['run'] + sys.argv[1:]), file=f)
+            print(' '.join([sys.argv[0]] + sys.argv[1:]), file=f)
             print('from this directory:', original_dir, file=f)
             print(file=f)
             print(*self.version_report_lines, sep='\n', file=f)
