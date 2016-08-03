@@ -1,6 +1,7 @@
 class Error (Exception): pass
 
 import os
+import re
 import sys
 import shutil
 import tarfile
@@ -212,27 +213,22 @@ class RefGenesGetter:
 
         genes_file = os.path.join(tmpdir, 'Database Nt Sequences File.txt')
         final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
 
         seq_reader = pyfastaq.sequences.file_reader(genes_file)
-        ids = {}
+        f_out_tsv = pyfastaq.utils.open_file_write(final_tsv)
+        f_out_fa = pyfastaq.utils.open_file_write(final_fasta)
+
         for seq in seq_reader:
-            ids[seq.id] = ids.get(seq.id, 0) + 1
+            original_id = seq.id
+            seq.id = re.sub(r'\((.*)\)', r'\1.', seq.id)
+            print(seq, file=f_out_fa)
+            print(seq.id, '1', '0', '.', '.', 'Original name was ' + original_id, sep='\t', file=f_out_tsv)
 
-        for name, count in sorted(ids.items()):
-            if count > 1:
-                print('Warning! Sequence name', name, 'found', count, 'times in download. Keeping longest sequence', file=sys.stderr)
 
-        pyfastaq.tasks.to_unique_by_id(genes_file, final_fasta)
+        pyfastaq.utils.close(f_out_tsv)
+        pyfastaq.utils.close(f_out_fa)
         shutil.rmtree(tmpdir)
-
-        final_tsv = outprefix + '.tsv'
-        f = pyfastaq.utils.open_file_write(final_tsv)
-        seq_reader = pyfastaq.sequences.file_reader(final_fasta)
-
-        for seq in seq_reader:
-            print(seq.id, '1', '0', '.', '.', '.', sep='\t', file=f)
-
-        pyfastaq.utils.close(f)
 
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
