@@ -100,6 +100,7 @@ class Clusters:
         self.report_file_filtered = os.path.join(self.outdir, 'report.tsv')
         self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa.gz')
         self.catted_genes_matching_refs_fasta = os.path.join(self.outdir, 'assembled_genes.fa.gz')
+        self.catted_assemblies_fasta = os.path.join(self.outdir, 'assemblies.fa.gz')
         self.threads = threads
         self.verbose = verbose
 
@@ -443,6 +444,21 @@ class Clusters:
         pyfastaq.utils.close(f)
 
 
+    def _write_catted_assemblies_fasta(self, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
+
+        for gene in sorted(self.clusters):
+            try:
+                seq_dict = self.clusters[gene].assembly.sequences
+            except:
+                continue
+
+            for seq_name in sorted(seq_dict):
+                print(seq_dict[seq_name], file=f)
+
+        pyfastaq.utils.close(f)
+
+
     def _write_catted_assembled_seqs_fasta(self, outfile):
         f = pyfastaq.utils.open_file_write(outfile)
 
@@ -490,9 +506,9 @@ class Clusters:
             except:
                 pass
 
-            if self.verbose:
-                print('Deleting reads store files', self.read_store.outfile + '[.tbi]')
             try:
+                if self.verbose:
+                    print('Deleting reads store files', self.read_store.outfile + '[.tbi]')
                 self.read_store.clean()
             except:
                 pass
@@ -504,7 +520,7 @@ class Clusters:
     def write_versions_file(self, original_dir):
         with open('version_info.txt', 'w') as f:
             print('ARIBA run with this command:', file=f)
-            print(' '.join([sys.argv[0]] + ['run'] + sys.argv[1:]), file=f)
+            print(' '.join([sys.argv[0]] + sys.argv[1:]), file=f)
             print('from this directory:', original_dir, file=f)
             print(file=f)
             print(*self.version_report_lines, sep='\n', file=f)
@@ -523,6 +539,7 @@ class Clusters:
         os.chdir(self.outdir)
         self.write_versions_file(cwd)
         self._map_and_cluster_reads()
+        self.log_files = None
 
         if len(self.cluster_to_dir) > 0:
             got_insert_data_ok = self._set_insert_size_data()
@@ -562,13 +579,15 @@ class Clusters:
             print(self.catted_assembled_seqs_fasta, 'and', self.catted_genes_matching_refs_fasta, flush=True)
         self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
         self._write_catted_genes_matching_refs_fasta(self.catted_genes_matching_refs_fasta)
+        self._write_catted_assemblies_fasta(self.catted_assemblies_fasta)
 
-        clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
-        if self.verbose:
-            print()
-            print('{:_^79}'.format(' Catting cluster log files '), flush=True)
-            print('Writing file', clusters_log_file, flush=True)
-        common.cat_files(self.log_files, clusters_log_file)
+        if self.log_files is not None:
+            clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
+            if self.verbose:
+                print()
+                print('{:_^79}'.format(' Catting cluster log files '), flush=True)
+                print('Writing file', clusters_log_file, flush=True)
+            common.cat_files(self.log_files, clusters_log_file)
 
         if self.verbose:
             print()

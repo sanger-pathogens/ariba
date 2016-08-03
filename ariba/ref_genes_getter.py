@@ -1,6 +1,7 @@
 class Error (Exception): pass
 
 import os
+import re
 import sys
 import shutil
 import tarfile
@@ -13,7 +14,7 @@ from ariba import common, card_record, vfdb_parser
 
 class RefGenesGetter:
     def __init__(self, ref_db, genetic_code=11):
-        allowed_ref_dbs = {'card', 'argannot', 'resfinder','vfdb'}
+        allowed_ref_dbs = {'card', 'argannot', 'plasmidfinder', 'resfinder','vfdb'}
         if ref_db not in allowed_ref_dbs:
             raise Error('Error in RefGenesGetter. ref_db must be one of: ' + str(allowed_ref_dbs) + ', but I got "' + ref_db)
         self.ref_db=ref_db
@@ -212,33 +213,80 @@ class RefGenesGetter:
 
         genes_file = os.path.join(tmpdir, 'Database Nt Sequences File.txt')
         final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
 
         seq_reader = pyfastaq.sequences.file_reader(genes_file)
-        ids = {}
+        f_out_tsv = pyfastaq.utils.open_file_write(final_tsv)
+        f_out_fa = pyfastaq.utils.open_file_write(final_fasta)
+
         for seq in seq_reader:
-            ids[seq.id] = ids.get(seq.id, 0) + 1
+            original_id = seq.id
+            seq.id = re.sub(r'\((.*)\)', r'\1.', seq.id)
+            print(seq, file=f_out_fa)
+            print(seq.id, '1', '0', '.', '.', 'Original name was ' + original_id, sep='\t', file=f_out_tsv)
 
-        for name, count in sorted(ids.items()):
-            if count > 1:
-                print('Warning! Sequence name', name, 'found', count, 'times in download. Keeping longest sequence', file=sys.stderr)
 
-        pyfastaq.tasks.to_unique_by_id(genes_file, final_fasta)
+        pyfastaq.utils.close(f_out_tsv)
+        pyfastaq.utils.close(f_out_fa)
         shutil.rmtree(tmpdir)
-
-        final_tsv = outprefix + '.tsv'
-        f = pyfastaq.utils.open_file_write(final_tsv)
-        seq_reader = pyfastaq.sequences.file_reader(final_fasta)
-
-        for seq in seq_reader:
-            print(seq.id, '1', '0', '.', '.', '.', sep='\t', file=f)
-
-        pyfastaq.utils.close(f)
 
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n')
+
+
+    def _get_from_plasmidfinder(self, outprefix):
+        outprefix = os.path.abspath(outprefix)
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
+        tmpdir = outprefix + '.tmp.download'
+        current_dir = os.getcwd()
+
+        try:
+            os.mkdir(tmpdir)
+            os.chdir(tmpdir)
+        except:
+            raise Error('Error mkdir/chdir ' + tmpdir)
+
+        zipfile = 'plasmidfinder.zip'
+        cmd = 'curl -X POST --data "folder=plasmidfinder&filename=plasmidfinder.zip" -o ' + zipfile + ' https://cge.cbs.dtu.dk/cge/download_data.php'
+        print('Downloading data with:', cmd, sep='\n')
+        common.syscall(cmd)
+        common.syscall('unzip ' + zipfile)
+
+        print('Combining downloaded fasta files...')
+        fout_fa = pyfastaq.utils.open_file_write(final_fasta)
+        fout_tsv = pyfastaq.utils.open_file_write(final_tsv)
+        name_count = {}
+
+        for filename in os.listdir(tmpdir):
+            if filename.endswith('.fsa'):
+                print('   ', filename)
+                file_reader = pyfastaq.sequences.file_reader(os.path.join(tmpdir, filename))
+                for seq in file_reader:
+                    original_id = seq.id
+                    seq.id = seq.id.replace('_', '.', 1)
+                    if seq.id in name_count:
+                        name_count[seq.id] += 1
+                        seq.id = seq.id + '.' + str(name_count[seq.id])
+                    else:
+                        name_count[seq.id] = 1
+
+                    print(seq, file=fout_fa)
+                    print(seq.id, '0', '0', '.', '.', 'Original name was ' + original_id, sep='\t', file=fout_tsv)
+
+        pyfastaq.utils.close(fout_fa)
+        pyfastaq.utils.close(fout_tsv)
+        print('\nFinished combining files\n')
+        os.chdir(current_dir)
+        shutil.rmtree(tmpdir)
+        print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
+        print('If you use this downloaded data, please cite:')
+        print('"PlasmidFinder and pMLST: in silico detection and typing of plasmids", Carattoli et al 2014, PMID: 24777092\n')
 
 
     def _get_from_vfdb(self, outprefix):

@@ -39,7 +39,7 @@ class SamtoolsVariants:
         tmp_vcf = self.vcf_file + '.tmp'
         cmd = ' '.join([
             self.samtools_exe, 'mpileup',
-            '-t INFO/DPR,DV',
+            '-t INFO/AD',
             '-A',
             '-f', self.ref_fa,
             '-u',
@@ -56,7 +56,7 @@ class SamtoolsVariants:
             tmp_vcf,
             '|',
             self.bcftools_exe, 'query',
-            r'''-f '%CHROM\t%POS\t%REF\t%ALT\t%DP\t%DPR]\n' ''',
+            r'''-f '%CHROM\t%POS\t%REF\t%ALT\t%DP\t%AD]\n' ''',
             '>',
             self.read_depths_file + '.tmp'
         ])
@@ -71,10 +71,7 @@ class SamtoolsVariants:
             tmp_vcf,
             '|',
             self.bcftools_exe, 'filter',
-            '-i', '"MIN(DP)>=' + str(self.bcf_min_dp),
-                  ' & MIN(DV)>=' + str(self.bcf_min_dv),
-                  ' & MIN(DV/DP)>=' + str(self.bcf_min_dv_over_dp),
-                  ' & QUAL >=', str(self.bcf_min_qual), '"',
+            '-i', '"SUM(AD)>=5 & MIN(AD)/DP>=0.1"',
             '-o', self.vcf_file
         ])
 

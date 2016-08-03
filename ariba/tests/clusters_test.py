@@ -204,6 +204,33 @@ class TestClusters(unittest.TestCase):
         os.unlink(tmp_tsv)
 
 
+    def test_write_catted_assemblies_fasta(self):
+        '''test _write_catted_assemblies_fasta'''
+        seq1 = pyfastaq.sequences.Fasta('seq1', 'ACGT')
+        seq2 = pyfastaq.sequences.Fasta('seq2', 'TTTT')
+        seq3 = pyfastaq.sequences.Fasta('seq3', 'AAAA')
+        class FakeAssembly:
+            def __init__(self, seqs):
+                if seqs is not None:
+                    self.sequences = {x.id: x for x in seqs}
+
+        class FakeCluster:
+            def __init__(self, seqs):
+                self.assembly = FakeAssembly(seqs)
+
+        self.clusters.clusters = {
+            'cluster1': FakeCluster([seq1, seq2]),
+            'cluster2': FakeCluster([seq3]),
+            'cluster3': FakeCluster(None),
+        }
+
+        tmp_file = 'tmp.test_write_catted_assemblies_fasta.fa'
+        self.clusters._write_catted_assemblies_fasta(tmp_file)
+        expected = os.path.join(data_dir, 'clusters_test_write_catted_assemblies_fasta.expected.out.fa')
+        self.assertTrue(filecmp.cmp(expected, tmp_file, shallow=False))
+        os.unlink(tmp_file)
+
+
     def test_write_catted_assembled_seqs_fasta(self):
         '''test _write_catted_assembled_seqs_fasta'''
         seq1 = pyfastaq.sequences.Fasta('seq1', 'ACGT')

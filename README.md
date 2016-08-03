@@ -25,7 +25,7 @@ ARIBA has the following dependencies, which need to be installed:
   * [CD-HIT][cdhit] version >= 4.6
   * [MASH][mash] version >= 1.0.2
   * [MUMmer][mummer] version >= 3.23
-  * [Samtools and BCFtools][samtools]  version >= 1.2
+  * [Samtools and BCFtools][samtools]  version >= 1.3
 
 
 Once the dependencies are installed, install ARIBA using pip:
@@ -64,7 +64,7 @@ to the following dependencies.
 For example, you could specify an exact version of a Samtools executable
 that you compiled and downloaded in your home directory (assuming BASH):
 
-    export ARIBA_SAMTOOLS=$HOME/samtools-1.2/samtools
+    export ARIBA_SAMTOOLS=$HOME/samtools-1.3/samtools
 
 
 ### Temporary files

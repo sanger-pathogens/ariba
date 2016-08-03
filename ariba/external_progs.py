@@ -41,13 +41,13 @@ prog_to_version_cmd = {
 
 
 min_versions = {
-    'bcftools': '1.2',
+    'bcftools': '1.3',
     'bowtie2': '2.1.0',
     'cdhit': '4.6',
     'cdhit2d': '4.6',
     'mash': '1.0.2',
     'nucmer': '3.1',
-    'samtools': '1.2',
+    'samtools': '1.3',
     #'spades': '3.5.0',
 }
 

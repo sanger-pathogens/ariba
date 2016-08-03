@@ -209,7 +209,7 @@ class SummaryCluster:
                 nuc_to_depth = dict(zip(nucleotides, depths))
                 total_depth = sum(depths)
                 var_depth = nuc_to_depth.get(var_nucleotide, 0)
-                percent_depth = 100 * var_depth / total_depth
+                percent_depth = round(100 * var_depth / total_depth, 1)
             except:
                 return None
 
