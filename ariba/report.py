@@ -212,11 +212,11 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 smtls_alt_nt = ';'.join(smtls_alt_nt) if len(smtls_alt_nt) else '.'
                 smtls_alt_depth = ';'.join(smtls_alt_depth) if len(smtls_alt_depth) else '.'
                 samtools_columns = [
-                        str(contributing_vars[0].ref_start), #ref_start
-                        str(contributing_vars[0].ref_end), # ref_end
+                        str(contributing_vars[0].ref_start + 1), #ref_start
+                        str(contributing_vars[0].ref_end + 1), # ref_end
                         ';'.join([x.ref_base for x in contributing_vars]), # ref_nt
-                        str(contributing_vars[0].qry_start),  # ctg_start
-                        str(contributing_vars[0].qry_end),  #ctg_end
+                        str(contributing_vars[0].qry_start + 1),  # ctg_start
+                        str(contributing_vars[0].qry_end + 1),  #ctg_end
                         ';'.join([x.qry_base for x in contributing_vars]), #ctg_nt
                         smtls_total_depth,
                         smtls_alt_nt,

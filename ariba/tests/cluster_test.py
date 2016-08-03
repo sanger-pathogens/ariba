@@ -160,10 +160,10 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t73\t73\tT\t19\t.\t19\tnoncoding1:0:0:A14T:.:ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tG61T\tSNP\t60\t60\tG\t120\t120\tT\t24\t.\t24\t.\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\t.82C\tINS\t81\t81\t.\t142\t142\tC\t23\t.\t23\t.\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tT108.\tDEL\t107\t107\tT\t167\t167\t.\t17\t.\t17\t.\tgeneric description of noncoding1',
+            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t14\t14\tA\t74\t74\tT\t19\t.\t19\tnoncoding1:0:0:A14T:.:ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
+            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tG61T\tSNP\t61\t61\tG\t121\t121\tT\t24\t.\t24\t.\tgeneric description of noncoding1',
+            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\t.82C\tINS\t82\t82\t.\t143\t143\tC\t23\t.\t23\t.\tgeneric description of noncoding1',
+            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tT108.\tDEL\t108\t108\tT\t168\t168\t.\t17\t.\t17\t.\tgeneric description of noncoding1',
             'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t1\tSNP\tn\tA6G\t1\t.\t.\t6\t6\tG\t66\t66\tG\t19\t.\t19\tnoncoding1:0:0:A6G:.:variant in ref and reads so should report\tgeneric description of noncoding1',
             'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t1\tSNP\tn\tG9T\t0\t.\t.\t9\t9\tG\t69\t69\tG\t19\t.\t19\tnoncoding1:0:0:G9T:.:wild type in ref and reads\tgeneric description of noncoding1'
         ]
@@ -184,8 +184,8 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t28\tC\t83\t83\tT\t22\t.\t22\tpresence_absence1:1:0:A10V:.:Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
-            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t0\t.\tp\t.\t0\t.\tSYN\t53\t53\tT\t108\t108\tC\t32\t.\t32\t.\tGeneric description of presence_absence1',
+            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t29\t29\tC\t84\t84\tT\t22\t.\t22\tpresence_absence1:1:0:A10V:.:Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t0\t.\tp\t.\t0\t.\tSYN\t54\t54\tT\t109\t109\tC\t32\t.\t32\t.\tGeneric description of presence_absence1',
 
             'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tC;G;C\t62\t64\tC;G;C\t18;17;17\t.;.;.\t18;17;17\tpresence_absence1:1:0:R3S:.:Ref and assembly have wild type\tGeneric description of presence_absence1',
 
