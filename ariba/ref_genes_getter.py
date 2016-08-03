@@ -281,7 +281,7 @@ class RefGenesGetter:
         pyfastaq.utils.close(fout_tsv)
         print('\nFinished combining files\n')
         os.chdir(current_dir)
-        #shutil.rmtree(tmpdir)
+        shutil.rmtree(tmpdir)
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
