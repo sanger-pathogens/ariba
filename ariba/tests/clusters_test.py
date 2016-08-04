@@ -49,9 +49,9 @@ class TestClusters(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_load_reference_data_from_dir(self):
+    def test_load_ref_data_from_dir(self):
         '''test _load_reference_data_from_dir'''
-        indir = os.path.join(data_dir, 'clusters_test_load_reference_data_from_dir')
+        indir = os.path.join(data_dir, 'clusters_load_ref_data_from_dir')
         got_refdata, got_clusters = clusters.Clusters._load_reference_data_from_dir(indir)
         expected_seq_dict = {
             'variants_only1': pyfastaq.sequences.Fasta('variants_only1', 'atggcgtgcgatgaataa'),
@@ -92,16 +92,16 @@ class TestClusters(unittest.TestCase):
 
     def test_minimap_reads_to_all_ref_seqs(self):
         '''test test_minimap_reads_to_all_ref_seqs'''
-        clusters_tsv = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.clusters.tsv')
-        ref_fasta = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.ref.fa')
-        reads_1 = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.reads_1.fq')
-        reads_2 = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.reads_2.fq')
+        clusters_tsv = os.path.join(data_dir, 'clusters_minimap_reads_to_all_refs.clstrs.tsv')
+        ref_fasta = os.path.join(data_dir, 'clusters_minimap_reads_to_all_refs.ref.fa')
+        reads_1 = os.path.join(data_dir, 'clusters_minimap_reads_to_all_refs.reads_1.fq')
+        reads_2 = os.path.join(data_dir, 'clusters_minimap_reads_to_all_refs.reads_2.fq')
         tmp_outprefix = 'tmp.clusters_test_minimap_reads_to_all_ref_seqs'
         clusters.Clusters._minimap_reads_to_all_ref_seqs(clusters_tsv, ref_fasta, reads_1, reads_2, tmp_outprefix)
-        expected_cluster2rep = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.cluster2representative')
-        expected_cluster_counts = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.clusterCounts')
-        expected_proper_pairs = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.properPairs')
-        expected_insert_hist = os.path.join(data_dir, 'clusters_test_minimap_reads_to_all_ref_seqs.out.insertHistogram')
+        expected_cluster2rep = os.path.join(data_dir, 'clusters_minimap_reads_to_all_refs.out.clstr2rep')
+        expected_cluster_counts = os.path.join(data_dir, 'clusters_minimap_reads_to_all_refs.out.clstr_count')
+        expected_proper_pairs = os.path.join(data_dir, 'clusters_minimap_reads_to_all_refs.out.pairs')
+        expected_insert_hist = os.path.join(data_dir, 'clusters_minimap_reads_to_all_refs.out.hist')
 
         # not sure that the reads order is preserved, so just check read store file exists
         self.assertTrue(os.path.exists(os.path.join(tmp_outprefix + '.reads')))
@@ -258,7 +258,7 @@ class TestClusters(unittest.TestCase):
         os.unlink(tmp_file)
 
 
-    def test_write_catted_genes_matching_refs_fasta(self):
+    def test_cat_genes_match_ref(self):
         '''test _write_catted_genes_matching_refs_fasta'''
         seq1 = pyfastaq.sequences.Fasta('seq1', 'ACGT')
         seq3 = pyfastaq.sequences.Fasta('seq3', 'AAAA')
@@ -281,7 +281,7 @@ class TestClusters(unittest.TestCase):
 
         tmp_file = 'tmp.test_write_catted_genes_matching_refs_fasta.fa'
         self.clusters._write_catted_genes_matching_refs_fasta(tmp_file)
-        expected = os.path.join(data_dir, 'clusters_test_write_catted_genes_matching_refs_fasta.expected.out.fa')
+        expected = os.path.join(data_dir, 'clusters_cat_genes_match_ref.fa')
         self.assertTrue(filecmp.cmp(expected, tmp_file, shallow=False))
         os.unlink(tmp_file)
 

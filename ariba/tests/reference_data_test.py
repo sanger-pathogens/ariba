@@ -129,10 +129,10 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_load_input_files_and_check_seq_names_ok(self):
+    def test_load_input_check_seq_names_ok(self):
         '''Test _load_input_files_and_check_seq_names with good input'''
-        fasta_files = [os.path.join(data_dir, 'reference_data_load_input_files_and_check_seq_names.good.in.fa.' + x) for x in ['1', '2']]
-        metadata_files = [os.path.join(data_dir, 'reference_data_load_input_files_and_check_seq_names.good.in.csv.' + x) for x in ['1', '2']]
+        fasta_files = [os.path.join(data_dir, 'reference_data_load_input_check_seq_names.good.fa.' + x) for x in ['1', '2']]
+        metadata_files = [os.path.join(data_dir, 'reference_data_load_input_check_seq_names.good.csv.' + x) for x in ['1', '2']]
         expected_seqs = {
              'seq1': pyfastaq.sequences.Fasta('seq1', 'ACGT'),
              'seq2': pyfastaq.sequences.Fasta('seq2', 'TTTT')
@@ -160,10 +160,10 @@ class TestReferenceData(unittest.TestCase):
         self.assertEqual(expected_meta, got_meta)
 
 
-    def test_load_input_files_and_check_seq_names_bad(self):
+    def test_load_input_check_seq_names_bad(self):
         '''Test _load_input_files_and_check_seq_names with bad input'''
-        fasta_files = [os.path.join(data_dir, 'reference_data_load_input_files_and_check_seq_names.bad.in.fa.' + x) for x in ['1', '2']]
-        metadata_files = [os.path.join(data_dir, 'reference_data_load_input_files_and_check_seq_names.bad.in.csv.' + x) for x in ['1', '2']]
+        fasta_files = [os.path.join(data_dir, 'reference_data_load_input_check_seq_names.bad.fa.' + x) for x in ['1', '2']]
+        metadata_files = [os.path.join(data_dir, 'reference_data_load_input_check_seq_names.bad.csv.' + x) for x in ['1', '2']]
         with self.assertRaises(reference_data.Error):
             reference_data.ReferenceData._load_input_files_and_check_seq_names(fasta_files, metadata_files)
 
@@ -537,11 +537,11 @@ class TestReferenceData(unittest.TestCase):
         os.unlink(outprefix + '.noncoding.varonly.fa')
 
 
-    def test_cluster_with_cdhit_clusters_in_file(self):
+    def test_cluster_w_cdhit_clstrs_file(self):
         '''Test cluster_with_cd_hit clusters from file'''
-        fasta_in = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_clusters_in_file.in.fa')
-        meta_tsv_in = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_clusters_in_file.in.meta.tsv')
-        cluster_tsv_in = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_clusters_in_file.in.clusters.tsv')
+        fasta_in = os.path.join(data_dir, 'reference_data_cluster_w_cdhit_clstrs_file.in.fa')
+        meta_tsv_in = os.path.join(data_dir, 'reference_data_cluster_w_cdhit_clstrs_file.in.meta.tsv')
+        cluster_tsv_in = os.path.join(data_dir, 'reference_data_cluster_w_cdhit_clstrs_file.in.clstrs.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [meta_tsv_in])
         outprefix = 'tmp.test_cluster_with_cdhit_clusters_in_file'
 
@@ -555,7 +555,7 @@ class TestReferenceData(unittest.TestCase):
         got_clusters = refdata.cluster_with_cdhit(outprefix, clusters_file=cluster_tsv_in)
         self.assertEqual(expected_clusters, got_clusters)
 
-        expected_clusters_file = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_clusters_in_file.expected.clusters.tsv')
+        expected_clusters_file = os.path.join(data_dir, 'reference_data_cluster_w_cdhit_clstrs_file.expect.clstrs.tsv')
         got_clusters_file = outprefix + '.clusters.tsv'
         self.assertTrue(filecmp.cmp(expected_clusters_file, got_clusters_file, shallow=False))
 
@@ -567,10 +567,10 @@ class TestReferenceData(unittest.TestCase):
         os.unlink(outprefix + '.noncoding.varonly.fa')
 
 
-    def test_cluster_with_cdhit_nocluster(self):
+    def test_cluster_w_cdhit_nocluster(self):
         '''Test cluster_with_cd_hit do not run cdhit'''
-        fasta_in = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_nocluster.in.fa')
-        tsv_in = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_nocluster.in.tsv')
+        fasta_in = os.path.join(data_dir, 'reference_data_cluster_w_cdhit_nocluster.in.fa')
+        tsv_in = os.path.join(data_dir, 'reference_data_cluster_w_cdhit_nocluster.in.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         outprefix = 'tmp.test_cluster_with_cdhit_nocluster'
 
@@ -586,7 +586,7 @@ class TestReferenceData(unittest.TestCase):
         got_clusters = refdata.cluster_with_cdhit(outprefix, nocluster=True)
         self.assertEqual(expected_clusters, got_clusters)
 
-        expected_clusters_file = os.path.join(data_dir, 'reference_data_test_cluster_with_cdhit_nocluster.expected.clusters.tsv')
+        expected_clusters_file = os.path.join(data_dir, 'reference_data_cluster_w_cdhit_nocluster.expect.tsv')
         got_clusters_file = outprefix + '.clusters.tsv'
         self.assertTrue(filecmp.cmp(expected_clusters_file, got_clusters_file, shallow=False))
 

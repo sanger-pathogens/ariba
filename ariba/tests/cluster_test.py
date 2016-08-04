@@ -216,9 +216,9 @@ class TestCluster(unittest.TestCase):
     def test_full_run_ok_variants_only_variant_not_present_always_report(self):
         '''test complete run of cluster on a variants only gene when variant not present but always report variant'''
         fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.not_present.always_report.metadata.tsv')
+        tsv_in = os.path.join(data_dir, 'cluster_full_run_varonly.not_present.always_report.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
-        tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.not_present.always_report'
+        tmpdir = 'tmp.cluster_full_run_varonly.not_present.always_report'
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
@@ -265,13 +265,13 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
-    def test_full_run_ok_samtools_snp_pres_abs_gene(self):
+    def test_full_run_smtls_snp_presabs_gene(self):
         '''test complete run where samtools calls a snp in a presence/absence gene'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_gene.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_gene.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_gene.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_gene.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_pres_abs_gene'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_gene'), tmpdir)
+        shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_gene'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
@@ -281,13 +281,15 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
-    def test_full_run_ok_samtools_snp_var_only_gene(self):
+    def test_full_run_smtls_snp_varonly_gene_2(self):
         '''test complete run where samtools calls a snp in a variant only gene'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_gene.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_gene.metadata.tsv')
+        # _2 because I think test_full_run_smtls_snp_varonly_gene tests the asame functionality.
+        # ... but let's leave both tests in anyway
+        fasta_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_2.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_2.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
-        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_var_only_gene'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_gene'), tmpdir)
+        tmpdir = 'tmp.cluster_full_run_smtls_snp_varonly_gene_2'
+        shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_2'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
@@ -297,13 +299,13 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
-    def test_full_run_ok_samtools_snp_known_position_pres_abs_gene(self):
+    def test_full_run_known_smtls_snp_presabs_gene(self):
         '''test complete run where samtools calls a snp at a known snp location in a presence/absence gene'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_gene.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_gene.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_pres_abs_gene'), tmpdir)
+        shutil.copytree(os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_gene'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
 
@@ -316,13 +318,13 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
-    def test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var(self):
+    def test_full_run_smtls_snp_varonly_gene_no_snp(self):
         '''test complete run where samtools calls a snp at a known snp location in a variant only gene, gene does not have variant'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_no_snp.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_no_snp.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
-        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_not_have_var'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_gene_does_not_have_var'), tmpdir)
+        tmpdir = 'tmp.cluster_test_full_run_smtls_snp_varonly_gene_no_snp'
+        shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_no_snp'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
 
@@ -335,13 +337,13 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
-    def test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var(self):
+    def test_full_run_smtls_snp_varonly_gene(self):
         '''test complete run where samtools calls a snp at a known snp location in a variant only gene, gene does have variant'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_gene_does_have_var'), tmpdir)
+        shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
 
@@ -354,13 +356,13 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
-    def test_full_run_ok_samtools_snp_pres_abs_noncoding(self):
+    def test_full_run_smtls_snp_presabs_nonc(self):
         '''test complete run where samtools calls a snp in a presence/absence noncoding sequence'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_noncoding.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_noncoding.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_nonc.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
-        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_pres_abs_noncoding'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_pres_abs_noncoding'), tmpdir)
+        tmpdir = 'tmp.cluster_test_full_run_smtls_snp_presabs_nonc'
+        shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_nonc'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
@@ -370,13 +372,13 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
-    def test_full_run_ok_samtools_snp_var_only_noncoding(self):
+    def test_full_run_smtls_snp_varonly_nonc(self):
         '''test complete run where samtools calls a snp in a presence/absence noncoding sequence'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_noncoding.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_noncoding.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
-        tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_var_only_noncoding'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_var_only_noncoding'), tmpdir)
+        tmpdir = 'tmp.cluster_full_run_smtls_snp_varonly_nonc'
+        shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
@@ -386,13 +388,13 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
-    def test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding(self):
+    def test_full_run_known_smtls_snp_presabs_nonc(self):
         '''test complete run where samtools calls a snp at a known snp location in a presence/absence noncoding'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_nonc.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_pres_abs_noncoding'), tmpdir)
+        shutil.copytree(os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_nonc'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
 
@@ -405,13 +407,13 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
-    def test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_not_have_var(self):
+    def test_full_run_smtls_snp_varonly_nonc_no_snp(self):
         '''test complete run where samtools calls a snp at a known snp location in a presence/absence noncoding and sample does not have the var'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_not_have_var.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_not_have_var.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc_no_snp.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc_no_snp.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_noncoding_does_not_have_var'), tmpdir)
+        shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc_no_snp'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
 
@@ -424,13 +426,13 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
-    def test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_have_var(self):
+    def test_full_run_cluster_test_full_run_smtls_snp_varonly_nonc(self):
         '''test complete run where samtools calls a snp at a known snp location in a presence/absence noncoding and sample has the var'''
-        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_have_var.fa')
-        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding_does_have_var.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_smtls_snp_varonly_nonc.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_smtls_snp_varonly_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding'
-        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_samtools_known_position_snp_var_only_noncoding_does_have_var'), tmpdir)
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_smtls_snp_varonly_nonc'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
 
