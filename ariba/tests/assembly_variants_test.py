@@ -102,10 +102,10 @@ class TestAssemblyVariants(unittest.TestCase):
         self.assertEqual(expected, mummer_variants)
 
 
-    def test_get_one_variant_for_one_contig_non_coding(self):
+    def test_one_var_one_ctg_noncdg(self):
         '''test _get_one_variant_for_one_contig_non_coding'''
-        fasta_in = os.path.join(data_dir, 'assembly_variants_test_get_variants_non_coding.fa')
-        tsv_in = os.path.join(data_dir, 'assembly_variants_test_get_one_variant_for_one_contig_non_coding.metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'assembly_variants_one_var_one_ctg_noncdg.fa')
+        tsv_in = os.path.join(data_dir, 'assembly_variants_one_var_one_ctg_noncdg.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         ref_sequence_name = 'non_coding'
         refdata_var_dict = refdata.metadata[ref_sequence_name]
@@ -144,10 +144,10 @@ class TestAssemblyVariants(unittest.TestCase):
             self.assertEqual(expected_used_variants[i], got_used_variants)
 
 
-    def test_get_one_variant_for_one_contig_coding(self):
+    def test_one_var_one_ctg_cdg(self):
         '''test _get_one_variant_for_one_contig_coding'''
-        fasta_in = os.path.join(data_dir, 'assembly_variants_test_get_one_variant_for_one_contig_coding_presence_absence.fa')
-        tsv_in = os.path.join(data_dir, 'assembly_variants_test_get_one_variant_for_one_contig_coding_metadata.tsv')
+        fasta_in = os.path.join(data_dir, 'assembly_variants_one_var_one_ctg_cdg.fa')
+        tsv_in = os.path.join(data_dir, 'assembly_variants_one_var_one_ctg_cdg.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         ref_sequence_name = 'presence_absence'
         ref_sequence = refdata.sequence(ref_sequence_name)
