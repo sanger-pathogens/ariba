@@ -16,13 +16,13 @@ def file2lines(filename):
 
 
 class TestSamtoolsVariants(unittest.TestCase):
-    def test_make_vcf_and_read_depths_files(self):
+    def test_make_vcf_and_depths_files(self):
         '''test _make_vcf_and_read_depths_files'''
-        ref = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.assembly.fa')
-        bam = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.bam')
-        expected_vcf = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.expected.vcf')
-        expected_depths = os.path.join(data_dir, 'samtools_variants_test_make_vcf_and_read_depths_files.expected.read_depths.gz')
-        tmp_prefix = 'tmp.test_make_vcf_and_read_depths_files'
+        ref = os.path.join(data_dir, 'samtools_variants_make_vcf_and_depths_files.asmbly.fa')
+        bam = os.path.join(data_dir, 'samtools_variants_make_vcf_and_depths_files.bam')
+        expected_vcf = os.path.join(data_dir, 'samtools_variants_make_vcf_and_depths_files.expect.vcf')
+        expected_depths = os.path.join(data_dir, 'samtools_variants_make_vcf_and_depths_files.expect.depths.gz')
+        tmp_prefix = 'tmp.test_make_vcf_and_depths_files'
         sv = samtools_variants.SamtoolsVariants(
             ref,
             bam,
