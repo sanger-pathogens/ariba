@@ -56,7 +56,7 @@ class SummaryCluster:
             d['var_group'] = '.'
         else:
             try:
-                d['var_group'] = d['var_description'].split(':')[3]
+                d['var_group'] = d['var_description'].split(':')[4]
             except:
                 raise Error('Error getting variant group from the following line:\n' + line)
 
