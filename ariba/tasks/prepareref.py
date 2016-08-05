@@ -12,8 +12,9 @@ def run(options):
 
     preparer = ref_preparer.RefPreparer(
         options.fasta_files,
-        options.tsv_files,
         extern_progs,
+        metadata_tsv_files=options.tsv_files,
+        all_coding=options.all_coding,
         version_report_lines=version_report_lines,
         min_gene_length=options.min_gene_length,
         max_gene_length=options.max_gene_length,

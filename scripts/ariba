@@ -61,11 +61,13 @@ subparser_prepareref = subparsers.add_parser(
     help='Prepare reference data for input to "run"',
     usage='ariba prepareref [options] <outdir>',
     description='Prepare reference data for running the pipeline with "ariba run"',
-    epilog='REQUIRED: -f and -m must each be used at least once',
+    epilog='REQUIRED: -f/--fasta, and also either -m/--metadata or --all_coding must be used',
 )
 input_group = subparser_prepareref.add_argument_group('input files options')
 input_group.add_argument('-f', '--fasta', action='append', dest='fasta_files', required=True, help='REQUIRED. Name of fasta file. Can be used more than once if your sequences are spread over more than on file', metavar='FILENAME')
-input_group.add_argument('-m', '--metadata', action='append', dest='tsv_files', required=True, help='REQUIRED. Name of tsv file of metadata about the input sequences. Can be used more than once if your metadata is spread over more than one file', metavar='FILENAME')
+meta_group = input_group.add_mutually_exclusive_group(required=True)
+meta_group.add_argument('-m', '--metadata', action='append', dest='tsv_files', help='Name of tsv file of metadata about the input sequences. Can be used more than once if your metadata is spread over more than one file. Incompatible with --all_coding', metavar='FILENAME')
+meta_group.add_argument('--all_coding', choices=['yes', 'no'], help='Use this if you only have a fasta of presence absence sequences as input, and no metadata. Use "yes" if all sequences are coding, or "no" if they are all non-coding. Incompatible with -m/--metadata')
 
 cdhit_group = subparser_prepareref.add_argument_group('cd-hit options')
 cdhit_group.add_argument('--no_cdhit', action='store_true', help='Do not run cd-hit. Each input sequence is put into its own "cluster". Incompatible with --cdhit_clusters.')
