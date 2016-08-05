@@ -380,7 +380,6 @@ class Summary:
 
         # sanity check same number of columns in headers and matrix
         lengths = {len(x) for x in matrix}
-        print(lengths, len(phandango_header), len(csv_header))
         assert len(lengths) == 1
         assert len(matrix[0]) == len(phandango_header) == len(csv_header)
 
