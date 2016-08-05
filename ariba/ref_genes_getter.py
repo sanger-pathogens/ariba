@@ -12,9 +12,12 @@ import json
 from ariba import common, card_record, vfdb_parser
 
 
+argannot_ref = '"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n'
+
+
 class RefGenesGetter:
     def __init__(self, ref_db, genetic_code=11):
-        allowed_ref_dbs = {'card', 'argannot', 'plasmidfinder', 'resfinder','vfdb'}
+        allowed_ref_dbs = {'card', 'argannot', 'plasmidfinder', 'resfinder','srst2_argannot', 'vfdb'}
         if ref_db not in allowed_ref_dbs:
             raise Error('Error in RefGenesGetter. ref_db must be one of: ' + str(allowed_ref_dbs) + ', but I got "' + ref_db)
         self.ref_db=ref_db
@@ -234,7 +237,7 @@ class RefGenesGetter:
         print('You can use them with ARIBA like this:')
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
-        print('"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n')
+        print(argannot_ref)
 
 
     def _get_from_plasmidfinder(self, outprefix):
@@ -287,6 +290,40 @@ class RefGenesGetter:
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"PlasmidFinder and pMLST: in silico detection and typing of plasmids", Carattoli et al 2014, PMID: 24777092\n')
+
+
+    def _get_from_srst2_argannot(self, outprefix):
+        srst2_version = '0.2.0'
+        srst2_url = 'https://github.com/katholt/srst2/raw/v' + srst2_version + '/data/ARGannot.r1.fasta'
+        srst2_fa = outprefix + '.original.fa'
+        command = 'wget -O ' + srst2_fa + ' ' + srst2_url
+        common.syscall(command, verbose=True)
+
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
+
+        f_out_fa = pyfastaq.utils.open_file_write(final_fasta)
+        f_out_meta = pyfastaq.utils.open_file_write(final_tsv)
+        seq_reader = pyfastaq.sequences.file_reader(srst2_fa)
+
+        for seq in seq_reader:
+            original_id = seq.id
+            name, extra = seq.id.split()
+            cluster_id, cluster_name, allele_name, allele_id = name.split('__')
+            seq.id = cluster_name + '.' + name
+            print(seq, file=f_out_fa)
+            print(seq.id, 1, 0, '.', '.', 'Original name: ' + original_id, sep='\t', file=f_out_meta)
+
+        pyfastaq.utils.close(f_out_fa)
+        pyfastaq.utils.close(f_out_meta)
+
+        print('Finished downloading and converting data. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
+        print('If you use this downloaded data, please cite:')
+        print('"SRST2: Rapid genomic surveillance for public health and hospital microbiology labs",\nInouye et al 2014, Genome Medicine, PMID: 25422674\n')
+        print(argannot_ref)
+        print('and in your methods say that the ARG-ANNOT sequences were used from version', srst2_version, 'of SRST2.')
 
 
     def _get_from_vfdb(self, outprefix):
