@@ -9,6 +9,19 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 
 class TestRefPreparer(unittest.TestCase):
+    def test_fasta_to_metadata(self):
+        '''test _fasta_to_metadata'''
+        infile = os.path.join(data_dir, 'ref_preparer_test_fasta_to_metadata.fa')
+        tmp_out = 'tmp.test_fasta_to_metadata.tsv'
+        expected_coding = os.path.join(data_dir, 'ref_preparer_test_fasta_to_metadata.coding.tsv')
+        expected_noncoding = os.path.join(data_dir, 'ref_preparer_test_fasta_to_metadata.noncoding.tsv')
+        ref_preparer.RefPreparer._fasta_to_metadata(infile, tmp_out, True)
+        self.assertTrue(filecmp.cmp(expected_coding, tmp_out, shallow=False))
+        ref_preparer.RefPreparer._fasta_to_metadata(infile, tmp_out, False)
+        self.assertTrue(filecmp.cmp(expected_noncoding, tmp_out, shallow=False))
+        os.unlink(tmp_out)
+
+
     def test_rename_clusters(self):
         '''test _rename_clusters'''
         clusters_in = {

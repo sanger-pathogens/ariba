@@ -1,6 +1,7 @@
 import sys
 import os
 import pickle
+import pyfastaq
 from ariba import reference_data
 
 class Error (Exception): pass
@@ -40,6 +41,18 @@ class RefPreparer:
         self.clusters_file = clusters_file
         self.threads = threads
         self.verbose = verbose
+
+
+    @classmethod
+    def _fasta_to_metadata(self, infile, outfile, all_coding):
+       seq_reader = pyfastaq.sequences.file_reader(infile)
+       f_out = pyfastaq.utils.open_file_write(outfile)
+       coding = '1' if all_coding else '0'
+
+       for seq in seq_reader:
+           print(seq.id, coding, 0, '.', '.', '.', sep='\t', file=f_out)
+
+       pyfastaq.utils.close(f_out)
 
 
     def _write_info_file(self, outfile):
