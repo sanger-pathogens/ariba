@@ -1,0 +1,5 @@
+ARIBA run with this command:
+python3 -m unittest prepareref ariba.tests.ref_preparer_test.TestRefPreparer.test_run_all_noncoding
+from this directory: /home/ubuntu/sanger-pathogens/ariba
+
+

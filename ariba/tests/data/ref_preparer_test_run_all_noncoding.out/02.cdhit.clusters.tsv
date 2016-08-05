@@ -1,0 +1,5 @@
+cluster_1	gene1	gene2
+cluster_2	cannot_make_into_a_gene
+gene4+	gene3	gene4.var_only
+noncoding-	noncoding1	noncoding2.var_only	noncoding3.var_only
+noncoding4	noncoding4.var_only

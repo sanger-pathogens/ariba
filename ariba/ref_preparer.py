@@ -10,8 +10,9 @@ class Error (Exception): pass
 class RefPreparer:
     def __init__(self,
         fasta_files,
-        metadata_tsv_files,
         extern_progs,
+        metadata_tsv_files=None,
+        all_coding=None,
         version_report_lines=None,
         min_gene_length=6,
         max_gene_length=10000,
@@ -31,7 +32,8 @@ class RefPreparer:
             self.version_report_lines = version_report_lines
 
         self.fasta_files = fasta_files
-        self.metadata_tsv_files = metadata_tsv_files
+        self.metadata_tsv_files = [] if metadata_tsv_files is None else metadata_tsv_files
+        self.all_coding = all_coding
         self.min_gene_length = min_gene_length
         self.max_gene_length = max_gene_length
         self.genetic_code = genetic_code
@@ -44,15 +46,12 @@ class RefPreparer:
 
 
     @classmethod
-    def _fasta_to_metadata(self, infile, outfile, all_coding):
+    def _fasta_to_metadata(cls, infile, out_fh, all_coding):
        seq_reader = pyfastaq.sequences.file_reader(infile)
-       f_out = pyfastaq.utils.open_file_write(outfile)
        coding = '1' if all_coding else '0'
 
        for seq in seq_reader:
-           print(seq.id, coding, 0, '.', '.', '.', sep='\t', file=f_out)
-
-       pyfastaq.utils.close(f_out)
+           print(seq.id, coding, 0, '.', '.', '.', sep='\t', file=out_fh)
 
 
     def _write_info_file(self, outfile):
@@ -138,6 +137,18 @@ class RefPreparer:
             print('from this directory:', original_dir, file=f)
             print(file=f)
             print(*self.version_report_lines, sep='\n', file=f)
+
+        if self.all_coding is not None:
+            assert len(self.metadata_tsv_files) == 0
+            assert self.all_coding in {'yes', 'no'}
+            self.metadata_tsv_files = [os.path.join(outdir, '00.auto_metadata.tsv')]
+            f_out = pyfastaq.utils.open_file_write(self.metadata_tsv_files[0])
+            for fasta_file in self.fasta_files:
+                RefPreparer._fasta_to_metadata(fasta_file, f_out, self.all_coding=='yes')
+            pyfastaq.utils.close(f_out)
+        else:
+            assert self.all_coding is None
+            assert len(self.metadata_tsv_files) > 0
 
         self._write_info_file(os.path.join(outdir, '00.info.txt'))
 

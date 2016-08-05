@@ -15,10 +15,15 @@ class TestRefPreparer(unittest.TestCase):
         tmp_out = 'tmp.test_fasta_to_metadata.tsv'
         expected_coding = os.path.join(data_dir, 'ref_preparer_test_fasta_to_metadata.coding.tsv')
         expected_noncoding = os.path.join(data_dir, 'ref_preparer_test_fasta_to_metadata.noncoding.tsv')
-        ref_preparer.RefPreparer._fasta_to_metadata(infile, tmp_out, True)
+
+        with open(tmp_out, 'w') as f:
+            ref_preparer.RefPreparer._fasta_to_metadata(infile, f, True)
         self.assertTrue(filecmp.cmp(expected_coding, tmp_out, shallow=False))
-        ref_preparer.RefPreparer._fasta_to_metadata(infile, tmp_out, False)
+
+        with open(tmp_out, 'w') as f:
+            ref_preparer.RefPreparer._fasta_to_metadata(infile, f, False)
         self.assertTrue(filecmp.cmp(expected_noncoding, tmp_out, shallow=False))
+
         os.unlink(tmp_out)
 
 
@@ -85,7 +90,7 @@ class TestRefPreparer(unittest.TestCase):
         ]
 
         extern_progs = external_progs.ExternalProgs()
-        refprep = ref_preparer.RefPreparer(fasta_in, tsv_in, extern_progs, genetic_code=1)
+        refprep = ref_preparer.RefPreparer(fasta_in, extern_progs, metadata_tsv_files=tsv_in, genetic_code=1)
         tmp_out = 'tmp.ref_preparer_test_run'
         refprep.run(tmp_out)
         expected_outdir = os.path.join(data_dir, 'ref_preparer_test_run.out')
@@ -108,4 +113,42 @@ class TestRefPreparer(unittest.TestCase):
             self.assertTrue(filecmp.cmp(expected, got, shallow=False))
 
         shutil.rmtree(tmp_out)
+
+
+    def test_run_all_noncoding(self):
+        '''test run with no metadata input, all sequences are noncoding'''
+        fasta_in = [
+            os.path.join(data_dir, 'ref_preparer_test_run.in.1.fa'),
+            os.path.join(data_dir, 'ref_preparer_test_run.in.2.fa'),
+            os.path.join(data_dir, 'ref_preparer_test_run.in.3.fa'),
+        ]
+
+        extern_progs = external_progs.ExternalProgs()
+        refprep = ref_preparer.RefPreparer(fasta_in, extern_progs, all_coding='no', genetic_code=1)
+        tmp_out = 'tmp.ref_preparer_test_run'
+        refprep.run(tmp_out)
+        expected_outdir = os.path.join(data_dir, 'ref_preparer_test_run_all_noncoding.out')
+
+        test_files = [
+            '00.auto_metadata.tsv',
+            '01.filter.check_metadata.tsv',
+            '01.filter.check_genes.log',
+            '01.filter.check_metadata.log',
+            '02.cdhit.all.fa',
+            '02.cdhit.clusters.tsv',
+            '02.cdhit.gene.fa',
+            '02.cdhit.gene.varonly.fa',
+            '02.cdhit.noncoding.fa',
+            '02.cdhit.noncoding.varonly.fa',
+        ]
+
+        for filename in test_files:
+            expected = os.path.join(expected_outdir, filename)
+            got = os.path.join(tmp_out, filename)
+            self.assertTrue(filecmp.cmp(expected, got, shallow=False))
+
+        shutil.rmtree(tmp_out)
+
+
+
 
