@@ -21,6 +21,7 @@ class Summary:
       show_known_het=False,
       cluster_cols='assembled,match,ref_seq,pct_id,known_var,novel_var',
       variant_cols='groups,grouped,ungrouped,novel',
+      make_phandango_tree=True,
       verbose=False,
     ):
         if filenames is None and fofn is None:
@@ -41,6 +42,7 @@ class Summary:
         self.filter_columns = filter_columns
         self.min_id = min_id
         self.outprefix = outprefix
+        self.make_phandango_tree = make_phandango_tree
         self.verbose = verbose
 
 
@@ -416,17 +418,21 @@ class Summary:
             csv_file = self.outprefix + '.phandango.csv'
             phandango_header, phandango_matrix = Summary._add_phandango_colour_columns(phandango_header, matrix)
             Summary._matrix_to_csv(phandango_matrix, phandango_header, csv_file)
-            dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
-            tree_file = self.outprefix + '.phandango.tre'
 
-            if self.verbose:
-                print('Making Phandango distance matrix', dist_matrix_file, flush=True)
-            Summary._write_distance_matrix(matrix, dist_matrix_file)
+            if self.make_phandango_tree:
+                dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
+                tree_file = self.outprefix + '.phandango.tre'
 
-            if self.verbose:
-                print('Making Phandango tree file', tree_file, flush=True)
-            Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
-            os.unlink(dist_matrix_file)
+                if self.verbose:
+                    print('Making Phandango distance matrix', dist_matrix_file, flush=True)
+                Summary._write_distance_matrix(matrix, dist_matrix_file)
+
+                if self.verbose:
+                    print('Making Phandango tree file', tree_file, flush=True)
+                Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
+                os.unlink(dist_matrix_file)
+            elif self.verbose:
+                print('Skipping making tree because you asked me not to make it', flush=True)
         else:
             print('Made csv file. Not making Phandango files because only one sample remains after filtering', file=sys.stderr)
 

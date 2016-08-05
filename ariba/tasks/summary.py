@@ -96,6 +96,7 @@ def run(options):
         show_known_het=options.het,
         cluster_cols=options.cluster_cols,
         variant_cols=options.var_cols,
+        make_phandango_tree=(not options.no_tree),
         verbose=options.verbose
     )
     s.run()

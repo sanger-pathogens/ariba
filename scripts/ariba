@@ -166,6 +166,7 @@ subparser_summary.add_argument('--preset', choices=summary_presets, help='Shorth
 subparser_summary.add_argument('--cluster_cols', help='Comma separated list of cluster columns to include. Choose from: assembled, match, ref_seq, pct_id, known_var, novel_var [%(default)s]', default='match', metavar='col1,col2,...')
 subparser_summary.add_argument('--col_filter', choices=['y', 'n'], default='y', help='Choose whether columns where all values are "no" or "NA" are removed [%(default)s]', metavar='y|n')
 subparser_summary.add_argument('--het', action='store_true', help='For known noncoding SNPs, report if they are heterozygous or not, and the percent of reads supporting the variant type')
+subparser_summary.add_argument('--no_tree', action='store_true', help='Do not make phandango tree')
 subparser_summary.add_argument('--row_filter', choices=['y', 'n'], default='y', help='Choose whether rows where all values are "no" or "NA" are removed [%(default)s]', metavar='y|n')
 subparser_summary.add_argument('--var_cols', help='Comma separated list of variant columns to include. Choose from: groups, grouped, ungrouped, novel [none by default]', metavar='col1,col2,...', default='')
 subparser_summary.add_argument('--min_id', type=float, help='Minimum percent identity cutoff to count as assembled [%(default)s]', default=90, metavar='FLOAT')
