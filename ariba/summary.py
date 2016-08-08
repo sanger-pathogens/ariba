@@ -135,6 +135,7 @@ class Summary:
                 if name not in groups:
                     groups[name] = set()
                 groups[name].update(name_set)
+
         return groups
 
 
@@ -170,9 +171,29 @@ class Summary:
                 if self.var_columns['groups']:
                     for group_name in var_groups[cluster]:
                         if cluster in sample.var_groups and group_name in sample.var_groups[cluster]:
-                            rows[filename][cluster]['vgroup.' + group_name] = 'yes'
+                            if self.show_known_het:
+                                if cluster in sample.het_snps:
+                                    if len(sample.het_snps[cluster]) == 0:
+                                        rows[filename][cluster]['vgroup.' + group_name] = 'no'
+                                        rows[filename][cluster]['vgroup.' + group_name + '.%'] = 'NA'
+                                    elif len(sample.het_snps[cluster]) == 1:
+                                        rows[filename][cluster]['vgroup.' + group_name] = 'het'
+                                        snp_name = list(sample.het_snps[cluster].keys())[0]
+                                        percent = -1
+                                        for v in sample.variant_column_names_tuples[cluster]:
+                                            if v[1] == snp_name and snp_name in sample.het_snps[cluster]:
+                                                percent = sample.het_snps[cluster][snp_name]
+
+                                        rows[filename][cluster]['vgroup.' + group_name + '.%'] = percent
+                                    else:
+                                        rows[filename][cluster]['vgroup.' + group_name] = 'multi_het'
+                                        rows[filename][cluster]['vgroup.' + group_name + '.%'] = 'NA'
+                            else:
+                                rows[filename][cluster]['vgroup.' + group_name] = 'yes'
                         else:
                             rows[filename][cluster]['vgroup.' + group_name] = 'no'
+                            if self.show_known_het:
+                                rows[filename][cluster]['vgroup.' + group_name + '.%'] = 'NA'
 
                 if cluster in all_var_columns:
                     for (ref_name, variant, grouped_or_novel, group_name) in all_var_columns[cluster]:
