@@ -121,8 +121,8 @@ class Summary:
         snps = set()
         for filename, sample in samples_dict.items():
             for cluster, snp_dict in sample.het_snps.items():
-                if len(snp_dict):
-                    for snp in snp_dict:
+                for snp_id in snp_dict:
+                    for snp in snp_dict[snp_id]:
                         snps.add((cluster, snp))
 
         return snps
@@ -143,7 +143,6 @@ class Summary:
         all_cluster_names = Summary._get_all_cluster_names(self.samples)
         all_var_columns = Summary._get_all_variant_columns(self.samples)
         all_het_snps = Summary._get_all_het_snps(self.samples)
-
         if self.var_columns['groups']:
             var_groups = Summary._get_all_var_groups(self.samples)
         else:
@@ -156,7 +155,7 @@ class Summary:
             for cluster in all_cluster_names:
                 rows[filename][cluster] = {}
 
-                if cluster in sample.column_summary_data and sample.column_summary_data[cluster]['assembled'].startswith('yes'):
+                if cluster in sample.column_summary_data and sample.column_summary_data[cluster]['assembled'] not in {'no'}:
                     rows[filename][cluster] = sample.column_summary_data[cluster]
                 else:
                     rows[filename][cluster] = {
@@ -171,25 +170,20 @@ class Summary:
                 if self.var_columns['groups']:
                     for group_name in var_groups[cluster]:
                         if cluster in sample.var_groups and group_name in sample.var_groups[cluster]:
+                            rows[filename][cluster]['vgroup.' + group_name] = 'yes'
                             if self.show_known_het:
                                 if cluster in sample.het_snps:
-                                    if len(sample.het_snps[cluster]) == 0:
-                                        rows[filename][cluster]['vgroup.' + group_name] = 'no'
-                                        rows[filename][cluster]['vgroup.' + group_name + '.%'] = 'NA'
-                                    elif len(sample.het_snps[cluster]) == 1:
-                                        rows[filename][cluster]['vgroup.' + group_name] = 'het'
-                                        snp_name = list(sample.het_snps[cluster].keys())[0]
-                                        percent = -1
-                                        for v in sample.variant_column_names_tuples[cluster]:
-                                            if v[1] == snp_name and snp_name in sample.het_snps[cluster]:
-                                                percent = sample.het_snps[cluster][snp_name]
-
-                                        rows[filename][cluster]['vgroup.' + group_name + '.%'] = percent
+                                    if group_name in sample.het_snps[cluster]:
+                                        if len(sample.het_snps[cluster][group_name]) == 1:
+                                            rows[filename][cluster]['vgroup.' + group_name] = 'het'
+                                            percent = list(sample.het_snps[cluster][group_name].values())[0]
+                                            rows[filename][cluster]['vgroup.' + group_name + '.%'] = percent
+                                        else:
+                                            assert len(sample.het_snps[cluster][group_name]) > 1
+                                            rows[filename][cluster]['vgroup.' + group_name] = 'multi_het'
+                                            rows[filename][cluster]['vgroup.' + group_name + '.%'] = 'NA'
                                     else:
-                                        rows[filename][cluster]['vgroup.' + group_name] = 'multi_het'
                                         rows[filename][cluster]['vgroup.' + group_name + '.%'] = 'NA'
-                            else:
-                                rows[filename][cluster]['vgroup.' + group_name] = 'yes'
                         else:
                             rows[filename][cluster]['vgroup.' + group_name] = 'no'
                             if self.show_known_het:
@@ -201,15 +195,20 @@ class Summary:
                             continue
 
                         key = ref_name + '.' + variant
-
                         if rows[filename][cluster]['assembled'] == 'no':
                             rows[filename][cluster][key] = 'NA'
                         elif cluster in sample.variant_column_names_tuples and (ref_name, variant, grouped_or_novel, group_name) in sample.variant_column_names_tuples[cluster]:
                             rows[filename][cluster][key] = 'yes'
                             if self.show_known_het:
-                                if cluster in sample.het_snps and variant in sample.het_snps[cluster]:
-                                    rows[filename][cluster][key] = 'het'
-                                    rows[filename][cluster][key + '.%'] = sample.het_snps[cluster][variant]
+                                if cluster in sample.het_snps:
+                                    if grouped_or_novel == 'grouped' and group_name in sample.het_snps[cluster]:
+                                        rows[filename][cluster][key] = 'het'
+                                        rows[filename][cluster][key + '.%'] = sample.het_snps[cluster][group_name].get(variant, "NA")
+                                    elif grouped_or_novel == 'novel' and '.' in sample.het_snps[cluster]:
+                                        rows[filename][cluster][key] = 'het'
+                                        rows[filename][cluster][key + '.%'] = sample.het_snps['.'].get(variant, "NA")
+                                    else:
+                                        percent = 'NA'
                         else:
                             rows[filename][cluster][key] = 'no'
                             if self.show_known_het and (cluster, variant) in all_het_snps:
@@ -315,11 +314,13 @@ class Summary:
         matrix = copy.deepcopy(matrix)
         cols_to_add_colour_col = [i for i in range(len(header)) if header[i].endswith(':o1')]
         field_to_col = {
-            'yes': '#1f78b4',
-            'yes_nonunique': '#a6cee3',
-            'no': '#33a02c',
-            'NA': '#b2df8a',
-            'het': '#fb9a99',
+            'yes': '#33a02c',
+            'yes_nonunique': '#b2df8a',
+            'no': '#fb9a99',
+            'NA': '#d3d3d3',
+            'het': '#fdbf6f',
+            'fragmented': '#1f78b4',
+            'interrupted': '#a6cee3',
         }
 
         cols_to_add_colour_col.reverse()

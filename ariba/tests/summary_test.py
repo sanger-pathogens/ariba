@@ -225,6 +225,12 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
         s.show_known_het = True
+        expected[infiles[0]]['noncoding1']['vgroup.id1.%'] = 'NA'
+        expected[infiles[0]]['noncoding1']['vgroup.id3.%'] = 'NA'
+        expected[infiles[1]]['noncoding1']['vgroup.id1'] = 'het'
+        expected[infiles[1]]['noncoding1']['vgroup.id1.%'] = 80.0
+        expected[infiles[1]]['noncoding1']['vgroup.id3'] = 'yes'
+        expected[infiles[1]]['noncoding1']['vgroup.id3.%'] = 'NA'
         expected[infiles[0]]['noncoding1']['noncoding1.A14T.%'] = 'NA'
         expected[infiles[1]]['noncoding1']['noncoding1.A14T'] = 'het'
         expected[infiles[1]]['noncoding1']['noncoding1.A14T.%'] = 80.0
@@ -234,6 +240,8 @@ class TestSummary(unittest.TestCase):
         for filename in expected:
             del expected[filename]['noncoding1']['vgroup.id1']
             del expected[filename]['noncoding1']['vgroup.id3']
+            del expected[filename]['noncoding1']['vgroup.id1.%']
+            del expected[filename]['noncoding1']['vgroup.id3.%']
             for gene_type in expected[filename]:
                 del expected[filename][gene_type]['ref_seq']
 
@@ -373,10 +381,10 @@ class TestSummary(unittest.TestCase):
 
         expected_header = ['head1', 'head2', 'head2:colour', 'head3', 'head3:colour', 'head4', 'head5', 'head5:colour']
         expected_matrix = [
-            ['yes', 'yes', '#1f78b4', 'yes_nonunique', '#a6cee3', 'yes', 'no', '#33a02c'],
-            ['yes', 'yes_nonunique', '#a6cee3', 'no', '#33a02c', 'yes', 'NA', '#b2df8a'],
-            ['yes', 'no', '#33a02c', 'NA', '#b2df8a', 'yes', 'yes', '#1f78b4'],
-            ['yes', 'NA', '#b2df8a', 'yes', '#1f78b4', 'yes', 'yes_nonunique', '#a6cee3'],
+            ['yes', 'yes', '#33a02c', 'yes_nonunique', '#b2df8a', 'yes', 'no', '#fb9a99'],
+            ['yes', 'yes_nonunique', '#b2df8a', 'no', '#fb9a99', 'yes', 'NA', '#d3d3d3'],
+            ['yes', 'no', '#fb9a99', 'NA', '#d3d3d3', 'yes', 'yes', '#33a02c'],
+            ['yes', 'NA', '#d3d3d3', 'yes', '#33a02c', 'yes', 'yes_nonunique', '#b2df8a']
         ]
         got_header, got_matrix = summary.Summary._add_phandango_colour_columns(header, matrix)
         self.assertEqual(expected_header, got_header)
