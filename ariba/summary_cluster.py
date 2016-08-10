@@ -297,5 +297,8 @@ class SummaryCluster:
         for d in self.data:
             snp_tuple = self._get_known_noncoding_het_snp(d)
             if snp_tuple is not None:
-                snps[snp_tuple[0]] = snp_tuple[1]
+                snp_id = d['var_description'].split(':')[4]
+                if snp_id not in snps:
+                    snps[snp_id] = {}
+                snps[snp_id][snp_tuple[0]] = snp_tuple[1]
         return snps
