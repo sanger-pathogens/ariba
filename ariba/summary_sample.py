@@ -4,9 +4,10 @@ from ariba import report, summary_cluster
 class Error (Exception): pass
 
 class SummarySample:
-    def __init__(self, report_tsv, min_pc_id=90):
+    def __init__(self, report_tsv, min_pc_id=90, only_clusters=None):
         self.report_tsv = report_tsv
         self.min_pc_id = min_pc_id
+        self.only_clusters = only_clusters
         self.clusters = {}
 
 
@@ -61,7 +62,7 @@ class SummarySample:
 
 
     def run(self):
-        self.clusters = self._load_file(self.report_tsv, self.min_pc_id)
+        self.clusters = self._load_file(self.report_tsv, self.min_pc_id, only_clusters=self.only_clusters)
         self.column_summary_data = self._column_summary_data()
         self.variant_column_names_tuples, self.het_snps = self._variant_column_names_tuples_and_het_snps()
         self.var_groups = self._var_groups()
