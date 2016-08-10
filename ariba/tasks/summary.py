@@ -97,6 +97,7 @@ def run(options):
         cluster_cols=options.cluster_cols,
         variant_cols=options.var_cols,
         make_phandango_tree=(not options.no_tree),
+        only_clusters=None if options.only_cluster is None else {options.only_cluster},
         verbose=options.verbose
     )
     s.run()
