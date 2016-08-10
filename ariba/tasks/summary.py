@@ -9,7 +9,7 @@ def use_preset(options):
     preset_to_vals = {
         'minimal': {
             'cluster_cols': 'match',
-            'variant_cols': '',
+            'var_cols': '',
             'col_filter': 'y',
             'row_filter': 'y',
             'var_groups': 'n',
@@ -18,7 +18,7 @@ def use_preset(options):
         },
         'cluster_small': {
             'cluster_cols': 'assembled,match,ref_seq,known_var',
-            'variant_cols': '',
+            'var_cols': '',
             'col_filter': 'y',
             'row_filter': 'y',
             'var_groups': 'n',
@@ -27,7 +27,7 @@ def use_preset(options):
         },
         'cluster_all': {
             'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
-            'variant_cols': '',
+            'var_cols': '',
             'col_filter': 'y',
             'row_filter': 'y',
             'var_groups': 'n',
@@ -36,7 +36,7 @@ def use_preset(options):
         },
         'cluster_var_groups': {
             'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
-            'variant_cols': 'groups',
+            'var_cols': 'groups',
             'col_filter': 'y',
             'row_filter': 'y',
             'var_groups': 'y',
@@ -45,7 +45,7 @@ def use_preset(options):
         },
         'cluster_known_vars': {
             'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
-            'variant_cols': 'groups,grouped,ungrouped',
+            'var_cols': 'groups,grouped,ungrouped',
             'col_filter': 'y',
             'row_filter': 'y',
             'var_groups': 'y',
@@ -54,7 +54,7 @@ def use_preset(options):
         },
         'all': {
             'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
-            'variant_cols': 'groups,grouped,ungrouped,novel',
+            'var_cols': 'groups,grouped,ungrouped,novel',
             'col_filter': 'y',
             'row_filter': 'y',
             'var_groups': 'y',
@@ -63,7 +63,7 @@ def use_preset(options):
         },
         'all_no_filter': {
             'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
-            'variant_cols': 'groups,grouped,ungrouped,novel',
+            'var_cols': 'groups,grouped,ungrouped,novel',
             'col_filter': 'n',
             'row_filter': 'n',
             'var_groups': 'y',
