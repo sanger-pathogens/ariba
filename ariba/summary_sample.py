@@ -15,7 +15,7 @@ class SummarySample:
 
 
     @staticmethod
-    def _load_file(filename, min_pc_id):
+    def _load_file(filename, min_pc_id, only_clusters=None):
         f = pyfastaq.utils.open_file_read(filename)
         clusters = {}
 
@@ -28,6 +28,9 @@ class SummarySample:
 
             data_dict = summary_cluster.SummaryCluster.line2dict(line)
             cluster = data_dict['cluster']
+            if only_clusters is not None and cluster not in only_clusters:
+                continue
+
             if cluster not in clusters:
                 clusters[cluster] = summary_cluster.SummaryCluster(min_pc_id=min_pc_id)
             clusters[cluster].add_data_dict(data_dict)

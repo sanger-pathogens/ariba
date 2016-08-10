@@ -33,6 +33,9 @@ class TestSummarySample(unittest.TestCase):
         got = summary_sample.SummarySample._load_file(infile, 90)
         self.assertEqual(expected, got)
 
+        got = summary_sample.SummarySample._load_file(infile, 90, only_clusters={'cluster.n'})
+        expected = {'cluster.n': cluster1}
+        self.assertEqual(expected, got)
 
     def test_column_summary_data(self):
         '''Test _column_summary_data'''
