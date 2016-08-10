@@ -118,6 +118,8 @@ class SummaryCluster:
                 return 'yes'
             else:
                 return 'yes_nonunique'
+        elif self.flag.has('assembled_into_one_contig'):
+            return 'interrupted'
         else:
             return 'fragmented'
 
