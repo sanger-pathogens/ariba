@@ -82,10 +82,10 @@ class Summary:
 
 
     @classmethod
-    def _load_input_files(cls, filenames, min_id, verbose=False):
+    def _load_input_files(cls, filenames, min_id, verbose=False, only_clusters=None):
         samples = {}
         for filename in filenames:
-            samples[filename] = summary_sample.SummarySample(filename, min_pc_id=min_id)
+            samples[filename] = summary_sample.SummarySample(filename, min_pc_id=min_id, only_clusters=only_clusters)
             samples[filename].run()
             if verbose:
                 print('Loaded file', filename, flush=True)

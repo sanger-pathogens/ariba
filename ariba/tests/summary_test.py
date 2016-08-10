@@ -84,6 +84,15 @@ class TestSummary(unittest.TestCase):
         expected = {file1: sample1, file2: sample2}
         self.assertEqual(expected, got)
 
+        sample1 = summary_sample.SummarySample(file1, only_clusters={'noncoding1'})
+        sample2 = summary_sample.SummarySample(file2, only_clusters={'noncoding1'})
+        sample1.run()
+        sample2.run()
+        expected = {file1: sample1, file2: sample2}
+        got = summary.Summary._load_input_files([file1, file2], 90, only_clusters={'noncoding1'})
+        self.assertEqual(expected, got)
+
+
 
     def test_get_all_cluster_names(self):
         '''Test _get_all_cluster_names'''
