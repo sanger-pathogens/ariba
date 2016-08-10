@@ -104,7 +104,7 @@ class TestSummarySample(unittest.TestCase):
 
         expected_het_snps = {
             'cluster.v': {},
-            'cluster.n': {'A14T': 80.0},
+            'cluster.n': {'.': {'A14T': 80.0}},
             'cluster.p': {},
         }
         self.assertEqual(expected_het_snps, got_het_snps)
