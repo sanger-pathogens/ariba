@@ -22,6 +22,7 @@ class Summary:
       cluster_cols='assembled,match,ref_seq,pct_id,known_var,novel_var',
       variant_cols='groups,grouped,ungrouped,novel',
       make_phandango_tree=True,
+      only_clusters=None,
       verbose=False,
     ):
         if filenames is None and fofn is None:
@@ -43,6 +44,7 @@ class Summary:
         self.min_id = min_id
         self.outprefix = outprefix
         self.make_phandango_tree = make_phandango_tree
+        self.only_clusters = only_clusters
         self.verbose = verbose
 
 
@@ -396,7 +398,7 @@ class Summary:
         if self.verbose:
             print('Loading input files...', flush=True)
         self._check_files_exist()
-        self.samples = self._load_input_files(self.filenames, self.min_id, verbose=self.verbose)
+        self.samples = self._load_input_files(self.filenames, self.min_id, verbose=self.verbose, only_clusters=self.only_clusters)
         if self.verbose:
             print('Generating output rows', flush=True)
         self.rows = self._gather_output_rows()
