@@ -421,78 +421,124 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected_all, s.all_data)
 
 
-    def test_to_matrix(self):
-        '''Test _to_matrix'''
-        rows = {
-            'file1': {
-                'cluster.n.1': {
-                    'assembled': 'yes',
-                    'match': 'yes',
-                    'ref_seq': 'noncoding1',
-                    'known_var': 'yes',
-                    'novel_var': 'no',
-                    'pct_id': '98.33',
-                    'noncoding1.A14T': 'yes'
-                },
-                'cluster.p.1': {
-                    'assembled': 'yes',
-                    'match': 'yes',
-                    'ref_seq': 'presence_absence1',
-                    'known_var': 'yes',
-                    'novel_var': 'no',
-                    'pct_id': '98.96',
-                    'presence_absence1.I42L': 'yes'
-                },
-                'cluster.v.1': {
-                    'assembled': 'yes',
-                    'match': 'yes',
-                    'ref_seq': 'varonly1',
-                    'known_var': 'no',
-                    'novel_var': 'no',
-                    'pct_id': '99.42',
-                }
-            },
-            'file2': {
-                'cluster.n.1': {
-                    'assembled': 'yes',
-                    'match': 'yes',
-                    'ref_seq': 'noncoding1',
-                    'known_var': 'no',
-                    'novel_var': 'no',
-                    'pct_id': '98.33',
-                    'noncoding1.A14T': 'no'
-                },
-                'cluster.p.1': {
-                    'assembled': 'yes',
-                    'match': 'yes',
-                    'ref_seq': 'presence_absence1',
-                    'pct_id': '98.96',
-                    'known_var': 'no',
-                    'novel_var': 'no',
-                    'presence_absence1.I42L': 'no'
-                },
-                'cluster.v.1': {
-                    'assembled': 'no',
-                    'match': 'NA',
-                    'ref_seq': 'NA',
-                    'known_var': 'NA',
-                    'novel_var': 'NA',
-                    'pct_id': 'NA',
-                }
-            },
-        }
-        filenames = ['file1', 'file2']
-        cluster_cols = {'assembled': True, 'match': True, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False}
-        got_phandago_header, got_csv_header, got_lines  = summary.Summary._to_matrix(filenames, rows, cluster_cols)
-        expected_phandango_header = ['name', 'cluster.n.1.assembled:o1', 'cluster.n.1.match:o1', 'cluster.n.1.noncoding1.A14T:o1', 'cluster.p.1.assembled:o1', 'cluster.p.1.match:o1', 'cluster.p.1.presence_absence1.I42L:o1', 'cluster.v.1.assembled:o1', 'cluster.v.1.match:o1']
-        expected_csv_header = ['name', 'cluster.n.1.assembled', 'cluster.n.1.match', 'cluster.n.1.noncoding1.A14T', 'cluster.p.1.assembled', 'cluster.p.1.match', 'cluster.p.1.presence_absence1.I42L', 'cluster.v.1.assembled', 'cluster.v.1.match']
-        expected_lines = [
-            ['file1', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes'],
-            ['file2', 'yes', 'yes', 'no', 'yes', 'yes', 'no', 'no', 'NA']
+    def test_to_matrix_all_cols(self):
+        '''Test _to_matrix all columns'''
+        infiles = [
+            os.path.join(data_dir, 'summary_to_matrix.1.tsv'),
+            os.path.join(data_dir, 'summary_to_matrix.2.tsv')
         ]
-        self.assertEqual(expected_phandango_header, got_phandago_header)
+
+        s = summary.Summary('out', filenames=infiles, show_var_groups=True, show_vars=True)
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        s._gather_unfiltered_output_data()
+        got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(infiles, s.all_data, s.all_potential_columns, s.cluster_columns)
+
+        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding1.id1:o1', 'noncoding1.id1.%:c2', 'noncoding1.id3:o1', 'noncoding1.A14T:o1', 'noncoding1.A14T.%:c2', 'noncoding1.A6G:o1', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'noncoding2.id2:o1', 'noncoding2.id2.%:c2', 'noncoding2.A42T:o1', 'noncoding2.A52T:o1', 'noncoding2.A52T.%:c2', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1', 'presence_absence1.A10V:o1']
+        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding1.id1', 'noncoding1.id1.%', 'noncoding1.id3', 'noncoding1.A14T', 'noncoding1.A14T.%', 'noncoding1.A6G', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.known_var', 'noncoding2.novel_var', 'noncoding2.id2', 'noncoding2.id2.%', 'noncoding2.A42T', 'noncoding2.A52T', 'noncoding2.A52T.%', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.known_var', 'presence_absence1.novel_var', 'presence_absence1.A10V']
+        expected_matrix = [
+            [infiles[0], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'yes', 'NA', 'no', 'yes', 'NA', 'no', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'yes_multi_het', 'NA', 'yes', 'het', 40.0, 'yes', 'yes', 'presence_absence_ref1', '98.96', 'no', 'yes', 'yes'],
+            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'het', 80.0, 'yes', 'het', 80.0, 'yes', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'het', 40.0, 'no', 'het', 40.0, 'yes', 'yes', 'presence_absence1', '98.96', 'no', 'yes', 'yes']
+        ]
+
+        self.assertEqual(expected_phandango_header, got_phandango_header)
         self.assertEqual(expected_csv_header, got_csv_header)
-        self.assertEqual(expected_lines, got_lines)
+        self.assertEqual(expected_matrix, got_matrix)
+
+
+    def test_to_matrix_with_groups(self):
+        '''Test _to_matrix with groups'''
+        infiles = [
+            os.path.join(data_dir, 'summary_to_matrix.1.tsv'),
+            os.path.join(data_dir, 'summary_to_matrix.2.tsv')
+        ]
+
+        s = summary.Summary('out', filenames=infiles, show_var_groups=True)
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        s._gather_unfiltered_output_data()
+        got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(infiles, s.all_data, s.all_potential_columns, s.cluster_columns)
+
+        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding1.id1:o1', 'noncoding1.id1.%:c2', 'noncoding1.id3:o1', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'noncoding2.id2:o1', 'noncoding2.id2.%:c2', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1']
+        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding1.id1', 'noncoding1.id1.%', 'noncoding1.id3', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.known_var', 'noncoding2.novel_var', 'noncoding2.id2', 'noncoding2.id2.%', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.known_var', 'presence_absence1.novel_var']
+        expected_matrix = [
+            [infiles[0], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'yes', 'NA', 'no', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'yes_multi_het', 'NA', 'yes', 'yes', 'presence_absence_ref1', '98.96', 'no', 'yes'],
+            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'het', 80.0, 'yes', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'het', 40.0, 'yes', 'yes', 'presence_absence1', '98.96', 'no', 'yes']
+        ]
+
+        self.assertEqual(expected_phandango_header, got_phandango_header)
+        self.assertEqual(expected_csv_header, got_csv_header)
+        self.assertEqual(expected_matrix, got_matrix)
+
+
+    def test_to_matrix_with_vars(self):
+        '''Test _to_matrix with vars'''
+        infiles = [
+            os.path.join(data_dir, 'summary_to_matrix.1.tsv'),
+            os.path.join(data_dir, 'summary_to_matrix.2.tsv')
+        ]
+
+        s = summary.Summary('out', filenames=infiles, show_vars=True)
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        s._gather_unfiltered_output_data()
+        got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(infiles, s.all_data, s.all_potential_columns, s.cluster_columns)
+
+        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding1.A14T:o1', 'noncoding1.A14T.%:c2', 'noncoding1.A6G:o1', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'noncoding2.A42T:o1', 'noncoding2.A52T:o1', 'noncoding2.A52T.%:c2', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1', 'presence_absence1.A10V:o1']
+        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding1.A14T', 'noncoding1.A14T.%', 'noncoding1.A6G', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.known_var', 'noncoding2.novel_var', 'noncoding2.A42T', 'noncoding2.A52T', 'noncoding2.A52T.%', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.known_var', 'presence_absence1.novel_var', 'presence_absence1.A10V']
+        expected_matrix = [
+            [infiles[0], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'yes', 'NA', 'no', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'yes', 'het', 40.0, 'yes', 'yes', 'presence_absence_ref1', '98.96', 'no', 'yes', 'yes'],
+            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'het', 80.0, 'yes', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'no', 'het', 40.0, 'yes', 'yes', 'presence_absence1', '98.96', 'no', 'yes', 'yes']
+        ]
+
+        self.assertEqual(expected_phandango_header, got_phandango_header)
+        self.assertEqual(expected_csv_header, got_csv_header)
+        self.assertEqual(expected_matrix, got_matrix)
+
+
+    def test_to_matrix_cluster_only(self):
+        '''Test _to_matrix with cluster columns only'''
+        infiles = [
+            os.path.join(data_dir, 'summary_to_matrix.1.tsv'),
+            os.path.join(data_dir, 'summary_to_matrix.2.tsv')
+        ]
+
+        s = summary.Summary('out', filenames=infiles)
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        s._gather_unfiltered_output_data()
+        got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(infiles, s.all_data, s.all_potential_columns, s.cluster_columns)
+
+        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1']
+        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.known_var', 'noncoding2.novel_var', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.known_var', 'presence_absence1.novel_var']
+        expected_matrix = [
+            [infiles[0], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'yes', 'yes', 'presence_absence_ref1', '98.96', 'no', 'yes'],
+            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'yes', 'yes', 'presence_absence1', '98.96', 'no', 'yes']
+        ]
+
+        self.assertEqual(expected_phandango_header, got_phandango_header)
+        self.assertEqual(expected_csv_header, got_csv_header)
+        self.assertEqual(expected_matrix, got_matrix)
+
+
+    def test_to_matrix_assembled_only(self):
+        '''Test _to_matrix with assembled column only'''
+        infiles = [
+            os.path.join(data_dir, 'summary_to_matrix.1.tsv'),
+            os.path.join(data_dir, 'summary_to_matrix.2.tsv')
+        ]
+
+        s = summary.Summary('out', filenames=infiles, cluster_cols='assembled')
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        s._gather_unfiltered_output_data()
+        got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(infiles, s.all_data, s.all_potential_columns, s.cluster_columns)
+
+        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding2.assembled:o1', 'presence_absence1.assembled:o1']
+        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding2.assembled', 'presence_absence1.assembled']
+        expected_matrix = [
+            [infiles[0], 'yes', 'yes', 'yes'],
+            [infiles[1], 'yes', 'yes', 'yes']
+        ]
+
+        self.assertEqual(expected_phandango_header, got_phandango_header)
+        self.assertEqual(expected_csv_header, got_csv_header)
+        self.assertEqual(expected_matrix, got_matrix)
 
 
     def test_filter_matrix_rows(self):

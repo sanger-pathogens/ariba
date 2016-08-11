@@ -231,49 +231,54 @@ class Summary:
 
 
     @classmethod
-    def _to_matrix(cls, filenames, rows, cluster_cols):
-        '''rows = output from _gather_output_rows().
-           filenames = self.filenames
-           cluster_cols = self.cluster_columns'''
+    def _to_matrix(cls, filenames, all_data, all_potential_columns, cluster_cols):
         matrix = []
         making_header_lines = True
         phandango_header = ['name']
-        phandago_suffixes = {'assembled': ':o1', 'match': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': ':o1'}
+        phandango_suffixes = {'assembled': ':o1', 'match': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': ':o1'}
         ref_seq_counter = 2
         csv_header = ['name']
-        all_cluster_cols_in_order = ['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
-        all_cluster_cols_in_order_set = set(['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
-        cluster_cols_in_order = [x for x in all_cluster_cols_in_order if cluster_cols[x]]
+        summary_cols_in_order = ['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
+        summary_cols_set = set(['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
+        summary_cols_in_order = [x for x in summary_cols_in_order if cluster_cols[x]]
 
         for filename in filenames:
-            assert filename in rows
             line = [filename]
 
-            for cluster_name in sorted(rows[filename]):
-                for col in cluster_cols_in_order:
+            for cluster_name in sorted(all_potential_columns):
+                group_cols = sorted(list(all_potential_columns[cluster_name]['groups']))
+                var_cols = sorted(list(all_potential_columns[cluster_name]['vars']))
+
+                for col in summary_cols_in_order + group_cols + var_cols:
                     if making_header_lines:
                         csv_header.append(cluster_name + '.' + col)
                         if col == 'ref_seq':
-                            phandago_suffixes[col] = ':o' + str(ref_seq_counter)
+                            phandango_suffixes[col] = ':o' + str(ref_seq_counter)
                             ref_seq_counter += 1
-                        phandango_header.append(cluster_name + '.' + col + phandago_suffixes[col])
+                            phandango_header.append(cluster_name + '.' + col + phandango_suffixes[col])
+                        elif col in phandango_suffixes:
+                            phandango_header.append(cluster_name + '.' + col + phandango_suffixes[col])
+                        elif col.endswith('.%'):
+                            phandango_header.append(cluster_name + '.' + col + ':c2')
+                        else:
+                            phandango_header.append(cluster_name + '.' + col + ':o1')
 
-                    line.append(rows[filename][cluster_name][col])
-
-                for col in sorted(rows[filename][cluster_name]):
-                    if col in all_cluster_cols_in_order_set:
-                        continue
-
-                    if making_header_lines:
-                        csv_header.append(cluster_name + '.' + col)
-                        suffix = ':c2' if col.endswith('.%') else ':o1'
-                        phandango_header.append(cluster_name + '.' + col + suffix)
-
-                    line.append(rows[filename][cluster_name][col])
+                    for col_type in ['summary', 'groups', 'vars']:
+                        if col in all_data[filename][cluster_name][col_type]:
+                            line.append(all_data[filename][cluster_name][col_type][col])
+                            break
+                    else:
+                        if col == 'assembled' or not col.endswith('.%'):
+                            line.append('no')
+                        else:
+                            line.append('NA')
 
             making_header_lines = False
             matrix.append(line)
 
+        assert len(phandango_header) == len(csv_header)
+        for line in matrix:
+            assert len(line) == len(csv_header)
         return phandango_header, csv_header, matrix
 
 
