@@ -39,6 +39,7 @@ __all__ = [
     'sequence_variant',
     'summary',
     'summary_cluster',
+    'summary_cluster_variant',
     'summary_sample',
     'tasks',
     'versions',
