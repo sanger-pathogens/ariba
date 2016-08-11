@@ -38,8 +38,15 @@ class SummarySample:
 
         pyfastaq.utils.close(f)
 
+        to_delete = set()
+
         for cluster_name, cluster in clusters.items():
             cluster.gather_data()
+            if cluster.name is None:
+                to_delete.add(cluster_name)
+
+        for name in to_delete:
+            del clusters[name]
 
         return clusters
 
