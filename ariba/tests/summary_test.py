@@ -417,7 +417,6 @@ class TestSummary(unittest.TestCase):
         s = summary.Summary('out', filenames=infiles, variant_cols=None, show_var_groups=True, show_vars=True)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         got_all, got_potential_cols = s._gather_unfiltered_output_data()
-        self.maxDiff = None
         self.assertEqual(expected_potential_cols, got_potential_cols)
         self.assertEqual(expected_all, got_all)
 
