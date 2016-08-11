@@ -7,6 +7,21 @@ class SummaryClusterVariant:
         self._get_nonsynon_variant_data(data_dict)
 
 
+    def __eq__(self, other):
+       return type(other) is type(self) and self.__dict__ == other.__dict__
+
+
+    def __hash__(self):
+        return hash(tuple([self.__dict__[x] for x in sorted(self.__dict__.keys())]))
+
+
+    def __str__(self):
+        if self.has_nonsynon:
+            return ', '.join((str(self.known), self.var_group, str(self.coding), self.var_string, str(self.het_percent)))
+        else:
+            return 'None'
+
+
     @classmethod
     def _has_nonsynonymous(cls, data_dict):
         return data_dict['ref_ctg_effect'] != 'SYN' and \
