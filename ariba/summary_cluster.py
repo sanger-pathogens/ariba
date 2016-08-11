@@ -1,4 +1,4 @@
-from ariba import flag, report
+from ariba import flag, report, summary_cluster_variant
 
 class Error (Exception): pass
 
@@ -303,4 +303,16 @@ class SummaryCluster:
                     snps[snp_id] = {}
                 snps[snp_id][snp_tuple[0]] = snp_tuple[1]
         return snps
+
+
+    @classmethod
+    def _get_all_nonsynon_variants_set(cls, data_dicts):
+        variants = set()
+
+        for data_dict in data_dicts:
+            cluster_var = summary_cluster_variant.SummaryClusterVariant(data_dict)
+            if cluster_var.has_nonsynon:
+                variants.add(cluster_var)
+
+        return variants
 
