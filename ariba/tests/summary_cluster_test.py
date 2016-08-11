@@ -488,3 +488,33 @@ class TestSummaryCluster(unittest.TestCase):
         got = summary_cluster.SummaryCluster._get_all_nonsynon_variants_set(data_dicts)
         self.assertEqual(expected, got)
 
+
+    def test_gather_data(self):
+        '''test gather_data'''
+        lines = [
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t95\t98.42\tctg_name\t279\t24.4\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tsome free text',
+            'ref1\t1\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tI14L\t1\tI14L\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:0:0:I14L:.:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tA\t10,30\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tA,G\t20,10,10\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+        ]
+
+        data_dicts = [summary_cluster.SummaryCluster.line2dict(x) for x in lines]
+        cluster = summary_cluster.SummaryCluster()
+        for data_dict in data_dicts:
+            cluster.add_data_dict(data_dict)
+
+        cluster.gather_data()
+        expected_summary = {
+            'assembled': 'yes',
+            'match': 'yes',
+            'ref_seq': 'ref1',
+            'pct_id': '98.33',
+            'known_var': 'yes',
+            'novel_var': 'no',
+        }
+        self.assertEqual(expected_summary, cluster.summary)
+
+        cluster_vars = [summary_cluster_variant.SummaryClusterVariant(x) for x in data_dicts]
+        expected_variants = {x for x in cluster_vars if x.has_nonsynon}
+        self.assertEqual(expected_variants, cluster.variants)
+

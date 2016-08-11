@@ -316,3 +316,8 @@ class SummaryCluster:
 
         return variants
 
+
+    def gather_data(self):
+        self.summary = self.column_summary_data()
+        self.variants = self._get_all_nonsynon_variants_set(self.data)
+
