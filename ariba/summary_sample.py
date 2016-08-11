@@ -37,6 +37,10 @@ class SummarySample:
             clusters[cluster].add_data_dict(data_dict)
 
         pyfastaq.utils.close(f)
+
+        for cluster_name, cluster in clusters.items():
+            cluster.gather_data()
+
         return clusters
 
 

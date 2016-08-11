@@ -18,11 +18,14 @@ class TestSummarySample(unittest.TestCase):
         cluster1.add_data_dict(dicts[0])
         cluster1.add_data_dict(dicts[1])
         cluster1.add_data_dict(dicts[2])
+        cluster1.gather_data()
         cluster2 = summary_cluster.SummaryCluster()
         cluster2.add_data_dict(dicts[3])
         cluster2.add_data_dict(dicts[4])
+        cluster2.gather_data()
         cluster3 = summary_cluster.SummaryCluster()
         cluster3.add_data_dict(dicts[5])
+        cluster3.gather_data()
 
         expected = {
             'cluster.n': cluster1,
