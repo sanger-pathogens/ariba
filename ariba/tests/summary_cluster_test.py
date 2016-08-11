@@ -471,3 +471,35 @@ class TestSummaryCluster(unittest.TestCase):
         }
         self.assertEqual(expected, got)
 
+
+    def  test_get_het_percent(self):
+        '''test _get_het_percent'''
+        #FIXME
+        lines = [
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA42T\t1\tA42T\tSNP\t42\t42\tA\t84\t84\tT\t40\tA\t10,30\tnon_coding1:0:0:A42T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA62T\t1\tA62T\tSNP\t62\t62\tA\t84\t84\tA\t40\tT\t10,30\tnon_coding1:0:0:A62T:id2:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA82T\t1\tA82T\tSNP\t82\t82\tA\t84\t84\tA\t100\tT,G\t10,40,50\tnon_coding1:0:0:A82T:.:foo_bar\tspam eggs'
+        ]
+
+        expected = [None, 25.0, 75.0, 40.0]
+        assert len(lines) == len(expected)
+
+        for i in range(len(lines)):
+            data_dict = summary_cluster.SummaryCluster.line2dict(lines[i])
+            got = summary_cluster.SummaryCluster._get_het_percent(data_dict)
+            self.assertEqual(expected[i], got)
+
+
+    def test_get_nonsynon_variant_data(self):
+        '''test _get_nonsynon_variant_data'''
+        #FIXME
+        pass
+
+
+    def test_get_all_nonsynon_variants(self):
+        '''test _get_all_nonsynon_variants'''
+        #FIXME
+        pass
+
+

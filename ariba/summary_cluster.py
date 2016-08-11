@@ -220,6 +220,7 @@ class SummaryCluster:
             return None
 
 
+
     @staticmethod
     def _get_nonsynonymous_var(data_dict):
         '''if data_dict has a non synonymous variant, return string:
@@ -302,3 +303,26 @@ class SummaryCluster:
                     snps[snp_id] = {}
                 snps[snp_id][snp_tuple[0]] = snp_tuple[1]
         return snps
+
+
+    @classmethod
+    def _get_het_percent(cls, data_dict):
+        if data_dict['gene'] == '1' or data_dict['ref_ctg_effect'] != 'SNP' or data_dict['smtls_alt_nt'] == '.' or ';' in data_dict['smtls_alt_nt']:
+            return None
+        else:
+            nucleotides = [data_dict['ctg_nt']] + data_dict['smtls_alt_nt'].split(',')
+            depths = data_dict['smtls_alt_depth'].split(',')
+
+            if len(nucleotides) != len(depths):
+                raise Error('Mismatch in number of inferred nucleotides from ctg_nt, smtls_alt_nt, smtls_alt_depth columns. Cannot continue\n' + str(data_dict))
+
+            try:
+                var_nucleotide = data_dict['known_var_change'][-1]
+                depths = [int(x) for x in depths]
+                nuc_to_depth = dict(zip(nucleotides, depths))
+                total_depth = sum(depths)
+                var_depth = nuc_to_depth.get(var_nucleotide, 0)
+                return round(100 * var_depth / total_depth, 1)
+            except:
+                return None
+
