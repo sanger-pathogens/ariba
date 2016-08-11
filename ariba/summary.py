@@ -510,4 +510,3 @@ class Summary:
 
                 self.all_data[filename][cluster.name] = this_cluster_dict
 
-        return self.all_data, self.all_potential_columns
