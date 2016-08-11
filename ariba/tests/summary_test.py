@@ -262,6 +262,166 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_gather_unfiltered_output_data(self):
+        '''test gather_output_rows_new'''
+        infiles = [
+            os.path.join(data_dir, 'summary_gather_unfiltered_output_data.in.1.tsv'),
+            os.path.join(data_dir, 'summary_gather_unfiltered_output_data.in.2.tsv')
+        ]
+        s = summary.Summary('out', filenames=infiles, variant_cols=None)
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        got_all, got_potential_cols = s._gather_unfiltered_output_data()
+
+        expected_all = {
+            infiles[0]: {
+                'noncoding1': {
+                    'summary': {
+                        'assembled': 'yes',
+                        'known_var': 'yes',
+                        'match': 'yes',
+                        'novel_var': 'no',
+                        'pct_id': '98.33',
+                        'ref_seq': 'noncoding_ref1'
+                    },
+                    'groups': {},
+                    'vars': {},
+                },
+                'noncoding2': {
+                    'summary': {
+                        'assembled': 'yes',
+                        'known_var': 'yes',
+                        'match': 'yes',
+                        'novel_var': 'no',
+                        'pct_id': '98.33',
+                        'ref_seq': 'noncoding_ref2'
+                    },
+                    'groups': {},
+                    'vars': {},
+                },
+                'presence_absence1': {
+                    'summary': {
+                        'assembled': 'yes',
+                        'known_var': 'no',
+                        'match': 'yes',
+                        'novel_var': 'yes',
+                        'pct_id': '98.96',
+                        'ref_seq': 'presence_absence_ref1'
+                    },
+                    'groups': {},
+                    'vars': {},
+                }
+            },
+            infiles[1]: {
+                'noncoding1': {
+                    'summary': {'assembled': 'yes',
+                        'known_var': 'yes',
+                        'match': 'yes',
+                        'novel_var': 'no',
+                        'pct_id': '98.33',
+                        'ref_seq': 'noncoding_ref1'
+                     },
+                    'groups': {},
+                    'vars': {},
+                },
+                'noncoding2': {
+                    'summary': {
+                        'assembled': 'yes',
+                        'known_var': 'yes',
+                        'match': 'yes',
+                        'novel_var': 'no',
+                        'pct_id': '98.33',
+                        'ref_seq': 'noncoding_ref2'
+                    },
+                    'groups': {},
+                    'vars': {},
+                },
+                'presence_absence1': {
+                    'summary': {
+                            'assembled': 'yes',
+                            'known_var': 'no',
+                            'match': 'yes',
+                            'novel_var': 'yes',
+                            'pct_id': '98.96',
+                            'ref_seq': 'presence_absence1'
+                    },
+                    'groups': {},
+                    'vars': {}
+                }
+            }
+        }
+
+        expected_potential_cols = {
+            'noncoding1': {
+                'summary': {
+                    'assembled',
+                    'known_var',
+                    'match',
+                    'novel_var',
+                    'pct_id',
+                    'ref_seq'
+                },
+                'groups': set(),
+                'vars': set()
+            },
+            'noncoding2': {
+                'summary': {
+                    'assembled',
+                    'known_var',
+                    'match',
+                    'novel_var',
+                    'pct_id',
+                    'ref_seq'
+                },
+                'groups': set(),
+                'vars': set()
+            },
+            'presence_absence1': {
+                'summary': {
+                    'assembled',
+                    'known_var',
+                    'match',
+                    'novel_var',
+                    'pct_id',
+                    'ref_seq'
+                },
+                'groups': set(),
+                'vars': set()
+            }
+        }
+
+        self.assertEqual(expected_potential_cols, got_potential_cols)
+        self.assertEqual(expected_all, got_all)
+
+        expected_potential_cols['noncoding1']['groups'] = {'id3', 'id1', 'id1.%'}
+        expected_potential_cols['noncoding2']['groups'] = {'id2.%', 'id2'}
+        expected_all[infiles[0]]['noncoding1']['groups'] = {'id1': 'yes'}
+        expected_all[infiles[0]]['noncoding2']['groups'] = {'id2': 'yes_multi_het', 'id2.%': 'NA'}
+        expected_all[infiles[1]]['noncoding1']['groups'] = {'id1': 'het', 'id1.%': 80.0, 'id3': 'yes'}
+        expected_all[infiles[1]]['noncoding2']['groups'] = {'id2': 'het', 'id2.%': 40.0}
+        s = summary.Summary('out', filenames=infiles, variant_cols=None, show_var_groups=True)
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        got_all, got_potential_cols = s._gather_unfiltered_output_data()
+        self.assertEqual(expected_potential_cols, got_potential_cols)
+        self.assertEqual(expected_all, got_all)
+
+        expected_potential_cols['noncoding1']['vars'] = {'A14T.%', 'A6G', 'A14T'}
+        expected_potential_cols['noncoding2']['vars'] = {'A52T', 'A52T.%', 'A42T'}
+        expected_potential_cols['presence_absence1']['vars'] = {'A10V'}
+
+        expected_all[infiles[0]]['noncoding1']['vars'] = {'A14T': 'yes'}
+        expected_all[infiles[0]]['noncoding2']['vars'] = {'A42T': 'yes', 'A52T': 'het', 'A52T.%': 40.0}
+        expected_all[infiles[0]]['presence_absence1']['vars'] = {'A10V': 'yes'}
+        expected_all[infiles[1]]['noncoding1']['vars'] = {'A14T': 'het', 'A14T.%': 80.0, 'A6G': 'yes'}
+        expected_all[infiles[1]]['noncoding2']['vars'] = {'A52T': 'het', 'A52T.%': 40.0}
+        expected_all[infiles[1]]['presence_absence1']['vars'] = {'A10V': 'yes'}
+        s = summary.Summary('out', filenames=infiles, variant_cols=None, show_var_groups=True, show_vars=True)
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        got_all, got_potential_cols = s._gather_unfiltered_output_data()
+        self.maxDiff = None
+        self.assertEqual(expected_potential_cols, got_potential_cols)
+        self.assertEqual(expected_all, got_all)
+
+
     def test_to_matrix(self):
         '''Test _to_matrix'''
         rows = {
