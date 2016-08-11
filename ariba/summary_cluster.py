@@ -326,3 +326,31 @@ class SummaryCluster:
             except:
                 return None
 
+
+    @classmethod
+    def _get_nonsynon_variant_data(cls, data_dict):
+        if not SummaryCluster._has_nonsynonymous(data_dict):
+            return None
+
+        if data_dict['known_var_change'] == data_dict['ref_ctg_change'] == '.' == data_dict['ref_ctg_effect']:
+            raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change, ref_ctg_change, ref_ctg_effect all equal to ".", but has a non synonymous change. Something is inconsistent. Cannot continue')
+        elif '.' not in [data_dict['known_var_change'], data_dict['ref_ctg_change']] and \
+          data_dict['known_var_change'] != data_dict['ref_ctg_change']:
+            raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change != ref_ctg_change. Cannot continue')
+
+        var_data = {
+            'known': data_dict['known_var'] == '1',
+            'var_group': data_dict['var_group'],
+            'coding': data_dict['gene'] == '1'
+        }
+
+        if data_dict['known_var'] == '1' and data_dict['known_var_change'] != '.':
+            var_data['var_string'] = data_dict['known_var_change']
+        elif data_dict['ref_ctg_change'] != '.':
+            var_data['var_string'] = data_dict['ref_ctg_change']
+        else:
+            var_data['var_string'] = data_dict['ref_ctg_effect']
+
+        var_data['het_percent'] = SummaryCluster._get_het_percent(data_dict)
+        return var_data
+

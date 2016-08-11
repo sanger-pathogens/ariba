@@ -474,7 +474,6 @@ class TestSummaryCluster(unittest.TestCase):
 
     def  test_get_het_percent(self):
         '''test _get_het_percent'''
-        #FIXME
         lines = [
             'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
             'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA42T\t1\tA42T\tSNP\t42\t42\tA\t84\t84\tT\t40\tA\t10,30\tnon_coding1:0:0:A42T:id1:foo_bar\tspam eggs',
@@ -493,13 +492,23 @@ class TestSummaryCluster(unittest.TestCase):
 
     def test_get_nonsynon_variant_data(self):
         '''test _get_nonsynon_variant_data'''
-        #FIXME
-        pass
+        lines = [
+            'ref1\t1\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tI14L\t1\tI14L\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:0:0:I14L:.:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tA\t10,30\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tA,G\t20,10,10\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+        ]
 
+        expected = [
+            {'coding': True, 'known': True, 'var_string': 'I14L', 'var_group': '.', 'het_percent': None},
+            {'coding': False, 'known': True, 'var_string': 'A14T', 'var_group': 'id1', 'het_percent': None},
+            {'coding': False, 'known': True, 'var_string': 'A14T', 'var_group': 'id1', 'het_percent': 25.0},
+            {'coding': False, 'known': True, 'var_string': 'A14T', 'var_group': 'id1', 'het_percent': 50.0},
+        ]
+        assert len(lines) == len(expected)
 
-    def test_get_all_nonsynon_variants(self):
-        '''test _get_all_nonsynon_variants'''
-        #FIXME
-        pass
-
+        for i in range(len(lines)):
+            data_dict = summary_cluster.SummaryCluster.line2dict(lines[i])
+            got = summary_cluster.SummaryCluster._get_nonsynon_variant_data(data_dict)
+            self.assertEqual(expected[i], got)
 
