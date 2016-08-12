@@ -90,6 +90,49 @@ class Summary:
         return samples
 
 
+    def _gather_unfiltered_output_data(self):
+        self.all_potential_columns = {}
+        self.all_data = {}
+
+        for filename in sorted(self.samples):
+            self.all_data[filename] = {}
+            for cluster in self.samples[filename].clusters.values():
+                self.all_data[filename][cluster.name] = {}
+                if cluster.name not in self.all_potential_columns:
+                    self.all_potential_columns[cluster.name] = {'summary' : set(), 'groups': set(), 'vars': set()}
+
+                this_cluster_dict = {'summary': copy.copy(cluster.summary), 'groups': {}, 'vars': {}}
+                seen_groups = {}
+
+                for variant in cluster.variants:
+                    if self.show_vars:
+                        this_cluster_dict['vars'][variant.var_string] = 'yes' if variant.het_percent is None else 'het'
+                        if variant.het_percent is not None:
+                            this_cluster_dict['vars'][variant.var_string + '.%'] = variant.het_percent
+
+                    if self.show_var_groups and variant.var_group != '.':
+                        if variant.var_group not in seen_groups:
+                            seen_groups[variant.var_group] = {'yes': 0, 'het': 0}
+
+                        if variant.het_percent is None:
+                            seen_groups[variant.var_group]['yes'] += 1
+                            this_cluster_dict['groups'][variant.var_group] = 'yes'
+                        else:
+                            seen_groups[variant.var_group]['het'] += 1
+                            this_cluster_dict['groups'][variant.var_group] = 'het'
+                            this_cluster_dict['groups'][variant.var_group + '.%'] = variant.het_percent
+
+                for group, d in seen_groups.items():
+                    if d['het'] > 0 and d['het'] + d['yes'] > 1:
+                        this_cluster_dict['groups'][group] = 'yes_multi_het'
+                        this_cluster_dict['groups'][group + '.%'] = 'NA'
+
+                for x in this_cluster_dict:
+                    self.all_potential_columns[cluster.name][x].update(set(this_cluster_dict[x].keys()))
+
+                self.all_data[filename][cluster.name] = this_cluster_dict
+
+
     @classmethod
     def _to_matrix(cls, filenames, all_data, all_potential_columns, cluster_cols):
         matrix = []
@@ -331,47 +374,4 @@ class Summary:
 
         if self.verbose:
             print('Finished', flush=True)
-
-
-    def _gather_unfiltered_output_data(self):
-        self.all_potential_columns = {}
-        self.all_data = {}
-
-        for filename in sorted(self.samples):
-            self.all_data[filename] = {}
-            for cluster in self.samples[filename].clusters.values():
-                self.all_data[filename][cluster.name] = {}
-                if cluster.name not in self.all_potential_columns:
-                    self.all_potential_columns[cluster.name] = {'summary' : set(), 'groups': set(), 'vars': set()}
-
-                this_cluster_dict = {'summary': copy.copy(cluster.summary), 'groups': {}, 'vars': {}}
-                seen_groups = {}
-
-                for variant in cluster.variants:
-                    if self.show_vars:
-                        this_cluster_dict['vars'][variant.var_string] = 'yes' if variant.het_percent is None else 'het'
-                        if variant.het_percent is not None:
-                            this_cluster_dict['vars'][variant.var_string + '.%'] = variant.het_percent
-
-                    if self.show_var_groups and variant.var_group != '.':
-                        if variant.var_group not in seen_groups:
-                            seen_groups[variant.var_group] = {'yes': 0, 'het': 0}
-
-                        if variant.het_percent is None:
-                            seen_groups[variant.var_group]['yes'] += 1
-                            this_cluster_dict['groups'][variant.var_group] = 'yes'
-                        else:
-                            seen_groups[variant.var_group]['het'] += 1
-                            this_cluster_dict['groups'][variant.var_group] = 'het'
-                            this_cluster_dict['groups'][variant.var_group + '.%'] = variant.het_percent
-
-                for group, d in seen_groups.items():
-                    if d['het'] > 0 and d['het'] + d['yes'] > 1:
-                        this_cluster_dict['groups'][group] = 'yes_multi_het'
-                        this_cluster_dict['groups'][group + '.%'] = 'NA'
-
-                for x in this_cluster_dict:
-                    self.all_potential_columns[cluster.name][x].update(set(this_cluster_dict[x].keys()))
-
-                self.all_data[filename][cluster.name] = this_cluster_dict
 
