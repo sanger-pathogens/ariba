@@ -43,35 +43,6 @@ class TestSummary(unittest.TestCase):
             self.assertEqual(expected[i], summary.Summary._determine_cluster_cols(col_strings[i]))
 
 
-    def test_determine_var_cols(self):
-        col_strings = [
-            'groups,grouped,ungrouped,novel',
-            'groups,grouped,ungrouped',
-            'grouped,novel',
-            'ungrouped,novel',
-            'grouped',
-            'ungrouped',
-            'novel',
-            ''
-        ]
-
-        expected = [
-            {'groups': True, 'grouped': True, 'ungrouped': True, 'novel': True},
-            {'groups': True, 'grouped': True, 'ungrouped': True, 'novel': False},
-            {'groups': False, 'grouped': True, 'ungrouped': False, 'novel': True},
-            {'groups': False, 'grouped': False, 'ungrouped': True, 'novel': True},
-            {'groups': False, 'grouped': True, 'ungrouped': False, 'novel': False},
-            {'groups': False, 'grouped': False, 'ungrouped': True, 'novel': False},
-            {'groups': False, 'grouped': False, 'ungrouped': False, 'novel': True},
-            {'groups': False, 'grouped': False, 'ungrouped': False, 'novel': False},
-        ]
-
-        assert len(col_strings) == len(expected)
-
-        for i in range(len(col_strings)):
-            self.assertEqual(expected[i], summary.Summary._determine_var_cols(col_strings[i]))
-
-
     def test_load_input_files(self):
         '''Test _load_input_files'''
         file1 = os.path.join(data_dir, 'summary_test_load_input_files.1.tsv')
@@ -267,7 +238,7 @@ class TestSummary(unittest.TestCase):
             }
         }
 
-        s = summary.Summary('out', filenames=infiles, variant_cols=None)
+        s = summary.Summary('out', filenames=infiles)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s._gather_unfiltered_output_data()
         self.assertEqual(expected_potential_cols, s.all_potential_columns)
@@ -279,7 +250,7 @@ class TestSummary(unittest.TestCase):
         expected_all[infiles[0]]['noncoding2']['groups'] = {'id2': 'yes_multi_het', 'id2.%': 'NA'}
         expected_all[infiles[1]]['noncoding1']['groups'] = {'id1': 'het', 'id1.%': 80.0, 'id3': 'yes'}
         expected_all[infiles[1]]['noncoding2']['groups'] = {'id2': 'het', 'id2.%': 40.0}
-        s = summary.Summary('out', filenames=infiles, variant_cols=None, show_var_groups=True)
+        s = summary.Summary('out', filenames=infiles, show_var_groups=True)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s._gather_unfiltered_output_data()
         self.assertEqual(expected_potential_cols, s.all_potential_columns)
@@ -295,7 +266,7 @@ class TestSummary(unittest.TestCase):
         expected_all[infiles[1]]['noncoding1']['vars'] = {'A14T': 'het', 'A14T.%': 80.0, 'A6G': 'yes'}
         expected_all[infiles[1]]['noncoding2']['vars'] = {'A52T': 'het', 'A52T.%': 40.0}
         expected_all[infiles[1]]['presence_absence1']['vars'] = {'A10V': 'yes'}
-        s = summary.Summary('out', filenames=infiles, variant_cols=None, show_var_groups=True, show_vars=True)
+        s = summary.Summary('out', filenames=infiles, show_var_groups=True, show_vars=True)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s._gather_unfiltered_output_data()
         self.assertEqual(expected_potential_cols, s.all_potential_columns)

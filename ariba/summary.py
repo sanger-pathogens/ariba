@@ -20,7 +20,6 @@ class Summary:
       min_id=90.0,
       show_known_het=False,
       cluster_cols='assembled,match,ref_seq,pct_id,known_var,novel_var',
-      variant_cols='groups,grouped,ungrouped,novel',
       make_phandango_tree=True,
       only_clusters=None,
       show_var_groups=False,
@@ -40,7 +39,6 @@ class Summary:
 
         self.show_known_het = show_known_het
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
-        self.var_columns = self._determine_var_cols(variant_cols)
         self.filter_rows = filter_rows
         self.filter_columns = filter_columns
         self.min_id = min_id
@@ -66,12 +64,6 @@ class Summary:
     def _determine_cluster_cols(cols_string):
         allowed_cols = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
         return Summary._determine_cols(cols_string, allowed_cols, 'cluster columns')
-
-
-    @staticmethod
-    def _determine_var_cols(cols_string):
-        allowed_cols = {'groups', 'grouped', 'ungrouped', 'novel'}
-        return Summary._determine_cols(cols_string, allowed_cols, 'variant columns')
 
 
     def _load_fofn(self, fofn):
