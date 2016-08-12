@@ -43,7 +43,9 @@ class SummaryClusterVariant:
                 raise Error('Mismatch in number of inferred nucleotides from ctg_nt, smtls_alt_nt, smtls_alt_depth columns. Cannot continue\n' + str(data_dict))
 
             try:
-                var_nucleotide = data_dict['known_var_change'][-1]
+                var_nucleotide = data_dict['known_var_change'][-1] if data_dict['known_var_change'] != '.' else data_dict['ref_ctg_change'][-1]
+                if var_nucleotide == '.':
+                    return None
                 depths = [int(x) for x in depths]
                 nuc_to_depth = dict(zip(nucleotides, depths))
                 total_depth = sum(depths)
