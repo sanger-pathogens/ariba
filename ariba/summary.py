@@ -18,7 +18,6 @@ class Summary:
       filter_rows=True,
       filter_columns=True,
       min_id=90.0,
-      show_known_het=False,
       cluster_cols='assembled,match,ref_seq,pct_id,known_var,novel_var',
       make_phandango_tree=True,
       only_clusters=None,
@@ -37,7 +36,6 @@ class Summary:
         if fofn is not None:
             self.filenames.extend(self._load_fofn(fofn))
 
-        self.show_known_het = show_known_het
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
         self.filter_rows = filter_rows
         self.filter_columns = filter_columns
@@ -167,7 +165,7 @@ class Summary:
                             phandango_header.append(cluster_name + '.' + col + ':o1')
 
                     for col_type in ['summary', 'groups', 'vars']:
-                        if col in all_data[filename][cluster_name][col_type]:
+                        if cluster_name in all_data[filename] and col in all_data[filename][cluster_name][col_type]:
                             line.append(all_data[filename][cluster_name][col_type][col])
                             break
                     else:
@@ -313,8 +311,8 @@ class Summary:
         self.samples = self._load_input_files(self.filenames, self.min_id, verbose=self.verbose, only_clusters=self.only_clusters)
         if self.verbose:
             print('Generating output rows', flush=True)
-        self.rows = self._gather_output_rows()
-        phandango_header, csv_header, matrix = Summary._to_matrix(self.filenames, self.rows, self.cluster_columns)
+        self._gather_unfiltered_output_data()
+        phandango_header, csv_header, matrix = Summary._to_matrix(self.filenames, self.all_data, self.all_potential_columns, self.cluster_columns)
 
         # sanity check same number of columns in headers and matrix
         lengths = {len(x) for x in matrix}
