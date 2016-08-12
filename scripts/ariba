@@ -50,6 +50,7 @@ subparser_getref = subparsers.add_parser(
     description='Download reference data from one of a few supported public resources',
 )
 subparser_getref.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
+subparser_getref.add_argument('--version', help='Version of reference data to download. If not used, gets the latest version. Only applies to card')
 subparser_getref.add_argument('db', help='Database to download. Must be one of: ' + ' '.join(allowed_dbs), choices=allowed_dbs, metavar="DB name")
 subparser_getref.add_argument('outprefix', help='Prefix of output filenames')
 subparser_getref.set_defaults(func=ariba.tasks.getref.run)
