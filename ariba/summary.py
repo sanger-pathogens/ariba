@@ -91,17 +91,6 @@ class Summary:
 
 
     @classmethod
-    def _get_all_het_snps(cls, samples_dict):
-        snps = set()
-        for filename, sample in samples_dict.items():
-            for cluster, snp_dict in sample.het_snps.items():
-                for snp_id in snp_dict:
-                    for snp in snp_dict[snp_id]:
-                        snps.add((cluster, snp))
-
-        return snps
-
-    @classmethod
     def _get_all_var_groups(cls, samples_dict):
         groups = {}
         for filename, sample in samples_dict.items():

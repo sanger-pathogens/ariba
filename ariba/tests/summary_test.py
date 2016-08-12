@@ -64,16 +64,6 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_get_all_het_snps(self):
-        '''test _get_all_het_snps'''
-        file1 = os.path.join(data_dir, 'summary_test_get_all_het_snps.1.tsv')
-        file2 = os.path.join(data_dir, 'summary_test_get_all_het_snps.2.tsv')
-        samples = summary.Summary._load_input_files([file1, file2], 90)
-        got = summary.Summary._get_all_het_snps(samples)
-        expected = {('noncoding1', 'A14T')}
-        self.assertEqual(expected, got)
-
-
     def test_get_all_var_groups(self):
         '''test _get_all_var_groups'''
         file1 = os.path.join(data_dir, 'summary_test_get_all_var_groups.1.tsv')
