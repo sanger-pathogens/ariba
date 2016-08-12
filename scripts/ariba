@@ -152,7 +152,7 @@ subparser_run.set_defaults(func=ariba.tasks.run.run)
 
 
 #----------------------------- summary -------------------------------
-summary_presets = ['minimal', 'cluster_small', 'cluster_all', 'cluster_var_groups', 'cluster_known_vars', 'all', 'all_no_filter']
+summary_presets = ['minimal', 'cluster_small', 'cluster_all', 'cluster_var_groups', 'all', 'all_no_filter']
 subparser_summary = subparsers.add_parser(
     'summary',
     help='Summarise multiple reports made by "run"',
@@ -162,15 +162,15 @@ subparser_summary = subparsers.add_parser(
 )
 
 subparser_summary.add_argument('-f', '--fofn', help='File of filenames of ariba reports in tsv format (not xls) to be summarised. Must be used if no input files listed after the outfile.', metavar='FILENAME')
-subparser_summary.add_argument('--preset', choices=summary_presets, help='Shorthand for setting --cluster_cols,--col_filter,--row_filter,--known_vars,--novel_vars. Using this overrides those options', metavar='|'.join(summary_presets))
+subparser_summary.add_argument('--preset', choices=summary_presets, help='Shorthand for setting --cluster_cols,--col_filter,--row_filter,--v_groups,--variants. Using this overrides those options', metavar='|'.join(summary_presets))
 subparser_summary.add_argument('--cluster_cols', help='Comma separated list of cluster columns to include. Choose from: assembled, match, ref_seq, pct_id, known_var, novel_var [%(default)s]', default='match', metavar='col1,col2,...')
 subparser_summary.add_argument('--col_filter', choices=['y', 'n'], default='y', help='Choose whether columns where all values are "no" or "NA" are removed [%(default)s]', metavar='y|n')
-subparser_summary.add_argument('--het', action='store_true', help='For known noncoding SNPs, report if they are heterozygous or not, and the percent of reads supporting the variant type')
 subparser_summary.add_argument('--no_tree', action='store_true', help='Do not make phandango tree')
 subparser_summary.add_argument('--row_filter', choices=['y', 'n'], default='y', help='Choose whether rows where all values are "no" or "NA" are removed [%(default)s]', metavar='y|n')
-subparser_summary.add_argument('--var_cols', help='Comma separated list of variant columns to include. Choose from: groups, grouped, ungrouped, novel [none by default]', metavar='col1,col2,...', default='')
 subparser_summary.add_argument('--min_id', type=float, help='Minimum percent identity cutoff to count as assembled [%(default)s]', default=90, metavar='FLOAT')
 subparser_summary.add_argument('--only_cluster', help='Only report data for the given cluster name', metavar='Cluster_name')
+subparser_summary.add_argument('--v_groups', action='store_true', help='Show presence of variants that are in groups')
+subparser_summary.add_argument('--variants', action='store_true', help='Report all variants')
 subparser_summary.add_argument('--verbose', action='store_true', help='Be verbose')
 subparser_summary.add_argument('outprefix', help='Prefix of output files')
 subparser_summary.add_argument('infiles', nargs='*', help='Files to be summarised')
