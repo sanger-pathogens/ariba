@@ -27,11 +27,6 @@ def use_preset(options):
             'col_filter': 'y',
             'row_filter': 'y',
         },
-        'cluster_known_vars': {
-            'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
-            'col_filter': 'y',
-            'row_filter': 'y',
-        },
         'all': {
             'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
             'col_filter': 'y',
@@ -48,6 +43,12 @@ def use_preset(options):
 
     for key, val in preset_to_vals[options.preset].items():
         exec('options.' + key + ' = "' + val + '"')
+
+    if options.preset in {'cluster_var_groups', 'all', 'all_no_filter'}:
+        options.v_groups = True
+
+    if options.preset in {'all', 'all_no_filter'}:
+        options.variants = True
 
     return options
 
