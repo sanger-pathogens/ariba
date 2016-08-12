@@ -91,30 +91,6 @@ class Summary:
 
 
     @classmethod
-    def _get_all_cluster_names(cls, samples_dict):
-        '''Input should be output of _load_input_files'''
-        cluster_names = set()
-        for filename, sample in samples_dict.items():
-            cluster_names.update(set(sample.clusters.keys()))
-        return cluster_names
-
-
-    @classmethod
-    def _get_all_variant_columns(cls, samples_dict):
-        '''Input should be output of _load_input_files'''
-        columns = {}
-        for filename, sample in samples_dict.items():
-            for cluster in sample.column_summary_data:
-                if sample.column_summary_data[cluster]['assembled'] == 'yes':
-                    for key, tuple_set in sample.variant_column_names_tuples.items():
-                        for t in tuple_set:
-                            if key not in columns:
-                                columns[key] = set()
-                            columns[key].add(t)
-        return columns
-
-
-    @classmethod
     def _get_all_het_snps(cls, samples_dict):
         snps = set()
         for filename, sample in samples_dict.items():
