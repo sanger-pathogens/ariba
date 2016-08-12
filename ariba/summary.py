@@ -18,9 +18,11 @@ class Summary:
       filter_rows=True,
       filter_columns=True,
       min_id=90.0,
-      show_known_het=False,
       cluster_cols='assembled,match,ref_seq,pct_id,known_var,novel_var',
-      variant_cols='groups,grouped,ungrouped,novel',
+      make_phandango_tree=True,
+      only_clusters=None,
+      show_var_groups=False,
+      show_vars=False,
       verbose=False,
     ):
         if filenames is None and fofn is None:
@@ -34,13 +36,15 @@ class Summary:
         if fofn is not None:
             self.filenames.extend(self._load_fofn(fofn))
 
-        self.show_known_het = show_known_het
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
-        self.var_columns = self._determine_var_cols(variant_cols)
         self.filter_rows = filter_rows
         self.filter_columns = filter_columns
         self.min_id = min_id
         self.outprefix = outprefix
+        self.make_phandango_tree = make_phandango_tree
+        self.only_clusters = only_clusters
+        self.show_var_groups = show_var_groups
+        self.show_vars = show_vars
         self.verbose = verbose
 
 
@@ -60,12 +64,6 @@ class Summary:
         return Summary._determine_cols(cols_string, allowed_cols, 'cluster columns')
 
 
-    @staticmethod
-    def _determine_var_cols(cols_string):
-        allowed_cols = {'groups', 'grouped', 'ungrouped', 'novel'}
-        return Summary._determine_cols(cols_string, allowed_cols, 'variant columns')
-
-
     def _load_fofn(self, fofn):
         f = pyfastaq.utils.open_file_read(fofn)
         filenames = [x.rstrip() for x in f.readlines()]
@@ -80,172 +78,108 @@ class Summary:
 
 
     @classmethod
-    def _load_input_files(cls, filenames, min_id, verbose=False):
+    def _load_input_files(cls, filenames, min_id, verbose=False, only_clusters=None):
         samples = {}
         for filename in filenames:
-            samples[filename] = summary_sample.SummarySample(filename, min_pc_id=min_id)
+            samples[filename] = summary_sample.SummarySample(filename, min_pc_id=min_id, only_clusters=only_clusters)
             samples[filename].run()
             if verbose:
                 print('Loaded file', filename, flush=True)
         return samples
 
 
-    @classmethod
-    def _get_all_cluster_names(cls, samples_dict):
-        '''Input should be output of _load_input_files'''
-        cluster_names = set()
-        for filename, sample in samples_dict.items():
-            cluster_names.update(set(sample.clusters.keys()))
-        return cluster_names
+    def _gather_unfiltered_output_data(self):
+        self.all_potential_columns = {}
+        self.all_data = {}
 
+        for filename in sorted(self.samples):
+            self.all_data[filename] = {}
+            for cluster in self.samples[filename].clusters.values():
+                self.all_data[filename][cluster.name] = {}
+                if cluster.name not in self.all_potential_columns:
+                    self.all_potential_columns[cluster.name] = {'summary' : set(), 'groups': set(), 'vars': set()}
 
-    @classmethod
-    def _get_all_variant_columns(cls, samples_dict):
-        '''Input should be output of _load_input_files'''
-        columns = {}
-        for filename, sample in samples_dict.items():
-            for cluster in sample.column_summary_data:
-                if sample.column_summary_data[cluster]['assembled'] == 'yes':
-                    for key, tuple_set in sample.variant_column_names_tuples.items():
-                        for t in tuple_set:
-                            if key not in columns:
-                                columns[key] = set()
-                            columns[key].add(t)
-        return columns
+                this_cluster_dict = {'summary': copy.copy(cluster.summary), 'groups': {}, 'vars': {}}
+                seen_groups = {}
 
+                for variant in cluster.variants:
+                    if self.show_vars:
+                        this_cluster_dict['vars'][variant.var_string] = 'yes' if variant.het_percent is None else 'het'
+                        if variant.het_percent is not None:
+                            this_cluster_dict['vars'][variant.var_string + '.%'] = variant.het_percent
 
-    @classmethod
-    def _get_all_het_snps(cls, samples_dict):
-        snps = set()
-        for filename, sample in samples_dict.items():
-            for cluster, snp_dict in sample.het_snps.items():
-                if len(snp_dict):
-                    for snp in snp_dict:
-                        snps.add((cluster, snp))
+                    if self.show_var_groups and variant.var_group != '.':
+                        if variant.var_group not in seen_groups:
+                            seen_groups[variant.var_group] = {'yes': 0, 'het': 0}
 
-        return snps
-
-    @classmethod
-    def _get_all_var_groups(cls, samples_dict):
-        groups = {}
-        for filename, sample in samples_dict.items():
-            for name, name_set in sample.var_groups.items():
-                if name not in groups:
-                    groups[name] = set()
-                groups[name].update(name_set)
-        return groups
-
-
-    def _gather_output_rows(self):
-        all_cluster_names = Summary._get_all_cluster_names(self.samples)
-        all_var_columns = Summary._get_all_variant_columns(self.samples)
-        all_het_snps = Summary._get_all_het_snps(self.samples)
-
-        if self.var_columns['groups']:
-            var_groups = Summary._get_all_var_groups(self.samples)
-        else:
-            var_groups = set()
-        rows = {}
-
-        for filename, sample in self.samples.items():
-            rows[filename] = {}
-
-            for cluster in all_cluster_names:
-                rows[filename][cluster] = {}
-
-                if cluster in sample.column_summary_data and sample.column_summary_data[cluster]['assembled'].startswith('yes'):
-                    rows[filename][cluster] = sample.column_summary_data[cluster]
-                else:
-                    rows[filename][cluster] = {
-                        'assembled': 'no',
-                        'match': 'no',
-                        'ref_seq': 'NA',
-                        'known_var': 'NA',
-                        'novel_var': 'NA',
-                        'pct_id': 'NA'
-                    }
-
-                if self.var_columns['groups']:
-                    for group_name in var_groups[cluster]:
-                        if cluster in sample.var_groups and group_name in sample.var_groups[cluster]:
-                            rows[filename][cluster]['vgroup.' + group_name] = 'yes'
+                        if variant.het_percent is None:
+                            seen_groups[variant.var_group]['yes'] += 1
+                            this_cluster_dict['groups'][variant.var_group] = 'yes'
                         else:
-                            rows[filename][cluster]['vgroup.' + group_name] = 'no'
+                            seen_groups[variant.var_group]['het'] += 1
+                            this_cluster_dict['groups'][variant.var_group] = 'het'
+                            this_cluster_dict['groups'][variant.var_group + '.%'] = variant.het_percent
 
-                if cluster in all_var_columns:
-                    for (ref_name, variant, grouped_or_novel, group_name) in all_var_columns[cluster]:
-                        if not self.var_columns[grouped_or_novel]:
-                            continue
+                for group, d in seen_groups.items():
+                    if d['het'] > 0 and d['het'] + d['yes'] > 1:
+                        this_cluster_dict['groups'][group] = 'yes_multi_het'
+                        this_cluster_dict['groups'][group + '.%'] = 'NA'
 
-                        key = ref_name + '.' + variant
+                for x in this_cluster_dict:
+                    self.all_potential_columns[cluster.name][x].update(set(this_cluster_dict[x].keys()))
 
-                        if rows[filename][cluster]['assembled'] == 'no':
-                            rows[filename][cluster][key] = 'NA'
-                        elif cluster in sample.variant_column_names_tuples and (ref_name, variant, grouped_or_novel, group_name) in sample.variant_column_names_tuples[cluster]:
-                            rows[filename][cluster][key] = 'yes'
-                            if self.show_known_het:
-                                if cluster in sample.het_snps and variant in sample.het_snps[cluster]:
-                                    rows[filename][cluster][key] = 'het'
-                                    rows[filename][cluster][key + '.%'] = sample.het_snps[cluster][variant]
-                        else:
-                            rows[filename][cluster][key] = 'no'
-                            if self.show_known_het and (cluster, variant) in all_het_snps:
-                                rows[filename][cluster][key + '.%'] = 'NA'
-
-                        if self.show_known_het and (cluster, variant) in all_het_snps and key + '.%' not in rows[filename][cluster]:
-                            rows[filename][cluster][key + '.%'] = 'NA'
-
-                for key, wanted in self.cluster_columns.items():
-                    if not wanted:
-                        del rows[filename][cluster][key]
-
-        return rows
+                self.all_data[filename][cluster.name] = this_cluster_dict
 
 
     @classmethod
-    def _to_matrix(cls, filenames, rows, cluster_cols):
-        '''rows = output from _gather_output_rows().
-           filenames = self.filenames
-           cluster_cols = self.cluster_columns'''
+    def _to_matrix(cls, filenames, all_data, all_potential_columns, cluster_cols):
         matrix = []
         making_header_lines = True
         phandango_header = ['name']
-        phandago_suffixes = {'assembled': ':o1', 'match': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': ':o1'}
+        phandango_suffixes = {'assembled': ':o1', 'match': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': ':o1'}
         ref_seq_counter = 2
         csv_header = ['name']
-        all_cluster_cols_in_order = ['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
-        all_cluster_cols_in_order_set = set(['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
-        cluster_cols_in_order = [x for x in all_cluster_cols_in_order if cluster_cols[x]]
+        summary_cols_in_order = ['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
+        summary_cols_set = set(['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
+        summary_cols_in_order = [x for x in summary_cols_in_order if cluster_cols[x]]
 
         for filename in filenames:
-            assert filename in rows
             line = [filename]
 
-            for cluster_name in sorted(rows[filename]):
-                for col in cluster_cols_in_order:
+            for cluster_name in sorted(all_potential_columns):
+                group_cols = sorted(list(all_potential_columns[cluster_name]['groups']))
+                var_cols = sorted(list(all_potential_columns[cluster_name]['vars']))
+
+                for col in summary_cols_in_order + group_cols + var_cols:
                     if making_header_lines:
                         csv_header.append(cluster_name + '.' + col)
                         if col == 'ref_seq':
-                            phandago_suffixes[col] = ':o' + str(ref_seq_counter)
+                            phandango_suffixes[col] = ':o' + str(ref_seq_counter)
                             ref_seq_counter += 1
-                        phandango_header.append(cluster_name + '.' + col + phandago_suffixes[col])
+                            phandango_header.append(cluster_name + '.' + col + phandango_suffixes[col])
+                        elif col in phandango_suffixes:
+                            phandango_header.append(cluster_name + '.' + col + phandango_suffixes[col])
+                        elif col.endswith('.%'):
+                            phandango_header.append(cluster_name + '.' + col + ':c2')
+                        else:
+                            phandango_header.append(cluster_name + '.' + col + ':o1')
 
-                    line.append(rows[filename][cluster_name][col])
-
-                for col in sorted(rows[filename][cluster_name]):
-                    if col in all_cluster_cols_in_order_set:
-                        continue
-
-                    if making_header_lines:
-                        csv_header.append(cluster_name + '.' + col)
-                        suffix = ':c2' if col.endswith('.%') else ':o1'
-                        phandango_header.append(cluster_name + '.' + col + suffix)
-
-                    line.append(rows[filename][cluster_name][col])
+                    for col_type in ['summary', 'groups', 'vars']:
+                        if cluster_name in all_data[filename] and col in all_data[filename][cluster_name][col_type]:
+                            line.append(all_data[filename][cluster_name][col_type][col])
+                            break
+                    else:
+                        if col == 'assembled' or not col.endswith('.%'):
+                            line.append('no')
+                        else:
+                            line.append('NA')
 
             making_header_lines = False
             matrix.append(line)
 
+        assert len(phandango_header) == len(csv_header)
+        for line in matrix:
+            assert len(line) == len(csv_header)
         return phandango_header, csv_header, matrix
 
 
@@ -292,11 +226,13 @@ class Summary:
         matrix = copy.deepcopy(matrix)
         cols_to_add_colour_col = [i for i in range(len(header)) if header[i].endswith(':o1')]
         field_to_col = {
-            'yes': '#1f78b4',
-            'yes_nonunique': '#a6cee3',
-            'no': '#33a02c',
-            'NA': '#b2df8a',
-            'het': '#fb9a99',
+            'yes': '#33a02c',
+            'yes_nonunique': '#b2df8a',
+            'no': '#fb9a99',
+            'NA': '#d3d3d3',
+            'het': '#fdbf6f',
+            'fragmented': '#1f78b4',
+            'interrupted': '#a6cee3',
         }
 
         cols_to_add_colour_col.reverse()
@@ -372,11 +308,11 @@ class Summary:
         if self.verbose:
             print('Loading input files...', flush=True)
         self._check_files_exist()
-        self.samples = self._load_input_files(self.filenames, self.min_id, verbose=self.verbose)
+        self.samples = self._load_input_files(self.filenames, self.min_id, verbose=self.verbose, only_clusters=self.only_clusters)
         if self.verbose:
             print('Generating output rows', flush=True)
-        self.rows = self._gather_output_rows()
-        phandango_header, csv_header, matrix = Summary._to_matrix(self.filenames, self.rows, self.cluster_columns)
+        self._gather_unfiltered_output_data()
+        phandango_header, csv_header, matrix = Summary._to_matrix(self.filenames, self.all_data, self.all_potential_columns, self.cluster_columns)
 
         # sanity check same number of columns in headers and matrix
         lengths = {len(x) for x in matrix}
@@ -416,19 +352,24 @@ class Summary:
             csv_file = self.outprefix + '.phandango.csv'
             phandango_header, phandango_matrix = Summary._add_phandango_colour_columns(phandango_header, matrix)
             Summary._matrix_to_csv(phandango_matrix, phandango_header, csv_file)
-            dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
-            tree_file = self.outprefix + '.phandango.tre'
 
-            if self.verbose:
-                print('Making Phandango distance matrix', dist_matrix_file, flush=True)
-            Summary._write_distance_matrix(matrix, dist_matrix_file)
+            if self.make_phandango_tree:
+                dist_matrix_file = self.outprefix + '.phandango.distance_matrix'
+                tree_file = self.outprefix + '.phandango.tre'
 
-            if self.verbose:
-                print('Making Phandango tree file', tree_file, flush=True)
-            Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
-            os.unlink(dist_matrix_file)
+                if self.verbose:
+                    print('Making Phandango distance matrix', dist_matrix_file, flush=True)
+                Summary._write_distance_matrix(matrix, dist_matrix_file)
+
+                if self.verbose:
+                    print('Making Phandango tree file', tree_file, flush=True)
+                Summary._newick_from_dist_matrix(dist_matrix_file, tree_file)
+                os.unlink(dist_matrix_file)
+            elif self.verbose:
+                print('Skipping making tree because you asked me not to make it', flush=True)
         else:
             print('Made csv file. Not making Phandango files because only one sample remains after filtering', file=sys.stderr)
 
         if self.verbose:
             print('Finished', flush=True)
+

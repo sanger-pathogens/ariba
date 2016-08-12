@@ -18,11 +18,14 @@ class TestSummarySample(unittest.TestCase):
         cluster1.add_data_dict(dicts[0])
         cluster1.add_data_dict(dicts[1])
         cluster1.add_data_dict(dicts[2])
+        cluster1.gather_data()
         cluster2 = summary_cluster.SummaryCluster()
         cluster2.add_data_dict(dicts[3])
         cluster2.add_data_dict(dicts[4])
+        cluster2.gather_data()
         cluster3 = summary_cluster.SummaryCluster()
         cluster3.add_data_dict(dicts[5])
+        cluster3.gather_data()
 
         expected = {
             'cluster.n': cluster1,
@@ -33,6 +36,9 @@ class TestSummarySample(unittest.TestCase):
         got = summary_sample.SummarySample._load_file(infile, 90)
         self.assertEqual(expected, got)
 
+        got = summary_sample.SummarySample._load_file(infile, 90, only_clusters={'cluster.n'})
+        expected = {'cluster.n': cluster1}
+        self.assertEqual(expected, got)
 
     def test_column_summary_data(self):
         '''Test _column_summary_data'''
@@ -104,7 +110,7 @@ class TestSummarySample(unittest.TestCase):
 
         expected_het_snps = {
             'cluster.v': {},
-            'cluster.n': {'A14T': 80.0},
+            'cluster.n': {'.': {'A14T': 80.0}},
             'cluster.p': {},
         }
         self.assertEqual(expected_het_snps, got_het_snps)

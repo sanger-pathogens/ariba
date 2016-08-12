@@ -1,4 +1,4 @@
-from ariba import flag, report
+from ariba import flag, report, summary_cluster_variant
 
 class Error (Exception): pass
 
@@ -56,7 +56,7 @@ class SummaryCluster:
             d['var_group'] = '.'
         else:
             try:
-                d['var_group'] = d['var_description'].split(':')[3]
+                d['var_group'] = d['var_description'].split(':')[4]
             except:
                 raise Error('Error getting variant group from the following line:\n' + line)
 
@@ -118,6 +118,8 @@ class SummaryCluster:
                 return 'yes'
             else:
                 return 'yes_nonunique'
+        elif self.flag.has('assembled_into_one_contig'):
+            return 'interrupted'
         else:
             return 'fragmented'
 
@@ -218,6 +220,7 @@ class SummaryCluster:
             return None
 
 
+
     @staticmethod
     def _get_nonsynonymous_var(data_dict):
         '''if data_dict has a non synonymous variant, return string:
@@ -295,5 +298,26 @@ class SummaryCluster:
         for d in self.data:
             snp_tuple = self._get_known_noncoding_het_snp(d)
             if snp_tuple is not None:
-                snps[snp_tuple[0]] = snp_tuple[1]
+                snp_id = d['var_description'].split(':')[4]
+                if snp_id not in snps:
+                    snps[snp_id] = {}
+                snps[snp_id][snp_tuple[0]] = snp_tuple[1]
         return snps
+
+
+    @classmethod
+    def _get_all_nonsynon_variants_set(cls, data_dicts):
+        variants = set()
+
+        for data_dict in data_dicts:
+            cluster_var = summary_cluster_variant.SummaryClusterVariant(data_dict)
+            if cluster_var.has_nonsynon:
+                variants.add(cluster_var)
+
+        return variants
+
+
+    def gather_data(self):
+        self.summary = self.column_summary_data()
+        self.variants = self._get_all_nonsynon_variants_set(self.data)
+

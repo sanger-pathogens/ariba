@@ -4,9 +4,10 @@ from ariba import report, summary_cluster
 class Error (Exception): pass
 
 class SummarySample:
-    def __init__(self, report_tsv, min_pc_id=90):
+    def __init__(self, report_tsv, min_pc_id=90, only_clusters=None):
         self.report_tsv = report_tsv
         self.min_pc_id = min_pc_id
+        self.only_clusters = only_clusters
         self.clusters = {}
 
 
@@ -15,7 +16,7 @@ class SummarySample:
 
 
     @staticmethod
-    def _load_file(filename, min_pc_id):
+    def _load_file(filename, min_pc_id, only_clusters=None):
         f = pyfastaq.utils.open_file_read(filename)
         clusters = {}
 
@@ -28,11 +29,25 @@ class SummarySample:
 
             data_dict = summary_cluster.SummaryCluster.line2dict(line)
             cluster = data_dict['cluster']
+            if only_clusters is not None and cluster not in only_clusters:
+                continue
+
             if cluster not in clusters:
                 clusters[cluster] = summary_cluster.SummaryCluster(min_pc_id=min_pc_id)
             clusters[cluster].add_data_dict(data_dict)
 
         pyfastaq.utils.close(f)
+
+        to_delete = set()
+
+        for cluster_name, cluster in clusters.items():
+            cluster.gather_data()
+            if cluster.name is None:
+                to_delete.add(cluster_name)
+
+        for name in to_delete:
+            del clusters[name]
+
         return clusters
 
 
@@ -58,7 +73,7 @@ class SummarySample:
 
 
     def run(self):
-        self.clusters = self._load_file(self.report_tsv, self.min_pc_id)
+        self.clusters = self._load_file(self.report_tsv, self.min_pc_id, only_clusters=self.only_clusters)
         self.column_summary_data = self._column_summary_data()
         self.variant_column_names_tuples, self.het_snps = self._variant_column_names_tuples_and_het_snps()
         self.var_groups = self._var_groups()
