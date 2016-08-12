@@ -64,21 +64,6 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_get_all_var_groups(self):
-        '''test _get_all_var_groups'''
-        file1 = os.path.join(data_dir, 'summary_test_get_all_var_groups.1.tsv')
-        file2 = os.path.join(data_dir, 'summary_test_get_all_var_groups.2.tsv')
-        samples = summary.Summary._load_input_files([file1, file2], 90)
-        got = summary.Summary._get_all_var_groups(samples)
-        expected = {
-            'cluster.p.1': {'id4'},
-            'cluster.p.2': {'id3'},
-            'cluster.v.1': set(),
-            'cluster.n.1': {'id1', 'id2'}
-        }
-        self.assertEqual(expected, got)
-
-
     def test_gather_unfiltered_output_data(self):
         '''test gather_output_rows_new'''
         infiles = [

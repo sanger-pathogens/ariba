@@ -91,18 +91,6 @@ class Summary:
 
 
     @classmethod
-    def _get_all_var_groups(cls, samples_dict):
-        groups = {}
-        for filename, sample in samples_dict.items():
-            for name, name_set in sample.var_groups.items():
-                if name not in groups:
-                    groups[name] = set()
-                groups[name].update(name_set)
-
-        return groups
-
-
-    @classmethod
     def _to_matrix(cls, filenames, all_data, all_potential_columns, cluster_cols):
         matrix = []
         making_header_lines = True
