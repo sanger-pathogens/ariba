@@ -16,7 +16,7 @@ argannot_ref = '"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resi
 
 
 class RefGenesGetter:
-    def __init__(self, ref_db, genetic_code=11):
+    def __init__(self, ref_db, genetic_code=11, version=None):
         allowed_ref_dbs = {'card', 'argannot', 'plasmidfinder', 'resfinder','srst2_argannot', 'vfdb'}
         if ref_db not in allowed_ref_dbs:
             raise Error('Error in RefGenesGetter. ref_db must be one of: ' + str(allowed_ref_dbs) + ', but I got "' + ref_db)
@@ -24,6 +24,7 @@ class RefGenesGetter:
         self.genetic_code = genetic_code
         self.max_download_attempts = 3
         self.sleep_time = 2
+        self.version = version
         pyfastaq.sequences.genetic_code = self.genetic_code
 
 
@@ -41,6 +42,30 @@ class RefGenesGetter:
         print(' done', flush=True)
 
 
+    def _get_card_versions(self, tmp_file):
+        print('Getting available CARD versions')
+        self._download_file('https://card.mcmaster.ca/download', tmp_file)
+        p = re.compile(r'''href="(/download/.*?broad.*?v([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz)"''')
+        versions = {}
+
+        with open(tmp_file) as f:
+            for line in f:
+                got = p.findall(line)
+                for match in got:
+                    key = tuple([int(x) for x in match[1].split('.')])
+                    versions[key] = 'https://card.mcmaster.ca' + match[0]
+
+        if len(versions) == 0:
+            raise Error('Error getting CARD versions. Cannot continue')
+
+        print('Found versions:')
+
+        for key, url in sorted(versions.items()):
+            print('.'.join([str(x) for x in key]), url, sep='\t')
+
+        os.unlink(tmp_file)
+        return versions
+
 
     def _get_from_card(self, outprefix):
         outprefix = os.path.abspath(outprefix)
@@ -53,8 +78,17 @@ class RefGenesGetter:
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
 
-        card_version = '1.0.9'
-        card_tarball_url = 'https://card.mcmaster.ca/download/0/broadstreet-v' + card_version + '.tar.gz'
+        versions = self._get_card_versions('download.html')
+        if self.version is not None:
+            key = tuple([int(x) for x in self.version.split('.')])
+            if key not in versions:
+                raise Error('Error! Did not find requested version ' + self.version)
+        else:
+            key = sorted(list(versions.keys()))[-1]
+            self.version = '.'.join([str(x) for x in key])
+
+        print('Getting version', self.version)
+        card_tarball_url = versions[key]
         card_tarball = 'card.tar.gz'
         print('Working in temporary directory', tmpdir)
         print('Downloading data from card:', card_tarball_url, flush=True)
@@ -149,7 +183,7 @@ class RefGenesGetter:
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"The Comprehensive Antibiotic Resistance Database", McArthur et al 2013, PMID: 23650175')
-        print('and in your methods say that version', card_version, 'of the database was used')
+        print('and in your methods say that version', self.version, 'of the database was used')
 
 
     def _get_from_resfinder(self, outprefix):
