@@ -12,12 +12,21 @@ import json
 from ariba import common, card_record, vfdb_parser
 
 
+allowed_ref_dbs = {
+    'argannot',
+    'card',
+    'plasmidfinder',
+    'resfinder',
+    'srst2_argannot',
+    'vfdb_core',
+    'vfdb_full',
+}
+
 argannot_ref = '"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n'
 
 
 class RefGenesGetter:
     def __init__(self, ref_db, genetic_code=11, version=None):
-        allowed_ref_dbs = {'card', 'argannot', 'plasmidfinder', 'resfinder','srst2_argannot', 'vfdb'}
         if ref_db not in allowed_ref_dbs:
             raise Error('Error in RefGenesGetter. ref_db must be one of: ' + str(allowed_ref_dbs) + ', but I got "' + ref_db)
         self.ref_db=ref_db
@@ -29,7 +38,7 @@ class RefGenesGetter:
 
 
     def _download_file(self, url, outfile):
-        print('Downloading "', url, '" and saving as "', outfile, '" ...', end='', sep='')
+        print('Downloading "', url, '" and saving as "', outfile, '" ...', end='', sep='', flush=True)
         for i in range(self.max_download_attempts):
             time.sleep(self.sleep_time)
             try:
@@ -360,7 +369,15 @@ class RefGenesGetter:
         print('and in your methods say that the ARG-ANNOT sequences were used from version', srst2_version, 'of SRST2.')
 
 
-    def _get_from_vfdb(self, outprefix):
+    def _get_from_vfdb_core(self, outprefix):
+        self._get_from_vfdb_common(outprefix, 'VFDB_setA_nt.fas.gz','core')
+
+
+    def _get_from_vfdb_full(self, outprefix):
+         self._get_from_vfdb_common(outprefix, 'VFDB_setB_nt.fas.gz','full')
+
+
+    def _get_from_vfdb_common(self, outprefix, filename, info_text):
         outprefix = os.path.abspath(outprefix)
         tmpdir = outprefix + '.tmp.download'
 
@@ -369,12 +386,13 @@ class RefGenesGetter:
         except:
             raise Error('Error mkdir ' + tmpdir)
 
-        zipfile = os.path.join(tmpdir, 'VFDB_setA_nt.fas.gz')
-        self._download_file('http://www.mgc.ac.cn/VFs/Down/VFDB_setA_nt.fas.gz', zipfile)
+        zipfile = os.path.join(tmpdir, filename)
+        self._download_file('http://www.mgc.ac.cn/VFs/Down/' + filename, zipfile)
+        print('Extracting files ... ', end='', flush=True)
         vparser = vfdb_parser.VfdbParser(zipfile, outprefix)
         vparser.run()
         shutil.rmtree(tmpdir)
-        print('Extracted files.')
+        print('done')
         final_fasta = outprefix + '.fa'
         final_tsv = outprefix + '.tsv'
 
@@ -383,6 +401,7 @@ class RefGenesGetter:
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"VFDB 2016: hierarchical and refined dataset for big data analysis-10 years on",\nChen LH et al 2016, Nucleic Acids Res. 44(Database issue):D694-D697. PMID: 26578559\n')
+
 
     def run(self, outprefix):
         exec('self._get_from_' + self.ref_db + '(outprefix)')
