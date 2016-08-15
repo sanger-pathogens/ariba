@@ -42,7 +42,7 @@ subparser_flag.set_defaults(func=ariba.tasks.flag.run)
 
 
 #---------------------------- getref ------------------------------------
-allowed_dbs = ['argannot', 'card', 'plasmidfinder', 'resfinder', 'srst2_argannot', 'vfdb']
+allowed_dbs = sorted(list(ariba.ref_genes_getter.allowed_ref_dbs))
 subparser_getref = subparsers.add_parser(
     'getref',
     help='Download reference data',
