@@ -443,3 +443,20 @@ class TestCluster(unittest.TestCase):
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
+
+
+    def test_full_run_partial_assembly(self):
+        '''Test complete run where only part of the ref gene is present in the reads'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_partial_asmbly.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_partial_asmbly.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_partial_assembly'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_partial_asmbly'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=278, total_reads_bases=15020)
+        c.run()
+
+        expected = [
+            'presence_absence1\t1\t0\t19\t278\tcluster_name\t96\t77\t100.0\tcluster_name.scaffold.1\t949\t20.5\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of presence_absence1'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
