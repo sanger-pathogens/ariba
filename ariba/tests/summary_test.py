@@ -108,6 +108,18 @@ class TestSummary(unittest.TestCase):
                     },
                     'groups': {},
                     'vars': {},
+                },
+                'presence_absence2': {
+                    'summary': {
+                            'assembled': 'no',
+                            'known_var': 'NA',
+                            'match': 'no',
+                            'novel_var': 'NA',
+                            'pct_id': 'NA',
+                            'ref_seq': 'NA'
+                    },
+                    'groups': {},
+                    'vars': {}
                 }
             },
             infiles[1]: {
@@ -145,7 +157,7 @@ class TestSummary(unittest.TestCase):
                     },
                     'groups': {},
                     'vars': {}
-                }
+                },
             }
         }
 
@@ -175,6 +187,18 @@ class TestSummary(unittest.TestCase):
                 'vars': set()
             },
             'presence_absence1': {
+                'summary': {
+                    'assembled',
+                    'known_var',
+                    'match',
+                    'novel_var',
+                    'pct_id',
+                    'ref_seq'
+                },
+                'groups': set(),
+                'vars': set()
+            },
+            'presence_absence2': {
                 'summary': {
                     'assembled',
                     'known_var',
