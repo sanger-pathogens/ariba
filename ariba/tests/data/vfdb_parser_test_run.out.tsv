@@ -1,3 +1,3 @@
-abcD.VF123(gi:1234).genus1_species1	1	0	.	.	foobar description1 [abc]
-efgH.VF234(gi:2345).genus2_species2	1	0	.	.	spam eggs description2 [abc]
-seq1 blah	1	0	.	.	.
+abcD.VF123(gi:1234).genus1_species1	1	0	.	.	Original name: VF123(gi:1234) (abcD) foobar description1 [abc] [genus1 species1]
+efgH.VF234(gi:2345).genus2_species2	1	0	.	.	Original name: VF234(gi:2345) (efgH) spam eggs description2 [abc] [genus2 species2]
+seq1	1	0	.	.	Original name: seq1 blah
