@@ -8,7 +8,7 @@ from ariba import sequence_metadata, cdhit
 
 class Error (Exception): pass
 
-rename_sub_regex = re.compile(r'[^\w.-]')
+rename_sub_regex = re.compile(r'''[':!@,-]''')
 
 
 class ReferenceData:
@@ -83,6 +83,8 @@ class ReferenceData:
         if filename is not None:
             seq_reader = pyfastaq.sequences.file_reader(filename)
             for seq in seq_reader:
+                seq.id = seq.id.split()[0]
+
                 if seq.id in seq_dict:
                     raise Error('Duplicate name "' + seq.id + '" found in file ' + filename + '. Cannot continue)')
                 seq_dict[seq.id] = copy.copy(seq)
@@ -281,7 +283,7 @@ class ReferenceData:
 
     @classmethod
     def _new_seq_name(cls, name):
-        name = name.split()[0]
+        assert len(name.split()) == 1 and name.strip() == name
         return re.sub(rename_sub_regex, '_', name)
 
 
@@ -291,6 +293,7 @@ class ReferenceData:
         old_name_to_new = {}
 
         for old_name in sorted(names):
+            assert len(old_name.split()) == 1 and old_name.strip() == old_name
             new_name = ReferenceData._new_seq_name(old_name)
             if new_name in used_names:
                 i = 1

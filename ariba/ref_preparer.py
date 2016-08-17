@@ -51,7 +51,13 @@ class RefPreparer:
        coding = '1' if all_coding else '0'
 
        for seq in seq_reader:
-           print(seq.id, coding, 0, '.', '.', '.', sep='\t', file=out_fh)
+           fields = seq.id.split(maxsplit=1)
+           if len(fields) > 1:
+               info_column = 'Original name: ' + seq.id
+               seq.id = fields[0]
+           else:
+               info_column = '.'
+           print(seq.id, coding, 0, '.', '.', info_column, sep='\t', file=out_fh)
 
 
     def _write_info_file(self, outfile):
@@ -94,6 +100,13 @@ class RefPreparer:
                     new_key = possible_keys[0] + '+'
                 else:
                     new_key = common_prefix + '-'
+
+            i = 1
+            new_new_key = new_key
+            while new_new_key in new_clusters:
+                new_new_key = new_key + '_' + str(i)
+                i += 1
+            new_key = new_new_key
 
             if new_key in key_count:
                 if new_key in new_clusters:

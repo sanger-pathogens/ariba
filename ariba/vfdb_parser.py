@@ -36,8 +36,11 @@ class VfdbParser:
         tsv_out = pyfastaq.utils.open_file_write(self.outprefix + '.tsv')
 
         for seq in file_reader:
+            original_id = seq.id
             seq.id, description = self._fa_header_to_name_and_metadata(seq.id)
-            print(seq.id, '1', '0', '.', '.', description, sep='\t', file=tsv_out)
+            if description == '.':
+                seq.id = original_id.split()[0]
+            print(seq.id, '1', '0', '.', '.', 'Original name: ' + original_id, sep='\t', file=tsv_out)
             print(seq, file=fa_out)
 
         pyfastaq.utils.close(fa_out)

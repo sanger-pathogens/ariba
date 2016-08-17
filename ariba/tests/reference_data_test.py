@@ -264,12 +264,9 @@ class TestReferenceData(unittest.TestCase):
         '''Test _new_seq_name'''
         tests = [
             ('name', 'name'),
-            ('name ', 'name'),
-            ('name xyz', 'name'),
             ('name_a', 'name_a'),
             ('name.a', 'name.a'),
-            ('name-a', 'name-a'),
-            ('name spam eggs foo', 'name'),
+            ('name-a', 'name_a'),
             ('name!', 'name_'),
             ('name:foo', 'name_foo'),
             ('name:!@foo', 'name___foo'),
@@ -281,15 +278,15 @@ class TestReferenceData(unittest.TestCase):
 
     def test_seq_names_to_rename_dict(self):
         '''Test _seq_names_to_rename_dict'''
-        names = {'foo', 'foo abc', 'foo xyz', 'bar!', 'bar:', 'spam abc', 'eggs'}
+        names = {'foo', 'bar!', 'bar:', 'bar,', 'spam', 'eggs,123'}
         got = reference_data.ReferenceData._seq_names_to_rename_dict(names)
         expected = {
-            'foo abc': 'foo_1',
-            'foo xyz': 'foo_2',
             'bar!': 'bar_',
-            'bar:': 'bar__1',
-            'spam abc': 'spam'
+            'bar,': 'bar__1',
+            'bar:': 'bar__2',
+            'eggs,123': 'eggs_123'
         }
+
         self.assertEqual(expected, got)
 
 
@@ -386,23 +383,19 @@ class TestReferenceData(unittest.TestCase):
         self.assertTrue(filecmp.cmp(expected_file, tmp_out, shallow=False))
         os.unlink(tmp_out)
 
-        meta1 = sequence_metadata.SequenceMetadata('noncoding1\t0\t0\t.\t.\toriginal name "noncoding1"')
-        meta2 = sequence_metadata.SequenceMetadata('noncoding1_1\t0\t0\t.\t.\toriginal name "noncoding1 blah"')
-        meta3 = sequence_metadata.SequenceMetadata('pres_abs1_2\t0\t0\t.\t.\toriginal name "pres_abs1 foo bar spam eggs"')
-        meta4 = sequence_metadata.SequenceMetadata('pres_abs1_1\t0\t0\t.\t.\toriginal name "pres_abs1 blah"')
+        meta1 = sequence_metadata.SequenceMetadata('noncoding1\t0\t0\t.\t.\toriginal name "noncoding1 blah"')
+        meta3 = sequence_metadata.SequenceMetadata('pres_abs1_1\t0\t0\t.\t.\toriginal name "pres_abs1 foo bar spam eggs"')
         meta5 = sequence_metadata.SequenceMetadata('pres_abs1\t0\t0\t.\t.\toriginal name "pres\'abs1"')
         meta6 = sequence_metadata.SequenceMetadata('pres_abs2\t0\t0\t.\t.\toriginal name "pres_abs2"')
         meta7 = sequence_metadata.SequenceMetadata('pres_abs3\t0\t0\t.\t.\toriginal name "pres!abs3"')
         meta8 = sequence_metadata.SequenceMetadata('var_only1_2\t0\t0\t.\t.\toriginal name "var_only1 hello"')
-        meta9 = sequence_metadata.SequenceMetadata('var_only1\t0\t0\t.\t.\toriginal name "var:only1 boo"')
-        meta10 = sequence_metadata.SequenceMetadata('var_only1_1\t0\t0\t.\t.\toriginal name "var_only1"')
+        meta9 = sequence_metadata.SequenceMetadata('var_only1\t0\t0\t.\t.\toriginal name "var,only1"')
+        meta10 = sequence_metadata.SequenceMetadata('var_only1_1\t0\t0\t.\t.\toriginal name "var:only1 boo"')
         meta11 = sequence_metadata.SequenceMetadata('var_only2\t0\t0\t.\t.\toriginal name "var_only2"')
 
         expected_meta = {
             'noncoding1': {'seq_type': 'n', 'variant_only': False, 'n': {}, 'p': {}, '.': {meta1}},
-            'noncoding1_1': {'seq_type': 'n', 'variant_only': False, 'n': {}, 'p': {}, '.': {meta2}},
-            'pres_abs1_2': {'seq_type': 'n', 'variant_only': False, 'n': {}, 'p': {}, '.': {meta3}},
-            'pres_abs1_1': {'seq_type': 'n', 'variant_only': False, 'n': {}, 'p': {}, '.': {meta4}},
+            'pres_abs1_1': {'seq_type': 'n', 'variant_only': False, 'n': {}, 'p': {}, '.': {meta3}},
             'pres_abs1': {'seq_type': 'n', 'variant_only': False, 'n': {}, 'p': {}, '.': {meta5}},
             'pres_abs2': {'seq_type': 'n', 'variant_only': False, 'n': {}, 'p': {}, '.': {meta6}},
             'pres_abs3': {'seq_type': 'n', 'variant_only': False, 'n': {}, 'p': {}, '.': {meta7}},
@@ -412,19 +405,19 @@ class TestReferenceData(unittest.TestCase):
             'var_only2': {'seq_type': 'n', 'variant_only': False, 'n': {}, 'p': {}, '.': {meta11}},
         }
 
+        self.maxDiff = None
+        self.assertEqual(set(expected_meta.keys()), set(refdata.metadata.keys()))
         self.assertEqual(expected_meta, refdata.metadata)
 
         expected_seqs_dict = {
             'noncoding1': pyfastaq.sequences.Fasta('noncoding1', 'AAAA'),
-            'noncoding1_1': pyfastaq.sequences.Fasta('noncoding1_1', 'CCCC'),
-            'pres_abs1_2': pyfastaq.sequences.Fasta('pres_abs1_2', 'ACGT'),
-            'pres_abs1_1': pyfastaq.sequences.Fasta('pres_abs1_1', 'AAAA'),
+            'pres_abs1_1': pyfastaq.sequences.Fasta('pres_abs1_1', 'ACGT'),
             'pres_abs1': pyfastaq.sequences.Fasta('pres_abs1', 'CCCC'),
             'pres_abs2': pyfastaq.sequences.Fasta('pres_abs2', 'TTTT'),
             'pres_abs3': pyfastaq.sequences.Fasta('pres_abs3', 'GGGG'),
             'var_only1_2': pyfastaq.sequences.Fasta('var_only1_2', 'AAAA'),
-            'var_only1': pyfastaq.sequences.Fasta('var_only1', 'CCCC'),
-            'var_only1_1': pyfastaq.sequences.Fasta('var_only1_1', 'GGGG'),
+            'var_only1': pyfastaq.sequences.Fasta('var_only1', 'GGGG'),
+            'var_only1_1': pyfastaq.sequences.Fasta('var_only1_1', 'CCCC'),
             'var_only2': pyfastaq.sequences.Fasta('var_only2', 'TTTT'),
         }
 
