@@ -1,7 +1,5 @@
 >pres_abs1 foo bar spam eggs
 ACGT
->pres_abs1 blah
-AAAA
 >pres'abs1
 CCCC
 >pres_abs2
@@ -12,11 +10,9 @@ GGGG
 AAAA
 >var:only1 boo
 CCCC
->var_only1
+>var,only1
 GGGG
 >var_only2
 TTTT
->noncoding1
-AAAA
 >noncoding1 blah
-CCCC
+AAAA

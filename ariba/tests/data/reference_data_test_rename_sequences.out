@@ -1,8 +1,6 @@
-noncoding1 blah	noncoding1_1
 pres!abs3	pres_abs3
 pres'abs1	pres_abs1
-pres_abs1 blah	pres_abs1_1
-pres_abs1 foo bar spam eggs	pres_abs1_2
-var:only1 boo	var_only1
-var_only1	var_only1_1
-var_only1 hello	var_only1_2
+pres_abs1	pres_abs1_1
+var,only1	var_only1
+var:only1	var_only1_1
+var_only1	var_only1_2
