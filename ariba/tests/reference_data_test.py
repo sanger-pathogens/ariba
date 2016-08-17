@@ -264,12 +264,9 @@ class TestReferenceData(unittest.TestCase):
         '''Test _new_seq_name'''
         tests = [
             ('name', 'name'),
-            ('name ', 'name'),
-            ('name xyz', 'name'),
             ('name_a', 'name_a'),
             ('name.a', 'name.a'),
-            ('name-a', 'name-a'),
-            ('name spam eggs foo', 'name'),
+            ('name-a', 'name_a'),
             ('name!', 'name_'),
             ('name:foo', 'name_foo'),
             ('name:!@foo', 'name___foo'),
@@ -281,15 +278,15 @@ class TestReferenceData(unittest.TestCase):
 
     def test_seq_names_to_rename_dict(self):
         '''Test _seq_names_to_rename_dict'''
-        names = {'foo', 'foo abc', 'foo xyz', 'bar!', 'bar:', 'spam abc', 'eggs'}
+        names = {'foo', 'bar!', 'bar:', 'bar,', 'spam', 'eggs,123'}
         got = reference_data.ReferenceData._seq_names_to_rename_dict(names)
         expected = {
-            'foo abc': 'foo_1',
-            'foo xyz': 'foo_2',
             'bar!': 'bar_',
             'bar:': 'bar__1',
-            'spam abc': 'spam'
+            'bar,': 'bar__2',
+            'eggs,123': 'eggs_123'
         }
+        print('got:', got)
         self.assertEqual(expected, got)
 
 
