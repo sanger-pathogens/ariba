@@ -49,6 +49,11 @@ class TestRefPreparer(unittest.TestCase):
            '16': {'def_2.3'},
            '17': {'def.4'},
            '18': {'def.5'},
+           '19': {'x_1.foo'},
+           '20': {'x_1.bar'},
+           '21': {'x_1.baz'},
+           '22': {'x_1_2.abc'},
+           '23': {'x_1_2.def'},
         }
 
         expected = {
@@ -71,6 +76,11 @@ class TestRefPreparer(unittest.TestCase):
             'def_3': {'def.1'},
             'def_4': {'def.4'},
             'def_5': {'def.5'},
+            'x_1_1': {'x_1.foo'},
+            'x_1_2': {'x_1.bar'},
+            'x_1_2_0_1': {'x_1_2.abc'},
+            'x_1_2_0_2': {'x_1_2.def'},
+            'x_1_3': {'x_1.baz'},
         }
 
         got = ref_preparer.RefPreparer._rename_clusters(clusters_in)

@@ -101,6 +101,14 @@ class RefPreparer:
                 else:
                     new_key = common_prefix + '-'
 
+            i = 0
+            new_new_key = new_key
+            while new_new_key not in key_count and new_new_key in new_clusters:
+                new_new_key = new_key + '_' + str(i)
+                i += 1
+            new_key = new_new_key
+
+
             if new_key in key_count:
                 if new_key in new_clusters:
                     assert key_count[new_key] == 1
