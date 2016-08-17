@@ -83,6 +83,8 @@ class ReferenceData:
         if filename is not None:
             seq_reader = pyfastaq.sequences.file_reader(filename)
             for seq in seq_reader:
+                seq.id = seq.id.split()[0]
+
                 if seq.id in seq_dict:
                     raise Error('Duplicate name "' + seq.id + '" found in file ' + filename + '. Cannot continue)')
                 seq_dict[seq.id] = copy.copy(seq)
