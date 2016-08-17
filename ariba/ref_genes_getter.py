@@ -267,9 +267,9 @@ class RefGenesGetter:
 
         for seq in seq_reader:
             original_id = seq.id
-            seq.id = re.sub(r'\((.*)\)', r'\1.', seq.id)
+            seq.id = re.sub(r'\((.*)\)', r'\1.', seq.id.split()[0])
             print(seq, file=f_out_fa)
-            print(seq.id, '1', '0', '.', '.', 'Original name was ' + original_id, sep='\t', file=f_out_tsv)
+            print(seq.id, '1', '0', '.', '.', 'Original name: ' + original_id, sep='\t', file=f_out_tsv)
 
 
         pyfastaq.utils.close(f_out_tsv)
