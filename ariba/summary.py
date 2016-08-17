@@ -22,7 +22,8 @@ class Summary:
       make_phandango_tree=True,
       only_clusters=None,
       show_var_groups=False,
-      show_vars=False,
+      show_known_vars=False,
+      show_novel_vars=False,
       verbose=False,
     ):
         if filenames is None and fofn is None:
@@ -44,7 +45,8 @@ class Summary:
         self.make_phandango_tree = make_phandango_tree
         self.only_clusters = only_clusters
         self.show_var_groups = show_var_groups
-        self.show_vars = show_vars
+        self.show_known_vars = show_known_vars
+        self.show_novel_vars = show_novel_vars
         self.verbose = verbose
 
 
@@ -115,7 +117,7 @@ class Summary:
                     seen_groups = {}
 
                     for variant in cluster.variants:
-                        if self.show_vars:
+                        if (self.show_known_vars and variant.known) or (self.show_novel_vars and not variant.known):
                             this_cluster_dict['vars'][variant.var_string] = 'yes' if variant.het_percent is None else 'het'
                             if variant.het_percent is not None:
                                 this_cluster_dict['vars'][variant.var_string + '.%'] = variant.het_percent

@@ -232,15 +232,21 @@ class TestSummary(unittest.TestCase):
 
         expected_potential_cols['noncoding1']['vars'] = {'A14T.%', 'A6G', 'A14T'}
         expected_potential_cols['noncoding2']['vars'] = {'A52T', 'A52T.%', 'A42T'}
-        expected_potential_cols['presence_absence1']['vars'] = {'A10V'}
 
         expected_all[infiles[0]]['noncoding1']['vars'] = {'A14T': 'yes'}
         expected_all[infiles[0]]['noncoding2']['vars'] = {'A42T': 'yes', 'A52T': 'het', 'A52T.%': 40.0}
-        expected_all[infiles[0]]['presence_absence1']['vars'] = {'A10V': 'yes'}
         expected_all[infiles[1]]['noncoding1']['vars'] = {'A14T': 'het', 'A14T.%': 80.0, 'A6G': 'yes'}
         expected_all[infiles[1]]['noncoding2']['vars'] = {'A52T': 'het', 'A52T.%': 40.0}
+        s = summary.Summary('out', filenames=infiles, show_var_groups=True, show_known_vars=True)
+        s.samples = summary.Summary._load_input_files(infiles, 90)
+        s._gather_unfiltered_output_data()
+        self.assertEqual(expected_potential_cols, s.all_potential_columns)
+        self.assertEqual(expected_all, s.all_data)
+
+        expected_potential_cols['presence_absence1']['vars'] = {'A10V'}
+        expected_all[infiles[0]]['presence_absence1']['vars'] = {'A10V': 'yes'}
         expected_all[infiles[1]]['presence_absence1']['vars'] = {'A10V': 'yes'}
-        s = summary.Summary('out', filenames=infiles, show_var_groups=True, show_vars=True)
+        s = summary.Summary('out', filenames=infiles, show_var_groups=True, show_known_vars=True, show_novel_vars=True)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s._gather_unfiltered_output_data()
         self.assertEqual(expected_potential_cols, s.all_potential_columns)
@@ -254,7 +260,7 @@ class TestSummary(unittest.TestCase):
             os.path.join(data_dir, 'summary_to_matrix.2.tsv')
         ]
 
-        s = summary.Summary('out', filenames=infiles, show_var_groups=True, show_vars=True)
+        s = summary.Summary('out', filenames=infiles, show_var_groups=True, show_known_vars=True, show_novel_vars=True)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s._gather_unfiltered_output_data()
         got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(infiles, s.all_data, s.all_potential_columns, s.cluster_columns)
@@ -302,7 +308,7 @@ class TestSummary(unittest.TestCase):
             os.path.join(data_dir, 'summary_to_matrix.2.tsv')
         ]
 
-        s = summary.Summary('out', filenames=infiles, show_vars=True)
+        s = summary.Summary('out', filenames=infiles, show_known_vars=True, show_novel_vars=True)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s._gather_unfiltered_output_data()
         got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(infiles, s.all_data, s.all_potential_columns, s.cluster_columns)
