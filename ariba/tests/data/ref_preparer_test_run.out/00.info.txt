@@ -1,6 +1,6 @@
-input fasta file:	/home/ubuntu/git/ariba/ariba/tests/data/ref_preparer_test_run.in.1.fa
-input fasta file:	/home/ubuntu/git/ariba/ariba/tests/data/ref_preparer_test_run.in.2.fa
-input fasta file:	/home/ubuntu/git/ariba/ariba/tests/data/ref_preparer_test_run.in.3.fa
-input tsv file:	/home/ubuntu/git/ariba/ariba/tests/data/ref_preparer_test_run.in.1.tsv
-input tsv file:	/home/ubuntu/git/ariba/ariba/tests/data/ref_preparer_test_run.in.2.tsv
+input fasta file:	/nfs/users/nfs_m/mh12/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.1.fa
+input fasta file:	/nfs/users/nfs_m/mh12/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.2.fa
+input fasta file:	/nfs/users/nfs_m/mh12/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.3.fa
+input tsv file:	/nfs/users/nfs_m/mh12/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.1.tsv
+input tsv file:	/nfs/users/nfs_m/mh12/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.2.tsv
 genetic_code	1

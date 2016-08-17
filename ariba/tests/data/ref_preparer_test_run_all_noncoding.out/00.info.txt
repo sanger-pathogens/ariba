@@ -1,5 +1,5 @@
-input fasta file:	/home/ubuntu/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.1.fa
-input fasta file:	/home/ubuntu/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.2.fa
-input fasta file:	/home/ubuntu/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.3.fa
+input fasta file:	/nfs/users/nfs_m/mh12/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.1.fa
+input fasta file:	/nfs/users/nfs_m/mh12/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.2.fa
+input fasta file:	/nfs/users/nfs_m/mh12/sanger-pathogens/ariba/ariba/tests/data/ref_preparer_test_run.in.3.fa
 input tsv file:	tmp.ref_preparer_test_run/00.auto_metadata.tsv
 genetic_code	1
