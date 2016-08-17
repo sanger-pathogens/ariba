@@ -48,7 +48,8 @@ def use_preset(options):
         options.v_groups = True
 
     if options.preset in {'all', 'all_no_filter'}:
-        options.variants = True
+        options.known_variants = True
+        options.novel_variants = True
 
     return options
 
@@ -70,7 +71,8 @@ def run(options):
         make_phandango_tree=(not options.no_tree),
         only_clusters=None if options.only_cluster is None else {options.only_cluster},
         show_var_groups=options.v_groups,
-        show_vars=options.variants,
+        show_known_vars=options.known_variants,
+        show_novel_vars=options.novel_variants,
         verbose=options.verbose
     )
     s.run()
