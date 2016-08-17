@@ -282,11 +282,11 @@ class TestReferenceData(unittest.TestCase):
         got = reference_data.ReferenceData._seq_names_to_rename_dict(names)
         expected = {
             'bar!': 'bar_',
-            'bar:': 'bar__1',
-            'bar,': 'bar__2',
+            'bar,': 'bar__1',
+            'bar:': 'bar__2',
             'eggs,123': 'eggs_123'
         }
-        print('got:', got)
+
         self.assertEqual(expected, got)
 
 
