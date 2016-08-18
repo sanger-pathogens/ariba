@@ -183,8 +183,15 @@ class Summary:
                             line.append(all_data[filename][cluster_name][col_type][col])
                             break
                     else:
-                        if col == 'assembled' or not col.endswith('.%'):
+                        if col in {'assembled', 'match'}:
                             line.append('no')
+                        elif col in summary_cols_set:
+                            line.append('NA')
+                        elif cluster_name in all_data[filename] and all_data[filename][cluster_name]['summary'].get('assembled', 'no')  != 'no':
+                            if col.endswith('.%'):
+                                line.append('NA')
+                            else:
+                                line.append('no')
                         else:
                             line.append('NA')
 
