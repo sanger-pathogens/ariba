@@ -11,7 +11,6 @@ class AlnToMetadata:
       vars_file,
       refs_are_coding,
       refs_are_variant_only,
-      cluster_rep_name,
       genetic_code=11,
     ):
         self.padded_seqs = AlnToMetadata._load_aln_file(aln_file)
@@ -19,7 +18,6 @@ class AlnToMetadata:
         self.refs_are_variant_only = refs_are_variant_only
         self.variants = AlnToMetadata._load_vars_file(vars_file, self.refs_are_coding)
         self.genetic_code = genetic_code
-        self.cluster_rep_name = cluster_rep_name
 
 
     @classmethod
@@ -248,8 +246,6 @@ class AlnToMetadata:
 
 
     def run(self, outprefix):
-        if self.cluster_rep_name not in self.padded_seqs:
-            raise Error('Sequence name "' + self.cluster_rep_name + '" to be used as cluster representative not found. Cannot continue')
         original_code = pyfastaq.sequences.genetic_code
         pyfastaq.sequences.genetic_code = self.genetic_code
         unpadded_seqs = AlnToMetadata._make_unpadded_seqs(self.padded_seqs)

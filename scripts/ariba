@@ -16,15 +16,15 @@ coding_choices = ['coding', 'noncoding']
 subparser_aln2meta = subparsers.add_parser(
     'aln2meta',
     help='Converts multi-aln fasta and SNPs to metadata',
-    usage='ariba aln2meta [options] <aln_fasta> <variants_tsv> <(non)coding> <cluster_rep> <outprefix>',
+    usage='ariba aln2meta [options] <aln_fasta> <variants_tsv> <(non)coding> <outprefix>',
     description='Make metadata input to prepareref, using multialignment and SNPs',
 )
 
 subparser_aln2meta.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
+subparser_aln2meta.add_argument('--variant_only', action='store_true', help='Use this to flag all sequences as variant only. By default they are considered to be presence/absence')
 subparser_aln2meta.add_argument('aln_fasta', help='Multi-fasta file of alignments')
 subparser_aln2meta.add_argument('variants_tsv', help='TSV file of variants information')
 subparser_aln2meta.add_argument('coding_or_non', help='Sequences are coding or noncoding. Must be one of: ' + ' '.join(coding_choices), choices=coding_choices, metavar='(non)coding')
-subparser_aln2meta.add_argument('cluster_rep', help='Name of sequence to be used as cluster representative. Must exactly match a sequence in aln_fasta file')
 subparser_aln2meta.add_argument('outprefix', help='Prefix of output filenames')
 subparser_aln2meta.set_defaults(func=ariba.tasks.aln2meta.run)
 
