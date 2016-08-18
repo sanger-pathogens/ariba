@@ -183,8 +183,15 @@ class Summary:
                             line.append(all_data[filename][cluster_name][col_type][col])
                             break
                     else:
-                        if col == 'assembled' or not col.endswith('.%'):
+                        if col in {'assembled', 'match'}:
                             line.append('no')
+                        elif col in summary_cols_set:
+                            line.append('NA')
+                        elif cluster_name in all_data[filename] and all_data[filename][cluster_name]['summary'].get('assembled', 'no')  != 'no':
+                            if col.endswith('.%'):
+                                line.append('NA')
+                            else:
+                                line.append('no')
                         else:
                             line.append('NA')
 
@@ -243,7 +250,7 @@ class Summary:
             'yes': '#33a02c',
             'yes_nonunique': '#b2df8a',
             'no': '#fb9a99',
-            'NA': '#d3d3d3',
+            'NA': '#ffffff',
             'het': '#fdbf6f',
             'fragmented': '#1f78b4',
             'interrupted': '#a6cee3',
@@ -263,11 +270,15 @@ class Summary:
 
 
     @classmethod
-    def _matrix_to_csv(cls, matrix, header, outfile):
+    def _matrix_to_csv(cls, matrix, header, outfile, remove_nas=False):
         f = pyfastaq.utils.open_file_write(outfile)
         print(*header, sep=',', file=f)
         for line in matrix:
-            print(*line, sep=',', file=f)
+            if remove_nas:
+                new_line = ['' if x=='NA' else x for x in line]
+                print(*new_line, sep=',', file=f)
+            else:
+                print(*line, sep=',', file=f)
         pyfastaq.utils.close(f)
 
 
@@ -365,7 +376,7 @@ class Summary:
                 print('Making Phandango csv file', csv_file, flush=True)
             csv_file = self.outprefix + '.phandango.csv'
             phandango_header, phandango_matrix = Summary._add_phandango_colour_columns(phandango_header, matrix)
-            Summary._matrix_to_csv(phandango_matrix, phandango_header, csv_file)
+            Summary._matrix_to_csv(phandango_matrix, phandango_header, csv_file, remove_nas=True)
 
             if self.make_phandango_tree:
                 dist_matrix_file = self.outprefix + '.phandango.distance_matrix'

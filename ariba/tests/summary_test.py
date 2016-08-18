@@ -428,9 +428,9 @@ class TestSummary(unittest.TestCase):
         expected_header = ['head1', 'head2', 'head2:colour', 'head3', 'head3:colour', 'head4', 'head5', 'head5:colour']
         expected_matrix = [
             ['yes', 'yes', '#33a02c', 'yes_nonunique', '#b2df8a', 'yes', 'no', '#fb9a99'],
-            ['yes', 'yes_nonunique', '#b2df8a', 'no', '#fb9a99', 'yes', 'NA', '#d3d3d3'],
-            ['yes', 'no', '#fb9a99', 'NA', '#d3d3d3', 'yes', 'yes', '#33a02c'],
-            ['yes', 'NA', '#d3d3d3', 'yes', '#33a02c', 'yes', 'yes_nonunique', '#b2df8a']
+            ['yes', 'yes_nonunique', '#b2df8a', 'no', '#fb9a99', 'yes', 'NA', '#ffffff'],
+            ['yes', 'no', '#fb9a99', 'NA', '#ffffff', 'yes', 'yes', '#33a02c'],
+            ['yes', 'NA', '#ffffff', 'yes', '#33a02c', 'yes', 'yes_nonunique', '#b2df8a']
         ]
         got_header, got_matrix = summary.Summary._add_phandango_colour_columns(header, matrix)
         self.assertEqual(expected_header, got_header)
@@ -450,6 +450,23 @@ class TestSummary(unittest.TestCase):
             got = f.read()
 
         expected = 'head1,head2\nline1_1,line1_2\nline2_1,line2_2\n'
+        self.assertEqual(expected, got)
+        os.unlink(tmpfile)
+
+
+    def test_matrix_to_csv_remove_nas(self):
+        '''Test _matrix_to_csv with remove_nas '''
+        matrix = [
+            ['line1_1', 'line1_2', 'NA', 'foo'],
+            ['NA', 'NA', 'bar', 'NA'],
+        ]
+        header = ['head1', 'head2', 'head3', 'head4']
+        tmpfile = 'tmp.test.matrix_to_csv_remove_nas.csv'
+        summary.Summary._matrix_to_csv(matrix, header, tmpfile, remove_nas=True)
+        with open(tmpfile) as f:
+            got = f.read()
+
+        expected = 'head1,head2,head3,head4\nline1_1,line1_2,,foo\n,,bar,\n'
         self.assertEqual(expected, got)
         os.unlink(tmpfile)
 
