@@ -444,6 +444,17 @@ class TestReferenceData(unittest.TestCase):
 
         self.assertEqual(expected_seqs_dict, refdata.sequences)
 
+        expected_rename_dict = {
+            'pres!abs3': 'pres_abs3',
+            'pres\'abs1': 'pres_abs1',
+            'pres_abs1': 'pres_abs1_1',
+            'var,only1': 'var_only1',
+            'var:only1': 'var_only1_1',
+            'var_only1': 'var_only1_2',
+        }
+
+        self.assertEqual(expected_rename_dict, refdata.rename_dict)
+
 
     def test_sequence_type(self):
         '''Test sequence_type'''
