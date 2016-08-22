@@ -33,7 +33,7 @@ class SummaryClusterVariant:
 
     @classmethod
     def _get_het_percent(cls, data_dict):
-        if data_dict['gene'] == '1' or data_dict['ref_ctg_effect'] != 'SNP' or data_dict['smtls_alt_nt'] == '.' or ';' in data_dict['smtls_alt_nt']:
+        if data_dict['gene'] == '1' or data_dict['ref_ctg_effect'] != 'SNP' or data_dict['smtls_alt_nt'] == '.' or ';' in data_dict['smtls_alt_nt'] or data_dict['smtls_alt_depth'] == 'ND':
             return None
         else:
             nucleotides = [data_dict['ctg_nt']] + data_dict['smtls_alt_nt'].split(',')
