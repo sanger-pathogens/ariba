@@ -47,14 +47,17 @@ class Runner:
 
 
     @staticmethod
-    def _load_user_clusters_file(filename):
+    def _load_user_clusters_file(filename, rename_dict=None):
+        if rename_dict is None:
+            rename_dict = {}
+
         f = pyfastaq.utils.open_file_read(filename)
         clusters = {}
         used_names = set()
 
         for line in f:
             names_list = line.rstrip().split()
-            new_names = set(names_list)
+            new_names = set([rename_dict.get(name, name) for name in names_list])
             if len(names_list) != len(new_names) or not new_names.isdisjoint(used_names):
                 pyfastaq.utils.close(f)
                 raise Error('Error in user-provided clusters file ' + filename + '. Non unique name found at this line:\n' + line)

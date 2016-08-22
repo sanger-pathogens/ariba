@@ -106,6 +106,20 @@ class TestCdhit(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_load_user_clusters_file_good_file_with_renaming(self):
+        '''test _load_user_clusters_file with good input file with some renamed'''
+        rename_dict = {'seq2': 'seq2_renamed', 'seq6': 'seq6_renamed'}
+        infile = os.path.join(data_dir, 'cdhit_test_load_user_clusters_file.good')
+        expected  = {
+            '0': {'seq1', 'seq2_renamed', 'seq3'},
+            '1': {'seq4'},
+            '2': {'seq5', 'seq6_renamed'}
+        }
+
+        got = cdhit.Runner._load_user_clusters_file(infile, rename_dict=rename_dict)
+        self.assertEqual(expected, got)
+
+
     def test_load_user_clusters_file_bad_file(self):
         '''test _load_user_clusters_file with bad input files'''
         infiles = [
