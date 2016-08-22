@@ -69,9 +69,12 @@ class Runner:
         return clusters
 
 
-    def run_get_clusters_from_file(self, clusters_infile):
+    def run_get_clusters_from_file(self, clusters_infile, rename_dict=None):
         '''Instead of running cdhit, gets the clusters info from the input file.'''
-        clusters = self._load_user_clusters_file(clusters_infile)
+        if rename_dict is None:
+            rename_dict = {}
+
+        clusters = self._load_user_clusters_file(clusters_infile, rename_dict=rename_dict)
 
         # check that every sequence in the clusters file can be
         # found in the fasta file

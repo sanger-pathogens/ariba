@@ -143,3 +143,17 @@ class TestCdhit(unittest.TestCase):
             '1': {'seq3'},
         }
         self.assertEqual(clusters, expected_clusters)
+
+
+    def test_run_get_clusters_from_file_with_renaming(self):
+        '''test run_get_clusters_from_file with renaming'''
+        rename_dict = {'seq2': 'seq2_renamed'}
+        fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict_rename.in.fa')
+        clusters_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.in.clusters')
+        r = cdhit.Runner(fa_infile)
+        clusters = r.run_get_clusters_from_file(clusters_infile, rename_dict=rename_dict)
+        expected_clusters = {
+            '0': {'seq1', 'seq2_renamed'},
+            '1': {'seq3'},
+        }
+        self.assertEqual(clusters, expected_clusters)
