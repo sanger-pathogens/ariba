@@ -64,7 +64,7 @@ class Runner:
                 new_name = rename_dict.get(name, name)
                 if new_name not in all_ref_seqs:
                     to_remove.add(name)
-                    print('WARNING: ignoring sequence', name, 'from clusters file because not in fasta file. This probably means it failed sanity checks - see the log file 01.filter.check_genes.log.', file=sys.stderr)
+                    print('WARNING: ignoring sequence', name, 'from clusters file because not in fasta file. This probably means it failed sanity checks - see the log files 01.filter.check_genes.log, 01.filter.check_metadata.log.', file=sys.stderr)
 
             names_list = [x for x in names_list if x not in to_remove]
             new_names = set([rename_dict.get(name, name) for name in names_list])
