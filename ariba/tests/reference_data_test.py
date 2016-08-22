@@ -278,12 +278,33 @@ class TestReferenceData(unittest.TestCase):
 
     def test_seq_names_to_rename_dict(self):
         '''Test _seq_names_to_rename_dict'''
-        names = {'foo', 'bar!', 'bar:', 'bar,', 'spam', 'eggs,123'}
+        names = {
+            'foo',
+            'bar!',
+            'bar:',
+            'bar,',
+            'spam',
+            'eggs,123',
+            'ab(c1',
+            'ab(c)2',
+            'ab[c]3',
+            'abc;4',
+            "abc'5",
+            'abc"6',
+            'abc|7',
+        }
         got = reference_data.ReferenceData._seq_names_to_rename_dict(names)
         expected = {
             'bar!': 'bar_',
             'bar,': 'bar__1',
             'bar:': 'bar__2',
+            'ab(c1': 'ab_c1',
+            'ab(c)2': 'ab_c_2',
+            'ab[c]3': 'ab_c_3',
+            'abc;4': 'abc_4',
+            "abc'5": 'abc_5',
+            'abc"6': 'abc_6',
+            'abc|7': 'abc_7',
             'eggs,123': 'eggs_123'
         }
 
@@ -422,6 +443,17 @@ class TestReferenceData(unittest.TestCase):
         }
 
         self.assertEqual(expected_seqs_dict, refdata.sequences)
+
+        expected_rename_dict = {
+            'pres!abs3': 'pres_abs3',
+            'pres\'abs1': 'pres_abs1',
+            'pres_abs1': 'pres_abs1_1',
+            'var,only1': 'var_only1',
+            'var:only1': 'var_only1_1',
+            'var_only1': 'var_only1_2',
+        }
+
+        self.assertEqual(expected_rename_dict, refdata.rename_dict)
 
 
     def test_sequence_type(self):

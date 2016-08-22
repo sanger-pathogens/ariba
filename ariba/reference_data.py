@@ -8,7 +8,7 @@ from ariba import sequence_metadata, cdhit
 
 class Error (Exception): pass
 
-rename_sub_regex = re.compile(r'''[':!@,-]''')
+rename_sub_regex = re.compile(r'''[|()\[\];"':!@,-]''')
 
 
 class ReferenceData:
@@ -30,6 +30,7 @@ class ReferenceData:
 
         self.genetic_code = genetic_code
         pyfastaq.sequences.genetic_code = self.genetic_code
+        self.rename_dict = None
 
 
     @classmethod
@@ -353,15 +354,15 @@ class ReferenceData:
 
 
     def rename_sequences(self, outfile):
-        rename_dict = ReferenceData._seq_names_to_rename_dict(self.sequences.keys())
-        if len(rename_dict):
+        self.rename_dict = ReferenceData._seq_names_to_rename_dict(self.sequences.keys())
+        if len(self.rename_dict):
             print('Had to rename some sequences. See', outfile, 'for old -> new names', file=sys.stderr)
             with open(outfile, 'w') as f:
-                for old_name, new_name in sorted(rename_dict.items()):
+                for old_name, new_name in sorted(self.rename_dict.items()):
                     print(old_name, new_name, sep='\t', file=f)
 
-            self.sequences = ReferenceData._rename_names_in_seq_dict(self.sequences, rename_dict)
-            self.metadata = ReferenceData._rename_names_in_metadata(self.metadata, rename_dict)
+            self.sequences = ReferenceData._rename_names_in_seq_dict(self.sequences, self.rename_dict)
+            self.metadata = ReferenceData._rename_names_in_metadata(self.metadata, self.rename_dict)
 
 
     def sequence_type(self, sequence_name):
@@ -427,7 +428,7 @@ class ReferenceData:
             )
 
             if clusters_file is not None:
-                new_clusters = cdhit_runner.run_get_clusters_from_file(clusters_file)
+                new_clusters = cdhit_runner.run_get_clusters_from_file(clusters_file, self.sequences, rename_dict=self.rename_dict)
             elif nocluster:
                 new_clusters = cdhit_runner.fake_run()
             else:
