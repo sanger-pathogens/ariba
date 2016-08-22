@@ -102,7 +102,11 @@ class TestCdhit(unittest.TestCase):
             '2': {'seq5', 'seq6'}
         }
 
-        got = cdhit.Runner._load_user_clusters_file(infile)
+        got = cdhit.Runner._load_user_clusters_file(infile, {'seq' + str(i) for i in range(1,7,1)})
+        self.assertEqual(expected, got)
+
+        expected['2'] = {'seq5'}
+        got = cdhit.Runner._load_user_clusters_file(infile, {'seq' + str(i) for i in range(1,6,1)})
         self.assertEqual(expected, got)
 
 
@@ -116,7 +120,8 @@ class TestCdhit(unittest.TestCase):
             '2': {'seq5', 'seq6_renamed'}
         }
 
-        got = cdhit.Runner._load_user_clusters_file(infile, rename_dict=rename_dict)
+        names = {'seq1', 'seq2_renamed', 'seq3', 'seq4', 'seq5', 'seq6_renamed'}
+        got = cdhit.Runner._load_user_clusters_file(infile, names, rename_dict=rename_dict)
         self.assertEqual(expected, got)
 
 
@@ -129,7 +134,7 @@ class TestCdhit(unittest.TestCase):
         ]
         for filename in infiles:
             with self.assertRaises(cdhit.Error):
-                cdhit.Runner._load_user_clusters_file(filename)
+                cdhit.Runner._load_user_clusters_file(filename, {'seq1', 'seq2', 'seq3'})
 
 
     def test_run_get_clusters_from_file(self):
@@ -137,7 +142,7 @@ class TestCdhit(unittest.TestCase):
         fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.in.fa')
         clusters_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.in.clusters')
         r = cdhit.Runner(fa_infile)
-        clusters = r.run_get_clusters_from_file(clusters_infile)
+        clusters = r.run_get_clusters_from_file(clusters_infile, {'seq1', 'seq2', 'seq3'})
         expected_clusters = {
             '0': {'seq1', 'seq2'},
             '1': {'seq3'},
@@ -151,7 +156,7 @@ class TestCdhit(unittest.TestCase):
         fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict_rename.in.fa')
         clusters_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict.in.clusters')
         r = cdhit.Runner(fa_infile)
-        clusters = r.run_get_clusters_from_file(clusters_infile, rename_dict=rename_dict)
+        clusters = r.run_get_clusters_from_file(clusters_infile, {'seq1', 'seq2_renamed', 'seq3'}, rename_dict=rename_dict)
         expected_clusters = {
             '0': {'seq1', 'seq2_renamed'},
             '1': {'seq3'},

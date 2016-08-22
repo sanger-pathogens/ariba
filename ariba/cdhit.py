@@ -1,5 +1,6 @@
 import tempfile
 import shutil
+import sys
 import os
 import pyfastaq
 from ariba import common, external_progs
@@ -47,7 +48,7 @@ class Runner:
 
 
     @staticmethod
-    def _load_user_clusters_file(filename, rename_dict=None):
+    def _load_user_clusters_file(filename, all_ref_seqs, rename_dict=None):
         if rename_dict is None:
             rename_dict = {}
 
@@ -57,6 +58,15 @@ class Runner:
 
         for line in f:
             names_list = line.rstrip().split()
+            to_remove = set()
+
+            for name in names_list:
+                new_name = rename_dict.get(name, name)
+                if new_name not in all_ref_seqs:
+                    to_remove.add(name)
+                    print('WARNING: ignoring sequence', name, 'from clusters file because not in fasta file. This probably means it failed sanity checks - see the log file 01.filter.check_genes.log.', file=sys.stderr)
+
+            names_list = [x for x in names_list if x not in to_remove]
             new_names = set([rename_dict.get(name, name) for name in names_list])
             if len(names_list) != len(new_names) or not new_names.isdisjoint(used_names):
                 pyfastaq.utils.close(f)
@@ -69,18 +79,18 @@ class Runner:
         return clusters
 
 
-    def run_get_clusters_from_file(self, clusters_infile, rename_dict=None):
+    def run_get_clusters_from_file(self, clusters_infile, all_ref_seqs, rename_dict=None):
         '''Instead of running cdhit, gets the clusters info from the input file.'''
         if rename_dict is None:
             rename_dict = {}
-
-        clusters = self._load_user_clusters_file(clusters_infile, rename_dict=rename_dict)
 
         # check that every sequence in the clusters file can be
         # found in the fasta file
         seq_reader = pyfastaq.sequences.file_reader(self.infile)
         names_list_from_fasta_file = [seq.id for seq in seq_reader]
         names_set_from_fasta_file = set(names_list_from_fasta_file)
+
+        clusters = self._load_user_clusters_file(clusters_infile, all_ref_seqs, rename_dict=rename_dict)
 
         if len(names_set_from_fasta_file) != len(names_list_from_fasta_file):
             raise Error('At least one duplicate name in fasta file ' + self.infile + '. Cannot continue')

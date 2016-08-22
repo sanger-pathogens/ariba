@@ -428,7 +428,7 @@ class ReferenceData:
             )
 
             if clusters_file is not None:
-                new_clusters = cdhit_runner.run_get_clusters_from_file(clusters_file, rename_dict=self.rename_dict)
+                new_clusters = cdhit_runner.run_get_clusters_from_file(clusters_file, self.sequences, rename_dict=self.rename_dict)
             elif nocluster:
                 new_clusters = cdhit_runner.fake_run()
             else:
