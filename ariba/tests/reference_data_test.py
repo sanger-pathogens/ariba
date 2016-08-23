@@ -292,6 +292,7 @@ class TestReferenceData(unittest.TestCase):
             "abc'5",
             'abc"6',
             'abc|7',
+            r'''zaphod<>/\b{}[]|!''',
         }
         got = reference_data.ReferenceData._seq_names_to_rename_dict(names)
         expected = {
@@ -305,7 +306,8 @@ class TestReferenceData(unittest.TestCase):
             "abc'5": 'abc_5',
             'abc"6': 'abc_6',
             'abc|7': 'abc_7',
-            'eggs,123': 'eggs_123'
+            'eggs,123': 'eggs_123',
+            r'''zaphod<>/\b{}[]|!''': 'zaphod____b______',
         }
 
         self.assertEqual(expected, got)

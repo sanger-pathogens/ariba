@@ -135,6 +135,7 @@ def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster,
 
 def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymummer_variants):
     lines = []
+    reported_known_vars = set()
     contig_length = len(cluster.assembly.sequences[contig_name])
     assert contig_length != 0
 
@@ -229,6 +230,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 for matching_var in matching_vars_set:
                     if contributing_vars is None:
                         samtools_columns = _samtools_depths_at_known_snps_all_wild(matching_var, contig_name, cluster, pymummer_variants)
+                    reported_known_vars.add(str(matching_var.variant))
                     variant_columns[3] = str(matching_var.variant)
 
                     if matching_var.has_variant(cluster.ref_sequence) == (ref_ctg_change is not None):
@@ -251,23 +253,41 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                     [matching_vars_column] + [free_text_column]
                 ))
 
-    for contig_name in remaining_samtools_variants:
+    if contig_name in remaining_samtools_variants:
         for var_position in remaining_samtools_variants[contig_name]:
             depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, var_position)
+
             if depths_tuple is not None:
-                new_cols = [
-                    '0',  # known_var column
-                    'HET', # var_type
-                    '.', '.', '.', '.', '.', '.', '.', '.', # var_seq_type ... ref_nt
-                    str(var_position + 1), str(var_position + 1), # ctg_start, ctg_end
-                    depths_tuple[0], # ctg_nt
-                    str(depths_tuple[2]), # smtls_total_depth
-                    depths_tuple[1], # smtls_alt_nt
-                    str(depths_tuple[3]), # smtls_alt_depth
-                    '.',
-                    free_text_column,
-                ]
-                lines.append('\t'.join(common_first_columns + new_cols))
+                ref_coord, in_indel = None, None
+                if contig_name in cluster.assembly_compare.nucmer_hits:
+                    for hit in cluster.assembly_compare.nucmer_hits[contig_name]:
+                        if hit.qry_coords().distance_to_point(var_position) == 0:
+                            ref_coord, in_indel = hit.ref_coords_from_qry_coord(var_position, pymummer_variants)
+                            break
+
+                if ref_coord is None:
+                    ref_coord = '.'
+                    ref_nt = '.'
+                    var_string = None
+                else:
+                    ref_nt = cluster.ref_sequence[ref_coord]
+                    var_string = depths_tuple[0] + str(ref_coord + 1) + depths_tuple[1]
+                    ref_coord = str(ref_coord + 1)
+
+                if var_string not in reported_known_vars:
+                    new_cols = [
+                        '0',  # known_var column
+                        'HET', # var_type
+                        '.', '.', '.', var_string, '.', ref_coord, ref_coord, ref_nt, # var_seq_type ... ref_nt
+                        str(var_position + 1), str(var_position + 1), # ctg_start, ctg_end
+                        depths_tuple[0], # ctg_nt
+                        str(depths_tuple[2]), # smtls_total_depth
+                        depths_tuple[1], # smtls_alt_nt
+                        str(depths_tuple[3]), # smtls_alt_depth
+                        '.',
+                        free_text_column,
+                    ]
+                    lines.append('\t'.join(common_first_columns + new_cols))
 
     if len(lines) == 0:
         lines.append('\t'.join(common_first_columns + ['.'] * (len(columns) - len(common_first_columns) - 1) + [free_text_column]))

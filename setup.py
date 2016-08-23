@@ -51,7 +51,7 @@ fermilite_mod = Extension(
 setup(
     ext_modules=[minimap_mod, fermilite_mod],
     name='ariba',
-    version='2.2.3',
+    version='2.2.4',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
     package_data={'ariba': ['test_run_data/*']},
@@ -65,7 +65,7 @@ setup(
         'dendropy >= 4.1.0',
         'pyfastaq >= 3.12.0',
         'pysam >= 0.8.1',
-        'pymummer>=0.6.1',
+        'pymummer>=0.8.1',
     ],
     license='GPLv3',
     classifiers=[

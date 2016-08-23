@@ -33,7 +33,7 @@ class SummaryClusterVariant:
 
     @classmethod
     def _get_het_percent(cls, data_dict):
-        if data_dict['gene'] == '1' or data_dict['ref_ctg_effect'] != 'SNP' or data_dict['smtls_alt_nt'] == '.' or ';' in data_dict['smtls_alt_nt'] or data_dict['smtls_alt_depth'] == 'ND':
+        if data_dict['gene'] == '1' or not (data_dict['ref_ctg_effect'] == 'SNP' or data_dict['var_type'] == 'HET') or data_dict['smtls_alt_nt'] == '.' or ';' in data_dict['smtls_alt_nt'] or data_dict['smtls_alt_depth'] == 'ND':
             return None
         else:
             nucleotides = [data_dict['ctg_nt']] + data_dict['smtls_alt_nt'].split(',')
@@ -43,7 +43,13 @@ class SummaryClusterVariant:
                 raise Error('Mismatch in number of inferred nucleotides from ctg_nt, smtls_alt_nt, smtls_alt_depth columns. Cannot continue\n' + str(data_dict))
 
             try:
-                var_nucleotide = data_dict['known_var_change'][-1] if data_dict['known_var_change'] != '.' else data_dict['ref_ctg_change'][-1]
+                if data_dict['var_type'] == 'HET':
+                    var_nucleotide = data_dict['smtls_alt_nt']
+                elif data_dict['known_var_change'] != '.':
+                    var_nucleotide = data_dict['known_var_change'][-1]
+                else:
+                    var_nucleotide = data_dict['ref_ctg_change'][-1]
+
                 if var_nucleotide == '.':
                     return None
                 depths = [int(x) for x in depths]
