@@ -278,7 +278,7 @@ class TestReportFilter(unittest.TestCase):
             'ref1': {
                 'ref1.scaff1': [
                     {'flag': flag.Flag(27), 'pc_ident': 91.0, 'ref_base_assembled': 9, 'known_var': '1', 'has_known_var': '1', 'var_type': 'SNP'},
-                    {'flag': flag.Flag(27), 'pc_ident': 91.5, 'ref_base_assembled': 9, 'known_var': '1', 'has_known_var': '1', 'var_type': 'HET'},
+                    {'flag': flag.Flag(27), 'pc_ident': 91.5, 'ref_base_assembled': 11, 'known_var': '1', 'has_known_var': '1', 'var_type': 'HET'},
                     {'flag': flag.Flag(27), 'pc_ident': 89.0, 'ref_base_assembled': 10, 'known_var': '1', 'has_known_var': '1', 'var_type': 'SNP'},
                     {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'known_var': '1', 'has_known_var': '0', 'var_type': 'SNP'},
                     {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'known_var': '1', 'has_known_var': '1', 'var_type': 'SNP'},
@@ -304,6 +304,7 @@ class TestReportFilter(unittest.TestCase):
         expected = {
             'ref1': {
                 'ref1.scaff1': [
+                    {'flag': flag.Flag(27), 'pc_ident': 91.5, 'ref_base_assembled': 11, 'known_var': '1', 'has_known_var': '1', 'var_type': 'HET'},
                     {'flag': flag.Flag(27), 'pc_ident': 90.0, 'ref_base_assembled': 11, 'known_var': '1', 'has_known_var': '1', 'var_type': 'SNP'},
                 ]
             },
