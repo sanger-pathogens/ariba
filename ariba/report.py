@@ -254,11 +254,26 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
     for contig_name in remaining_samtools_variants:
         for var_position in remaining_samtools_variants[contig_name]:
             depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, var_position)
+
             if depths_tuple is not None:
+                ref_coord, in_indel = None, None
+                if contig_name in cluster.assembly_compare.nucmer_hits:
+                    for hit in cluster.assembly_compare.nucmer_hits[contig_name]:
+                        if hit.qry_coords().distance_to_point(var_position) == 0:
+                            ref_coord, in_indel = hit.ref_coords_from_qry_coord(var_position, pymummer_variants)
+                            break
+
+                if ref_coord is None:
+                    ref_coord = '.'
+                    ref_nt = '.'
+                else:
+                    ref_nt = cluster.ref_sequence[ref_coord]
+                    ref_coord = str(ref_coord + 1)
+
                 new_cols = [
                     '0',  # known_var column
                     'HET', # var_type
-                    '.', '.', '.', '.', '.', '.', '.', '.', # var_seq_type ... ref_nt
+                    '.', '.', '.', '.', '.', ref_coord, ref_coord, ref_nt, # var_seq_type ... ref_nt
                     str(var_position + 1), str(var_position + 1), # ctg_start, ctg_end
                     depths_tuple[0], # ctg_nt
                     str(depths_tuple[2]), # smtls_total_depth

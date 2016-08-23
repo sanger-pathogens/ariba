@@ -275,7 +275,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
-            'ref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t.\t.\t.\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_gene'
+            'ref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t18\t18\tG\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_gene'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -293,7 +293,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
-            'ref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t.\t.\t.\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_gene'
+            'ref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t18\t18\tG\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_gene'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -366,7 +366,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
-            'ref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t.\t.\t.\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_seq'
+            'ref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t18\t18\tG\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_seq'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -382,7 +382,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
-            'ref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t.\t.\t.\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_seq'
+            'ref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\t.\t.\t18\t18\tG\t137\t137\tG\t63\tA\t32,31\t.\tGeneric description of ref_seq'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -460,3 +460,4 @@ class TestCluster(unittest.TestCase):
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
+

@@ -65,7 +65,7 @@ setup(
         'dendropy >= 4.1.0',
         'pyfastaq >= 3.12.0',
         'pysam >= 0.8.1',
-        'pymummer>=0.6.1',
+        'pymummer>=0.8.1',
     ],
     license='GPLv3',
     classifiers=[
