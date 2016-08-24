@@ -47,9 +47,13 @@ fermilite_mod = Extension(
     include_dirs=[os.path.join('third_party', 'fermi-lite-0.1')],
 )
 
+vcfcall_mod = Extension(
+    "vcfcall_ariba",
+    [os.path.join('ariba', 'ext', 'vcfcall_ariba.cpp')],
+)
 
 setup(
-    ext_modules=[minimap_mod, fermilite_mod],
+    ext_modules=[minimap_mod, fermilite_mod, vcfcall_mod],
     name='ariba',
     version='2.2.4',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',

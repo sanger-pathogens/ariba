@@ -2,6 +2,7 @@ import os
 import sys
 import pysam
 import pyfastaq
+import vcfcall_ariba
 from ariba import common
 
 class Error (Exception): pass
@@ -14,22 +15,16 @@ class SamtoolsVariants:
       outprefix,
       log_fh=sys.stdout,
       samtools_exe='samtools',
-      bcftools_exe='bcftools',
-      bcf_min_dp=10,
-      bcf_min_dv=5,
-      bcf_min_dv_over_dp=0.3,
-      bcf_min_qual=20,
+      min_var_read_depth=5,
+      max_allele_freq=0.95
     ):
         self.ref_fa = os.path.abspath(ref_fa)
         self.bam = os.path.abspath(bam)
         self.outprefix = os.path.abspath(outprefix)
         self.log_fh = log_fh
         self.samtools_exe = samtools_exe
-        self.bcftools_exe = bcftools_exe
-        self.bcf_min_dp = bcf_min_dp
-        self.bcf_min_dv = bcf_min_dv
-        self.bcf_min_dv_over_dp = bcf_min_dv_over_dp
-        self.bcf_min_qual = bcf_min_qual
+        self.min_var_read_depth = min_var_read_depth
+        self.max_allele_freq = max_allele_freq
 
         self.vcf_file = self.outprefix + '.vcf'
         self.read_depths_file = self.outprefix + '.read_depths.gz'
@@ -40,6 +35,7 @@ class SamtoolsVariants:
         cmd = ' '.join([
             self.samtools_exe, 'mpileup',
             '-t INFO/AD',
+            '-L 99999999',
             '-A',
             '-f', self.ref_fa,
             '-u',
@@ -51,31 +47,13 @@ class SamtoolsVariants:
 
         common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
 
-        cmd = ' '.join([
-            self.bcftools_exe, 'call -m',
-            tmp_vcf,
-            '|',
-            self.bcftools_exe, 'query',
-            r'''-f '%CHROM\t%POS\t%REF\t%ALT\t%DP\t%AD]\n' ''',
-            '>',
-            self.read_depths_file + '.tmp'
-        ])
+        got = vcfcall_ariba.vcfcall_ariba(tmp_vcf, self.outprefix, self.min_var_read_depth, self.max_allele_freq)
+        if got != 0:
+            raise Error('Error parsing vcf file. Cannot contine')
 
-        common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
-        pysam.tabix_compress(self.read_depths_file + '.tmp', self.read_depths_file)
+        pysam.tabix_compress(self.outprefix + '.read_depths', self.read_depths_file)
         pysam.tabix_index(self.read_depths_file, seq_col=0, start_col=1, end_col=1)
-        os.unlink(self.read_depths_file + '.tmp')
-
-        cmd = ' '.join([
-            self.bcftools_exe, 'call -m -v',
-            tmp_vcf,
-            '|',
-            self.bcftools_exe, 'filter',
-            '-i', '"SUM(AD)>=5 & MIN(AD)/DP>=0.1"',
-            '-o', self.vcf_file
-        ])
-
-        common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
+        os.unlink(self.outprefix + '.read_depths')
         os.unlink(tmp_vcf)
 
 
