@@ -54,7 +54,6 @@ class TestMapping(unittest.TestCase):
             reads2,
             ref,
             out_prefix,
-            samtools=extern_progs.exe('samtools'),
             bowtie2=extern_progs.exe('bowtie2'),
         )
         expected = get_sam_columns(os.path.join(data_dir, 'mapping_test_bowtie2_unsorted.bam'))
@@ -75,7 +74,6 @@ class TestMapping(unittest.TestCase):
             reads2,
             ref,
             out_prefix,
-            samtools=extern_progs.exe('samtools'),
             bowtie2=extern_progs.exe('bowtie2'),
             remove_both_unmapped=True,
         )
@@ -97,7 +95,6 @@ class TestMapping(unittest.TestCase):
             ref,
             out_prefix,
             sort=True,
-            samtools=extern_progs.exe('samtools'),
             bowtie2=extern_progs.exe('bowtie2'),
         )
         expected = get_sam_columns(os.path.join(data_dir, 'mapping_test_bowtie2_sorted.bam'))

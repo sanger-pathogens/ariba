@@ -347,7 +347,6 @@ class Cluster:
                 self.final_assembly_bam[:-4],
                 threads=1,
                 sort=True,
-                samtools=self.extern_progs.exe('samtools'),
                 bowtie2=self.extern_progs.exe('bowtie2'),
                 bowtie2_preset='very-sensitive-local',
                 verbose=True,

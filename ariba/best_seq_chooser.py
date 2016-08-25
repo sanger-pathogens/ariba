@@ -40,7 +40,6 @@ class BestSeqChooser:
             tmp_fa,
             tmp_bam[:-4],
             threads=self.threads,
-            samtools=self.samtools_exe,
             bowtie2=self.bowtie2_exe,
             bowtie2_preset=self.bowtie2_preset,
             verbose=True,

@@ -37,7 +37,6 @@ def run_bowtie2(
       threads=1,
       max_insert=1000,
       sort=False,
-      samtools='samtools',
       bowtie2='bowtie2',
       bowtie2_preset='very-sensitive-local',
       verbose=False,
@@ -85,33 +84,29 @@ def run_bowtie2(
     if remove_both_unmapped:
         map_cmd.append(r''' | awk ' !(and($2,4)) || !(and($2,8)) ' ''')
 
-
-    map_cmd.extend([
-        '|', samtools, 'view',
-        '-bS -T', ref_fa,
-        '- >', intermediate_bam
-    ])
-
+    tmp_sam_file = out_prefix + '.unsorted.sam'
+    map_cmd.append(' > ' + tmp_sam_file)
     map_cmd = ' '.join(map_cmd)
 
     common.syscall(map_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
 
+    if verbose:
+        print('Converting', tmp_sam_file, '->', intermediate_bam, file=verbose_filehandle)
+    infile = pysam.AlignmentFile(tmp_sam_file, "r")
+    outfile = pysam.AlignmentFile(intermediate_bam, "wb", template=infile)
+    for x in infile:
+        outfile.write(x)
+    infile.close()
+    outfile.close()
+    os.unlink(tmp_sam_file)
+
     if sort:
-        threads = min(4, threads)
-        thread_mem = int(500 / threads)
-        sort_cmd = ' '.join([
-            samtools,
-            'sort',
-            '-@' + str(threads),
-            '-m' + str(thread_mem) + 'M',
-            '-o', final_bam,
-            '-O bam',
-            '-T', out_prefix + '.tmp.samtool_sort',
-            intermediate_bam,
-        ])
-        index_cmd = samtools + ' index ' + final_bam
-        common.syscall(sort_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
-        common.syscall(index_cmd, verbose=verbose, verbose_filehandle=verbose_filehandle)
+        if verbose:
+            print('Sorting', intermediate_bam, '->', final_bam, file=verbose_filehandle)
+        pysam.sort('-o', final_bam, '-O', 'BAM', intermediate_bam)
+        if verbose:
+            print('Indexing', final_bam, file=verbose_filehandle)
+        pysam.index(final_bam)
         clean_files.append(intermediate_bam)
 
     for fname in clean_files:
