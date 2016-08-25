@@ -14,7 +14,6 @@ class SamtoolsVariants:
       bam,
       outprefix,
       log_fh=sys.stdout,
-      samtools_exe='samtools',
       min_var_read_depth=5,
       max_allele_freq=0.95
     ):
@@ -22,7 +21,6 @@ class SamtoolsVariants:
         self.bam = os.path.abspath(bam)
         self.outprefix = os.path.abspath(outprefix)
         self.log_fh = log_fh
-        self.samtools_exe = samtools_exe
         self.min_var_read_depth = min_var_read_depth
         self.max_allele_freq = max_allele_freq
 

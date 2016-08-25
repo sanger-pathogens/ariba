@@ -16,7 +16,6 @@ prog_to_default = {
     #'gapfiller': 'GapFiller.pl',
     'mash': 'mash',
     'nucmer' : 'nucmer',
-    'samtools': 'samtools',
     #'spades': 'spades.py',
     #'sspace': 'SSPACE_Basic_v2.0.pl',
 }
@@ -32,7 +31,6 @@ prog_to_version_cmd = {
     #'gapfiller': ('', re.compile('^Usage: .*pl \[GapFiller_(.*)\]')),
     'mash': ('', re.compile('^Mash version (.*)$')),
     'nucmer': ('--version', re.compile('^NUCmer \(NUCleotide MUMmer\) version ([0-9\.]+)')),
-    'samtools': ('', re.compile('^Version: ([0-9\.]+)')),
     #'spades': ('', re.compile('^SPAdes genome assembler v\.?([0-9\.]+)')),
     #'sspace': ('', re.compile('^Usage: .*pl \[SSPACE_(.*)\]')),
 }
@@ -44,7 +42,6 @@ min_versions = {
     'cdhit2d': '4.6',
     'mash': '1.0.2',
     'nucmer': '3.1',
-    'samtools': '1.3',
     #'spades': '3.5.0',
 }
 

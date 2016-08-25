@@ -7,13 +7,11 @@ start_dir=$(pwd)
 BOWTIE2_VERSION=2.2.8
 CDHIT_VERSION=4.6.5
 MASH_VERSION=1.1
-SAMTOOLS_VERSION=1.3
 MUMMER_VERSION=3.23
 
 BOWTIE2_DOWNLOAD_URL="http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip"
 CDHIT_DOWNLOAD_URL="https://github.com/weizhongli/cdhit/archive/V${CDHIT_VERSION}.tar.gz"
 MASH_DOWNLOAD_URL="https://github.com/marbl/Mash/releases/download/v${MASH_VERSION}/mash-Linux64-v${MASH_VERSION}.tar.gz"
-SAMTOOLS_DOWNLOAD_URL="https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VERSION}/samtools-${SAMTOOLS_VERSION}.tar.bz2"
 MUMMER_DOWNLOAD_URL="http://downloads.sourceforge.net/project/mummer/mummer/${MUMMER_VERSION}/MUMmer${MUMMER_VERSION}.tar.gz"
 
 
@@ -70,16 +68,6 @@ cd $mummer_dir
 make
 
 
-# --------------- samtools -----------------
-cd $build_dir
-download $SAMTOOLS_DOWNLOAD_URL "samtools-${SAMTOOLS_VERSION}.tar.bz2"
-samtools_dir="$build_dir/samtools-${SAMTOOLS_VERSION}"
-tar -xjf samtools-${SAMTOOLS_VERSION}.tar.bz2
-cd $samtools_dir
-make
-
-
-
 cd $start_dir
 
 update_path () {
@@ -93,4 +81,3 @@ update_path ${bowtie2_dir}
 update_path ${cdhit_dir}
 update_path ${mash_dir}
 update_path ${mummer_dir}
-update_path ${samtools_dir}

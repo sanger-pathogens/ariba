@@ -2,11 +2,10 @@ import unittest
 import os
 import filecmp
 import pyfastaq
-from ariba import samtools_variants, external_progs
+from ariba import samtools_variants
 
 modules_dir = os.path.dirname(os.path.abspath(samtools_variants.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
-extern_progs = external_progs.ExternalProgs()
 
 
 def file2lines(filename):
@@ -29,7 +28,6 @@ class TestSamtoolsVariants(unittest.TestCase):
             ref,
             bam,
             tmp_prefix,
-            samtools_exe=extern_progs.exe('samtools'),
         )
         sv._make_vcf_and_read_depths_files()
 
@@ -158,7 +156,6 @@ class TestSamtoolsVariants(unittest.TestCase):
             ref_fa,
             bam,
             tmp_prefix,
-            samtools_exe=extern_progs.exe('samtools'),
         )
         samtools_vars.run()
         tests = [

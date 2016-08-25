@@ -400,7 +400,6 @@ class Cluster:
                 self.final_assembly_bam,
                 self.samtools_vars_prefix,
                 log_fh=self.log_fh,
-                samtools_exe=self.extern_progs.exe('samtools'),
                 min_var_read_depth=self.min_var_read_depth,
                 max_allele_freq=self.max_allele_freq
             )
