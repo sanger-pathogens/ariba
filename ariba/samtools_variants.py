@@ -119,13 +119,13 @@ class SamtoolsVariants:
         depths = {}
         for line in f:
             try:
-                name, pos, base, var, depth, depth2 = line.rstrip().split('\t')
+                name, depth = line.rstrip().split('\t')
                 depth = int(depth)
             except:
                 pyfastaq.utils.close(f)
                 raise Error('Error getting read depth from he following line of file ' + read_depths_file + ':\n' + line)
 
-            depths[name] = depths.get(name, 0) + depth
+            depths[name] = depth
 
         pyfastaq.utils.close(f)
         return depths

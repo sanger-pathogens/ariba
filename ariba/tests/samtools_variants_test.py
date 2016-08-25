@@ -131,7 +131,7 @@ class TestSamtoolsVariants(unittest.TestCase):
     def test_total_depth_per_contig(self):
         '''test total_depth_per_contig'''
         infile = os.path.join(data_dir, 'samtools_variants_test_total_depth_per_contig')
-        expected = {'scaff1': 67, 'scaff2': 72}
+        expected = {'scaff1': 42, 'scaff64738': 11}
         got = samtools_variants.SamtoolsVariants.total_depth_per_contig(infile)
         self.assertEqual(expected, got)
 
