@@ -37,7 +37,7 @@ class Cluster:
       threads=1,
       assembled_threshold=0.95,
       min_var_read_depth=5,
-      max_allele_freq=0.95,
+      max_allele_freq=0.90,
       unique_threshold=0.03,
       max_gene_nt_extend=30,
       spades_other_options=None,
