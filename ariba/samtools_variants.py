@@ -28,6 +28,7 @@ class SamtoolsVariants:
 
         self.vcf_file = self.outprefix + '.vcf'
         self.read_depths_file = self.outprefix + '.read_depths.gz'
+        self.contig_depths_file = self.outprefix + '.contig_depths'
 
 
     def _make_vcf_and_read_depths_files(self):
