@@ -20,7 +20,7 @@ Installation
 ------------
 
 ARIBA has the following dependencies, which need to be installed:
-  * [Python3][python] version >= 3.4
+  * [Python3][python] version >= 3.3.2
   * [Bowtie2][bowtie2] version >= 2.1.0
   * [CD-HIT][cdhit] version >= 4.6
   * [MASH][mash] version >= 1.0.2
