@@ -33,20 +33,16 @@ class SamtoolsVariants:
 
     def _make_vcf_and_read_depths_files(self):
         tmp_vcf = self.vcf_file + '.tmp'
-        cmd = ' '.join([
-            self.samtools_exe, 'mpileup',
-            '-t INFO/AD',
-            '-L 99999999',
-            '-A',
-            '-f', self.ref_fa,
-            '-u',
-            '-v',
-            self.bam,
-            '>',
-            tmp_vcf
-        ])
-
-        common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
+        with open(tmp_vcf, 'w') as f:
+            print(pysam.mpileup(
+                '-t', 'INFO/AD',
+                '-L', '99999999',
+                '-A',
+                '-f', self.ref_fa,
+                '-u',
+                '-v',
+                self.bam,
+            ), end='', file=f)
 
         got = vcfcall_ariba.vcfcall_ariba(tmp_vcf, self.outprefix, self.min_var_read_depth, self.max_allele_freq)
         if got != 0:
