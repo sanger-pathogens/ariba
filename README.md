@@ -25,7 +25,7 @@ ARIBA has the following dependencies, which need to be installed:
   * [CD-HIT][cdhit] version >= 4.6
   * [MASH][mash] version >= 1.0.2
   * [MUMmer][mummer] version >= 3.23
-  * [Samtools and BCFtools][samtools]  version >= 1.3
+  * [Samtools][samtools]  version >= 1.3
 
 
 Once the dependencies are installed, install ARIBA using pip:
@@ -53,7 +53,6 @@ to the following dependencies.
 
 | Dependency     |  Default executable    | Environment variable name |
 |----------------|------------------------|---------------------------|
-| BCFtools       | `bcftools`             | `$ARIBA_BCFTOOLS`         |
 | Bowtie2        | `bowtie2`              | `$ARIBA_BOWTIE2`          |
 | CD-HIT (est)   | `cd-hit-est`           | `$ARIBA_CDHIT`            |
 | CD-HIT (est-2d)| `cd-hit-est-2d`        | `$ARIBA_CDHIT2D`          |

@@ -4,14 +4,12 @@ set -x
 
 start_dir=$(pwd)
 
-BCFTOOLS_VERSION=1.3
 BOWTIE2_VERSION=2.2.8
 CDHIT_VERSION=4.6.5
 MASH_VERSION=1.1
 SAMTOOLS_VERSION=1.3
 MUMMER_VERSION=3.23
 
-BCFTOOLS_DOWNLOAD_URL="https://github.com/samtools/bcftools/releases/download/1.3/bcftools-${BCFTOOLS_VERSION}.tar.bz2"
 BOWTIE2_DOWNLOAD_URL="http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip"
 CDHIT_DOWNLOAD_URL="https://github.com/weizhongli/cdhit/archive/V${CDHIT_VERSION}.tar.gz"
 MASH_DOWNLOAD_URL="https://github.com/marbl/Mash/releases/download/v${MASH_VERSION}/mash-Linux64-v${MASH_VERSION}.tar.gz"
@@ -38,15 +36,6 @@ download () {
     wget $url -O $download_location
   fi
 }
-
-
-# --------------- bcftools -----------------
-cd $build_dir
-download $BCFTOOLS_DOWNLOAD_URL "bcftools-${BCFTOOLS_VERSION}.tar.bz2"
-bcftools_dir="$build_dir/bcftools-${BCFTOOLS_VERSION}"
-tar -xjf bcftools-${BCFTOOLS_VERSION}.tar.bz2
-cd $bcftools_dir
-make
 
 
 # --------------- bowtie2 ------------------
@@ -100,7 +89,6 @@ update_path () {
   fi
 }
 
-update_path ${bcftools_dir}
 update_path ${bowtie2_dir}
 update_path ${cdhit_dir}
 update_path ${mash_dir}
