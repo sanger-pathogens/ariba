@@ -16,25 +16,26 @@ void openFileWrite(std::string filename, std::ofstream& ofs);
 void split(const std::string& s, char delim, std::vector<std::string>& elems);
 void split(const std::string& s, char delim, std::vector<uint32_t> &elems);
 std::string getKey(const std::string& key, const std::string& s);
-bool adStringPassesFilter(std::string& adString, uint32_t minDepth, float maxAlleleFreq);
+bool adStringPassesFilter(std::string& adString, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq);
 
-int run(char* infileIn, char* outprefixIn, uint32_t minDepth, float maxAlleleFreq);
+int run(char* infileIn, char* outprefixIn, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq);
 
 
 static PyObject * main_wrapper(PyObject * self, PyObject * args)
 {
   char *infile;
   char *outprefix;
-  uint32_t minDepth;
+  uint32_t minSecondDepth;
+  uint32_t minTotalDepth;
   float maxAlleleFreq;
   int gotFromMain = 1;
 
   // parse arguments
-  if (!PyArg_ParseTuple(args, "ssif", &infile, &outprefix, &minDepth, &maxAlleleFreq)) {
+  if (!PyArg_ParseTuple(args, "ssiif", &infile, &outprefix, &minTotalDepth, &minSecondDepth, &maxAlleleFreq)) {
       return NULL;
   }
 
-  gotFromMain = run(infile, outprefix, minDepth, maxAlleleFreq);
+  gotFromMain = run(infile, outprefix, minTotalDepth, minSecondDepth, maxAlleleFreq);
   return PyLong_FromLong((long) gotFromMain);
 }
 
@@ -115,25 +116,27 @@ std::string getKey(const std::string& key, const std::string& s)
 }
 
 
-bool adStringPassesFilter(std::string& adString, uint32_t minDepth, float maxAlleleFreq)
+bool adStringPassesFilter(std::string& adString, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq)
 {
     std::vector<uint32_t> depths;
     split(adString, ',', depths);
-    uint32_t total = 0;
-    uint32_t maxDepth = 0;
+    uint32_t firstDepth = depths[0];
+    std::sort(depths.begin(), depths.end());
+    uint32_t totalDepth = 0;
 
     for (std::vector<uint32_t>::const_iterator p = depths.begin(); p != depths.end(); p++)
     {
-        total += *p;
-        maxDepth = std::max(maxDepth, *p);
+        totalDepth += *p;
     }
 
-    return (depths[0] < maxDepth) || (total >= minDepth && 1.0 * maxDepth / total <= maxAlleleFreq);
+    bool secondDepthOk = (depths.size() == 1 || (depths.size() > 1 && depths[1] >= minSecondDepth));
+    bool maxDepthOk = (totalDepth >= minTotalDepth && 1.0 * depths.back() / totalDepth <= maxAlleleFreq);
+    return ( firstDepth < depths.back() || (secondDepthOk && maxDepthOk) );
 }
 
 
 
-int run(char* infileIn, char* outprefixIn, uint32_t minDepth, float maxAlleleFreq)
+int run(char* infileIn, char* outprefixIn, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq)
 {
     std::string infile(infileIn);
     std::string outprefix(outprefixIn);
@@ -220,7 +223,7 @@ int run(char* infileIn, char* outprefixIn, uint32_t minDepth, float maxAlleleFre
                        << '\t' << dpString
                        << '\t' << adString << '\n';
 
-        if (varString.compare(".") && adStringPassesFilter(adString, minDepth, maxAlleleFreq))
+        if (varString.compare(".") && adStringPassesFilter(adString, minTotalDepth, minSecondDepth, maxAlleleFreq))
         {
             variantOutFh << line << '\n';
         }

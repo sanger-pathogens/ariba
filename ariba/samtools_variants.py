@@ -14,6 +14,7 @@ class SamtoolsVariants:
       outprefix,
       log_fh=sys.stdout,
       min_var_read_depth=5,
+      min_second_var_read_depth=2,
       max_allele_freq=0.90
     ):
         self.ref_fa = os.path.abspath(ref_fa)
@@ -21,6 +22,7 @@ class SamtoolsVariants:
         self.outprefix = os.path.abspath(outprefix)
         self.log_fh = log_fh
         self.min_var_read_depth = min_var_read_depth
+        self.min_second_var_read_depth = min_second_var_read_depth
         self.max_allele_freq = max_allele_freq
 
         self.vcf_file = self.outprefix + '.vcf'
@@ -44,7 +46,7 @@ class SamtoolsVariants:
                 self.bam,
             ), end='', file=f)
 
-        got = vcfcall_ariba.vcfcall_ariba(tmp_vcf, self.outprefix, self.min_var_read_depth, self.max_allele_freq)
+        got = vcfcall_ariba.vcfcall_ariba(tmp_vcf, self.outprefix, self.min_var_read_depth, self.min_second_var_read_depth, self.max_allele_freq)
         if got != 0:
             raise Error('Error parsing vcf file. Cannot contine')
 

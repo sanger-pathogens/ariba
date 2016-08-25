@@ -37,6 +37,7 @@ class Cluster:
       threads=1,
       assembled_threshold=0.95,
       min_var_read_depth=5,
+      min_second_var_read_depth=2,
       max_allele_freq=0.90,
       unique_threshold=0.03,
       max_gene_nt_extend=30,
@@ -83,6 +84,7 @@ class Cluster:
         self.nucmer_breaklen = nucmer_breaklen
 
         self.min_var_read_depth = min_var_read_depth
+        self.min_second_var_read_depth = min_second_var_read_depth
         self.max_allele_freq = max_allele_freq
 
         self.threads = threads
@@ -401,6 +403,7 @@ class Cluster:
                 self.samtools_vars_prefix,
                 log_fh=self.log_fh,
                 min_var_read_depth=self.min_var_read_depth,
+                min_second_var_read_depth=self.min_second_var_read_depth,
                 max_allele_freq=self.max_allele_freq
             )
             self.samtools_vars.run()
