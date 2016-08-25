@@ -35,11 +35,9 @@ class Cluster:
       sspace_k=20,
       sspace_sd=0.4,
       threads=1,
-      bcf_min_dp=10,
-      bcf_min_dv=5,
-      bcf_min_dv_over_dp=0.3,
-      bcf_min_qual=20,
       assembled_threshold=0.95,
+      min_var_read_depth=5,
+      max_allele_freq=0.95,
       unique_threshold=0.03,
       max_gene_nt_extend=30,
       spades_other_options=None,
@@ -84,10 +82,8 @@ class Cluster:
         self.nucmer_min_len = nucmer_min_len
         self.nucmer_breaklen = nucmer_breaklen
 
-        self.bcf_min_dp = bcf_min_dp
-        self.bcf_min_dv = bcf_min_dv
-        self.bcf_min_dv_over_dp = bcf_min_dv_over_dp
-        self.bcf_min_qual = bcf_min_qual
+        self.min_var_read_depth = min_var_read_depth
+        self.max_allele_freq = max_allele_freq
 
         self.threads = threads
         self.assembled_threshold = assembled_threshold
@@ -406,15 +402,12 @@ class Cluster:
                 self.samtools_vars_prefix,
                 log_fh=self.log_fh,
                 samtools_exe=self.extern_progs.exe('samtools'),
-                bcftools_exe=self.extern_progs.exe('bcftools'),
-                bcf_min_dp=self.bcf_min_dp,
-                bcf_min_dv=self.bcf_min_dv,
-                bcf_min_dv_over_dp=self.bcf_min_dv_over_dp,
-                bcf_min_qual=self.bcf_min_qual,
+                min_var_read_depth=self.min_var_read_depth,
+                max_allele_freq=self.max_allele_freq
             )
             self.samtools_vars.run()
 
-            self.total_contig_depths = self.samtools_vars.total_depth_per_contig(self.samtools_vars.read_depths_file)
+            self.total_contig_depths = self.samtools_vars.total_depth_per_contig(self.samtools_vars.contig_depths_file)
 
             self.variants_from_samtools =  self.samtools_vars.variants_in_coords(self.assembly_compare.assembly_match_coords(), self.samtools_vars.vcf_file)
             if len(self.variants_from_samtools):
