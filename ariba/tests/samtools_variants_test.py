@@ -173,3 +173,4 @@ class TestSamtoolsVariants(unittest.TestCase):
         os.unlink(samtools_vars.vcf_file)
         os.unlink(samtools_vars.read_depths_file)
         os.unlink(samtools_vars.read_depths_file + '.tbi')
+        os.unlink(samtools_vars.contig_depths_file)
