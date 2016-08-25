@@ -397,10 +397,6 @@ class Clusters:
                 sspace_k=self.min_scaff_depth,
                 sspace_sd=self.insert_sspace_sd,
                 threads=1, # clusters now run in parallel, so this should always be 1!
-                bcf_min_dp=10,            # let the user change this in a future version?
-                bcf_min_dv=5,             # let the user change this in a future version?
-                bcf_min_dv_over_dp=0.3,   # let the user change this in a future version?
-                bcf_min_qual=20,          # let the user change this in a future version?
                 assembled_threshold=self.assembled_threshold,
                 unique_threshold=self.unique_threshold,
                 max_gene_nt_extend=self.max_gene_nt_extend,
