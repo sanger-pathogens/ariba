@@ -1,8 +1,6 @@
-import sys
 import os
 import pysam
 import pyfastaq
-from ariba import common
 
 
 def write_fa_subset(seq_names, infile, outfile):
