@@ -1,5 +1,3 @@
-from ariba import flag, report
-
 class Error (Exception): pass
 
 class SummaryClusterVariant:

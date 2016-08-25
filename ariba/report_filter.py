@@ -1,4 +1,3 @@
-import pprint
 import pyfastaq
 from ariba import report, flag
 

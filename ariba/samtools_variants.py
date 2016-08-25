@@ -3,7 +3,6 @@ import sys
 import pysam
 import pyfastaq
 import vcfcall_ariba
-from ariba import common
 
 class Error (Exception): pass
 
