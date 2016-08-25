@@ -32,14 +32,7 @@ class BestSeqChooser:
         tmp_bam = os.path.join(tmpdir, 'tmp.get_total_alignment_score.bam')
         tmp_fa = os.path.join(tmpdir, 'tmp.get_total_alignment_score.ref.fa')
 
-        faidx.write_fa_subset(
-            [seq_name],
-            self.references_fa,
-            tmp_fa,
-            samtools_exe=self.samtools_exe,
-            verbose=True,
-            verbose_filehandle=self.log_fh
-        )
+        faidx.write_fa_subset([seq_name], self.references_fa, tmp_fa)
 
         mapping.run_bowtie2(
             self.reads1,
@@ -90,7 +83,7 @@ class BestSeqChooser:
         seq_name = self._get_best_seq_by_alignment_score()
         if seq_name is None:
             return None
-        faidx.write_fa_subset([seq_name], self.references_fa, outfile, samtools_exe=self.samtools_exe, verbose=True, verbose_filehandle=self.log_fh)
+        faidx.write_fa_subset([seq_name], self.references_fa, outfile)
         seqs = {}
         pyfastaq.tasks.file_to_dict(outfile, seqs)
         assert len(seqs) == 1

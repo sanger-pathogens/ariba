@@ -384,7 +384,7 @@ class Assembly:
                 self.log_fh = None
                 return
 
-            faidx.write_fa_subset({self.ref_seq_name}, self.ref_fastas, self.ref_fasta, samtools_exe=self.extern_progs.exe('samtools'), verbose=True, verbose_filehandle=self.log_fh)
+            faidx.write_fa_subset({self.ref_seq_name}, self.ref_fastas, self.ref_fasta)
             print('Closest reference sequence according to mash: ', self.ref_seq_name, file=self.log_fh)
 
             contigs_both_strands = self._fix_contig_orientation(self.gapfilled_length_filtered, self.ref_fasta, self.final_assembly_fa, min_id=self.nucmer_min_id, min_length=self.nucmer_min_len, breaklen=self.nucmer_breaklen)

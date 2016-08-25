@@ -14,6 +14,6 @@ class TestFaidx(unittest.TestCase):
         infile = os.path.join(data_dir, 'faidx_test_write_fa_subset.in.fa')
         expected = os.path.join(data_dir, 'faidx_test_write_fa_subset.out.fa')
         tmpfile = 'tmp.test_write_fa_subset.out.fa'
-        faidx.write_fa_subset(['seq1', 'seq3', 'seq4'], infile, tmpfile, samtools_exe=extern_progs.exe('samtools'))
+        faidx.write_fa_subset(['seq1', 'seq3', 'seq4'], infile, tmpfile)
         self.assertTrue(filecmp.cmp(expected, tmpfile, shallow=False))
         os.unlink(tmpfile)

@@ -5,7 +5,7 @@ import pyfastaq
 from ariba import common
 
 
-def write_fa_subset(seq_names, infile, outfile, samtools_exe='samtools', verbose=False, verbose_filehandle=sys.stdout):
+def write_fa_subset(seq_names, infile, outfile):
     if not os.path.exists(infile + '.fai'):
         pysam.faidx(infile)
 
