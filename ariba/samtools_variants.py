@@ -29,6 +29,9 @@ class SamtoolsVariants:
 
 
     def _make_vcf_and_read_depths_files(self):
+        if not os.path.exists(self.ref_fa + '.fai'):
+            pysam.faidx(self.ref_fa)
+
         tmp_vcf = self.vcf_file + '.tmp'
         with open(tmp_vcf, 'w') as f:
             print(pysam.mpileup(
