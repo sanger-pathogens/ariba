@@ -186,19 +186,10 @@ int run(char* infileIn, char* outprefixIn, uint32_t minDepth, float maxAlleleFre
         }
         else
         {
-            if (fields[4].substr(fields[4].size() - 3).compare("<*>"))
+            if (adString.substr(adString.size() - 2).compare(",0") == 0)
             {
-                std::cerr << "Unexpected format in column 5 of vcf file. Cannot continue. Line was:\n" << line << std::endl;
-                return 1;
+                adString.resize(adString.size() - 2);
             }
-
-            if (adString.substr(adString.size() - 2).compare(",0"))
-            {
-                std::cerr << "Unexpected format in AD=... part of vcf file. Cannot continue. Line was:\n" << line << std::endl;
-                return 1;
-            }
-
-            adString.resize(adString.size() - 2);
 
             if (fields[4].compare("<*>"))
             {
