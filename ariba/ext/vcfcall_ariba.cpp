@@ -129,7 +129,7 @@ bool adStringPassesFilter(std::string& adString, uint32_t minTotalDepth, uint32_
         totalDepth += *p;
     }
 
-    bool secondDepthOk = (depths.size() == 1 || (depths.size() > 1 && depths[1] >= minSecondDepth));
+    bool secondDepthOk = (depths.size() == 1 || (depths.size() > 1 && depths[depths.size() - 2] >= minSecondDepth));
     bool maxDepthOk = (totalDepth >= minTotalDepth && 1.0 * depths.back() / totalDepth <= maxAlleleFreq);
     return ( firstDepth < depths.back() || (secondDepthOk && maxDepthOk) );
 }
