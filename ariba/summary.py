@@ -118,7 +118,7 @@ class Summary:
 
                     for variant in cluster.variants:
                         if (self.show_known_vars and variant.known) or (self.show_novel_vars and not variant.known):
-                            this_cluster_dict['vars'][variant.var_string] = 'yes' if variant.het_percent is None else 'het'
+                            this_cluster_dict['vars'][variant.var_string] = 'yes' if (variant.het_percent is None or not variant.is_het) else 'het'
                             if variant.het_percent is not None:
                                 this_cluster_dict['vars'][variant.var_string + '.%'] = variant.het_percent
 

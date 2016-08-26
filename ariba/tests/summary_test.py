@@ -534,3 +534,31 @@ class TestSummary(unittest.TestCase):
         self.assertTrue(os.path.exists(tmp_tree))
         os.unlink(tmp_tree)
 
+
+    def test_whole_run(self):
+        '''Test whole run to check csv ok (skip making tree)'''
+        tmp_out = 'tmp.summary_test_whole_run.out'''
+        infiles = [
+            os.path.join(data_dir, 'summary_test_whole_run.in.1.tsv'),
+            os.path.join(data_dir, 'summary_test_whole_run.in.2.tsv'),
+        ]
+
+        s = summary.Summary(
+            tmp_out,
+            filenames=infiles,
+            make_phandango_tree=False,
+            show_var_groups=True,
+            show_known_vars=True,
+            show_novel_vars=True
+        )
+
+        s.run()
+        expected_file = os.path.join(data_dir, 'summary_test_whole_run.out.csv')
+        # we don't know the full path of the input files, so check all the other columns
+        with open(expected_file) as f:
+            expected = [line.rstrip().split(',', maxsplit=1)[1] for line in f]
+        with open(tmp_out + '.csv') as f:
+            got = [line.rstrip().split(',', maxsplit=1)[1] for line in f]
+        self.assertEqual(expected, got)
+        os.unlink(tmp_out + '.csv')
+        os.unlink(tmp_out + '.phandango.csv')
