@@ -55,13 +55,14 @@ class SummaryClusterVariant:
             try:
                 is_het = False
 
-                if data_dict['var_type'] == 'HET':
+                if data_dict['ref_ctg_change'] != '.':
+                    var_nucleotide = data_dict['ref_ctg_change'][-1]
+                elif data_dict['var_type'] == 'HET':
                     var_nucleotide = data_dict['smtls_alt_nt']
-                    is_het = True
                 elif data_dict['known_var_change'] != '.':
                     var_nucleotide = data_dict['known_var_change'][-1]
                 else:
-                    var_nucleotide = data_dict['ref_ctg_change'][-1]
+                    return False, None
 
                 if var_nucleotide == '.':
                     return False, None
@@ -70,7 +71,9 @@ class SummaryClusterVariant:
                 total_depth = sum(depths)
                 var_depth = nuc_to_depth.get(var_nucleotide, 0)
 
-                if not is_het:
+                if data_dict['var_type'] == 'HET':
+                    is_het = True
+                else:
                     is_het = SummaryClusterVariant._depths_look_het(depths)
 
                 return is_het, round(100 * var_depth / total_depth, 1)
