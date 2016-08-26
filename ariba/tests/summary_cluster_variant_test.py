@@ -23,6 +23,29 @@ class TestSummaryClusterVariant(unittest.TestCase):
             self.assertEqual(expected[i], summary_cluster_variant.SummaryClusterVariant._has_nonsynonymous(dicts[i]))
 
 
+    def test_depths_look_het(self):
+        '''test _depths_look_het'''
+        tests = [
+            (['1'], False),
+            (['2'], False),
+            (['3'], False),
+            (['4'], False),
+            (['5'], False),
+            (['90', '1'], False),
+            (['90', '9'], False),
+            (['90', '10'], True),
+            (['9', '1'], False),
+            (['9', '2'], True),
+            (['1', '2'], True),
+            (['90', '5', '5'], True),
+            (['90', '2', '1', '1'], False),
+            (['97', '2', '1'], False),
+        ]
+
+        for depths, expected in tests:
+            self.assertEqual(expected, summary_cluster_variant.SummaryClusterVariant._depths_look_het(depths))
+
+
     def  test_get_het_percent(self):
         '''test _get_het_percent'''
         lines = [

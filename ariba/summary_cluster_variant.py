@@ -30,6 +30,21 @@ class SummaryClusterVariant:
 
 
     @classmethod
+    def _depths_look_het(cls, depths_in):
+        depths = [int(x) for x in depths_in]
+        sorted_depths = sorted(depths)
+        print(depths, sorted_depths)
+        min_var_read_depth = 5
+        min_second_var_read_depth = 2
+        max_allele_freq = 0.90
+        total_depth = sum(depths)
+        second_depth_ok = len(depths) == 1 or (len(depths) > 1 and sorted_depths[-2] >= min_second_var_read_depth)
+        max_depth_ok = total_depth >= min_var_read_depth and sorted_depths[-1] / total_depth <= max_allele_freq
+        print(depths[0] < sorted_depths[-1], second_depth_ok, max_depth_ok)
+        return depths[0] < sorted_depths[-1] or (second_depth_ok and max_depth_ok)
+
+
+    @classmethod
     def _get_het_percent(cls, data_dict):
         if data_dict['gene'] == '1' or not (data_dict['ref_ctg_effect'] == 'SNP' or data_dict['var_type'] == 'HET') or data_dict['smtls_alt_nt'] == '.' or ';' in data_dict['smtls_alt_nt'] or data_dict['smtls_alt_depth'] == 'ND':
             return None
