@@ -66,7 +66,13 @@ to the following dependencies.
 For example, you could specify an exact version of a Samtools executable
 that you compiled and downloaded in your home directory (assuming BASH):
 
-    export ARIBA_SAMTOOLS=$HOME/mash-1.0.2/mash
+    export ARIBA_BOWTIE2=$HOME/bowtie2-2.1.0/bowtie2
+
+Note that ARIBA also runs `bowtie2-build`, for which it uses the
+`bowtie2` executable with `-build` appended. So in this case
+it would try to use
+
+    $HOME/bowtie2-2.1.0/bowtie2-build
 
 
 ### Temporary files
