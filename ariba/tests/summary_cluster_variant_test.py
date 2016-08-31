@@ -23,22 +23,59 @@ class TestSummaryClusterVariant(unittest.TestCase):
             self.assertEqual(expected[i], summary_cluster_variant.SummaryClusterVariant._has_nonsynonymous(dicts[i]))
 
 
-    def  test_get_het_percent(self):
-        '''test _get_het_percent'''
+    def test_depths_look_het(self):
+        '''test _depths_look_het'''
+        tests = [
+            ([1], False),
+            ([2], False),
+            ([3], False),
+            ([4], False),
+            ([5], False),
+            ([90, 1], False),
+            ([90, 9], False),
+            ([90, 10], True),
+            ([9, 1], False),
+            ([9, 2], True),
+            ([1, 2], True),
+            ([90, 5, 5], True),
+            ([90, 2, 1, 1], False),
+            ([97, 2, 1], False),
+        ]
+
+        for depths, expected in tests:
+            self.assertEqual(expected, summary_cluster_variant.SummaryClusterVariant._depths_look_het(depths))
+
+
+    def  test_get_is_het_and_percent(self):
+        '''test _get_is_het_and_percent'''
         lines = [
             'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
             'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA42T\t1\tA42T\tSNP\t42\t42\tA\t84\t84\tT\t40\tA\t10,30\tnon_coding1:0:0:A42T:id1:foo_bar\tspam eggs',
             'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA62T\t1\tA62T\tSNP\t62\t62\tA\t84\t84\tA\t40\tT\t10,30\tnon_coding1:0:0:A62T:id2:foo_bar\tspam eggs',
             'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA82T\t1\tA82T\tSNP\t82\t82\tA\t84\t84\tA\t100\tT,G\t10,40,50\tnon_coding1:0:0:A82T:.:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA82T\t1\tA82T\tSNP\t82\t82\tA\t84\t84\tA\t100\tT\t95,5\tnon_coding1:0:0:A82T:.:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA82T\t1\tA82T\tSNP\t82\t82\tA\t84\t84\tA\t100\tT\t90,10\tnon_coding1:0:0:A82T:.:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA82T\t1\tA82T\tSNP\t82\t82\tA\t84\t84\tA\t100\tT,C\t90,6,4\tnon_coding1:0:0:A82T:.:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA82T\t1\tA82T\tSNP\t82\t82\tA\t84\t84\tA\t100\tT,C\t3,7,90\tnon_coding1:0:0:A82T:.:foo_bar\tspam eggs',
             'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tHET\t.\t.\t.\t.\t.\t.\t.\t.\t84\t84\tA\t50\tT\t40,10\t.\t.'
         ]
 
-        expected = [None, 25.0, 75.0, 40.0, 20.0]
+        expected = [
+            (False, None),
+            (True, 25.0),
+            (True, 75.0),
+            (True, 40.0),
+            (False, 5.0),
+            (True, 10.0),
+            (True, 6.0),
+            (True, 7.0),
+            (True, 20.0)
+        ]
         assert len(lines) == len(expected)
 
         for i in range(len(lines)):
             data_dict = summary_cluster.SummaryCluster.line2dict(lines[i])
-            got = summary_cluster_variant.SummaryClusterVariant._get_het_percent(data_dict)
+            got = summary_cluster_variant.SummaryClusterVariant._get_is_het_and_percent(data_dict)
             self.assertEqual(expected[i], got)
 
 

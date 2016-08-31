@@ -1,5 +1,3 @@
-from ariba import flag, report
-
 class Error (Exception): pass
 
 class SummaryClusterVariant:
@@ -32,9 +30,21 @@ class SummaryClusterVariant:
 
 
     @classmethod
-    def _get_het_percent(cls, data_dict):
+    def _depths_look_het(cls, depths):
+        sorted_depths = sorted(depths)
+        min_var_read_depth = 5
+        min_second_var_read_depth = 2
+        max_allele_freq = 0.90
+        total_depth = sum(depths)
+        second_depth_ok = len(depths) == 1 or (len(depths) > 1 and sorted_depths[-2] >= min_second_var_read_depth)
+        max_depth_ok = total_depth >= min_var_read_depth and sorted_depths[-1] / total_depth <= max_allele_freq
+        return depths[0] < sorted_depths[-1] or (second_depth_ok and max_depth_ok)
+
+
+    @classmethod
+    def _get_is_het_and_percent(cls, data_dict):
         if data_dict['gene'] == '1' or not (data_dict['ref_ctg_effect'] == 'SNP' or data_dict['var_type'] == 'HET') or data_dict['smtls_alt_nt'] == '.' or ';' in data_dict['smtls_alt_nt'] or data_dict['smtls_alt_depth'] == 'ND':
-            return None
+            return False, None
         else:
             nucleotides = [data_dict['ctg_nt']] + data_dict['smtls_alt_nt'].split(',')
             depths = data_dict['smtls_alt_depth'].split(',')
@@ -43,22 +53,32 @@ class SummaryClusterVariant:
                 raise Error('Mismatch in number of inferred nucleotides from ctg_nt, smtls_alt_nt, smtls_alt_depth columns. Cannot continue\n' + str(data_dict))
 
             try:
-                if data_dict['var_type'] == 'HET':
+                is_het = False
+
+                if data_dict['ref_ctg_change'] != '.':
+                    var_nucleotide = data_dict['ref_ctg_change'][-1]
+                elif data_dict['var_type'] == 'HET':
                     var_nucleotide = data_dict['smtls_alt_nt']
                 elif data_dict['known_var_change'] != '.':
                     var_nucleotide = data_dict['known_var_change'][-1]
                 else:
-                    var_nucleotide = data_dict['ref_ctg_change'][-1]
+                    return False, None
 
                 if var_nucleotide == '.':
-                    return None
+                    return False, None
                 depths = [int(x) for x in depths]
                 nuc_to_depth = dict(zip(nucleotides, depths))
                 total_depth = sum(depths)
                 var_depth = nuc_to_depth.get(var_nucleotide, 0)
-                return round(100 * var_depth / total_depth, 1)
+
+                if data_dict['var_type'] == 'HET':
+                    is_het = True
+                else:
+                    is_het = SummaryClusterVariant._depths_look_het(depths)
+
+                return is_het, round(100 * var_depth / total_depth, 1)
             except:
-                return None
+                return False, None
 
 
     def _get_nonsynon_variant_data(self, data_dict):
@@ -85,5 +105,5 @@ class SummaryClusterVariant:
         else:
             self.var_string = data_dict['ref_ctg_effect']
 
-        self.het_percent = SummaryClusterVariant._get_het_percent(data_dict)
+        self.is_het, self.het_percent = SummaryClusterVariant._get_is_het_and_percent(data_dict)
 

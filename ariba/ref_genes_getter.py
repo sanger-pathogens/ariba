@@ -2,7 +2,6 @@ class Error (Exception): pass
 
 import os
 import re
-import sys
 import shutil
 import tarfile
 import pyfastaq
@@ -26,11 +25,11 @@ argannot_ref = '"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resi
 
 
 class RefGenesGetter:
-    def __init__(self, ref_db, genetic_code=11, version=None):
+    def __init__(self, ref_db, version=None):
         if ref_db not in allowed_ref_dbs:
             raise Error('Error in RefGenesGetter. ref_db must be one of: ' + str(allowed_ref_dbs) + ', but I got "' + ref_db)
         self.ref_db=ref_db
-        self.genetic_code = genetic_code
+        self.genetic_code = 11
         self.max_download_attempts = 3
         self.sleep_time = 2
         self.version = version

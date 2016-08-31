@@ -10,14 +10,12 @@ class Error (Exception): pass
 
 
 prog_to_default = {
-    'bcftools': 'bcftools',
     'bowtie2': 'bowtie2',
     'cdhit': 'cd-hit-est',
     'cdhit2d': 'cd-hit-est-2d',
     #'gapfiller': 'GapFiller.pl',
     'mash': 'mash',
     'nucmer' : 'nucmer',
-    'samtools': 'samtools',
     #'spades': 'spades.py',
     #'sspace': 'SSPACE_Basic_v2.0.pl',
 }
@@ -27,27 +25,23 @@ prog_to_env_var = {x: 'ARIBA_' + x.upper() for x in prog_to_default if x not in 
 
 
 prog_to_version_cmd = {
-    'bcftools': ('', re.compile('^Version: ([0-9\.]+)')),
     'bowtie2': ('--version', re.compile('.*bowtie2.*version (.*)$')),
     'cdhit': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
     'cdhit2d': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
     #'gapfiller': ('', re.compile('^Usage: .*pl \[GapFiller_(.*)\]')),
     'mash': ('', re.compile('^Mash version (.*)$')),
     'nucmer': ('--version', re.compile('^NUCmer \(NUCleotide MUMmer\) version ([0-9\.]+)')),
-    'samtools': ('', re.compile('^Version: ([0-9\.]+)')),
     #'spades': ('', re.compile('^SPAdes genome assembler v\.?([0-9\.]+)')),
     #'sspace': ('', re.compile('^Usage: .*pl \[SSPACE_(.*)\]')),
 }
 
 
 min_versions = {
-    'bcftools': '1.3',
     'bowtie2': '2.1.0',
     'cdhit': '4.6',
     'cdhit2d': '4.6',
     'mash': '1.0.2',
     'nucmer': '3.1',
-    'samtools': '1.3',
     #'spades': '3.5.0',
 }
 

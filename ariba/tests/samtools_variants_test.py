@@ -1,11 +1,11 @@
 import unittest
 import os
+import filecmp
 import pyfastaq
-from ariba import samtools_variants, external_progs
+from ariba import samtools_variants
 
 modules_dir = os.path.dirname(os.path.abspath(samtools_variants.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
-extern_progs = external_progs.ExternalProgs()
 
 
 def file2lines(filename):
@@ -22,13 +22,12 @@ class TestSamtoolsVariants(unittest.TestCase):
         bam = os.path.join(data_dir, 'samtools_variants_make_vcf_and_depths_files.bam')
         expected_vcf = os.path.join(data_dir, 'samtools_variants_make_vcf_and_depths_files.expect.vcf')
         expected_depths = os.path.join(data_dir, 'samtools_variants_make_vcf_and_depths_files.expect.depths.gz')
+        expected_coverage = os.path.join(data_dir, 'samtools_variants_make_vcf_and_depths_files.expect.cov')
         tmp_prefix = 'tmp.test_make_vcf_and_depths_files'
         sv = samtools_variants.SamtoolsVariants(
             ref,
             bam,
             tmp_prefix,
-            samtools_exe=extern_progs.exe('samtools'),
-            bcftools_exe=extern_progs.exe('bcftools')
         )
         sv._make_vcf_and_read_depths_files()
 
@@ -67,6 +66,9 @@ class TestSamtoolsVariants(unittest.TestCase):
         os.unlink(sv.vcf_file)
         os.unlink(sv.read_depths_file)
         os.unlink(sv.read_depths_file + '.tbi')
+
+        self.assertTrue(filecmp.cmp(expected_coverage, tmp_prefix + '.contig_depths', shallow=False))
+        os.unlink(tmp_prefix + '.contig_depths')
 
 
     def test_get_read_depths(self):
@@ -127,7 +129,7 @@ class TestSamtoolsVariants(unittest.TestCase):
     def test_total_depth_per_contig(self):
         '''test total_depth_per_contig'''
         infile = os.path.join(data_dir, 'samtools_variants_test_total_depth_per_contig')
-        expected = {'scaff1': 67, 'scaff2': 72}
+        expected = {'scaff1': 42, 'scaff64738': 11}
         got = samtools_variants.SamtoolsVariants.total_depth_per_contig(infile)
         self.assertEqual(expected, got)
 
@@ -154,8 +156,6 @@ class TestSamtoolsVariants(unittest.TestCase):
             ref_fa,
             bam,
             tmp_prefix,
-            samtools_exe=extern_progs.exe('samtools'),
-            bcftools_exe=extern_progs.exe('bcftools')
         )
         samtools_vars.run()
         tests = [
@@ -170,3 +170,4 @@ class TestSamtoolsVariants(unittest.TestCase):
         os.unlink(samtools_vars.vcf_file)
         os.unlink(samtools_vars.read_depths_file)
         os.unlink(samtools_vars.read_depths_file + '.tbi')
+        os.unlink(samtools_vars.contig_depths_file)
