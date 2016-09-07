@@ -216,16 +216,29 @@ class RefGenesGetter:
         print('Combining downloaded fasta files...')
         fout_fa = pyfastaq.utils.open_file_write(final_fasta)
         fout_tsv = pyfastaq.utils.open_file_write(final_tsv)
+        used_names = {}
 
-        for filename in os.listdir('database'):
+        for filename in os.listdir():
             if filename.endswith('.fsa'):
                 print('   ', filename)
-                prefix = filename.split('.')[0]
-                file_reader = pyfastaq.sequences.file_reader(os.path.join('database', filename))
+                file_reader = pyfastaq.sequences.file_reader(filename)
                 for seq in file_reader:
-                    seq.id = prefix + '.' + seq.id
+                    try:
+                        prefix, suffix = seq.id.split('_', maxsplit=1)
+                        description = 'Original name: ' + seq.id
+                        seq.id = prefix + '.' + suffix
+                    except:
+                        description = '.'
+
+                    # names are not unique across the files
+                    if seq.id in used_names:
+                        used_names[seq.id] += 1
+                        seq.id += '_' + str(used_names[seq.id])
+                    else:
+                        used_names[seq.id] = 1
+
                     print(seq, file=fout_fa)
-                    print(seq.id, '1', '0', '.', '.', '.', sep='\t', file=fout_tsv)
+                    print(seq.id, '1', '0', '.', '.', description, sep='\t', file=fout_tsv)
 
         pyfastaq.utils.close(fout_fa)
         pyfastaq.utils.close(fout_tsv)
