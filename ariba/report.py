@@ -31,7 +31,7 @@ columns = [
     'ctg_end',               # 23 end position of variant in contig
     'ctg_nt',                # 24 nucleotide(s) in contig at variant position
     'smtls_total_depth',     # 25 total read depth at variant start position in contig, reported by mpileup
-    'smtls_alt_nt',          # 26 alt nucleotides on contig, reported by mpileup
+    'smtls_nts',          # 26 alt nucleotides on contig, reported by mpileup
     'smtls_alt_depth',       # 27 alt depth on contig, reported by mpileup
     'var_description',       # 28 description of variant from reference metdata
     'free_text',             # 29 other free text about reference sequence, from reference metadata
@@ -53,7 +53,7 @@ var_columns = [
     'ctg_end',
     'ctg_nt',
     'smtls_total_depth',
-    'smtls_alt_nt',
+    'smtls_nts',
     'smtls_alt_depth',
     'var_description',
 ]
