@@ -78,10 +78,10 @@ class TestSamtoolsVariants(unittest.TestCase):
         tests = [
             ( ('ref1', 42), None ),
             ( ('ref2', 1), None ),
-            ( ('ref1', 0), ('G', '.', 1, '1') ),
-            ( ('ref1', 2), ('T', 'A', 3, '2,1') ),
-            ( ('ref1', 3), ('C', 'A,G', 42, '21,11,10') ),
-            ( ('ref1', 4), ('C', 'AC', 41, '0,42') )
+            ( ('ref1', 0), ('G', 1, '1') ),
+            ( ('ref1', 2), ('T,A', 3, '2,1') ),
+            ( ('ref1', 3), ('C,A,G', 42, '21,11,10') ),
+            ( ('ref1', 4), ('C,AC', 41, '0,42') )
         ]
 
         for (name, position), expected in tests:
@@ -113,12 +113,12 @@ class TestSamtoolsVariants(unittest.TestCase):
         ]
         expected = {
             '16__cat_2_M35190.scaffold.1': {
-                92: ('T', 'A', 123, '65,58'),
-                179: ('A', 'T', 86, '41,45'),
-                263: ('G', 'C', 97, '53,44'),
+                92: ('T,A',123, '65,58'),
+                179: ('A,T', 86, '41,45'),
+                263: ('G,C', 97, '53,44'),
             },
             '16__cat_2_M35190.scaffold.6': {
-                93: ('T', 'G', 99, '56,43')
+                93: ('T,G', 99, '56,43')
             }
         }
 
@@ -159,9 +159,9 @@ class TestSamtoolsVariants(unittest.TestCase):
         )
         samtools_vars.run()
         tests = [
-            (('ref', 425), ('C', 'T', 31, '18,13')),
-            (('not_a_ref', 10), ('ND', 'ND', 'ND', 'ND')),
-            (('ref', 1000000000), ('ND', 'ND', 'ND', 'ND'))
+            (('ref', 425), ('C,T', 31, '18,13')),
+            (('not_a_ref', 10), ('ND', 'ND', 'ND')),
+            (('ref', 1000000000), ('ND', 'ND', 'ND'))
         ]
         for (ref, pos), expected in tests:
             got = samtools_vars.get_depths_at_position(ref, pos)
