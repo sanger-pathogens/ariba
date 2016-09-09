@@ -91,11 +91,12 @@ def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster,
     if ref_nuc_range is None:
         return None
 
+    bases = []
     ctg_nts = []
     ref_nts = []
     smtls_total_depths = []
-    smtls_alt_nts = []
-    smtls_alt_depths = []
+    smtls_nts = []
+    smtls_depths = []
     contig_positions = []
 
     for ref_position in range(ref_nuc_range[0], ref_nuc_range[1]+1, 1):
@@ -106,17 +107,19 @@ def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster,
             ref_nts.append(cluster.ref_sequence[ref_position])
             contig_position, in_indel = nucmer_match.qry_coords_from_ref_coord(ref_position, variant_list)
             contig_positions.append(contig_position)
-            ref, alt, total_depth, alt_depths = cluster.samtools_vars.get_depths_at_position(contig_name, contig_position)
-            ctg_nts.append(ref)
-            smtls_alt_nts.append(alt)
+            bases, total_depth, base_depths = cluster.samtools_vars.get_depths_at_position(contig_name, contig_position)
+            #ctg_nts.append(ref)
+            #samtools_nts.append(bases)
+            ctg_nts.append(cluster.assembly.sequences[contig_name][contig_position])
+            smtls_nts.append(bases)
             smtls_total_depths.append(total_depth)
-            smtls_alt_depths.append(alt_depths)
+            smtls_depths.append(base_depths)
 
     ctg_nts = ';'.join(ctg_nts) if len(ctg_nts) else '.'
     ref_nts = ';'.join(ref_nts) if len(ref_nts) else '.'
-    smtls_alt_nts = ';'.join(smtls_alt_nts) if len(smtls_alt_nts) else '.'
+    smtls_nts = ';'.join(smtls_nts) if len(smtls_nts) else '.'
     smtls_total_depths = ';'.join([str(x)for x in smtls_total_depths]) if len(smtls_total_depths) else '.'
-    smtls_alt_depths = ';'.join([str(x)for x in smtls_alt_depths]) if len(smtls_alt_depths) else '.'
+    smtls_depths = ';'.join([str(x)for x in smtls_depths]) if len(smtls_depths) else '.'
     ctg_start = str(min(contig_positions) + 1) if contig_positions is not None else '.'
     ctg_end = str(max(contig_positions) + 1) if contig_positions is not None else '.'
 
@@ -128,8 +131,8 @@ def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster,
         ctg_end,
         ctg_nts,
         smtls_total_depths,
-        smtls_alt_nts,
-        smtls_alt_depths
+        smtls_nts,
+        smtls_depths
     ]]
 
 
@@ -206,9 +209,9 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                     depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, var.qry_start)
 
                     if depths_tuple is not None:
-                        smtls_alt_nt.append(depths_tuple[1])
-                        smtls_total_depth.append(str(depths_tuple[2]))
-                        smtls_alt_depth.append(str(depths_tuple[3]))
+                        smtls_alt_nt.append(depths_tuple[0])
+                        smtls_total_depth.append(str(depths_tuple[1]))
+                        smtls_alt_depth.append(str(depths_tuple[2]))
 
                 smtls_total_depth = ';'.join(smtls_total_depth) if len(smtls_total_depth) else '.'
                 smtls_alt_nt = ';'.join(smtls_alt_nt) if len(smtls_alt_nt) else '.'
@@ -271,7 +274,9 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                     var_string = None
                 else:
                     ref_nt = cluster.ref_sequence[ref_coord]
-                    var_string = depths_tuple[0] + str(ref_coord + 1) + depths_tuple[1]
+                    ctg_nt = cluster.assembly.sequences[contig_name][var_position]
+                    alt_strings = [x for x in depths_tuple[0].split(',') if x != ctg_nt]
+                    var_string = ctg_nt + str(ref_coord + 1) + ','.join(alt_strings)
                     ref_coord = str(ref_coord + 1)
 
                 if var_string not in reported_known_vars:
@@ -280,10 +285,10 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                         'HET', # var_type
                         '.', '.', '.', var_string, '.', ref_coord, ref_coord, ref_nt, # var_seq_type ... ref_nt
                         str(var_position + 1), str(var_position + 1), # ctg_start, ctg_end
-                        depths_tuple[0], # ctg_nt
-                        str(depths_tuple[2]), # smtls_total_depth
-                        depths_tuple[1], # smtls_alt_nt
-                        str(depths_tuple[3]), # smtls_alt_depth
+                        ctg_nt, # ctg_nt
+                        str(depths_tuple[1]), # smtls_total_depth
+                        depths_tuple[0], # smtls_alt_nt
+                        str(depths_tuple[2]), # smtls_alt_depth
                         '.',
                         free_text_column,
                     ]
