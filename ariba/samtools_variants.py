@@ -59,7 +59,6 @@ class SamtoolsVariants:
     @classmethod
     def _get_read_depths(cls, read_depths_file, sequence_name, position):
         '''Returns total read depth and depth of reads supporting alternative (if present)'''
-        print('_get_read_depths', sequence_name, position, sep='\t')
         assert os.path.exists(read_depths_file)
         assert os.path.exists(read_depths_file + '.tbi')
         tbx = pysam.TabixFile(read_depths_file)
@@ -159,10 +158,8 @@ class SamtoolsVariants:
 
 
     def get_depths_at_position(self, seq_name, position):
-        print('get_depths_at_position', seq_name, position)
         d = self._get_variants(self.vcf_file, self.read_depths_file, [(seq_name, position)])
         if seq_name in d and position in d[seq_name]:
-            print('get_depths_at_position return',  d[seq_name][position])
             return d[seq_name][position]
         else:
             return 'ND', 'ND', 'ND'
