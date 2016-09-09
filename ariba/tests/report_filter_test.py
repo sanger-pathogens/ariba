@@ -67,7 +67,7 @@ class TestReportFilter(unittest.TestCase):
             'ctg_nt':             'C',
             'smtls_total_depth':  '500',
             'smtls_nts':       '.',
-            'smtls_alt_depth':    '500',
+            'smtls_nts_depth':    '500',
             'var_description':    'a:n:C42T:id1:foo',
             'free_text':          'free text',
         }
@@ -108,7 +108,7 @@ class TestReportFilter(unittest.TestCase):
             'ctg_nt':             'C',
             'smtls_total_depth':  '500',
             'smtls_nts':       '.',
-            'smtls_alt_depth':    '500',
+            'smtls_nts_depth':    '500',
             'var_description':    'a:n:C42T:id1:foo',
             'free_text':          'free text',
         }

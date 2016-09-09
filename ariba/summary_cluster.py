@@ -200,10 +200,10 @@ class SummaryCluster:
         if data_dict['known_var'] == '1' and data_dict['ref_ctg_effect'] == 'SNP' \
           and data_dict['smtls_nts'] != '.' and ';' not in data_dict['smtls_nts']:
             nucleotides = [data_dict['ctg_nt']] + data_dict['smtls_nts'].split(',')
-            depths = data_dict['smtls_alt_depth'].split(',')
+            depths = data_dict['smtls_nts_depth'].split(',')
 
             if len(nucleotides) != len(depths):
-                raise Error('Mismatch in number of inferred nucleotides from ctg_nt, smtls_nts, smtls_alt_depth columns. Cannot continue\n' + str(data_dict))
+                raise Error('Mismatch in number of inferred nucleotides from ctg_nt, smtls_nts, smtls_nts_depth columns. Cannot continue\n' + str(data_dict))
 
             try:
                 var_nucleotide = data_dict['known_var_change'][-1]

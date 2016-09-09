@@ -38,7 +38,7 @@ class TestSummaryCluster(unittest.TestCase):
             'ctg_nt': 'T',
             'smtls_total_depth': '17',
             'smtls_nts': '.',
-            'smtls_alt_depth': '17',
+            'smtls_nts_depth': '17',
             'var_description': 'noncoding1:1:0:A14T:var_group1:ref has wild type, foo bar',
             'var_group': 'var_group1',
             'free_text': 'some free text'
@@ -318,7 +318,7 @@ class TestSummaryCluster(unittest.TestCase):
         d['known_var_change'] = 'A42T'
         d['ctg_nt'] = 'A'
         d['smtls_nts'] = 'T'
-        d['smtls_alt_depth'] = '52,48'
+        d['smtls_nts_depth'] = '52,48'
         self.assertEqual(('A42T', 48.0), summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
 
 
