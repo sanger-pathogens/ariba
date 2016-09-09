@@ -126,13 +126,15 @@ class Summary:
                             if variant.var_group not in seen_groups:
                                 seen_groups[variant.var_group] = {'yes': 0, 'het': 0}
 
-                            if variant.het_percent is None:
-                                seen_groups[variant.var_group]['yes'] += 1
-                                this_cluster_dict['groups'][variant.var_group] = 'yes'
-                            else:
+                            if variant.het_percent is not None:
+                                this_cluster_dict['groups'][variant.var_group + '.%'] = variant.het_percent
+
+                            if variant.is_het:
                                 seen_groups[variant.var_group]['het'] += 1
                                 this_cluster_dict['groups'][variant.var_group] = 'het'
-                                this_cluster_dict['groups'][variant.var_group + '.%'] = variant.het_percent
+                            else:
+                                seen_groups[variant.var_group]['yes'] += 1
+                                this_cluster_dict['groups'][variant.var_group] = 'yes'
 
                     for group, d in seen_groups.items():
                         if d['het'] > 0 and d['het'] + d['yes'] > 1:

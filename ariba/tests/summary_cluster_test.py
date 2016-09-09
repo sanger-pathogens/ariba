@@ -8,7 +8,7 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 class TestSummaryCluster(unittest.TestCase):
     def test_line2dict(self):
         '''Test _line2dict'''
-        line = 'refname\t1\t0\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:var_group1:ref has wild type, foo bar\tsome free text'
+        line = 'refname\t1\t0\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:var_group1:ref has wild type, foo bar\tsome free text'
 
         expected = {
             'ref_name': 'refname',
@@ -37,7 +37,7 @@ class TestSummaryCluster(unittest.TestCase):
             'ctg_end': 84,
             'ctg_nt': 'T',
             'smtls_total_depth': '17',
-            'smtls_nts': '.',
+            'smtls_nts': 'T',
             'smtls_nts_depth': '17',
             'var_description': 'noncoding1:1:0:A14T:var_group1:ref has wild type, foo bar',
             'var_group': 'var_group1',
@@ -51,9 +51,9 @@ class TestSummaryCluster(unittest.TestCase):
         '''Test add_data_dict'''
         cluster = summary_cluster.SummaryCluster()
         self.assertTrue(cluster.name is None)
-        line1 = 'refname\t1\t0\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
-        line2 = 'refname\t1\t0\t19\t78\tcluster2\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id2:ref has wild type, foo bar\tsome free text'
-        line3 = 'refname2\t1\t0\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id3:ref has wild type, foo bar\tsome free text'
+        line1 = 'refname\t1\t0\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line2 = 'refname\t1\t0\t19\t78\tcluster2\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id2:ref has wild type, foo bar\tsome free text'
+        line3 = 'refname2\t1\t0\t19\t78\tcluster\t120\t120\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id3:ref has wild type, foo bar\tsome free text'
         data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
         data_dict2 = summary_cluster.SummaryCluster.line2dict(line2)
         data_dict3 = summary_cluster.SummaryCluster.line2dict(line3)
@@ -71,9 +71,9 @@ class TestSummaryCluster(unittest.TestCase):
         '''Test pc_id_of_longest'''
         cluster = summary_cluster.SummaryCluster()
         self.assertTrue(cluster.name is None)
-        line1 = 'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
-        line2 = 'refname\t1\t0\t19\t78\tcluster\t120\t119\t98.20\tctg_name2\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
-        line3 = 'refname\t1\t0\t19\t78\tcluster\t120\t114\t98.32\tctg_name3\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line1 = 'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line2 = 'refname\t1\t0\t19\t78\tcluster\t120\t119\t98.20\tctg_name2\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line3 = 'refname\t1\t0\t19\t78\tcluster\t120\t114\t98.32\tctg_name3\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
         data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
         data_dict2 = summary_cluster.SummaryCluster.line2dict(line2)
         data_dict3 = summary_cluster.SummaryCluster.line2dict(line3)
@@ -85,7 +85,7 @@ class TestSummaryCluster(unittest.TestCase):
 
     def test_to_cluster_summary_number(self):
         '''Test _to_cluster_summary_assembled'''
-        line = 'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line = 'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text'
         data_dict = summary_cluster.SummaryCluster.line2dict(line)
 
         tests = [
@@ -122,9 +122,9 @@ class TestSummaryCluster(unittest.TestCase):
     def test_has_known_variant(self):
         '''Test _has_known_variant'''
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
         ]
@@ -139,9 +139,9 @@ class TestSummaryCluster(unittest.TestCase):
 
     def test_has_any_known_variant(self):
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
         ]
@@ -159,10 +159,10 @@ class TestSummaryCluster(unittest.TestCase):
     def test_has_nonsynonymous(self):
         '''Test _has_nonsynonymous'''
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
         ]
@@ -178,11 +178,11 @@ class TestSummaryCluster(unittest.TestCase):
     def test_has_any_nonsynonymous(self):
         '''Test _has_any_nonsynonymous'''
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:N_ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\t.\tMULTIPLE\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:N_ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\t.\tMULTIPLE\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
         ]
 
         expected = ['no', 'yes', 'no', 'yes', 'yes']
@@ -198,9 +198,9 @@ class TestSummaryCluster(unittest.TestCase):
     def test_has_novel_nonsynonymous(self):
         '''Test _has_novel_nonsynonymous'''
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
         ]
@@ -216,8 +216,8 @@ class TestSummaryCluster(unittest.TestCase):
     def test_has_any_novel_nonsynonymous(self):
         '''Test _has_any_novel_nonsynonymous'''
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
@@ -236,11 +236,11 @@ class TestSummaryCluster(unittest.TestCase):
     def test_to_cluster_summary_has_known_nonsynonymous(self):
         '''Test _to_cluster_summary_has_known_nonsynonymous'''
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\t.\tn\t.\t.\t.\tMULTIPLE\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\t.\tn\t.\t.\t.\tMULTIPLE\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
         ]
 
         expected = ['yes', 'yes', 'no', 'no', 'no']
@@ -257,11 +257,11 @@ class TestSummaryCluster(unittest.TestCase):
     def test_to_cluster_summary_has_novel_nonsynonymous(self):
         '''Test _to_cluster_summary_has_novel_nonsynonymous'''
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\t.\tn\t.\t.\t.\tMULTIPLE\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\t.\tn\t.\t.\t.\tMULTIPLE\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
         ]
 
         expected = ['no', 'no', 'no', 'yes', 'yes']
@@ -278,11 +278,11 @@ class TestSummaryCluster(unittest.TestCase):
     def test_to_cluster_summary_has_nonsynonymous(self):
         '''Test _to_cluster_summary_has_nonsynonymous'''
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\t.\tn\t.\t.\t.\tMULTIPLE\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\t.\tn\t.\t.\t.\tMULTIPLE\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
         ]
 
         expected = ['no', 'yes', 'no', 'yes', 'yes']
@@ -317,7 +317,7 @@ class TestSummaryCluster(unittest.TestCase):
 
         d['known_var_change'] = 'A42T'
         d['ctg_nt'] = 'A'
-        d['smtls_nts'] = 'T'
+        d['smtls_nts'] = 'A,T'
         d['smtls_nts_depth'] = '52,48'
         self.assertEqual(('A42T', 48.0), summary_cluster.SummaryCluster._get_known_noncoding_het_snp(d))
 
@@ -369,16 +369,16 @@ class TestSummaryCluster(unittest.TestCase):
     def test_has_match(self):
         '''Test _has_match'''
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:1:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:1:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tp\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:1:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:1:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tp\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:1:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:1:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:1:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tp\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:1:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:1:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tp\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:1:A14T:id1:ref has wild type, foo bar\tsome free text',
         ]
 
         expected = ['yes', 'yes', 'yes', 'no', 'yes', 'yes', 'yes', 'yes', 'no', 'no']
@@ -396,14 +396,14 @@ class TestSummaryCluster(unittest.TestCase):
     def test_has_var_groups(self):
         '''Test has_var_groups'''
         lines = [
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id2:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id3:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id4:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tp\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:0:A14T:id5:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:1:A14T:id6:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:1:A14T:id7:ref has wild type, foo bar\tsome free text',
-            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tp\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:1:1:A14T:id7:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSYN\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id2:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id3:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id4:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tp\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id5:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:1:A14T:id6:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tp\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:1:A14T:id7:ref has wild type, foo bar\tsome free text',
+            'refname\t1\t1\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tp\tA14T\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:1:A14T:id7:ref has wild type, foo bar\tsome free text',
         ]
         dicts = [summary_cluster.SummaryCluster.line2dict(line) for line in lines]
         cluster = summary_cluster.SummaryCluster()
@@ -416,7 +416,7 @@ class TestSummaryCluster(unittest.TestCase):
 
     def test_column_summary_data(self):
         '''Test column_summary_data'''
-        line1 = 'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:n:A14T:id1:foo_bar\tspam eggs'
+        line1 = 'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnon_coding1:n:A14T:id1:foo_bar\tspam eggs'
         line2 = 'ref1\t0\t0\t531\t78\tcluster1\t120\t95\t98.42\tctg_name\t279\t24.4\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tsome free text'
 
         data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
@@ -438,7 +438,7 @@ class TestSummaryCluster(unittest.TestCase):
 
     def test_non_synon_variants(self):
         '''Test non_synon_variants'''
-        line1 = 'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs'
+        line1 = 'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs'
         line2 = 'ref1\t0\t0\t531\t78\tcluster1\t120\t95\t98.42\tctg_name\t279\t24.4\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tsome free text'
 
         data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
@@ -454,10 +454,10 @@ class TestSummaryCluster(unittest.TestCase):
     def test_known_noncoding_het_snps(self):
         '''test known_noncoding_het_snps'''
         lines = [
-            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
-            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA42T\t1\tA42T\tSNP\t42\t42\tA\t84\t84\tT\t40\tA\t10,30\tnon_coding1:0:0:A42T:id1:foo_bar\tspam eggs',
-            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA62T\t1\tA62T\tSNP\t62\t62\tA\t84\t84\tA\t40\tT\t10,30\tnon_coding1:0:0:A62T:id2:foo_bar\tspam eggs',
-            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA82T\t1\tA82T\tSNP\t82\t82\tA\t84\t84\tA\t100\tT,G\t10,40,50\tnon_coding1:0:0:A82T:.:foo_bar\tspam eggs'
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA42T\t1\tA42T\tSNP\t42\t42\tA\t84\t84\tT\t40\tT,A\t10,30\tnon_coding1:0:0:A42T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA62T\t1\tA62T\tSNP\t62\t62\tA\t84\t84\tA\t40\tA,T\t10,30\tnon_coding1:0:0:A62T:id2:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA82T\t1\tA82T\tSNP\t82\t82\tA\t84\t84\tA\t100\tA,T,G\t10,40,50\tnon_coding1:0:0:A82T:.:foo_bar\tspam eggs'
         ]
 
         cluster = summary_cluster.SummaryCluster()
@@ -466,7 +466,7 @@ class TestSummaryCluster(unittest.TestCase):
         got = cluster.known_noncoding_het_snps()
         expected = {
             '.': {'A82T': 40.0},
-            'id1': {'A42T': 25.0},
+            'id1': {'A42T': 25.0, 'A14T': 100.0},
             'id2': {'A62T': 75.0},
         }
         self.assertEqual(expected, got)
@@ -476,9 +476,9 @@ class TestSummaryCluster(unittest.TestCase):
         '''test _get_all_nonsynon_variants_set'''
         lines = [
             'ref1\t0\t0\t531\t78\tcluster1\t120\t95\t98.42\tctg_name\t279\t24.4\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tsome free text',
-            'ref1\t1\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tI14L\t1\tI14L\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:0:0:I14L:.:foo_bar\tspam eggs',
-            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tA\t10,30\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
-            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tA,G\t20,10,10\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t1\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tI14L\t1\tI14L\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnon_coding1:0:0:I14L:.:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tT,A\t10,30\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tT,A,G\t20,10,10\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
         ]
 
         data_dicts = [summary_cluster.SummaryCluster.line2dict(x) for x in lines]
@@ -493,9 +493,9 @@ class TestSummaryCluster(unittest.TestCase):
         '''test gather_data'''
         lines = [
             'ref1\t0\t0\t531\t78\tcluster1\t120\t95\t98.42\tctg_name\t279\t24.4\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tsome free text',
-            'ref1\t1\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tI14L\t1\tI14L\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnon_coding1:0:0:I14L:.:foo_bar\tspam eggs',
-            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tA\t10,30\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
-            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tA,G\t20,10,10\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t1\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tI14L\t1\tI14L\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnon_coding1:0:0:I14L:.:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tT,A\t10,30\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t40\tT,A,G\t20,10,10\tnon_coding1:0:0:A14T:id1:foo_bar\tspam eggs',
         ]
 
         data_dicts = [summary_cluster.SummaryCluster.line2dict(x) for x in lines]

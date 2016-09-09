@@ -1,7 +1,7 @@
 #ref_name	gene	var_only	flag	reads	cluster	ref_len	ref_base_assembled	pc_ident	ctg	ctg_len	ctg_cov	known_var	var_type	var_seq_type	known_var_change	has_known_var	ref_ctg_change	ref_ctg_effect	ref_start	ref_end	ref_nt	ctg_start	ctg_end	ctg_nt	smtls_total_depth	smtls_nts	smtls_nts_depth	var_description	free_text
 noncoding1_ref2	0	0	19	100	noncoding1	100	100	99.2	noncoding1.scaffold.1	150	10.1	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of noncoding1
 noncoding3_ref1	0	0	19	100	noncoding3	242	241	97.6	noncoding3.scaffold.1	300	37.6	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of noncoding3
-noncoding5_ref1	0	1	531	100	noncoding5	100	100	99.42	noncoding5.scaffold.1	200	14.1	1	SNP	n	A42T	0	A42T	SNP	42	42	A	50	50	A	20	.	20	.	.
+noncoding5_ref1	0	1	531	100	noncoding5	100	100	99.42	noncoding5.scaffold.1	200	14.1	1	SNP	n	A42T	0	A42T	SNP	42	42	A	50	50	A	20	A	20	noncoding5_ref1:0:1:A42T:.:description of A42T	.
 coding1_ref2	1	0	27	100	coding1	100	100	99.2	coding1.scaffold.1	150	10.1	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of coding1
 coding3_ref1	1	0	27	100	coding3	242	241	97.6	coding3.scaffold.1	300	37.6	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of coding3
-coding5_ref1	1	1	539	100	coding5	100	100	97.4	coding5.scaffold.1	200	14.1	1	SNP	p	A42S	1	A42S	NONSYN	142	144	A	50	50	T	65	.	65	coding5_ref1:0:1:A42S:.:description of A42S	.
+coding5_ref1	1	1	539	100	coding5	100	100	97.4	coding5.scaffold.1	200	14.1	1	SNP	p	A42S	1	A42S	NONSYN	142	144	A	50	50	T	65	T	65	coding5_ref1:0:1:A42S:.:description of A42S	.

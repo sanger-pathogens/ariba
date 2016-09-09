@@ -199,7 +199,7 @@ class SummaryCluster:
 
         if data_dict['known_var'] == '1' and data_dict['ref_ctg_effect'] == 'SNP' \
           and data_dict['smtls_nts'] != '.' and ';' not in data_dict['smtls_nts']:
-            nucleotides = [data_dict['ctg_nt']] + data_dict['smtls_nts'].split(',')
+            nucleotides = data_dict['smtls_nts'].split(',')
             depths = data_dict['smtls_nts_depth'].split(',')
 
             if len(nucleotides) != len(depths):
@@ -298,7 +298,10 @@ class SummaryCluster:
         for d in self.data:
             snp_tuple = self._get_known_noncoding_het_snp(d)
             if snp_tuple is not None:
-                snp_id = d['var_description'].split(':')[4]
+                try:
+                    snp_id = d['var_description'].split(':')[4]
+                except:
+                    raise Error('Error getting ID from ' + str(d) + '\n' + d['var_description'])
                 if snp_id not in snps:
                     snps[snp_id] = {}
                 snps[snp_id][snp_tuple[0]] = snp_tuple[1]

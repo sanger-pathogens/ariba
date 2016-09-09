@@ -46,19 +46,27 @@ class SummaryClusterVariant:
         if data_dict['gene'] == '1' or not (data_dict['ref_ctg_effect'] == 'SNP' or data_dict['var_type'] == 'HET') or data_dict['smtls_nts'] == '.' or ';' in data_dict['smtls_nts'] or data_dict['smtls_nts_depth'] == 'ND':
             return False, None
         else:
-            nucleotides = [data_dict['ctg_nt']] + data_dict['smtls_nts'].split(',')
+            nucleotides = data_dict['smtls_nts'].split(',')
             depths = data_dict['smtls_nts_depth'].split(',')
 
             if len(nucleotides) != len(depths):
                 raise Error('Mismatch in number of inferred nucleotides from ctg_nt, smtls_nts, smtls_nts_depth columns. Cannot continue\n' + str(data_dict))
 
             try:
-                is_het = False
+                depths = [int(x) for x in depths]
+                nuc_to_depth = dict(zip(nucleotides, depths))
 
                 if data_dict['ref_ctg_change'] != '.':
                     var_nucleotide = data_dict['ref_ctg_change'][-1]
                 elif data_dict['var_type'] == 'HET':
-                    var_nucleotide = data_dict['smtls_nts']
+                    var_nucleotide = '.'
+                    best_depth = -1
+                    for nuc in nuc_to_depth:
+                        if nuc == data_dict['ctg_nt']:
+                            continue
+                        elif nuc_to_depth[nuc] > best_depth:
+                            var_nucleotide = nuc
+                            best_depth = nuc_to_depth[nuc]
                 elif data_dict['known_var_change'] != '.':
                     var_nucleotide = data_dict['known_var_change'][-1]
                 else:
@@ -66,15 +74,13 @@ class SummaryClusterVariant:
 
                 if var_nucleotide == '.':
                     return False, None
-                depths = [int(x) for x in depths]
-                nuc_to_depth = dict(zip(nucleotides, depths))
                 total_depth = sum(depths)
-                var_depth = nuc_to_depth.get(var_nucleotide, 0)
-
-                if data_dict['var_type'] == 'HET':
-                    is_het = True
+                if max([len(x) for x in nucleotides]) == 1:
+                    var_depth = nuc_to_depth.get(var_nucleotide, 0)
                 else:
-                    is_het = SummaryClusterVariant._depths_look_het(depths)
+                    var_depth = sum([nuc_to_depth[x] for x in nuc_to_depth if x[0] == var_nucleotide])
+
+                is_het = SummaryClusterVariant._depths_look_het(depths)
 
                 return is_het, round(100 * var_depth / total_depth, 1)
             except:
