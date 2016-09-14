@@ -2,6 +2,11 @@ class Error (Exception): pass
 
 class SummaryClusterVariant:
     def __init__(self, data_dict):
+        self.known = None
+        self.var_group = None
+        self.coding = None
+        self.var_string = None
+        self.het_percent = None
         self._get_nonsynon_variant_data(data_dict)
 
 
@@ -43,7 +48,7 @@ class SummaryClusterVariant:
 
     @classmethod
     def _get_is_het_and_percent(cls, data_dict):
-        if data_dict['gene'] == '1' or not (data_dict['ref_ctg_effect'] == 'SNP' or data_dict['var_type'] == 'HET') or data_dict['smtls_nts'] == '.' or ';' in data_dict['smtls_nts'] or data_dict['smtls_nts_depth'] == 'ND':
+        if data_dict['gene'] == '1' or not (data_dict['known_var'] == '1' or data_dict['ref_ctg_effect'] == 'SNP' or data_dict['var_type'] == 'HET') or data_dict['smtls_nts'] == '.' or ';' in data_dict['smtls_nts'] or data_dict['smtls_nts_depth'] == 'ND':
             return False, None
         else:
             nucleotides = data_dict['smtls_nts'].split(',')
@@ -88,6 +93,19 @@ class SummaryClusterVariant:
 
 
     def _get_nonsynon_variant_data(self, data_dict):
+        self.known = data_dict['known_var'] == '1'
+        self.coding = data_dict['gene'] == '1'
+        self.var_group = data_dict['var_group']
+
+        if data_dict['known_var'] == '1' and data_dict['known_var_change'] != '.':
+            self.var_string = data_dict['known_var_change']
+        elif data_dict['ref_ctg_change'] != '.':
+            self.var_string = data_dict['ref_ctg_change']
+        else:
+            self.var_string = data_dict['ref_ctg_effect']
+
+        self.is_het, self.het_percent = SummaryClusterVariant._get_is_het_and_percent(data_dict)
+
         if not SummaryClusterVariant._has_nonsynonymous(data_dict):
             self.has_nonsynon = False
             return
@@ -100,16 +118,4 @@ class SummaryClusterVariant:
           data_dict['known_var_change'] != data_dict['ref_ctg_change']:
             raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change != ref_ctg_change. Cannot continue')
 
-        self.known = data_dict['known_var'] == '1'
-        self.var_group = data_dict['var_group']
-        self.coding = data_dict['gene'] == '1'
-
-        if data_dict['known_var'] == '1' and data_dict['known_var_change'] != '.':
-            self.var_string = data_dict['known_var_change']
-        elif data_dict['ref_ctg_change'] != '.':
-            self.var_string = data_dict['ref_ctg_change']
-        else:
-            self.var_string = data_dict['ref_ctg_effect']
-
-        self.is_het, self.het_percent = SummaryClusterVariant._get_is_het_and_percent(data_dict)
 
