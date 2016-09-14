@@ -274,7 +274,8 @@ class Summary:
     @classmethod
     def _matrix_to_csv(cls, matrix, header, outfile, remove_nas=False):
         f = pyfastaq.utils.open_file_write(outfile)
-        print(*header, sep=',', file=f)
+        fixed_header = [x.replace(',', '/') for x in header]
+        print(*fixed_header, sep=',', file=f)
         for line in matrix:
             if remove_nas:
                 new_line = ['' if x=='NA' else x for x in line]
