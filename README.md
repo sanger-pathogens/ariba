@@ -63,7 +63,7 @@ to the following dependencies.
 | MASH           | `mash`                 | `$ARIBA_MASH`             |
 
 
-For example, you could specify an exact version of a Samtools executable
+For example, you could specify an exact version of a bowtie2 executable
 that you compiled and downloaded in your home directory (assuming BASH):
 
     export ARIBA_BOWTIE2=$HOME/bowtie2-2.1.0/bowtie2
