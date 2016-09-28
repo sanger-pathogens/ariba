@@ -126,11 +126,12 @@ class TestSummaryCluster(unittest.TestCase):
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
-            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
+            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
+            '23S.rDNA_WHO_F_01358c\t0\t1\t659\t4168\t23S\t2890\t2890\t99.86\t23S.scaffold.1\t3628\t344.0\t1\tSNP\tn\tC2597T\t0\t.\t.\t2597\t2597\tC\t2928\t2928\tC\t410\tC,T\t70,30\t23S.rDNA_WHO_F_01358c:0:1:C2597T:.:E coli C2611T\t.',
         ]
 
         dicts = [summary_cluster.SummaryCluster.line2dict(x) for x in lines]
-        expected = [True, False, False, False, False]
+        expected = ['yes', 'no', 'no', 'no', 'no', 'het']
         assert len(dicts) == len(expected)
 
         for i in range(len(dicts)):
@@ -143,10 +144,11 @@ class TestSummaryCluster(unittest.TestCase):
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
-            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
+            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
+            '23S.rDNA_WHO_F_01358c\t0\t1\t659\t4168\t23S\t2890\t2890\t99.86\t23S.scaffold.1\t3628\t344.0\t1\tSNP\tn\tC2597T\t0\t.\t.\t2597\t2597\tC\t2928\t2928\tC\t410\tC,T\t70,30\t23S.rDNA_WHO_F_01358c:0:1:C2597T:.:E coli C2611T\t.',
         ]
 
-        expected = ['yes', 'no', 'no', 'no', 'no']
+        expected = ['yes', 'no', 'no', 'no', 'no', 'het']
         assert len(lines) == len(expected)
 
         for i in range(len(lines)):
@@ -164,11 +166,13 @@ class TestSummaryCluster(unittest.TestCase):
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
-            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
+            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
+            '23S.rDNA_WHO_F_01358c\t0\t1\t659\t4168\t23S\t2890\t2890\t99.86\t23S.scaffold.1\t3628\t344.0\t0\tHET\t.\t.\t.\t.\t.\t2597\t2597\tC\t2928\t2928\tC\t410\tC,T\t70,30\t.\t.',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA62T\t1\tA62T\tSNP\t62\t62\tA\t84\t84\tA\t40\tA,T\t10,30\tnon_coding1:0:0:A62T:id2:foo_bar\tspam eggs',
         ]
 
         dicts = [summary_cluster.SummaryCluster.line2dict(x) for x in lines]
-        expected = [False, True, False, True, True, True]
+        expected = ['no', 'yes', 'no', 'yes', 'yes', 'yes', 'het', 'het']
         assert len(dicts) == len(expected)
 
         for i in range(len(dicts)):
@@ -183,9 +187,11 @@ class TestSummaryCluster(unittest.TestCase):
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\t.\tMULTIPLE\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            '23S.rDNA_WHO_F_01358c\t0\t1\t659\t4168\t23S\t2890\t2890\t99.86\t23S.scaffold.1\t3628\t344.0\t0\tHET\t.\t.\t.\t.\t.\t2597\t2597\tC\t2928\t2928\tC\t410\tC,T\t70,30\t.\t.',
+            'ref1\t0\t0\t531\t78\tcluster1\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA62T\t1\tA62T\tSNP\t62\t62\tA\t84\t84\tA\t40\tA,T\t10,30\tnon_coding1:0:0:A62T:id2:foo_bar\tspam eggs',
         ]
 
-        expected = ['no', 'yes', 'no', 'yes', 'yes']
+        expected = ['no', 'yes', 'no', 'yes', 'yes', 'het', 'het']
         assert len(lines) == len(expected)
 
         for i in range(len(lines)):
@@ -202,14 +208,16 @@ class TestSummaryCluster(unittest.TestCase):
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
-            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
+            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
+            '23S.rDNA_WHO_F_01358c\t0\t1\t659\t4168\t23S\t2890\t2890\t99.86\t23S.scaffold.1\t3628\t344.0\t1\tSNP\tn\tC2597T\t0\t.\t.\t2597\t2597\tC\t2928\t2928\tC\t410\tC,T\t70,30\t23S.rDNA_WHO_F_01358c:0:1:C2597T:.:E coli C2611T\t.',
+            '23S.rDNA_WHO_F_01358c\t0\t1\t659\t4168\t23S\t2890\t2890\t99.86\t23S.scaffold.1\t3628\t344.0\t0\tHET\t.\t.\t.\t.\t.\t2597\t2597\tC\t2928\t2928\tC\t410\tC,T\t70,30\t.\t.',
         ]
 
         dicts = [summary_cluster.SummaryCluster.line2dict(x) for x in lines]
-        expected = [False, False, True, True, True]
+        expected = ['no', 'no', 'yes', 'yes', 'yes', 'no', 'het']
         assert len(dicts) == len(expected)
 
-        for i in range(len(dicts)-1):
+        for i in range(len(dicts)):
             self.assertEqual(expected[i], summary_cluster.SummaryCluster._has_novel_nonsynonymous(dicts[i]))
 
 
@@ -218,12 +226,14 @@ class TestSummaryCluster(unittest.TestCase):
         lines = [
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
             'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t0\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
-            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\t.\t17\tnoncoding1:0:0:A14T:id1:ref has wild type, foo bar\tsome free text',
+            'refname\t0\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t0\tSNP\tn\t.\t.\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\t.\tsome free text',
             'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tMULTIPLE\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
-            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.'
+            'refname\t1\t0\t528\t2814\tcluster\t1188\t1009\t90.49\tctg_name\t2470\t141.8\t0\t.\tp\t.\t0\t.\tINDELS\t594\t594\tC;T\t1195\t1195\t.;C\t207;204\t.;.\t207;204\t.\t.',
+            '23S.rDNA_WHO_F_01358c\t0\t1\t659\t4168\t23S\t2890\t2890\t99.86\t23S.scaffold.1\t3628\t344.0\t1\tSNP\tn\tC2597T\t0\t.\t.\t2597\t2597\tC\t2928\t2928\tC\t410\tC,T\t70,30\t23S.rDNA_WHO_F_01358c:0:1:C2597T:.:E coli C2611T\t.',
+            '23S.rDNA_WHO_F_01358c\t0\t1\t659\t4168\t23S\t2890\t2890\t99.86\t23S.scaffold.1\t3628\t344.0\t0\tHET\t.\t.\t.\t.\t.\t2597\t2597\tC\t2928\t2928\tC\t410\tC,T\t70,30\t.\t.',
         ]
 
-        expected = ['no', 'no', 'yes', 'yes', 'yes']
+        expected = ['no', 'no', 'yes', 'yes', 'yes', 'no', 'het']
         assert len(lines) == len(expected)
 
         for i in range(len(lines)):
@@ -326,6 +336,7 @@ class TestSummaryCluster(unittest.TestCase):
         '''Test _get_nonsynonymous_var'''
         d = {
             'ref_name': 'ref',
+            'gene': '1',
             'var_type': '.',
             'known_var_change': '.',
             'has_known_var': '.',
@@ -341,7 +352,7 @@ class TestSummaryCluster(unittest.TestCase):
         d['var_type'] = 'p'
         d['known_var'] = '1'
         d['has_known_var'] = '1'
-        with self.assertRaises(summary_cluster.Error):
+        with self.assertRaises(summary_cluster_variant.Error):
             summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
 
         d['known_var_change'] = 'I42L'
@@ -352,14 +363,14 @@ class TestSummaryCluster(unittest.TestCase):
         d['var_group'] = '.'
 
         d['ref_ctg_change'] = 'P43Q'
-        with self.assertRaises(summary_cluster.Error):
+        with self.assertRaises(summary_cluster_variant.Error):
             summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
 
         d['known_var_change'] = '.'
         self.assertEqual(('ref', 'P43Q', 'novel', None), summary_cluster.SummaryCluster._get_nonsynonymous_var(d))
 
         d['ref_ctg_change'] = '.'
-        with self.assertRaises(summary_cluster.Error):
+        with self.assertRaises(summary_cluster_variant.Error):
             summary_cluster.SummaryCluster._get_nonsynonymous_var(d)
 
         d['ref_ctg_effect'] = 'MULTIPLE'

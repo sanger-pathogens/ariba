@@ -126,42 +126,70 @@ class SummaryCluster:
 
     @classmethod
     def _has_known_variant(cls, data_dict):
-        return data_dict['has_known_var'] == '1'
+        if data_dict['has_known_var'] == '1':
+            return 'yes'
+        elif data_dict['known_var'] == '0':
+            return 'no'
+        elif data_dict['gene'] == '1': # we don't yet call hets in genes
+            return 'no'
+        else:
+            cluster_var = summary_cluster_variant.SummaryClusterVariant(data_dict)
+            return 'het' if cluster_var.is_het else 'no'
 
 
     def _has_any_known_variant(self):
-        for d in self.data:
-            if self._has_known_variant(d):
-                return 'yes'
-        return 'no'
+        results = {self._has_known_variant(d) for d in self.data}
+        if 'yes' in results:
+            return 'yes'
+        else:
+            return 'het' if 'het' in results else 'no'
 
 
     @classmethod
     def _has_nonsynonymous(cls, data_dict):
-        return data_dict['ref_ctg_effect'] != 'SYN' and \
-          (
-              data_dict['has_known_var'] == '1' or \
-              (data_dict['known_var'] != '1' and (data_dict['ref_ctg_change'] != '.' or data_dict['ref_ctg_effect'] != '.'))
-          )
+        cluster_var = summary_cluster_variant.SummaryClusterVariant(data_dict)
+
+        has_non_het = data_dict['ref_ctg_effect'] != 'SYN' and \
+        (
+            data_dict['has_known_var'] == '1' or \
+            (data_dict['known_var'] != '1' and (data_dict['ref_ctg_change'] != '.' or data_dict['ref_ctg_effect'] != '.'))
+        )
+
+        if has_non_het and not cluster_var.is_het:
+            return 'yes'
+        else:
+            return 'het' if cluster_var.is_het else 'no'
 
 
     def _has_any_nonsynonymous(self):
-        for d in self.data:
-            if self._has_nonsynonymous(d):
-                return 'yes'
-        return 'no'
+        results = {SummaryCluster._has_nonsynonymous(d) for d in self.data}
+
+        if 'yes' in results:
+            return 'yes'
+        else:
+            return 'het' if 'het' in results else 'no'
 
 
     @classmethod
     def _has_novel_nonsynonymous(cls, data_dict):
-        return SummaryCluster._has_nonsynonymous(data_dict) and not SummaryCluster._has_known_variant(data_dict)
+        has_nonsynon = SummaryCluster._has_nonsynonymous(data_dict)
+        if has_nonsynon == 'no':
+            return 'no'
+        else:
+            has_known = SummaryCluster._has_known_variant(data_dict)
+            if has_known == 'no':
+                return has_nonsynon
+            else:
+                return 'no'
 
 
     def _has_any_novel_nonsynonymous(self):
-        for d in self.data:
-            if self._has_novel_nonsynonymous(d):
-                return 'yes'
-        return 'no'
+        results = {SummaryCluster._has_novel_nonsynonymous(d) for d in self.data}
+
+        if 'yes' in results:
+            return 'yes'
+        else:
+            return 'het' if 'het' in results else 'no'
 
 
     def _to_cluster_summary_has_known_nonsynonymous(self, assembled_summary):
@@ -220,14 +248,13 @@ class SummaryCluster:
             return None
 
 
-
     @staticmethod
     def _get_nonsynonymous_var(data_dict):
         '''if data_dict has a non synonymous variant, return string:
         ref_name.change. Otherwise return None'''
         has_nonsyn = SummaryCluster._has_nonsynonymous(data_dict)
 
-        if not has_nonsyn:
+        if has_nonsyn == 'no':
             return None
         elif data_dict['known_var_change'] == data_dict['ref_ctg_change'] == '.' == data_dict['ref_ctg_effect']:
             raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change, ref_ctg_change, ref_ctg_effect all equal to ".", but has a non synonymous change. Something is inconsistent. Cannot continue')
@@ -251,6 +278,7 @@ class SummaryCluster:
 
             return (data_dict['ref_name'], var_change) + var_group
 
+
     def _has_match(self, assembled_summary):
         '''assembled_summary should be output of _to_cluster_summary_assembled'''
         if assembled_summary.startswith('yes'):
@@ -266,7 +294,7 @@ class SummaryCluster:
         '''Returns a set of the variant group ids that this cluster has'''
         ids = set()
         for d in self.data:
-            if self._has_known_variant(d) and d['var_group'] != '.':
+            if self._has_known_variant(d) != 'no' and d['var_group'] != '.':
                 ids.add(d['var_group'])
         return ids
 

@@ -19,10 +19,7 @@ class SummaryClusterVariant:
 
 
     def __str__(self):
-        if self.has_nonsynon:
-            return ', '.join((str(self.known), self.var_group, str(self.coding), self.var_string, str(self.het_percent)))
-        else:
-            return 'None'
+        return ', '.join((str(self.known), self.var_group, str(self.coding), self.var_string, str(self.het_percent)))
 
 
     @classmethod
