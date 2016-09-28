@@ -342,7 +342,7 @@ class SummaryCluster:
 
         for data_dict in data_dicts:
             cluster_var = summary_cluster_variant.SummaryClusterVariant(data_dict)
-            if cluster_var.has_nonsynon:
+            if cluster_var.has_nonsynon or cluster_var.is_het:
                 variants.add(cluster_var)
 
         return variants
