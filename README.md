@@ -45,6 +45,21 @@ If the tests all pass, install:
 
     python3 setup.py install
 
+### Docker
+ARIBA can be run in a Docker container. First of all install Docker, then to install ARIBA run:
+
+    docker pull sangerpathogens/ariba
+
+To use ARIBA you would use a command such as this (substituting in your directories), where your files are assumed to be stored in /home/ubuntu/data:
+
+    docker run --rm -it -v /home/ubuntu/data:/data sangerpathogens/ariba ariba -h
+
+
+### Debian (testing)
+ARIBA is available in the latest version of Debian, and over time will progressively filter through to Ubuntu and other distributions which use Debian. To install it as root:
+
+    sudo apt-get install ariba
+
 
 ### Dependencies and environment variables
 
