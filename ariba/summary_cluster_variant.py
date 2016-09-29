@@ -2,6 +2,11 @@ class Error (Exception): pass
 
 class SummaryClusterVariant:
     def __init__(self, data_dict):
+        self.known = None
+        self.var_group = None
+        self.coding = None
+        self.var_string = None
+        self.het_percent = None
         self._get_nonsynon_variant_data(data_dict)
 
 
@@ -14,10 +19,7 @@ class SummaryClusterVariant:
 
 
     def __str__(self):
-        if self.has_nonsynon:
-            return ', '.join((str(self.known), self.var_group, str(self.coding), self.var_string, str(self.het_percent)))
-        else:
-            return 'None'
+        return ', '.join((str(self.known), self.var_group, str(self.coding), self.var_string, str(self.het_percent)))
 
 
     @classmethod
@@ -43,22 +45,30 @@ class SummaryClusterVariant:
 
     @classmethod
     def _get_is_het_and_percent(cls, data_dict):
-        if data_dict['gene'] == '1' or not (data_dict['ref_ctg_effect'] == 'SNP' or data_dict['var_type'] == 'HET') or data_dict['smtls_alt_nt'] == '.' or ';' in data_dict['smtls_alt_nt'] or data_dict['smtls_alt_depth'] == 'ND':
+        if data_dict['gene'] == '1' or not (data_dict['known_var'] == '1' or data_dict['ref_ctg_effect'] == 'SNP' or data_dict['var_type'] == 'HET') or data_dict['smtls_nts'] == '.' or ';' in data_dict['smtls_nts'] or data_dict['smtls_nts_depth'] == 'ND':
             return False, None
         else:
-            nucleotides = [data_dict['ctg_nt']] + data_dict['smtls_alt_nt'].split(',')
-            depths = data_dict['smtls_alt_depth'].split(',')
+            nucleotides = data_dict['smtls_nts'].split(',')
+            depths = data_dict['smtls_nts_depth'].split(',')
 
             if len(nucleotides) != len(depths):
-                raise Error('Mismatch in number of inferred nucleotides from ctg_nt, smtls_alt_nt, smtls_alt_depth columns. Cannot continue\n' + str(data_dict))
+                raise Error('Mismatch in number of inferred nucleotides from ctg_nt, smtls_nts, smtls_nts_depth columns. Cannot continue\n' + str(data_dict))
 
             try:
-                is_het = False
+                depths = [int(x) for x in depths]
+                nuc_to_depth = dict(zip(nucleotides, depths))
 
                 if data_dict['ref_ctg_change'] != '.':
                     var_nucleotide = data_dict['ref_ctg_change'][-1]
                 elif data_dict['var_type'] == 'HET':
-                    var_nucleotide = data_dict['smtls_alt_nt']
+                    var_nucleotide = '.'
+                    best_depth = -1
+                    for nuc in nuc_to_depth:
+                        if nuc == data_dict['ctg_nt']:
+                            continue
+                        elif nuc_to_depth[nuc] > best_depth:
+                            var_nucleotide = nuc
+                            best_depth = nuc_to_depth[nuc]
                 elif data_dict['known_var_change'] != '.':
                     var_nucleotide = data_dict['known_var_change'][-1]
                 else:
@@ -66,15 +76,13 @@ class SummaryClusterVariant:
 
                 if var_nucleotide == '.':
                     return False, None
-                depths = [int(x) for x in depths]
-                nuc_to_depth = dict(zip(nucleotides, depths))
                 total_depth = sum(depths)
-                var_depth = nuc_to_depth.get(var_nucleotide, 0)
-
-                if data_dict['var_type'] == 'HET':
-                    is_het = True
+                if max([len(x) for x in nucleotides]) == 1:
+                    var_depth = nuc_to_depth.get(var_nucleotide, 0)
                 else:
-                    is_het = SummaryClusterVariant._depths_look_het(depths)
+                    var_depth = sum([nuc_to_depth[x] for x in nuc_to_depth if x[0] == var_nucleotide])
+
+                is_het = SummaryClusterVariant._depths_look_het(depths)
 
                 return is_het, round(100 * var_depth / total_depth, 1)
             except:
@@ -82,6 +90,19 @@ class SummaryClusterVariant:
 
 
     def _get_nonsynon_variant_data(self, data_dict):
+        self.known = data_dict['known_var'] == '1'
+        self.coding = data_dict['gene'] == '1'
+        self.var_group = data_dict['var_group']
+
+        if data_dict['known_var'] == '1' and data_dict['known_var_change'] != '.':
+            self.var_string = data_dict['known_var_change']
+        elif data_dict['ref_ctg_change'] != '.':
+            self.var_string = data_dict['ref_ctg_change']
+        else:
+            self.var_string = data_dict['ref_ctg_effect']
+
+        self.is_het, self.het_percent = SummaryClusterVariant._get_is_het_and_percent(data_dict)
+
         if not SummaryClusterVariant._has_nonsynonymous(data_dict):
             self.has_nonsynon = False
             return
@@ -94,16 +115,4 @@ class SummaryClusterVariant:
           data_dict['known_var_change'] != data_dict['ref_ctg_change']:
             raise Error('Unexpected data in ariba summary... \n' + str(data_dict) + '\n... known_var_change != ref_ctg_change. Cannot continue')
 
-        self.known = data_dict['known_var'] == '1'
-        self.var_group = data_dict['var_group']
-        self.coding = data_dict['gene'] == '1'
-
-        if data_dict['known_var'] == '1' and data_dict['known_var_change'] != '.':
-            self.var_string = data_dict['known_var_change']
-        elif data_dict['ref_ctg_change'] != '.':
-            self.var_string = data_dict['ref_ctg_change']
-        else:
-            self.var_string = data_dict['ref_ctg_effect']
-
-        self.is_het, self.het_percent = SummaryClusterVariant._get_is_het_and_percent(data_dict)
 

@@ -163,6 +163,16 @@ class TestClusters(unittest.TestCase):
         bin_size = 10
         inprefix = os.path.join(data_dir, 'clusters_test_load_minimap_files')
         got_clster2rep, got_cluster_read_count, got_cluster_base_count, got_insert_hist, got_proper_pairs = clusters.Clusters._load_minimap_files(inprefix, bin_size)
+        expected_clster2rep = {'1': 'ref2', '2': 'ref42'}
+        expected_cluster_read_count = {'1': 42, '2': 43}
+        expected_cluster_base_count = {'1': 4242, '2': 4343}
+        expected_insert_hist_bins = {80: 3, 90: 20, 100: 7, 110: 3}
+        expected_proper_pairs = 42424242
+        self.assertEqual(expected_clster2rep, got_clster2rep)
+        self.assertEqual(expected_cluster_read_count, got_cluster_read_count)
+        self.assertEqual(expected_cluster_base_count, got_cluster_base_count)
+        self.assertEqual(expected_insert_hist_bins, got_insert_hist.bins)
+        self.assertEqual(expected_proper_pairs, got_proper_pairs)
 
 
     def test_set_insert_size_data(self):

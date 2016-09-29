@@ -76,7 +76,8 @@ class SamtoolsVariants:
 
         if len(rows) == 1:
             r, p, ref_base, alt_base, ref_counts, alt_counts = rows[0].rstrip().split()
-            return ref_base, alt_base, int(ref_counts), alt_counts
+            bases = ref_base if alt_base == '.' else ref_base + ',' + alt_base
+            return bases, int(ref_counts), alt_counts
         else:
             return None
 
@@ -161,7 +162,7 @@ class SamtoolsVariants:
         if seq_name in d and position in d[seq_name]:
             return d[seq_name][position]
         else:
-            return 'ND', 'ND', 'ND', 'ND'
+            return 'ND', 'ND', 'ND'
 
 
     def run(self):

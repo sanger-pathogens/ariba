@@ -126,13 +126,15 @@ class Summary:
                             if variant.var_group not in seen_groups:
                                 seen_groups[variant.var_group] = {'yes': 0, 'het': 0}
 
-                            if variant.het_percent is None:
-                                seen_groups[variant.var_group]['yes'] += 1
-                                this_cluster_dict['groups'][variant.var_group] = 'yes'
-                            else:
+                            if variant.het_percent is not None:
+                                this_cluster_dict['groups'][variant.var_group + '.%'] = variant.het_percent
+
+                            if variant.is_het:
                                 seen_groups[variant.var_group]['het'] += 1
                                 this_cluster_dict['groups'][variant.var_group] = 'het'
-                                this_cluster_dict['groups'][variant.var_group + '.%'] = variant.het_percent
+                            else:
+                                seen_groups[variant.var_group]['yes'] += 1
+                                this_cluster_dict['groups'][variant.var_group] = 'yes'
 
                     for group, d in seen_groups.items():
                         if d['het'] > 0 and d['het'] + d['yes'] > 1:
@@ -272,7 +274,8 @@ class Summary:
     @classmethod
     def _matrix_to_csv(cls, matrix, header, outfile, remove_nas=False):
         f = pyfastaq.utils.open_file_write(outfile)
-        print(*header, sep=',', file=f)
+        fixed_header = [x.replace(',', '/') for x in header]
+        print(*fixed_header, sep=',', file=f)
         for line in matrix:
             if remove_nas:
                 new_line = ['' if x=='NA' else x for x in line]
