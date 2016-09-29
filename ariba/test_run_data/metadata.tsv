@@ -15,5 +15,6 @@ noncoding1	0	0	A14T	noncoding_group1	ref has wild type, reads have variant so sh
 noncoding1	0	0	A40C	.	ref has variant, reads have wild type so should not report
 noncoding2	0	0	.	.	generic description of noncoding2
 noncoding3	0	0	.	.	generic description of noncoding3
+noncoding4	0	0	.	.	generic description of noncoding4
 noncoding.var_only1	0	1	C6T	.	sample does not have this SNP
 noncoding.var_only2	0	1	T10A	.	sample does have this SNP

@@ -372,6 +372,12 @@ class Clusters:
 
         for cluster_name in sorted(self.cluster_to_dir):
             counter += 1
+
+            if self.cluster_read_counts[cluster_name] <= 2:
+                if self.verbose:
+                    print('Not constructing cluster ', cluster_name, ' because it only has ', self.cluster_read_counts[cluster_name], ' reads (', counter, ' of ', len(self.cluster_to_dir), ')', sep='')
+                continue
+
             if self.verbose:
                 print('Constructing cluster ', cluster_name, ' (', counter, ' of ', len(self.cluster_to_dir), ')', sep='')
             new_dir = self.cluster_to_dir[cluster_name]
