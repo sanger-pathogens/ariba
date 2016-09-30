@@ -74,7 +74,6 @@ to the following dependencies.
 |----------------|------------------------|---------------------------|
 | Bowtie2        | `bowtie2`              | `$ARIBA_BOWTIE2`          |
 | CD-HIT (est)   | `cd-hit-est`           | `$ARIBA_CDHIT`            |
-| CD-HIT (est-2d)| `cd-hit-est-2d`        | `$ARIBA_CDHIT2D`          |
 | MASH           | `mash`                 | `$ARIBA_MASH`             |
 
 

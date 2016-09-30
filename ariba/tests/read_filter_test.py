@@ -13,7 +13,9 @@ class TestReadFilter(unittest.TestCase):
         self.external_progs = external_progs.ExternalProgs()
 
 
-    def test_run_cdhit_est_2d(self):
+    # skip this, as no longer using cdhit2d, but leave it here in case we want
+    # to put it back in at a later date
+    def _test_run_cdhit_est_2d(self):
         '''test _run_cdhit_est_2d'''
         reads_in = os.path.join(data_dir, 'read_filter_test_run_cdhit_est_2d.reads.in.fa')
         ref_in = os.path.join(data_dir, 'read_filter_test_run_cdhit_est_2d.ref.in.fa')
@@ -33,7 +35,9 @@ class TestReadFilter(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
-    def test_run(self):
+    # skip this, as no longer using cdhit2d, but leave it here in case we want
+    # to put it back in at a later date
+    def _test_run(self):
         '''test run'''
         rstore_infile = os.path.join(data_dir, 'read_filter_test_run.in.read_store')
         ref_fasta = os.path.join(data_dir, 'read_filter_test_run.in.ref.fa')
