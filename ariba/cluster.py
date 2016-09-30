@@ -6,7 +6,7 @@ import math
 import shutil
 import sys
 import pyfastaq
-from ariba import assembly, assembly_compare, assembly_variants, external_progs, flag, mapping, read_filter, report, samtools_variants
+from ariba import assembly, assembly_compare, assembly_variants, external_progs, flag, mapping, report, samtools_variants
 
 class Error (Exception): pass
 
@@ -174,9 +174,7 @@ class Cluster:
 
             self.refdata.write_seqs_to_fasta(self.references_fa, self.reference_names)
             self.log_fh = pyfastaq.utils.open_file_write(self.logfile)
-            self.read_store.get_reads(self.name, self.all_reads1, self.all_reads2)
-            rfilter = read_filter.ReadFilter(self.read_store, self.references_fa, self.name, self.log_fh, self.extern_progs)
-            self.total_reads, self.total_reads_bases = rfilter.run(self.all_reads1, self.all_reads2)
+            self.total_reads, self.total_reads_bases = self.read_store.get_reads(self.name, self.all_reads1, self.all_reads2, log_fh=self.log_fh)
             self.refdata.write_seqs_to_fasta(self.references_fa, self.reference_names)
 
         self.longest_ref_length = max([len(self.refdata.sequence(name)) for name in self.reference_names])

@@ -12,7 +12,7 @@ class Error (Exception): pass
 prog_to_default = {
     'bowtie2': 'bowtie2',
     'cdhit': 'cd-hit-est',
-    'cdhit2d': 'cd-hit-est-2d',
+    #'cdhit2d': 'cd-hit-est-2d',
     #'gapfiller': 'GapFiller.pl',
     'mash': 'mash',
     'nucmer' : 'nucmer',
@@ -27,7 +27,7 @@ prog_to_env_var = {x: 'ARIBA_' + x.upper() for x in prog_to_default if x not in 
 prog_to_version_cmd = {
     'bowtie2': ('--version', re.compile('.*bowtie2.*version (.*)$')),
     'cdhit': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
-    'cdhit2d': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
+    #'cdhit2d': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
     #'gapfiller': ('', re.compile('^Usage: .*pl \[GapFiller_(.*)\]')),
     'mash': ('', re.compile('^Mash version (.*)$')),
     'nucmer': ('--version', re.compile('^NUCmer \(NUCleotide MUMmer\) version ([0-9\.]+)')),
@@ -39,7 +39,7 @@ prog_to_version_cmd = {
 min_versions = {
     'bowtie2': '2.1.0',
     'cdhit': '4.6',
-    'cdhit2d': '4.6',
+    #'cdhit2d': '4.6',
     'mash': '1.0.2',
     'nucmer': '3.1',
     #'spades': '3.5.0',
