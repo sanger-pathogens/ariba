@@ -362,6 +362,12 @@ bool readMappingOk(const mm_reg1_t* r, const mm_idx_t* mi, const kseq_t *ks, uin
 {
     // coords are same style as python (0-based, end is one past the end)
     assert (r->qs < r->qe && r->rs <  r->re);
+
+    if (r->qe - r->qs < std::min((unsigned) 50, (int) 0.5 * ks->seq.l))
+    {
+        return false;
+    }
+
     uint32_t refLength = mi->len[r->rid];
     bool startOk;
     bool endOk;
