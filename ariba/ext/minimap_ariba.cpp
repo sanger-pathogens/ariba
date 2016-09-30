@@ -23,6 +23,7 @@ void chooseCluster(std::string outfile, std::map<std::string, uint64_t>& refname
 void writeClusterCountsFile(std::string outfile, const std::map<std::string, uint64_t>& readCounters, const std::map<std::string, uint64_t>& baseCounters);
 void writeInsertHistogramFile(std::string outfile, const std::map<uint32_t, uint32_t>& insertHist);
 void writeProperPairsFile(std::string outfile, uint32_t properPairs);
+bool readMappingOk(const mm_reg1_t* r, const mm_idx_t* mi, const kseq_t *ks1, uint32_t endTolerance);
 
 int run_minimap(char *clustersFileIn, char *refFileIn, char *readsFile1In, char *readsFile2In, char *outprefixIn);
 
@@ -143,18 +144,24 @@ int run_minimap(char *clustersFileIn, char *refFileIn, char *readsFile1In, char 
             for (j  =0; j < n_reg1; ++j)
             {
                 const mm_reg1_t *r = &reg1[j];
-                refnames.insert(mi->name[r->rid]);
-                refnameToScore[mi->name[r->rid]] += r->cnt;
-                uint32_t coord = r->rev ? std::max(r->rs, r->re) : std::min(r->rs, r->re);
-                positions1[mi->name[r->rid]].push_back(std::make_pair(coord, r->rev));
+                if (readMappingOk(r, mi, ks1, (int) 1.1 * k))
+                {
+                    refnames.insert(mi->name[r->rid]);
+                    refnameToScore[mi->name[r->rid]] += r->cnt;
+                    uint32_t coord = r->rev ? std::max(r->rs, r->re) : std::min(r->rs, r->re);
+                    positions1[mi->name[r->rid]].push_back(std::make_pair(coord, r->rev));
+                }
             }
             for (j  =0; j < n_reg2; ++j)
             {
                 const mm_reg1_t *r = &reg2[j];
-                refnames.insert(mi->name[r->rid]);
-                refnameToScore[mi->name[r->rid]] += r->cnt;
-                uint32_t coord = r->rev ? std::max(r->rs, r->re) : std::min(r->rs, r->re);
-                positions2[mi->name[r->rid]].push_back(std::make_pair(coord, r->rev));
+                if (readMappingOk(r, mi, ks2, (int) 1.1 * k))
+                {
+                    refnames.insert(mi->name[r->rid]);
+                    refnameToScore[mi->name[r->rid]] += r->cnt;
+                    uint32_t coord = r->rev ? std::max(r->rs, r->re) : std::min(r->rs, r->re);
+                    positions2[mi->name[r->rid]].push_back(std::make_pair(coord, r->rev));
+                }
             }
 
             bool foundProperPair = false;
@@ -348,4 +355,27 @@ void writeProperPairsFile(std::string outfile, uint32_t properPairs)
 
     ofs << properPairs << '\n';
     ofs.close();
+}
+
+
+bool readMappingOk(const mm_reg1_t* r, const mm_idx_t* mi, const kseq_t *ks, uint32_t endTolerance)
+{
+    // coords are same style as python (0-based, end is one past the end)
+    assert (r->qs < r->qe && r->rs <  r->re);
+    uint32_t refLength = mi->len[r->rid];
+    bool startOk;
+    bool endOk;
+    if (r->rev)
+    {
+        startOk = (r->qs < endTolerance || refLength - r->re < endTolerance);
+        endOk = (ks->seq.l - r->qe < endTolerance || r->rs < endTolerance);
+    }
+    else
+    {
+        startOk = (r->qs < endTolerance || r->rs < endTolerance);
+        endOk = (ks->seq.l - r->qe < endTolerance || refLength - r->re < endTolerance);
+    }
+
+    std::cout << startOk << '\t' << endOk << '\n';
+    return (startOk && endOk);
 }
