@@ -57,27 +57,27 @@ class ReadFilter:
 
 
     def run(self, reads_out1, reads_out2):
-        #tmpdir = tempfile.mkdtemp(prefix='tmp.filter_reads.', dir=os.getcwd())
-        #all_reads_fasta = os.path.join(tmpdir, 'all_reads_for_cdhit.fa')
-        #self.readstore.get_reads(self.cluster_name, all_reads_fasta, fasta=True, log_fh=self.log_fh)
-        #cdhit_out = os.path.join(tmpdir, 'cdhit')
-        #ReadFilter._run_cdhit_est_2d(
-        #    self.references_fa,
-        #    all_reads_fasta,
-        #    cdhit_out,
-        #    self.extern_progs.exe('cdhit2d'),
-        #    verbose=True,
-        #    verbose_fh=self.log_fh
-        #)
+        tmpdir = tempfile.mkdtemp(prefix='tmp.filter_reads.', dir=os.getcwd())
+        all_reads_fasta = os.path.join(tmpdir, 'all_reads_for_cdhit.fa')
+        self.readstore.get_reads(self.cluster_name, all_reads_fasta, fasta=True, log_fh=self.log_fh)
+        cdhit_out = os.path.join(tmpdir, 'cdhit')
+        ReadFilter._run_cdhit_est_2d(
+            self.references_fa,
+            all_reads_fasta,
+            cdhit_out,
+            self.extern_progs.exe('cdhit2d'),
+            verbose=True,
+            verbose_fh=self.log_fh
+        )
 
-        #wanted_read_ids = ReadFilter._cdhit_clstr_to_reads(cdhit_out + '.clstr')
+        wanted_read_ids = ReadFilter._cdhit_clstr_to_reads(cdhit_out + '.clstr')
         total_reads, total_bases = self.readstore.get_reads(
             self.cluster_name,
             reads_out1,
             out2=reads_out2,
             log_fh=self.log_fh,
-            #wanted_ids=wanted_read_ids
+            wanted_ids=wanted_read_ids
         )
 
-        #shutil.rmtree(tmpdir)
+        shutil.rmtree(tmpdir)
         return total_reads, total_bases
