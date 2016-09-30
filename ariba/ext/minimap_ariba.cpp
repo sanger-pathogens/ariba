@@ -376,6 +376,5 @@ bool readMappingOk(const mm_reg1_t* r, const mm_idx_t* mi, const kseq_t *ks, uin
         endOk = (ks->seq.l - r->qe < endTolerance || refLength - r->re < endTolerance);
     }
 
-    std::cout << startOk << '\t' << endOk << '\n';
     return (startOk && endOk);
 }
