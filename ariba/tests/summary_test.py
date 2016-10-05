@@ -559,6 +559,7 @@ class TestSummary(unittest.TestCase):
             expected = [line.rstrip().split(',', maxsplit=1)[1] for line in f]
         with open(tmp_out + '.csv') as f:
             got = [line.rstrip().split(',', maxsplit=1)[1] for line in f]
+
         self.assertEqual(expected, got)
         os.unlink(tmp_out + '.csv')
         os.unlink(tmp_out + '.phandango.csv')
