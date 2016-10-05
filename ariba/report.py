@@ -1,6 +1,8 @@
 import copy
+import re
 import sys
 import pymummer
+from ariba import sequence_variant
 
 class Error (Exception): pass
 
@@ -196,17 +198,55 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
             if contributing_vars is None:
                 samtools_columns = [['.'] * 9]
             else:
-                contributing_vars.sort(key = lambda x: x.qry_start)
+                ref_start_pos = 3 * position if cluster.is_gene == '1' else position
+                assert contig_name in cluster.assembly_compare.nucmer_hits
+                ref_start_hit = None
+                for hit in cluster.assembly_compare.nucmer_hits[contig_name]:
+                    if hit.ref_name == cluster.ref_sequence.id and hit.ref_coords().distance_to_point(ref_start_pos) == 0:
+                        ref_start_hit = copy.copy(hit)
+                        break
+
+                assert ref_start_hit is not None
+                ctg_start_pos, ctg_start_in_indel = ref_start_hit.qry_coords_from_ref_coord(ref_start_pos, pymummer_variants)
+
+                if known_var_change not in  ['.', 'unknown']:
+                    regex = re.match('^([^0-9])([0-9]+)([^0-9])$', known_var_change)
+                    try:
+                        ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
+                    except:
+                        raise Error('Error parsing variant ' + known_var_change)
+                elif ref_ctg_change != '.':
+                    if '_' in ref_ctg_change:
+                        continue
+                    else:
+                        regex = re.match('^([^0-9])([0-9]+)([^0-9])$', ref_ctg_change)
+                        try:
+                            ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
+                        except:
+                            raise Error('Error parsing variant ' + ref_ctg_change)
+
+                if ref_var_string == '.' or var_effect in ['FSHIFT', 'TRUNC', 'INDELS', 'UNKNOWN']:
+                    ref_end_pos = ref_start_pos
+                    ctg_end_pos = ctg_start_pos
+                elif cluster.is_gene == '1':
+                    ref_end_pos = ref_start_pos + 3 * len(ref_var_string) - 1
+                    ctg_end_pos = ctg_start_pos + 3 * len(ctg_var_string) - 1
+                else:
+                    ref_end_pos = ref_start_pos + len(ref_var_string) - 1
+                    ctg_end_pos = ctg_start_pos + len(ctg_var_string) - 1
 
                 smtls_total_depth = []
                 smtls_alt_nt = []
                 smtls_alt_depth = []
 
-                for var in contributing_vars:
+                for qry_pos in range(ctg_start_pos, ctg_end_pos + 1, 1):
                     if contig_name in remaining_samtools_variants:
-                        remaining_samtools_variants[contig_name].discard(var.qry_start)
+                        try:
+                            remaining_samtools_variants[contig_name].discard(qry_pos)
+                        except:
+                            pass
 
-                    depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, var.qry_start)
+                    depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, qry_pos)
 
                     if depths_tuple is not None:
                         smtls_alt_nt.append(depths_tuple[0])
@@ -217,12 +257,14 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 smtls_alt_nt = ';'.join(smtls_alt_nt) if len(smtls_alt_nt) else '.'
                 smtls_alt_depth = ';'.join(smtls_alt_depth) if len(smtls_alt_depth) else '.'
                 samtools_columns = [
-                        str(contributing_vars[0].ref_start + 1), #ref_start
-                        str(contributing_vars[0].ref_end + 1), # ref_end
-                        ';'.join([x.ref_base for x in contributing_vars]), # ref_nt
-                        str(contributing_vars[0].qry_start + 1),  # ctg_start
-                        str(contributing_vars[0].qry_end + 1),  #ctg_end
-                        ';'.join([x.qry_base for x in contributing_vars]), #ctg_nt
+                        str(ref_start_pos + 1), #ref_start
+                        str(ref_end_pos + 1), # ref_end
+                        #';'.join([x.ref_base for x in contributing_vars]), # ref_nt
+                        cluster.ref_sequence[ref_start_pos:ref_end_pos+1],
+                        str(ctg_start_pos + 1),  # ctg_start
+                        str(ctg_end_pos + 1),  #ctg_end
+                        #';'.join([x.qry_base for x in contributing_vars]), #ctg_nt
+                        cluster.assembly.sequences[contig_name][ctg_start_pos:ctg_end_pos + 1], # ctg_nt
                         smtls_total_depth,
                         smtls_alt_nt,
                         smtls_alt_depth,
@@ -233,6 +275,8 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 for matching_var in matching_vars_set:
                     if contributing_vars is None:
                         samtools_columns = _samtools_depths_at_known_snps_all_wild(matching_var, contig_name, cluster, pymummer_variants)
+                        samtools_columns[2] = samtools_columns[2].replace(';', '')
+                        samtools_columns[5] = samtools_columns[5].replace(';', '')
                     reported_known_vars.add(str(matching_var.variant))
                     variant_columns[3] = str(matching_var.variant)
 
