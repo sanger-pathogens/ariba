@@ -4,5 +4,5 @@ ariba_noncoding3_ref1	noncoding3_ref1	0	0	19	100	noncoding3	242	241	97.6	noncodi
 ariba_noncoding5_ref1	noncoding5_ref1	0	1	531	100	noncoding5	100	100	99.42	noncoding5.scaffold.1	200	14.1	1	SNP	n	A42T	0	A42T	SNP	42	42	A	50	50	A	20	A	20	noncoding5_ref1:0:1:A42T:.:description of A42T	.
 ariba_coding1_ref2	coding1_ref2	1	0	27	100	coding1	100	100	99.2	coding1.scaffold.1	150	10.1	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of coding1
 ariba_coding3_ref1	coding3_ref1	1	0	27	100	coding3	242	241	97.6	coding3.scaffold.1	300	37.6	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of coding3
-ariba_coding5_ref1	coding5_ref1	1	1	539	100	coding5	100	100	97.4	coding5.scaffold.1	200	14.1	1	SNP	p	A42S	1	A42S	NONSYN	142	144	A	50	50	T	65	T	65	coding5_ref1:0:1:A42S:.:description of A42S	.
+ariba_coding5_ref1	coding5_ref1	1	1	539	100	coding5	100	100	97.4	coding5.scaffold.1	200	14.1	1	SNP	p	A42S	1	A42S	NONSYN	142	144	GCA	50	52	TCA	65;64;63	T;C;A	65;64;63	coding5_ref1:0:1:A42S:.:description of A42S	.
 ariba_23S.rDNA_WHO_F_01358c	23S.rDNA_WHO_F_01358c	0	1	659	4168	23S	2890	2890	99.84	23S.scaffold.1	3628	344.0	1	SNP	n	C2597T	0	.	.	2597	2597	C	2928	2928	C	410	C,T	301,44	23S.rDNA_WHO_F_01358c:0:1:C2597T:.:E coli C2611T. High-level resistance to Azithromycin.	.
