@@ -105,7 +105,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=0, total_reads_bases=0)
         c.run()
 
-        expected = '\t'.join(['.', '.', '.', '64', '0', 'cluster_name'] + ['.'] * 24)
+        expected = '\t'.join(['.', '.', '.', '.', '64', '0', 'cluster_name'] + ['.'] * 24)
         self.assertEqual([expected], c.report_lines)
         self.assertFalse(c.status_flag.has('ref_seq_choose_fail'))
         self.assertTrue(c.status_flag.has('assembly_fail'))
@@ -123,7 +123,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=2, total_reads_bases=108, spades_other_options='--only-assembler')
         c.run()
 
-        expected = '\t'.join(['.', '.', '.', '1024', '2', 'cluster_name'] + ['.'] * 24)
+        expected = '\t'.join(['.', '.', '.', '.', '1024', '2', 'cluster_name'] + ['.'] * 24)
         self.assertEqual([expected], c.report_lines)
         self.assertTrue(c.status_flag.has('ref_seq_choose_fail'))
         self.assertFalse(c.status_flag.has('assembly_fail'))
@@ -141,7 +141,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=4, total_reads_bases=304)
         c.run()
 
-        expected = '\t'.join(['.', '.', '.', '64', '4', 'cluster_name'] + ['.'] * 24)
+        expected = '\t'.join(['.', '.', '.', '.', '64', '4', 'cluster_name'] + ['.'] * 24)
         self.assertEqual([expected], c.report_lines)
         self.assertFalse(c.status_flag.has('ref_seq_choose_fail'))
         self.assertTrue(c.status_flag.has('assembly_fail'))
@@ -161,12 +161,12 @@ class TestCluster(unittest.TestCase):
 
         self.maxDiff=None
         expected = [
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t14\t14\tA\t74\t74\tT\t19\tT\t19\tnoncoding1:0:0:A14T:.:ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tG61T\tSNP\t61\t61\tG\t121\t121\tT\t24\tT\t24\t.\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\t.82C\tINS\t82\t82\tA\t143\t143\tC\t23\tC\t23\t.\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tT108.\tDEL\t108\t108\tT\t168\t168\tC\t17\tC\t17\t.\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t1\tSNP\tn\tA6G\t1\t.\t.\t6\t6\tG\t66\t66\tG\t19\tG\t19\tnoncoding1:0:0:A6G:.:variant in ref and reads so should report\tgeneric description of noncoding1',
-            'noncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t1\tSNP\tn\tG9T\t0\t.\t.\t9\t9\tG\t69\t69\tG\t19\tG\t19\tnoncoding1:0:0:G9T:.:wild type in ref and reads\tgeneric description of noncoding1'
+            'noncoding1\tnoncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t14\t14\tA\t74\t74\tT\t19\tT\t19\tnoncoding1:0:0:A14T:.:ref has wild type, reads has variant so should report\tgeneric description of noncoding1',
+            'noncoding1\tnoncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tG61T\tSNP\t61\t61\tG\t121\t121\tT\t24\tT\t24\t.\tgeneric description of noncoding1',
+            'noncoding1\tnoncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\t.82C\tINS\t82\t82\tA\t143\t143\tC\t23\tC\t23\t.\tgeneric description of noncoding1',
+            'noncoding1\tnoncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t0\t.\tn\t.\t0\tT108.\tDEL\t108\t108\tT\t168\t168\tC\t17\tC\t17\t.\tgeneric description of noncoding1',
+            'noncoding1\tnoncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t1\tSNP\tn\tA6G\t1\t.\t.\t6\t6\tG\t66\t66\tG\t19\tG\t19\tnoncoding1:0:0:A6G:.:variant in ref and reads so should report\tgeneric description of noncoding1',
+            'noncoding1\tnoncoding1\t0\t0\t531\t72\tcluster_name\t120\t120\t95.87\tcluster_name.scaffold.1\t234\t15.4\t1\tSNP\tn\tG9T\t0\t.\t.\t9\t9\tG\t69\t69\tG\t19\tG\t19\tnoncoding1:0:0:G9T:.:wild type in ref and reads\tgeneric description of noncoding1'
         ]
 
         self.assertEqual(expected, c.report_lines)
@@ -185,10 +185,10 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t30\tGCG\t83\t85\tGTG\t22;22;21\tG;T;G\t22;22;21\tpresence_absence1:1:0:A10V:.:Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
-            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t0\t.\tp\t.\t0\t.\tSYN\t52\t54\tATT\t107\t109\tATC\t31;31;32\tA;T;C\t31;31;32\t.\tGeneric description of presence_absence1',
-            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t62\t64\tCGC\t18;17;17\tC;G;C\t18;17;17\tpresence_absence1:1:0:R3S:.:Ref and assembly have wild type\tGeneric description of presence_absence1',
-            'presence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tGCG\t68\t70\tGCG\t18;20;20\tG;C;G\t18;20;20\tpresence_absence1:1:0:I5A:.:Ref and reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tA10V\t1\tA10V\tNONSYN\t28\t30\tGCG\t83\t85\tGTG\t22;22;21\tG;T;G\t22;22;21\tpresence_absence1:1:0:A10V:.:Ref has wild, reads have variant so report\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t0\t.\tp\t.\t0\t.\tSYN\t52\t54\tATT\t107\t109\tATC\t31;31;32\tA;T;C\t31;31;32\t.\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t62\t64\tCGC\t18;17;17\tC;G;C\t18;17;17\tpresence_absence1:1:0:R3S:.:Ref and assembly have wild type\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence1\t1\t0\t539\t64\tcluster_name\t96\t96\t97.92\tcluster_name.scaffold.1\t213\t15.0\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tGCG\t68\t70\tGCG\t18;20;20\tG;C;G\t18;20;20\tpresence_absence1:1:0:I5A:.:Ref and reads have variant so report\tGeneric description of presence_absence1',
         ]
 
         self.assertEqual(expected, c.report_lines)
@@ -206,7 +206,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
         c.run()
         expected = [
-            'variants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t65\t67\tCGC\t18;18;19\tC;G;C\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type, so do not report\tGeneric description of variants_only1'
+            'variants_only1\tvariants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t65\t67\tCGC\t18;18;19\tC;G;C\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type, so do not report\tGeneric description of variants_only1'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -223,7 +223,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
         c.run()
         expected = [
-            'variants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t65\t67\tCGC\t18;18;19\tC;G;C\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type, but always report anyway\tGeneric description of variants_only1'
+            'variants_only1\tvariants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t65\t67\tCGC\t18;18;19\tC;G;C\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type, but always report anyway\tGeneric description of variants_only1'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -241,8 +241,8 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'variants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t65\t67\tCGC\t18;18;19\tC;G;C\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type\tGeneric description of variants_only1',
-            'variants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t215\t15.3\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tGCG\t71\t73\tGCG\t17;17;17\tG;C;G\t17;17;17\tvariants_only1:1:1:I5A:.:Ref and reads have variant so report\tGeneric description of variants_only1',
+            'variants_only1\tvariants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t65\t67\tCGC\t18;18;19\tC;G;C\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type\tGeneric description of variants_only1',
+            'variants_only1\tvariants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t215\t15.3\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tGCG\t71\t73\tGCG\t17;17;17\tG;C;G\t17;17;17\tvariants_only1:1:1:I5A:.:Ref and reads have variant so report\tGeneric description of variants_only1',
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -258,7 +258,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=112, total_reads_bases=1080)
         c.run()
         expected = [
-            'gene\t1\t0\t27\t112\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t364\t27.0\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of gene'
+            'gene\tgene\t1\t0\t27\t112\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t364\t27.0\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of gene'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -274,7 +274,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
-            'ref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_gene'
+            'ref_gene\tref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_gene'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -292,7 +292,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
-            'ref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_gene'
+            'ref_gene\tref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_gene'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -311,7 +311,7 @@ class TestCluster(unittest.TestCase):
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
         # included in the report of the known snp
         expected = [
-            'ref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tM6I\t0\t.\t.\t16\t18\tATG\t135\t137\tATG\t65;64;63\tA;T;G,A\t65;64;32,31\tref_gene:1:0:M6I:.:Description of M6I snp\t.'
+            'ref_gene\tref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tM6I\t0\t.\t.\t16\t18\tATG\t135\t137\tATG\t65;64;63\tA;T;G,A\t65;64;32,31\tref_gene:1:0:M6I:.:Description of M6I snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -330,7 +330,7 @@ class TestCluster(unittest.TestCase):
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
         # included in the report of the known snp
         expected = [
-            'ref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tM6I\t0\t.\t.\t16\t18\tATG\t135\t137\tATG\t65;64;63\tA;T;G,A\t65;64;32,31\tref_gene:1:1:M6I:.:Description of M6I snp\t.'
+            'ref_gene\tref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tM6I\t0\t.\t.\t16\t18\tATG\t135\t137\tATG\t65;64;63\tA;T;G,A\t65;64;32,31\tref_gene:1:1:M6I:.:Description of M6I snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -349,7 +349,7 @@ class TestCluster(unittest.TestCase):
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
         # included in the report of the known snp
         expected = [
-            'ref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tI6M\t1\t.\t.\t16\t18\tATG\t135\t137\tATG\t65;64;63\tA;T;G,A\t65;64;32,31\tref_gene:1:1:I6M:.:Description of I6M snp\t.'
+            'ref_gene\tref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tp\tI6M\t1\t.\t.\t16\t18\tATG\t135\t137\tATG\t65;64;63\tA;T;G,A\t65;64;32,31\tref_gene:1:1:I6M:.:Description of I6M snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -365,7 +365,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
-            'ref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_seq'
+            'ref_seq\tref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_seq'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -381,7 +381,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
-            'ref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:0:G18A:.:Description of G18A\tGeneric description of ref_seq'
+            'ref_seq\tref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:0:G18A:.:Description of G18A\tGeneric description of ref_seq'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -397,7 +397,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
-            'ref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_seq'
+            'ref_seq\tref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_seq'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -416,7 +416,7 @@ class TestCluster(unittest.TestCase):
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
         # included in the report of the known snp
         expected = [
-            'ref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:0:G18A:.:Description of G18A snp\t.'
+            'ref_seq\tref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:0:G18A:.:Description of G18A snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -435,7 +435,7 @@ class TestCluster(unittest.TestCase):
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
         # included in the report of the known snp
         expected = [
-            'ref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:1:G18A:.:Description of G18A snp\t.'
+            'ref_seq\tref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:1:G18A:.:Description of G18A snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -454,7 +454,7 @@ class TestCluster(unittest.TestCase):
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
         # included in the report of the known snp
         expected = [
-            'ref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tA18G\t1\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:1:A18G:.:Description of A18G snp\t.'
+            'ref_seq\tref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.scaffold.1\t335\t39.8\t1\tSNP\tn\tA18G\t1\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:1:A18G:.:Description of A18G snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -471,7 +471,7 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'presence_absence1\t1\t0\t19\t278\tcluster_name\t96\t77\t100.0\tcluster_name.scaffold.1\t949\t20.5\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of presence_absence1'
+            'presence_absence1\tpresence_absence1\t1\t0\t19\t278\tcluster_name\t96\t77\t100.0\tcluster_name.scaffold.1\t949\t20.5\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of presence_absence1'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
