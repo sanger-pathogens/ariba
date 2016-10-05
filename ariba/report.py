@@ -259,11 +259,9 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 samtools_columns = [
                         str(ref_start_pos + 1), #ref_start
                         str(ref_end_pos + 1), # ref_end
-                        #';'.join([x.ref_base for x in contributing_vars]), # ref_nt
                         cluster.ref_sequence[ref_start_pos:ref_end_pos+1],
                         str(ctg_start_pos + 1),  # ctg_start
                         str(ctg_end_pos + 1),  #ctg_end
-                        #';'.join([x.qry_base for x in contributing_vars]), #ctg_nt
                         cluster.assembly.sequences[contig_name][ctg_start_pos:ctg_end_pos + 1], # ctg_nt
                         smtls_total_depth,
                         smtls_alt_nt,
