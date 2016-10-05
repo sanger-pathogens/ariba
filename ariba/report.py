@@ -7,7 +7,7 @@ from ariba import sequence_variant
 class Error (Exception): pass
 
 columns = [
-    'ariba_ref_name',        # 0  ariiba (renamed) name of reference sequence
+    'ariba_ref_name',        # 0  ariba (renamed) name of reference sequence
     'ref_name',              # 1  original name of ref sequence
     'gene',                  # 2  is a gene 0|1
     'var_only',              # 3  is variant only 0|1
