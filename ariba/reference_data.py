@@ -373,7 +373,6 @@ class ReferenceData:
     def rename_sequences(self, outfile):
         self.rename_dict = ReferenceData._seq_names_to_rename_dict(self.sequences.keys())
         if len(self.rename_dict):
-            print('Had to rename some sequences. See', outfile, 'for old -> new names', file=sys.stderr)
             with open(outfile, 'w') as f:
                 for old_name, new_name in sorted(self.rename_dict.items()):
                     print(old_name, new_name, sep='\t', file=f)
