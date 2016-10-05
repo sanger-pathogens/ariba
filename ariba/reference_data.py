@@ -33,7 +33,7 @@ class ReferenceData:
         pyfastaq.sequences.genetic_code = self.genetic_code
         self.rename_dict = None
 
-        if rename_file is None:
+        if rename_file is None or not os.path.exists(rename_file):
             self.ariba_to_original_name = {}
         else:
             self.ariba_to_original_name = ReferenceData._load_rename_file(rename_file)
