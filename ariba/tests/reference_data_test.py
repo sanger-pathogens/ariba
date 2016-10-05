@@ -52,6 +52,23 @@ class TestReferenceData(unittest.TestCase):
         }
 
         self.assertEqual(expected_seqs_dict, ref_data.sequences)
+        self.assertEqual({}, ref_data.ariba_to_original_name)
+
+        rename_file =  os.path.join(data_dir, 'reference_data_init_ok.rename.tsv')
+        ref_data = reference_data.ReferenceData([fasta_in], [tsv_in], rename_file=rename_file)
+        expected_rename_dict = {'gene1': 'original_gene1', 'gene2': 'original_gene2'}
+        self.assertEqual(expected_rename_dict, ref_data.ariba_to_original_name)
+
+
+    def test_load_rename_file(self):
+        '''Test _load_rename_file'''
+        infile = os.path.join(data_dir, 'reference_data_load_rename_file.tsv')
+        got = reference_data.ReferenceData._load_rename_file(infile)
+        expected = {
+            'ariba1': 'original1',
+            'ariba2': 'original2'
+        }
+        self.assertEqual(expected, got)
 
 
     def test_load_metadata_tsv(self):

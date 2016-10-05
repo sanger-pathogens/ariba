@@ -15,6 +15,7 @@ class ReferenceData:
     def __init__(self,
         fasta_files,
         metadata_tsv_files,
+        rename_file=None,
         min_gene_length=6,
         max_gene_length=10000,
         genetic_code=11,
@@ -31,6 +32,22 @@ class ReferenceData:
         self.genetic_code = genetic_code
         pyfastaq.sequences.genetic_code = self.genetic_code
         self.rename_dict = None
+
+        if rename_file is None:
+            self.ariba_to_original_name = {}
+        else:
+            self.ariba_to_original_name = ReferenceData._load_rename_file(rename_file)
+
+
+    @classmethod
+    def _load_rename_file(cls, filename):
+        ariba_name_to_original_name = {}
+        f = pyfastaq.utils.open_file_read(filename)
+        for line in f:
+            original_name, ariba_name = line.rstrip().split('\t')
+            ariba_name_to_original_name[ariba_name] = original_name
+        pyfastaq.utils.close(f)
+        return ariba_name_to_original_name
 
 
     @classmethod
