@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 import sys
 import ariba
 
@@ -26,6 +27,9 @@ def run(options):
     if not os.path.exists(options.prepareref_dir):
         print('Input directory', options.prepareref_dir, 'not found. Cannot continue', file=sys.stderr)
         sys.exit(1)
+
+    if options.force and os.path.exists(options.outdir):
+        shutil.rmtree(options.outdir)
 
     if os.path.exists(options.outdir):
         print('Output directory already exists. ARIBA makes the output directory. Cannot continue.', file=sys.stderr)

@@ -1,5 +1,6 @@
 import sys
 import os
+import shutil
 import pickle
 import pyfastaq
 from ariba import reference_data
@@ -23,6 +24,7 @@ class RefPreparer:
         clusters_file=None,
         threads=1,
         verbose=False,
+        force=False,
     ):
         self.extern_progs = extern_progs
 
@@ -43,6 +45,7 @@ class RefPreparer:
         self.clusters_file = clusters_file
         self.threads = threads
         self.verbose = verbose
+        self.force = force
 
 
     @classmethod
@@ -135,6 +138,9 @@ class RefPreparer:
 
     def run(self, outdir):
         original_dir = os.getcwd()
+
+        if self.force and os.path.exists(outdir):
+            shutil.rmtree(outdir)
 
         if os.path.exists(outdir):
             raise Error('Error! Output directory ' + outdir + ' already exists. Cannot continue')
