@@ -95,8 +95,7 @@ class Clusters:
         self.cdhit_cluster_representatives_fa = self.cdhit_files_prefix + '.cluster_representatives.fa'
         self.bam_prefix = os.path.join(self.outdir, 'map_reads_to_cluster_reps')
         self.bam = self.bam_prefix + '.bam'
-        self.report_file_all_tsv = os.path.join(self.outdir, 'report.all.tsv')
-        self.report_file_all_xls = os.path.join(self.outdir, 'report.all.xls')
+        self.report_file_all_tsv = os.path.join(self.outdir, 'debug.report.tsv')
         self.report_file_filtered = os.path.join(self.outdir, 'report.tsv')
         self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa.gz')
         self.catted_genes_matching_refs_fasta = os.path.join(self.outdir, 'assembled_genes.fa.gz')

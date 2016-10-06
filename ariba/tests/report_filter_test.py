@@ -12,10 +12,10 @@ class TestReportFilter(unittest.TestCase):
         '''test __init__ on good input file'''
         infile = os.path.join(data_dir, 'report_filter_test_init_good.tsv')
         rf = report_filter.ReportFilter(infile=infile)
-        line1 = '\t'.join(['cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', 'C', '500', 'a:n:C42T:id1:foo', 'free_text'])
-        line2 = '\t'.join(['cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', 'C', '542', 'a:n:A51G:id2:bar', 'free_text2'])
-        line3 = '\t'.join(['cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '12.4', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', 'C', '542', 'a:n:A51G:id3:spam', 'free_text3'])
-        line4 = '\t'.join(['cluster2', '1', '0', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '20.2', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', 'T', '290', 'a:v:I42L:id4:eggs', 'free_text3'])
+        line1 = '\t'.join(['ariba_cluster1', 'cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', 'C', '500', 'a:n:C42T:id1:foo', 'free_text'])
+        line2 = '\t'.join(['ariba_cluster1', 'cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '10.5', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', 'C', '542', 'a:n:A51G:id2:bar', 'free_text2'])
+        line3 = '\t'.join(['ariba_cluster1', 'cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '12.4', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', 'C', '542', 'a:n:A51G:id3:spam', 'free_text3'])
+        line4 = '\t'.join(['ariba_cluster2', 'cluster2', '1', '0', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '20.2', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', 'T', '290', 'a:v:I42L:id4:eggs', 'free_text3'])
 
         expected = {
             'cluster1': {
@@ -38,8 +38,9 @@ class TestReportFilter(unittest.TestCase):
 
 
     def test_report_line_to_dict(self):
-        line = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t999\t23.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\ta:n:C42T:id1:foo\tfree text'
+        line = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t999\t23.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\ta:n:C42T:id1:foo\tfree text'
         expected = {
+            'ariba_ref_name':     'ariba_cluster1',
             'ref_name':           'cluster1',
             'gene':               '0',
             'var_only':           '0',
@@ -81,6 +82,7 @@ class TestReportFilter(unittest.TestCase):
     def test_dict_to_report_line(self):
         '''Test _dict_to_report_line'''
         report_dict = {
+            'ariba_ref_name':     'ariba_cluster1',
             'ref_name':           'cluster1',
             'gene':               '0',
             'var_only':           '0',
@@ -113,7 +115,7 @@ class TestReportFilter(unittest.TestCase):
             'free_text':          'free text',
         }
 
-        expected = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t1300\t42.4\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\ta:n:C42T:id1:foo\tfree text'
+        expected = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t99.42\tcluster1.scaffold.1\t1300\t42.4\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\ta:n:C42T:id1:foo\tfree text'
         self.assertEqual(expected, report_filter.ReportFilter._dict_to_report_line(report_dict))
 
 
@@ -121,10 +123,10 @@ class TestReportFilter(unittest.TestCase):
         good_infile = os.path.join(data_dir, 'report_filter_test_load_report_good.tsv')
         bad_infile = os.path.join(data_dir, 'report_filter_test_load_report_bad.tsv')
 
-        line1 = '\t'.join(['cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '12.2', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', 'C', '500', 'a:n:C42T:id1:foo', 'free_text'])
-        line2 = '\t'.join(['cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '12.2', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', 'C', '542', 'a:n:A51G:id2:bar', 'free_text2'])
-        line3 = '\t'.join(['cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '22.2', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', 'C', '542', 'a:n:A51G:id3:spam', 'free_text3'])
-        line4 = '\t'.join(['cluster2', '1', '1', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '33.3', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', 'T', '290', 'a:v:I42L:id4:eggs', 'free_text3'])
+        line1 = '\t'.join(['ariba_cluster1', 'cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '12.2', '1', 'SNP', 'n', 'C42T', '0', '.', '.', '42', '42', 'C', '142', '142', 'C', '500', 'C', '500', 'a:n:C42T:id1:foo', 'free_text'])
+        line2 = '\t'.join(['ariba_cluster1', 'cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.1', '1300', '12.2', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', 'C', '542', 'a:n:A51G:id2:bar', 'free_text2'])
+        line3 = '\t'.join(['ariba_cluster1', 'cluster1', '0', '0', '27', '10000', 'cluster1', '1000', '999', '99.42', 'cluster1.scaffold.2', '1300', '22.2', '1', 'SNP', 'n', 'A51G', '0', '.', '.', '51', '51', 'C', '151', '151', 'C', '542', 'C', '542', 'a:n:A51G:id3:spam', 'free_text3'])
+        line4 = '\t'.join(['ariba_cluster2', 'cluster2', '1', '1', '179', '20000', 'cluster2', '1042', '1042', '42.42', 'cluster2.scaffold.1', '1442', '33.3', '1', 'SNP', 'p', 'I42L', '1', 'I42L', 'NONSYN', '112', '112', 'C', '442', '442', 'T', '300', 'T', '290', 'a:v:I42L:id4:eggs', 'free_text3'])
 
         expected = {
             'cluster1': {
@@ -181,9 +183,9 @@ class TestReportFilter(unittest.TestCase):
 
     def test_report_dict_passes_essential_filters(self):
         '''Test _report_dict_passes_essential_filters'''
-        line1 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
-        line2 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t0\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
-        line3 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line1 = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t0\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line3 = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         tests = [
             (report_filter.ReportFilter._report_line_to_dict(line1), True),
             (report_filter.ReportFilter._report_line_to_dict(line2), False),
@@ -214,8 +216,8 @@ class TestReportFilter(unittest.TestCase):
     def test_filter_list_of_dicts_all_fail(self):
         '''Test _filter_list_of_dicts where all fail'''
         rf = report_filter.ReportFilter()
-        line1 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t88.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
-        line2 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line1 = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t88.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
         dict2 = report_filter.ReportFilter._report_line_to_dict(line2)
         got = rf._filter_list_of_dicts([dict1, dict2])
@@ -225,11 +227,11 @@ class TestReportFilter(unittest.TestCase):
     def test_filter_list_of_dicts_with_essential(self):
         '''Test _filter_list_of_dicts with an essential line but all others fail'''
         rf = report_filter.ReportFilter(ignore_not_has_known_variant=True)
-        line1 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
-        line2 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line1 = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t400\t12.2\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
         dict2 = report_filter.ReportFilter._report_line_to_dict(line2)
-        expected_line = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t' + '\t'.join(['.'] * 17) + '\tfree text'
+        expected_line = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t400\t12.2\t' + '\t'.join(['.'] * 17) + '\tfree text'
         expected = [report_filter.ReportFilter._report_line_to_dict(expected_line)]
         assert expected != [None]
         got = rf._filter_list_of_dicts([dict1, dict2])
@@ -239,9 +241,9 @@ class TestReportFilter(unittest.TestCase):
     def test_filter_list_of_dicts_with_pass(self):
         '''Test _filter_list_of_dicts with a line that passes'''
         rf = report_filter.ReportFilter(ignore_not_has_known_variant=True)
-        line1 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t500\t12.1\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
-        line2 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t500\t12.1\t1\tSNP\tn\tC46T\t1\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C46T\tfree text'
-        line3 = 'cluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t500\t12.1\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line1 = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t500\t12.1\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
+        line2 = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t98.42\tcluster1.scaffold.1\t500\t12.1\t1\tSNP\tn\tC46T\t1\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C46T\tfree text'
+        line3 = 'ariba_cluster1\tcluster1\t0\t0\t27\t10000\tcluster1\t1000\t999\t78.42\tcluster1.scaffold.1\t500\t12.1\t1\tSNP\tn\tC42T\t0\t.\t.\t42\t42\tC\t142\t142\tC\t500\t.\t500\tDescription_of_variant C42T\tfree text'
         dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
         dict2 = report_filter.ReportFilter._report_line_to_dict(line2)
         dict3 = report_filter.ReportFilter._report_line_to_dict(line3)
@@ -252,9 +254,9 @@ class TestReportFilter(unittest.TestCase):
     def test_remove_all_after_first_frameshift(self):
         '''Test _remove_all_after_first_frameshift'''
         self.assertEqual([], report_filter.ReportFilter._remove_all_after_first_frameshift([]))
-        line1 = 'cluster1\t1\t0\t528\t1874\tcluster1\t1188\t1097\t92.43\tcluster1.scaffold.1\t2218\t42.42\t0\t.\tp\t.\t0\tE89G\tNONSYN\t65\t265\tA;A\t766\t766\tG;C\t88;90\t.;.\t87;90\t.\t.'
-        line2 = 'cluster1\t1\t0\t528\t1874\tcluster1\t1188\t1097\t92.43\tcluster1.scaffold.1\t2218\t42.42\t0\t.\tp\t.\t0\tQ37fs\tFSHIFT\t109\t109\tA\t634\t634\t.\t67\t.\t67\t.\t.'
-        line3 = 'cluster1\t1\t0\t528\t1874\tcluster1\t1188\t1097\t92.43\tcluster1.scaffold.1\t2218\t42.42\t0\t.\tp\t.\t0\tE89G\tNONSYN\t265\t265\tA;A\t766\t766\tG;C\t88;90\t.;.\t87;90\t.\t.'
+        line1 = 'ariba_cluster1\tcluster1\t1\t0\t528\t1874\tcluster1\t1188\t1097\t92.43\tcluster1.scaffold.1\t2218\t42.42\t0\t.\tp\t.\t0\tE89G\tNONSYN\t65\t265\tA;A\t766\t766\tG;C\t88;90\t.;.\t87;90\t.\t.'
+        line2 = 'ariba_cluster1\tcluster1\t1\t0\t528\t1874\tcluster1\t1188\t1097\t92.43\tcluster1.scaffold.1\t2218\t42.42\t0\t.\tp\t.\t0\tQ37fs\tFSHIFT\t109\t109\tA\t634\t634\t.\t67\t.\t67\t.\t.'
+        line3 = 'ariba_cluster1\tcluster1\t1\t0\t528\t1874\tcluster1\t1188\t1097\t92.43\tcluster1.scaffold.1\t2218\t42.42\t0\t.\tp\t.\t0\tE89G\tNONSYN\t265\t265\tA;A\t766\t766\tG;C\t88;90\t.;.\t87;90\t.\t.'
         dict1 = report_filter.ReportFilter._report_line_to_dict(line1)
         dict2 = report_filter.ReportFilter._report_line_to_dict(line2)
         dict3 = report_filter.ReportFilter._report_line_to_dict(line3)

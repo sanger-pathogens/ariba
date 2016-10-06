@@ -1,40 +1,43 @@
 import copy
+import re
 import sys
 import pymummer
+from ariba import sequence_variant
 
 class Error (Exception): pass
 
 columns = [
-    'ref_name',              # 0  name of reference sequence
-    'gene',                  # 1  is a gene 0|1
-    'var_only',              # 2  is variant only 0|1
-    'flag',                  # 3  cluster flag
-    'reads',                 # 4  number of reads in this cluster
-    'cluster',               # 5  name of cluster
-    'ref_len',               # 6  length of reference sequence
-    'ref_base_assembled',    # 7  number of reference nucleotides assembled by this contig
-    'pc_ident',              # 8  %identity between ref sequence and contig
-    'ctg',                   # 9  name of contig matching reference
-    'ctg_len',               # 10  length of contig matching reference
-    'ctg_cov',               # 11 mean mapped read depth of this contig
-    'known_var',             # 12 is this a known SNP from reference metadata? 1|0
-    'var_type',              # 13 The type of variant. Currently only SNP supported
-    'var_seq_type',          # 14 if known_var=1, n|p for nucleotide or protein
-    'known_var_change',      # 15 if known_var=1, the wild/variant change, eg I42L
-    'has_known_var',         # 16 if known_var=1, 1|0 for whether or not the assembly has the variant
-    'ref_ctg_change',        # 17 amino acid or nucleotide change between reference and contig, eg I42L
-    'ref_ctg_effect',        # 18 effect of change between reference and contig, eg SYS, NONSYN (amino acid changes only)
-    'ref_start',             # 19 start position of variant in contig
-    'ref_end',               # 20 end position of variant in contig
-    'ref_nt',                # 21 nucleotide(s) in contig at variant position
-    'ctg_start',             # 22 start position of variant in contig
-    'ctg_end',               # 23 end position of variant in contig
-    'ctg_nt',                # 24 nucleotide(s) in contig at variant position
-    'smtls_total_depth',     # 25 total read depth at variant start position in contig, reported by mpileup
-    'smtls_nts',             # 26 alt nucleotides on contig, reported by mpileup
-    'smtls_nts_depth',          # 27 alt depth on contig, reported by mpileup
-    'var_description',       # 28 description of variant from reference metdata
-    'free_text',             # 29 other free text about reference sequence, from reference metadata
+    'ariba_ref_name',        # 0  ariba (renamed) name of reference sequence
+    'ref_name',              # 1  original name of ref sequence
+    'gene',                  # 2  is a gene 0|1
+    'var_only',              # 3  is variant only 0|1
+    'flag',                  # 4  cluster flag
+    'reads',                 # 5  number of reads in this cluster
+    'cluster',               # 6  name of cluster
+    'ref_len',               # 7  length of reference sequence
+    'ref_base_assembled',    # 8  number of reference nucleotides assembled by this contig
+    'pc_ident',              # 9  %identity between ref sequence and contig
+    'ctg',                   # 10  name of contig matching reference
+    'ctg_len',               # 11  length of contig matching reference
+    'ctg_cov',               # 12 mean mapped read depth of this contig
+    'known_var',             # 13 is this a known SNP from reference metadata? 1|0
+    'var_type',              # 14 The type of variant. Currently only SNP supported
+    'var_seq_type',          # 15 if known_var=1, n|p for nucleotide or protein
+    'known_var_change',      # 16 if known_var=1, the wild/variant change, eg I42L
+    'has_known_var',         # 17 if known_var=1, 1|0 for whether or not the assembly has the variant
+    'ref_ctg_change',        # 18 amino acid or nucleotide change between reference and contig, eg I42L
+    'ref_ctg_effect',        # 19 effect of change between reference and contig, eg SYS, NONSYN (amino acid changes only)
+    'ref_start',             # 20 start position of variant in contig
+    'ref_end',               # 21 end position of variant in contig
+    'ref_nt',                # 22 nucleotide(s) in contig at variant position
+    'ctg_start',             # 23 start position of variant in contig
+    'ctg_end',               # 24 end position of variant in contig
+    'ctg_nt',                # 25 nucleotide(s) in contig at variant position
+    'smtls_total_depth',     # 26 total read depth at variant start position in contig, reported by mpileup
+    'smtls_nts',             # 27 alt nucleotides on contig, reported by mpileup
+    'smtls_nts_depth',       # 28 alt depth on contig, reported by mpileup
+    'var_description',       # 29 description of variant from reference metdata
+    'free_text',             # 30 other free text about reference sequence, from reference metadata
 ]
 
 
@@ -152,6 +155,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
 
     common_first_columns = [
         cluster.ref_sequence.id,
+        cluster.refdata.ariba_to_original_name.get(cluster.ref_sequence.id, cluster.ref_sequence.id),
         cluster.is_gene,
         cluster.is_variant_only,
         str(cluster.status_flag),
@@ -196,17 +200,55 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
             if contributing_vars is None:
                 samtools_columns = [['.'] * 9]
             else:
-                contributing_vars.sort(key = lambda x: x.qry_start)
+                ref_start_pos = 3 * position if cluster.is_gene == '1' else position
+                assert contig_name in cluster.assembly_compare.nucmer_hits
+                ref_start_hit = None
+                for hit in cluster.assembly_compare.nucmer_hits[contig_name]:
+                    if hit.ref_name == cluster.ref_sequence.id and hit.ref_coords().distance_to_point(ref_start_pos) == 0:
+                        ref_start_hit = copy.copy(hit)
+                        break
+
+                assert ref_start_hit is not None
+                ctg_start_pos, ctg_start_in_indel = ref_start_hit.qry_coords_from_ref_coord(ref_start_pos, pymummer_variants)
+
+                if known_var_change not in  ['.', 'unknown']:
+                    regex = re.match('^([^0-9])([0-9]+)([^0-9])$', known_var_change)
+                    try:
+                        ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
+                    except:
+                        raise Error('Error parsing variant ' + known_var_change)
+                elif ref_ctg_change != '.':
+                    if '_' in ref_ctg_change:
+                        continue
+                    else:
+                        regex = re.match('^([^0-9])([0-9]+)([^0-9])$', ref_ctg_change)
+                        try:
+                            ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
+                        except:
+                            raise Error('Error parsing variant ' + ref_ctg_change)
+
+                if ref_var_string == '.' or var_effect in ['FSHIFT', 'TRUNC', 'INDELS', 'UNKNOWN']:
+                    ref_end_pos = ref_start_pos
+                    ctg_end_pos = ctg_start_pos
+                elif cluster.is_gene == '1':
+                    ref_end_pos = ref_start_pos + 3 * len(ref_var_string) - 1
+                    ctg_end_pos = ctg_start_pos + 3 * len(ctg_var_string) - 1
+                else:
+                    ref_end_pos = ref_start_pos + len(ref_var_string) - 1
+                    ctg_end_pos = ctg_start_pos + len(ctg_var_string) - 1
 
                 smtls_total_depth = []
                 smtls_alt_nt = []
                 smtls_alt_depth = []
 
-                for var in contributing_vars:
+                for qry_pos in range(ctg_start_pos, ctg_end_pos + 1, 1):
                     if contig_name in remaining_samtools_variants:
-                        remaining_samtools_variants[contig_name].discard(var.qry_start)
+                        try:
+                            remaining_samtools_variants[contig_name].discard(qry_pos)
+                        except:
+                            pass
 
-                    depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, var.qry_start)
+                    depths_tuple = cluster.samtools_vars.get_depths_at_position(contig_name, qry_pos)
 
                     if depths_tuple is not None:
                         smtls_alt_nt.append(depths_tuple[0])
@@ -217,12 +259,12 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 smtls_alt_nt = ';'.join(smtls_alt_nt) if len(smtls_alt_nt) else '.'
                 smtls_alt_depth = ';'.join(smtls_alt_depth) if len(smtls_alt_depth) else '.'
                 samtools_columns = [
-                        str(contributing_vars[0].ref_start + 1), #ref_start
-                        str(contributing_vars[0].ref_end + 1), # ref_end
-                        ';'.join([x.ref_base for x in contributing_vars]), # ref_nt
-                        str(contributing_vars[0].qry_start + 1),  # ctg_start
-                        str(contributing_vars[0].qry_end + 1),  #ctg_end
-                        ';'.join([x.qry_base for x in contributing_vars]), #ctg_nt
+                        str(ref_start_pos + 1), #ref_start
+                        str(ref_end_pos + 1), # ref_end
+                        cluster.ref_sequence[ref_start_pos:ref_end_pos+1],
+                        str(ctg_start_pos + 1),  # ctg_start
+                        str(ctg_end_pos + 1),  #ctg_end
+                        cluster.assembly.sequences[contig_name][ctg_start_pos:ctg_end_pos + 1], # ctg_nt
                         smtls_total_depth,
                         smtls_alt_nt,
                         smtls_alt_depth,
@@ -233,6 +275,8 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 for matching_var in matching_vars_set:
                     if contributing_vars is None:
                         samtools_columns = _samtools_depths_at_known_snps_all_wild(matching_var, contig_name, cluster, pymummer_variants)
+                        samtools_columns[2] = samtools_columns[2].replace(';', '')
+                        samtools_columns[5] = samtools_columns[5].replace(';', '')
                     reported_known_vars.add(str(matching_var.variant))
                     variant_columns[3] = str(matching_var.variant)
 
@@ -302,11 +346,11 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
 
 def report_lines(cluster):
     if cluster.status_flag.has('ref_seq_choose_fail'):
-        fields = ['.', '.', '.', str(cluster.status_flag), str(cluster.total_reads), cluster.name] + ['.'] * (len(columns) - 6)
+        fields = ['.', '.', '.', '.', str(cluster.status_flag), str(cluster.total_reads), cluster.name] + ['.'] * (len(columns) - 7)
         assert len(fields) == len(columns)
         return ['\t'.join(fields)]
     elif cluster.status_flag.has('assembly_fail'):
-        fields = ['.', '.', '.', str(cluster.status_flag), str(cluster.total_reads), cluster.name] + ['.'] * (len(columns) - 6)
+        fields = ['.', '.', '.', '.', str(cluster.status_flag), str(cluster.total_reads), cluster.name] + ['.'] * (len(columns) - 7)
         assert len(fields) == len(columns)
         return ['\t'.join(fields)]
 

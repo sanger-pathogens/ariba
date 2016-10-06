@@ -1,18 +1,18 @@
-#ref_name	gene	var_only	flag	reads	cluster	ref_len	ref_base_assembled	pc_ident	ctg	ctg_len	ctg_cov	known_var	var_type	var_seq_type	known_var_change	has_known_var	ref_ctg_change	ref_ctg_effect	ref_start	ref_end	ref_nt	ctg_start	ctg_end	ctg_nt	smtls_total_depth	smtls_nts	smtls_nts_depth	var_description	free_text
-noncoding1_ref1	0	0	19	100	noncoding1	100	100	99.1	noncoding1.scaffold.1	150	10.1	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of noncoding1
-noncoding2_ref1	0	0	19	100	noncoding2	200	200	98.2	noncoding2.scaffold.1	250	42.42	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of noncoding2
-noncoding5_ref1	0	1	531	100	noncoding5	100	100	97.4	noncoding5.scaffold.1	200	14.1	1	SNP	n	A42T	1	A42T	SNP	42	42	A	50	50	T	40	T	40	noncoding5_ref1:0:1:A42T:.:description of A42T	.
-noncoding6_ref1	0	0	531	100	noncoding6	100	100	95.5	noncoding6.scaffold.1	200	24.32	1	SNP	n	A52T	1	A52T	SNP	52	52	A	70	70	T	100	T,C	70,30	noncoding6_ref1:0:1:A52T:.:description of A52T	.
-noncoding7_ref1	0	0	531	100	noncoding7	100	100	95.4	noncoding7.scaffold.1	200	24.31	1	SNP	n	A53T	1	A53T	SNP	53	53	A	70	70	T	100	T,C	70,1	noncoding7_ref1:0:1:A53T:.:description of A53T	.
-noncoding8_ref1	0	0	531	100	noncoding8	100	100	95.3	noncoding8.scaffold.1	200	24.29	1	SNP	n	A54T	0	.	.	54	54	A	70	70	A	100	.	.	noncoding8_ref1:0:1:A54T:.:description of A54T	.
-noncoding9_ref1	0	1	531	100	noncoding9	100	100	95.2	noncoding9.scaffold.1	200	24.28	1	SNP	n	A55T	0	.	.	55	55	A	70	70	A	100	.	.	noncoding9_ref1:0:1:A55T:.:description of A55T	.
-noncoding10_ref1	0	0	531	100	noncoding10	100	100	95.1	noncoding10.scaffold.1	200	24.27	0	.	n	.	0	C100T	SNP	100	100	C	150	150	T	100	T,A	99,1	.	.
-noncoding11_ref1	0	0	531	100	noncoding11	100	100	95.05	noncoding11.scaffold.1	200	24.26	0	HET	.	.	.	G101A	.	100	100	G	150	150	G	100	G,A	70,30	.	.
-coding1_ref1	1	0	19	100	coding1	100	100	99.1	coding1.scaffold.1	150	10.1	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of coding1
-coding2_ref1	1	0	27	100	coding2	200	200	98.2	coding2.scaffold.1	250	42.42	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of coding2
-coding5_ref1	1	1	539	100	coding5	100	100	97.4	coding5.scaffold.1	200	14.1	1	SNP	p	A42S	0	.	.	142	144	A;G;A	50	52	A;G;A	60;61;62	A;G;A	60;61;62	coding5_ref1:0:1:A42S:.:description of A42S	.
-coding6_ref1	1	0	539	100	coding6	100	100	95.5	coding6.scaffold.1	200	24.32	1	SNP	p	A52S	1	A52S	NONSYN	152	152	A	70	70	T	50	T	50	coding6_ref1:0:1:A52S:.:description of A52S	.
-coding7_ref1	1	1	539	100	coding7	100	100	95.4	coding7.scaffold.1	200	24.32	1	SNP	p	A53S	0	.	.	152	154	A;G;A	70	70	A;G;A	71;72;73	A;G;A	71;72;73	coding7_ref1:0:1:A53S:.:description of A53S	.
-coding8_ref1	1	0	539	100	coding8	100	100	95.3	coding8.scaffold.1	200	24.31	0	.	p	.	0	A53S	NONSYN	160	160	A	75	75	T	100	T,G	100,1	.	.
-23S.rDNA_WHO_F_01358c	0	1	531	9914	23S	2890	2890	99.86	23S.scaffold.1	3120	744.8	1	SNP	n	C2597T	1	C2597T	SNP	2597	2597	C	2755	2755	T	823	TC,T	487,1	23S.rDNA_WHO_F_01358c:0:1:C2597T:.:E coli C2611T.	High-level resistance to Azithromycin
-mdfA.3001328.JQ394987.0_1233.561	1	0	659	336	mdfA	1233	1233	97.0	mdfA.scaffold.1	1464	16.2	0	HET	.	.	.	G261GGGTGTGGTGTGGT,GGGTGTGGT	.	261	261	G	282	282	G	20	GGGTGTGGTGTGGT,GGGTGTGGT	17,2	.	mdfA;Multidrug translocase MdfA
+#ariba_ref_name	ref_name	gene	var_only	flag	reads	cluster	ref_len	ref_base_assembled	pc_ident	ctg	ctg_len	ctg_cov	known_var	var_type	var_seq_type	known_var_change	has_known_var	ref_ctg_change	ref_ctg_effect	ref_start	ref_end	ref_nt	ctg_start	ctg_end	ctg_nt	smtls_total_depth	smtls_nts	smtls_nts_depth	var_description	free_text
+ariba_noncoding1_ref1	noncoding1_ref1	0	0	19	100	noncoding1	100	100	99.1	noncoding1.scaffold.1	150	10.1	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of noncoding1
+ariba_noncoding2_ref1	noncoding2_ref1	0	0	19	100	noncoding2	200	200	98.2	noncoding2.scaffold.1	250	42.42	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of noncoding2
+ariba_noncoding5_ref1	noncoding5_ref1	0	1	531	100	noncoding5	100	100	97.4	noncoding5.scaffold.1	200	14.1	1	SNP	n	A42T	1	A42T	SNP	42	42	A	50	50	T	40	T	40	noncoding5_ref1:0:1:A42T:.:description of A42T	.
+ariba_noncoding6_ref1	noncoding6_ref1	0	0	531	100	noncoding6	100	100	95.5	noncoding6.scaffold.1	200	24.32	1	SNP	n	A52T	1	A52T	SNP	52	52	A	70	70	T	100	T,C	70,30	noncoding6_ref1:0:1:A52T:.:description of A52T	.
+ariba_noncoding7_ref1	noncoding7_ref1	0	0	531	100	noncoding7	100	100	95.4	noncoding7.scaffold.1	200	24.31	1	SNP	n	A53T	1	A53T	SNP	53	53	A	70	70	T	100	T,C	70,1	noncoding7_ref1:0:1:A53T:.:description of A53T	.
+ariba_noncoding8_ref1	noncoding8_ref1	0	0	531	100	noncoding8	100	100	95.3	noncoding8.scaffold.1	200	24.29	1	SNP	n	A54T	0	.	.	54	54	A	70	70	A	100	.	.	noncoding8_ref1:0:1:A54T:.:description of A54T	.
+ariba_noncoding9_ref1	noncoding9_ref1	0	1	531	100	noncoding9	100	100	95.2	noncoding9.scaffold.1	200	24.28	1	SNP	n	A55T	0	.	.	55	55	A	70	70	A	100	.	.	noncoding9_ref1:0:1:A55T:.:description of A55T	.
+ariba_noncoding10_ref1	noncoding10_ref1	0	0	531	100	noncoding10	100	100	95.1	noncoding10.scaffold.1	200	24.27	0	.	n	.	0	C100T	SNP	100	100	C	150	150	T	100	T,A	99,1	.	.
+ariba_noncoding11_ref1	noncoding11_ref1	0	0	531	100	noncoding11	100	100	95.05	noncoding11.scaffold.1	200	24.26	0	HET	.	.	.	G101A	.	100	100	G	150	150	G	100	G,A	70,30	.	.
+ariba_coding1_ref1	coding1_ref1	1	0	19	100	coding1	100	100	99.1	coding1.scaffold.1	150	10.1	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of coding1
+ariba_coding2_ref1	coding2_ref1	1	0	27	100	coding2	200	200	98.2	coding2.scaffold.1	250	42.42	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	generic description of coding2
+ariba_coding5_ref1	coding5_ref1	1	1	539	100	coding5	100	100	97.4	coding5.scaffold.1	200	14.1	1	SNP	p	A42S	0	.	.	142	144	GCA	50	52	GCA	60;61;62	G;C;A	60;61;62	coding5_ref1:0:1:A42S:.:description of A42S	.
+ariba_coding6_ref1	coding6_ref1	1	0	539	100	coding6	100	100	95.5	coding6.scaffold.1	200	24.32	1	SNP	p	A52S	1	A52S	NONSYN	151	153	GCA	68	70	TCA	50;49;51	T;C;A	50;49;51	coding6_ref1:0:1:A52S:.:description of A52S	.
+ariba_coding7_ref1	coding7_ref1	1	1	539	100	coding7	100	100	95.4	coding7.scaffold.1	200	24.32	1	SNP	p	A53S	0	.	.	154	156	GCA	71	73	GCA	71;72;73	G;C;A	71;72;73	coding7_ref1:0:1:A53S:.:description of A53S	.
+ariba_coding8_ref1	coding8_ref1	1	0	539	100	coding8	100	100	95.3	coding8.scaffold.1	200	24.31	0	.	p	.	0	A53S	NONSYN	160	162	GCA	74	76	TCA	100,1;95,99	T,G;C;A	100,1;95;99	.	.
+ariba_23S.rDNA_WHO_F_01358c	23S.rDNA_WHO_F_01358c	0	1	531	9914	23S	2890	2890	99.86	23S.scaffold.1	3120	744.8	1	SNP	n	C2597T	1	C2597T	SNP	2597	2597	C	2755	2755	T	823	TC,T	487,1	23S.rDNA_WHO_F_01358c:0:1:C2597T:.:E coli C2611T.	High-level resistance to Azithromycin
+ariba_mdfA.3001328.JQ394987.0_1233.561	mdfA.3001328.JQ394987.0_1233.561	1	0	659	336	mdfA	1233	1233	97.0	mdfA.scaffold.1	1464	16.2	0	HET	.	.	.	G261GGGTGTGGTGTGGT,GGGTGTGGT	.	261	261	G	282	282	G	20	GGGTGTGGTGTGGT,GGGTGTGGT	17,2	.	mdfA;Multidrug translocase MdfA
