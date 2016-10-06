@@ -96,16 +96,18 @@ are put in a temporary directory made by ARIBA.  The total size of these
 files is small, but there can be a many of them. This can be a
 problem when running large numbers (100s or 1000s) of jobs simultaneously
 on the same file system.
-By default, ARIBA creates a temporary directory for these files
-inside the output directory of each run.
+The parent directory of the temporary directory is determined in the
+following order of precedence:
+
+1. The value of the option `--tmp_dir` (if that option was used)
+2. The environment variable `$ARIBA_TMPDIR` (if it is set)
+3. The environment variable `$TMPDIR` (if it is set)
+4. If none of the above is found, then use the run's output directory.
 
 Each temporary directory
 is unique to one run of ARIBA, and is automatically deleted at the end
 of the run (even if ARIBA was killed by the user or crashed).
-The parent directory of the temporary
-directory can be changed using the environment variable
-`$ARIBA_TMPDIR`. The temporary directory for each run will be made
-inside `$ARIBA_TMPDIR`. For example,
+For example,
 
     export $ARIBA_TMPDIR=/tmp
 
@@ -116,12 +118,6 @@ will have a name of the form
 
 where the suffix `abcdef` is a random string of characters, chosen
 such that `/tmp/ariba.tmp.abcdef` does not already exist.
-
-The temporary directory can also be changed using the option
-`--tmp_dir` when running `ariba run`. Using this option takes precedence
-over the environment variable `$ARIBA_TMPDIR`. If neither are
-set, then ARIBA creates the temporary directory inside
-the output directory given to `ariba run`.
 
 The exception to the above is if the option `--noclean` is used.
 This forces the temporary directory to be placed in the output

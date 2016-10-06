@@ -137,6 +137,8 @@ class Clusters:
         if tmp_dir is None:
             if 'ARIBA_TMPDIR' in os.environ:
                 tmp_dir = os.path.abspath(os.environ['ARIBA_TMPDIR'])
+            elif 'TMPDIR' in os.environ:
+                tmp_dir = os.path.abspath(os.environ['TMPDIR'])
             else:
                 tmp_dir = self.outdir
 
