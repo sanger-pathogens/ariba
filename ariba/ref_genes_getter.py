@@ -25,10 +25,11 @@ argannot_ref = '"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resi
 
 
 class RefGenesGetter:
-    def __init__(self, ref_db, version=None):
+    def __init__(self, ref_db, version=None, debug=False):
         if ref_db not in allowed_ref_dbs:
             raise Error('Error in RefGenesGetter. ref_db must be one of: ' + str(allowed_ref_dbs) + ', but I got "' + ref_db)
         self.ref_db=ref_db
+        self.debug = debug
         self.genetic_code = 11
         self.max_download_attempts = 3
         self.sleep_time = 2
@@ -185,6 +186,9 @@ class RefGenesGetter:
         pyfastaq.utils.close(f_out_tsv)
         pyfastaq.utils.close(f_out_log)
         os.chdir(current_dir)
+        if not self.debug:
+            shutil.rmtree(tmpdir)
+
         print('Extracted data and written ARIBA input files\n')
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
@@ -244,7 +248,8 @@ class RefGenesGetter:
         pyfastaq.utils.close(fout_tsv)
         print('\nFinished combining files\n')
         os.chdir(current_dir)
-        shutil.rmtree(tmpdir)
+        if not self.debug:
+            shutil.rmtree(tmpdir)
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
@@ -286,7 +291,8 @@ class RefGenesGetter:
 
         pyfastaq.utils.close(f_out_tsv)
         pyfastaq.utils.close(f_out_fa)
-        shutil.rmtree(tmpdir)
+        if not self.debug:
+            shutil.rmtree(tmpdir)
 
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
@@ -339,7 +345,8 @@ class RefGenesGetter:
         pyfastaq.utils.close(fout_tsv)
         print('\nFinished combining files\n')
         os.chdir(current_dir)
-        shutil.rmtree(tmpdir)
+        if not self.debug:
+            shutil.rmtree(tmpdir)
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
@@ -371,6 +378,8 @@ class RefGenesGetter:
 
         pyfastaq.utils.close(f_out_fa)
         pyfastaq.utils.close(f_out_meta)
+        if not self.debug:
+            os.unlink(srst2_fa)
 
         print('Finished downloading and converting data. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
@@ -403,7 +412,8 @@ class RefGenesGetter:
         print('Extracting files ... ', end='', flush=True)
         vparser = vfdb_parser.VfdbParser(zipfile, outprefix)
         vparser.run()
-        shutil.rmtree(tmpdir)
+        if not self.debug:
+            shutil.rmtree(tmpdir)
         print('done')
         final_fasta = outprefix + '.fa'
         final_tsv = outprefix + '.tsv'
