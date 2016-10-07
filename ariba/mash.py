@@ -19,9 +19,13 @@ class Masher:
             self.extern_progs = extern_progs
 
 
-    def _sketch(self, infile, individual):
+    @classmethod
+    def sketch(cls, infile, individual, extern_progs, verbose=True, verbose_filehandle=None):
+        if verbose:
+            assert verbose_filehandle is not None
+
         cmd_list = [
-            self.extern_progs.exe('mash'),
+            extern_progs.exe('mash'),
             'sketch',
             '-s 100000'
         ]
@@ -30,7 +34,7 @@ class Masher:
             cmd_list.append('-i')
 
         cmd_list.append(infile)
-        common.syscall(' '.join(cmd_list), verbose=True, verbose_filehandle=self.log_fh)
+        common.syscall(' '.join(cmd_list), verbose=verbose, verbose_filehandle=verbose_filehandle)
 
 
     def _dist(self, outfile):
@@ -45,8 +49,8 @@ class Masher:
 
 
     def run(self, outfile):
-        self._sketch(self.reference_fa, True)
-        self._sketch(self.query_fa, False)
+        Masher.sketch(self.reference_fa, True, self.extern_progs, verbose=True, verbose_filehandle=self.log_fh)
+        Masher.sketch(self.query_fa, False, self.extern_progs, verbose=True, verbose_filehandle=self.log_fh)
         self._dist(outfile)
         if os.path.getsize(outfile) == 0:
             return None
