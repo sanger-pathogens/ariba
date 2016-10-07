@@ -18,6 +18,7 @@ class Assembly:
       final_assembly_fa,
       final_assembly_bam,
       log_fh,
+      mash_reference_fasta,
       scaff_name_prefix='scaffold',
       kmer=0,
       assembler='fermilite',
@@ -42,6 +43,7 @@ class Assembly:
         self.final_assembly_fa = os.path.abspath(final_assembly_fa)
         self.final_assembly_bam = os.path.abspath(final_assembly_bam)
         self.log_fh = log_fh
+        self.mash_reference_fasta = os.path.abspath(mash_reference_fasta)
         self.scaff_name_prefix = scaff_name_prefix
 
         self.ref_seq_name = None
@@ -377,14 +379,26 @@ class Assembly:
                 self.log_fh = None
                 return
 
-            masher = mash.Masher(self.ref_fastas, self.gapfilled_length_filtered, self.log_fh, self.extern_progs)
+            masher = mash.Masher(self.mash_reference_fasta, self.gapfilled_length_filtered, self.log_fh, self.extern_progs)
             self.ref_seq_name = masher.run(self.mash_dist_file)
             if self.ref_seq_name is None:
                 print('Could not determine closest reference sequence', file=self.log_fh)
                 self.log_fh = None
                 return
 
-            faidx.write_fa_subset({self.ref_seq_name}, self.ref_fastas, self.ref_fasta)
+            file_reader = pyfastaq.sequences.file_reader(self.ref_fastas)
+            for ref_seq in file_reader:
+                if self.ref_seq_name == ref_seq.id:
+                    f_out = pyfastaq.utils.open_file_write(self.ref_fasta)
+                    print(ref_seq, file=f_out)
+                    pyfastaq.utils.close(f_out)
+                    break
+            else:
+                print('Closest reference sequence ', self.ref_seq_name, ' does not belong to this cluster', file=self.log_fh)
+                self.ref_seq_name = None
+                self.log_fh = None
+                return
+
             print('Closest reference sequence according to mash: ', self.ref_seq_name, file=self.log_fh)
 
             contigs_both_strands = self._fix_contig_orientation(self.gapfilled_length_filtered, self.ref_fasta, self.final_assembly_fa, min_id=self.nucmer_min_id, min_length=self.nucmer_min_len, breaklen=self.nucmer_breaklen)

@@ -6,7 +6,7 @@ import math
 import shutil
 import sys
 import pyfastaq
-from ariba import assembly, assembly_compare, assembly_variants, external_progs, flag, mapping, report, samtools_variants
+from ariba import assembly, assembly_compare, assembly_variants, external_progs, flag, mapping, mash, report, samtools_variants
 
 class Error (Exception): pass
 
@@ -17,6 +17,7 @@ class Cluster:
       root_dir,
       name,
       refdata,
+      refdata_seqs_fasta_for_mash=None,
       total_reads=None,
       total_reads_bases=None,
       fail_file=None,
@@ -125,6 +126,13 @@ class Cluster:
             self.extern_progs = external_progs.ExternalProgs()
         else:
             self.extern_progs = extern_progs
+
+        if refdata_seqs_fasta_for_mash is None:
+            mash.Masher.sketch(self.references_fa, True, self.extern_progs, verbose=False)
+            self.refdata_seqs_fasta_for_mash = self.references_fa
+        else:
+            self.refdata_seqs_fasta_for_mash = os.path.abspath(refdata_seqs_fasta_for_mash)
+            assert os.path.exists(self.refdata_seqs_fasta_for_mash + '.msh')
 
         self.random_seed = random_seed
         wanted_signals = [signal.SIGABRT, signal.SIGINT, signal.SIGSEGV, signal.SIGTERM]
@@ -312,6 +320,7 @@ class Cluster:
               self.final_assembly_fa,
               self.final_assembly_bam,
               self.log_fh,
+              self.refdata_seqs_fasta_for_mash,
               scaff_name_prefix=self.name,
               kmer=self.assembly_kmer,
               assembler=self.assembler,

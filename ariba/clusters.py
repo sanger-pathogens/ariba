@@ -388,6 +388,7 @@ class Clusters:
                 new_dir,
                 cluster_name,
                 self.refdata,
+                refdata_seqs_fasta_for_mash=self.all_ref_seqs_fasta,
                 fail_file=os.path.join(self.fails_dir, cluster_name),
                 read_store=self.read_store,
                 reference_names=self.cluster_ids[cluster_name],

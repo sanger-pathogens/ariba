@@ -130,6 +130,25 @@ class TestCluster(unittest.TestCase):
         shutil.rmtree(tmpdir)
 
 
+    def test_full_run_ref_not_in_cluster(self):
+        '''test complete run of cluster when nearest ref is outside cluster'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_ref_not_in_cluster.in.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ref_not_in_cluster.in.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.test_full_run_ref_not_in_cluster'
+        ref_for_mash =  os.path.join(data_dir, 'cluster_test_full_run_ref_not_in_cluster.mash.fa')
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ref_not_in_cluster'), tmpdir)
+
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=72, total_reads_bases=3600, refdata_seqs_fasta_for_mash=ref_for_mash)
+        c.run()
+
+        expected = '\t'.join(['.', '.', '.', '.', '1024', '72', 'cluster_name'] + ['.'] * 24)
+        self.assertEqual([expected], c.report_lines)
+        self.assertTrue(c.status_flag.has('ref_seq_choose_fail'))
+        self.assertFalse(c.status_flag.has('assembly_fail'))
+        shutil.rmtree(tmpdir)
+
+
     def test_full_run_assembly_fail(self):
         '''test complete run of cluster when assembly fails'''
         fasta_in = os.path.join(data_dir, 'cluster_test_full_run_assembly_fail.in.fa')

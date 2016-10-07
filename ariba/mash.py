@@ -49,7 +49,8 @@ class Masher:
 
 
     def run(self, outfile):
-        Masher.sketch(self.reference_fa, True, self.extern_progs, verbose=True, verbose_filehandle=self.log_fh)
+        if not os.path.exists(self.reference_fa + '.msh'):
+            Masher.sketch(self.reference_fa, True, self.extern_progs, verbose=True, verbose_filehandle=self.log_fh)
         Masher.sketch(self.query_fa, False, self.extern_progs, verbose=True, verbose_filehandle=self.log_fh)
         self._dist(outfile)
         if os.path.getsize(outfile) == 0:
