@@ -107,7 +107,7 @@ class TestSummaryCluster(unittest.TestCase):
         data_dict = summary_cluster.SummaryCluster.line2dict(line)
 
         tests = [
-            ('0', 0, 'no'),
+            ('0', 0, 'partial'),
             ('0', 64, 'no'),
             ('0', 1024, 'no'),
             ('0', 1, 'fragmented'),
@@ -117,7 +117,7 @@ class TestSummaryCluster(unittest.TestCase):
             ('0', 51, 'yes_nonunique'),
             ('0', 147, 'yes_nonunique'),
             ('0', 275, 'yes_nonunique'),
-            ('1', 0, 'no'),
+            ('1', 0, 'partial'),
             ('1', 64, 'no'),
             ('1', 1024, 'no'),
             ('1', 1, 'fragmented'),
@@ -135,6 +135,11 @@ class TestSummaryCluster(unittest.TestCase):
             data_dict['flag'] = flag.Flag(f)
             cluster.add_data_dict(data_dict)
             self.assertEqual(expected, cluster._to_cluster_summary_assembled())
+            if expected == 'partial':
+                original_number = cluster.data[0]['ref_base_assembled']
+                cluster.data[0]['ref_base_assembled'] = 0
+                self.assertEqual('no', cluster._to_cluster_summary_assembled())
+                cluster.data[0]['ref_base_assembled'] = original_number
 
 
     def test_has_known_variant(self):

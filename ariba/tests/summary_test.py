@@ -111,12 +111,12 @@ class TestSummary(unittest.TestCase):
                 },
                 'presence_absence2': {
                     'summary': {
-                            'assembled': 'no',
-                            'known_var': 'NA',
+                            'assembled': 'partial',
+                            'known_var': 'no',
                             'match': 'no',
-                            'novel_var': 'NA',
-                            'pct_id': 'NA',
-                            'ref_seq': 'NA'
+                            'novel_var': 'yes',
+                            'pct_id': '99.1',
+                            'ref_seq': 'presence_absence_ref2'
                     },
                     'groups': {},
                     'vars': {}
@@ -212,6 +212,7 @@ class TestSummary(unittest.TestCase):
             }
         }
 
+        self.maxDiff = None
         s = summary.Summary('out', filenames=infiles)
         s.samples = summary.Summary._load_input_files(infiles, 90)
         s._gather_unfiltered_output_data()
@@ -244,7 +245,9 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(expected_all, s.all_data)
 
         expected_potential_cols['presence_absence1']['vars'] = {'A10V'}
+        expected_potential_cols['presence_absence2']['vars'] = {'V175L'}
         expected_all[infiles[0]]['presence_absence1']['vars'] = {'A10V': 'yes'}
+        expected_all[infiles[0]]['presence_absence2']['vars'] = {'V175L': 'yes'}
         expected_all[infiles[1]]['presence_absence1']['vars'] = {'A10V': 'yes'}
         s = summary.Summary('out', filenames=infiles, show_var_groups=True, show_known_vars=True, show_novel_vars=True)
         s.samples = summary.Summary._load_input_files(infiles, 90)
