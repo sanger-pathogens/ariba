@@ -212,7 +212,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                 ctg_start_pos, ctg_start_in_indel = ref_start_hit.qry_coords_from_ref_coord(ref_start_pos, pymummer_variants)
 
                 if known_var_change not in  ['.', 'unknown']:
-                    regex = re.match('^([^0-9])([0-9]+)([^0-9])$', known_var_change)
+                    regex = re.match('^([^0-9]+)([0-9]+)([^0-9]+)$', known_var_change)
                     try:
                         ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
                     except:
@@ -221,13 +221,18 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                     if '_' in ref_ctg_change:
                         continue
                     else:
-                        regex = re.match('^([^0-9])([0-9]+)([^0-9])$', ref_ctg_change)
+                        regex = re.match('^([^0-9]+)([0-9]+)([^0-9]+)$', ref_ctg_change)
                         try:
                             ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
                         except:
                             raise Error('Error parsing variant ' + ref_ctg_change)
+                else:
+                    assert var_effect == 'SYN'
 
-                if ref_var_string == '.' or var_effect in ['FSHIFT', 'TRUNC', 'INDELS', 'UNKNOWN']:
+                if var_effect == 'SYN':
+                    ref_end_pos = ref_start_pos + 2
+                    ctg_end_pos = ctg_start_pos + 2
+                elif ref_var_string == '.' or var_effect in ['FSHIFT', 'TRUNC', 'INDELS', 'UNKNOWN']:
                     ref_end_pos = ref_start_pos
                     ctg_end_pos = ctg_start_pos
                 elif cluster.is_gene == '1':
