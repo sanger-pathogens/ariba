@@ -1,4 +1,5 @@
 import signal
+import traceback
 import os
 import atexit
 import random
@@ -427,8 +428,12 @@ class Cluster:
             print('\nCould not get closest reference sequence\n', file=self.log_fh, flush=True)
             self.status_flag.add('ref_seq_choose_fail')
 
+        try:
+            self.report_lines = report.report_lines(self)
+        except:
+            print('Error making report for cluster ', self.name, '... traceback:', file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+            raise Error('Error making report for cluster ' + self.name)
 
-        print('\nMaking report lines', file=self.log_fh, flush=True)
-        self.report_lines = report.report_lines(self)
         self._clean()
         atexit.unregister(self._atexit)
