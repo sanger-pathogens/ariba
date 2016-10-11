@@ -512,3 +512,37 @@ class TestCluster(unittest.TestCase):
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
+
+
+    def test_full_run_delete_codon(self):
+        '''Test complete run where there is a deleted codon'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_delete_codon.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_delete_codon.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_delete_codon'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_delete_codon'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=292, total_reads_bases=20900)
+        c.run()
+
+        expected = [
+            'presence_absence1\tpresence_absence1\t1\t0\t539\t292\tcluster_name\t117\t117\t92.31\tcluster_name.scaffold.1\t1104\t20.0\t0\t.\tp\t.\t0\tR25_A26del\tDEL\t73\t73\tA\t553\t553\tA\t27\tA\t27\t.\tGeneric description of presence_absence1',
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
+
+
+    def test_full_run_insert_codon(self):
+        '''Test complete run where there is a inserted codon'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_insert_codon.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_insert_codon.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_insert_codon'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_insert_codon'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=292, total_reads_bases=20900)
+        c.run()
+
+        expected = [
+            'presence_absence1\tpresence_absence1\t1\t0\t539\t292\tcluster_name\t108\t108\t92.31\tcluster_name.scaffold.1\t1115\t19.9\t0\t.\tp\t.\t0\tS25_M26insELI\tINS\t73\t73\tA\t554\t554\tG\t24\tG\t24\t.\tGeneric description of presence_absence1'
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)

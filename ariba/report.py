@@ -200,7 +200,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
             if contributing_vars is None:
                 samtools_columns = [['.'] * 9]
             else:
-                if var_effect == 'MULTIPLE':
+                if var_effect in ['INDELS', 'MULTIPLE']:
                     ref_start_pos = min([x.ref_start for x in contributing_vars])
                     ref_end_pos = max([x.ref_start for x in contributing_vars])
                     ctg_start_pos = min([x.qry_start for x in contributing_vars])
@@ -225,7 +225,11 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                             raise Error('Error parsing variant ' + known_var_change)
                     elif ref_ctg_change != '.':
                         if '_' in ref_ctg_change:
-                            continue
+                            regex = re.match('^([^0-9]+)([0-9]+)_[^0-9]+[0-9]+([^0-9]+)$', ref_ctg_change)
+                            try:
+                                ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
+                            except:
+                                raise Error('Error parsing variant ' + ref_ctg_change)
                         else:
                             regex = re.match('^([^0-9]+)([0-9]+)([^0-9]+)$', ref_ctg_change)
                             try:
@@ -238,7 +242,7 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
                     if var_effect == 'SYN':
                         ref_end_pos = ref_start_pos + 2
                         ctg_end_pos = ctg_start_pos + 2
-                    elif ref_var_string == '.' or var_effect in ['FSHIFT', 'TRUNC', 'INDELS', 'UNKNOWN']:
+                    elif ref_var_string == '.' or var_effect in {'INS', 'DEL', 'FSHIFT', 'TRUNC', 'INDELS', 'UNKNOWN'}:
                         ref_end_pos = ref_start_pos
                         ctg_end_pos = ctg_start_pos
                     elif cluster.is_gene == '1':
