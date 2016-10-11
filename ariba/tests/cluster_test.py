@@ -495,3 +495,20 @@ class TestCluster(unittest.TestCase):
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
 
+
+    def test_full_run_multiple_vars_in_codon(self):
+        '''Test complete run where there is a codon with a SNP and an indel'''
+        fasta_in = os.path.join(data_dir, 'cluster_test_full_run_multiple_vars.fa')
+        tsv_in = os.path.join(data_dir, 'cluster_test_full_run_multiple_vars.tsv')
+        refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
+        tmpdir = 'tmp.cluster_test_full_run_multiple_vars'
+        shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_multiple_vars'), tmpdir)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=292, total_reads_bases=20900)
+        c.run()
+
+        expected = [
+            'presence_absence1\tpresence_absence1\t1\t0\t539\t292\tcluster_name\t96\t96\t96.91\tcluster_name.scaffold.1\t1074\t20.4\t0\t.\tp\t.\t0\t.\tMULTIPLE\t25\t26\tGA\t487\t489\tCAT\t27;26;25\tC;A;T\t27;26;25\t.\tGeneric description of presence_absence1',
+            'presence_absence1\tpresence_absence1\t1\t0\t539\t292\tcluster_name\t96\t96\t96.91\tcluster_name.scaffold.1\t1074\t20.4\t0\t.\tp\t.\t0\tA10fs\tFSHIFT\t28\t28\tG\t491\t491\tG\t26\tG\t26\t.\tGeneric description of presence_absence1',
+        ]
+        self.assertEqual(expected, c.report_lines)
+        shutil.rmtree(tmpdir)
