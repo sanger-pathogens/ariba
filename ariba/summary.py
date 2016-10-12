@@ -256,6 +256,7 @@ class Summary:
             'het': '#fdbf6f',
             'fragmented': '#1f78b4',
             'interrupted': '#a6cee3',
+            'partial': '#fdbf6f',
         }
 
         cols_to_add_colour_col.reverse()
@@ -287,6 +288,10 @@ class Summary:
 
     @staticmethod
     def _distance_score_between_values(value1, value2):
+        if value1 == 'partial':
+            value1 = 'no'
+        if value2 == 'partial':
+            value2 = 'no'
         value_set = {value1, value2}
         if value_set.isdisjoint(required_keys_for_difference) or value1 == value2 or value_set == {'NA', 'no'}:
             return 0

@@ -200,42 +200,57 @@ def _report_lines_for_one_contig(cluster, contig_name, ref_cov_per_contig, pymum
             if contributing_vars is None:
                 samtools_columns = [['.'] * 9]
             else:
-                ref_start_pos = 3 * position if cluster.is_gene == '1' else position
-                assert contig_name in cluster.assembly_compare.nucmer_hits
-                ref_start_hit = None
-                for hit in cluster.assembly_compare.nucmer_hits[contig_name]:
-                    if hit.ref_name == cluster.ref_sequence.id and hit.ref_coords().distance_to_point(ref_start_pos) == 0:
-                        ref_start_hit = copy.copy(hit)
-                        break
+                if var_effect in ['INDELS', 'MULTIPLE']:
+                    ref_start_pos = min([x.ref_start for x in contributing_vars])
+                    ref_end_pos = max([x.ref_start for x in contributing_vars])
+                    ctg_start_pos = min([x.qry_start for x in contributing_vars])
+                    ctg_end_pos = max([x.qry_start for x in contributing_vars])
+                else:
+                    ref_start_pos = 3 * position if cluster.is_gene == '1' else position
+                    assert contig_name in cluster.assembly_compare.nucmer_hits
+                    ref_start_hit = None
+                    for hit in cluster.assembly_compare.nucmer_hits[contig_name]:
+                        if hit.ref_name == cluster.ref_sequence.id and hit.ref_coords().distance_to_point(ref_start_pos) == 0:
+                            ref_start_hit = copy.copy(hit)
+                            break
 
-                assert ref_start_hit is not None
-                ctg_start_pos, ctg_start_in_indel = ref_start_hit.qry_coords_from_ref_coord(ref_start_pos, pymummer_variants)
+                    assert ref_start_hit is not None
+                    ctg_start_pos, ctg_start_in_indel = ref_start_hit.qry_coords_from_ref_coord(ref_start_pos, pymummer_variants)
 
-                if known_var_change not in  ['.', 'unknown']:
-                    regex = re.match('^([^0-9])([0-9]+)([^0-9])$', known_var_change)
-                    try:
-                        ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
-                    except:
-                        raise Error('Error parsing variant ' + known_var_change)
-                elif ref_ctg_change != '.':
-                    if '_' in ref_ctg_change:
-                        continue
-                    else:
-                        regex = re.match('^([^0-9])([0-9]+)([^0-9])$', ref_ctg_change)
+                    if known_var_change not in  ['.', 'unknown']:
+                        regex = re.match('^([^0-9]+)([0-9]+)([^0-9]+)$', known_var_change)
                         try:
                             ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
                         except:
-                            raise Error('Error parsing variant ' + ref_ctg_change)
+                            raise Error('Error parsing variant ' + known_var_change)
+                    elif ref_ctg_change != '.':
+                        if '_' in ref_ctg_change:
+                            regex = re.match('^([^0-9]+)([0-9]+)_[^0-9]+[0-9]+([^0-9]+)$', ref_ctg_change)
+                            try:
+                                ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
+                            except:
+                                raise Error('Error parsing variant ' + ref_ctg_change)
+                        else:
+                            regex = re.match('^([^0-9]+)([0-9]+)([^0-9]+)$', ref_ctg_change)
+                            try:
+                                ref_var_string, ref_var_position, ctg_var_string = regex.group(1, 2, 3)
+                            except:
+                                raise Error('Error parsing variant ' + ref_ctg_change)
+                    else:
+                        assert var_effect == 'SYN'
 
-                if ref_var_string == '.' or var_effect in ['FSHIFT', 'TRUNC', 'INDELS', 'UNKNOWN']:
-                    ref_end_pos = ref_start_pos
-                    ctg_end_pos = ctg_start_pos
-                elif cluster.is_gene == '1':
-                    ref_end_pos = ref_start_pos + 3 * len(ref_var_string) - 1
-                    ctg_end_pos = ctg_start_pos + 3 * len(ctg_var_string) - 1
-                else:
-                    ref_end_pos = ref_start_pos + len(ref_var_string) - 1
-                    ctg_end_pos = ctg_start_pos + len(ctg_var_string) - 1
+                    if var_effect == 'SYN':
+                        ref_end_pos = ref_start_pos + 2
+                        ctg_end_pos = ctg_start_pos + 2
+                    elif ref_var_string == '.' or var_effect in {'INS', 'DEL', 'FSHIFT', 'TRUNC', 'INDELS', 'UNKNOWN'}:
+                        ref_end_pos = ref_start_pos
+                        ctg_end_pos = ctg_start_pos
+                    elif cluster.is_gene == '1':
+                        ref_end_pos = ref_start_pos + 3 * len(ref_var_string) - 1
+                        ctg_end_pos = ctg_start_pos + 3 * len(ctg_var_string) - 1
+                    else:
+                        ref_end_pos = ref_start_pos + len(ref_var_string) - 1
+                        ctg_end_pos = ctg_start_pos + len(ctg_var_string) - 1
 
                 smtls_total_depth = []
                 smtls_alt_nt = []

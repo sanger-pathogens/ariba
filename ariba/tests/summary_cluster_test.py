@@ -68,6 +68,23 @@ class TestSummaryCluster(unittest.TestCase):
             cluster.add_data_dict(data_dict3)
 
 
+    def test_has_any_part_of_ref_assembled(self):
+        '''Test _has_any_part_of_ref_assembled'''
+        line1 = 'ariba_refname\trefname\t1\t0\t19\t78\tcluster\t120\t.\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line2 = 'ariba_refname\trefname\t1\t0\t19\t78\tcluster\t120\t0\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line3 = 'ariba_refname\trefname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
+        data_dict2 = summary_cluster.SummaryCluster.line2dict(line2)
+        data_dict3 = summary_cluster.SummaryCluster.line2dict(line3)
+        cluster = summary_cluster.SummaryCluster()
+        cluster.add_data_dict(data_dict1)
+        self.assertFalse(cluster._has_any_part_of_ref_assembled())
+        cluster.add_data_dict(data_dict2)
+        self.assertFalse(cluster._has_any_part_of_ref_assembled())
+        cluster.add_data_dict(data_dict3)
+        self.assertTrue(cluster._has_any_part_of_ref_assembled())
+
+
     def test_pc_id_of_longest(self):
         '''Test pc_id_of_longest'''
         cluster = summary_cluster.SummaryCluster()
@@ -90,7 +107,7 @@ class TestSummaryCluster(unittest.TestCase):
         data_dict = summary_cluster.SummaryCluster.line2dict(line)
 
         tests = [
-            ('0', 0, 'no'),
+            ('0', 0, 'partial'),
             ('0', 64, 'no'),
             ('0', 1024, 'no'),
             ('0', 1, 'fragmented'),
@@ -100,7 +117,7 @@ class TestSummaryCluster(unittest.TestCase):
             ('0', 51, 'yes_nonunique'),
             ('0', 147, 'yes_nonunique'),
             ('0', 275, 'yes_nonunique'),
-            ('1', 0, 'no'),
+            ('1', 0, 'partial'),
             ('1', 64, 'no'),
             ('1', 1024, 'no'),
             ('1', 1, 'fragmented'),
@@ -118,6 +135,11 @@ class TestSummaryCluster(unittest.TestCase):
             data_dict['flag'] = flag.Flag(f)
             cluster.add_data_dict(data_dict)
             self.assertEqual(expected, cluster._to_cluster_summary_assembled())
+            if expected == 'partial':
+                original_number = cluster.data[0]['ref_base_assembled']
+                cluster.data[0]['ref_base_assembled'] = 0
+                self.assertEqual('no', cluster._to_cluster_summary_assembled())
+                cluster.data[0]['ref_base_assembled'] = original_number
 
 
     def test_has_known_variant(self):

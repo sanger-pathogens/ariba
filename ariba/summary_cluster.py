@@ -96,6 +96,14 @@ class SummaryCluster:
         return identity
 
 
+    def _has_any_part_of_ref_assembled(self):
+        for d in self.data:
+            if isinstance(d['ref_base_assembled'], int) and d['ref_base_assembled'] > 0:
+                return True
+
+        return False
+
+
     def _to_cluster_summary_assembled(self):
         if len(self.data) == 0:
             return 'no'
@@ -105,10 +113,10 @@ class SummaryCluster:
         else:
             has_complete_gene = self.flag.has('complete_gene')
 
-        if self.flag.has('assembly_fail') or \
-          (not self.flag.has('assembled')) or \
-          self.flag.has('ref_seq_choose_fail'):
+        if self.flag.has('assembly_fail') or self.flag.has('ref_seq_choose_fail'):
             return 'no'
+        elif not self.flag.has('assembled'):
+            return 'partial' if self._has_any_part_of_ref_assembled() else 'no'
         elif self.flag.has('assembled_into_one_contig') and has_complete_gene:
             if self.flag.has('unique_contig') and \
               (not self.flag.has('scaffold_graph_bad')) and \

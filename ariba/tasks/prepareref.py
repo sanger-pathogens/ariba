@@ -25,6 +25,7 @@ def run(options):
         clusters_file=options.cdhit_clusters,
         threads=options.threads,
         verbose=options.verbose,
+        force=options.force,
     )
 
     preparer.run(options.outdir)

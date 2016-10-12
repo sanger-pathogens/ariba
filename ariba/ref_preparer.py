@@ -1,8 +1,9 @@
 import sys
 import os
+import shutil
 import pickle
 import pyfastaq
-from ariba import reference_data
+from ariba import reference_data, mash
 
 class Error (Exception): pass
 
@@ -23,6 +24,7 @@ class RefPreparer:
         clusters_file=None,
         threads=1,
         verbose=False,
+        force=False,
     ):
         self.extern_progs = extern_progs
 
@@ -43,6 +45,7 @@ class RefPreparer:
         self.clusters_file = clusters_file
         self.threads = threads
         self.verbose = verbose
+        self.force = force
 
 
     @classmethod
@@ -136,6 +139,9 @@ class RefPreparer:
     def run(self, outdir):
         original_dir = os.getcwd()
 
+        if self.force and os.path.exists(outdir):
+            shutil.rmtree(outdir)
+
         if os.path.exists(outdir):
             raise Error('Error! Output directory ' + outdir + ' already exists. Cannot continue')
 
@@ -203,4 +209,9 @@ class RefPreparer:
 
         with open(clusters_pickle_file, 'wb') as f:
             pickle.dump(clusters, f)
+
+        if self.verbose:
+            print('\nMash-sketching all reference sequences', flush=True)
+
+        mash.Masher.sketch(os.path.join(outdir, '02.cdhit.all.fa'), True, self.extern_progs, self.verbose, sys.stdout)
 
