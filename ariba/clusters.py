@@ -76,6 +76,9 @@ class Clusters:
         self.extern_progs = extern_progs
         self.clusters_tsv = os.path.abspath(os.path.join(refdata_dir, '02.cdhit.clusters.tsv'))
         self.all_ref_seqs_fasta = os.path.abspath(os.path.join(refdata_dir, '02.cdhit.all.fa'))
+        mash_file = self.all_ref_seqs_fasta + '.msh'
+        if not os.path.exists(mash_file):
+            raise Error('Error! Mash file ' + mash_file + ' not found.\nThe likely cause is that prepareref was run using an old version of ariba.\nIf this is the case, please rerun ariba preparef.')
 
         if version_report_lines is None:
             self.version_report_lines = []

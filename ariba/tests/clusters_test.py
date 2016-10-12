@@ -24,6 +24,7 @@ class TestClusters(unittest.TestCase):
         self.refdata_dir = 'tmp.RefData'
         os.mkdir(self.refdata_dir)
         shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.fa'), os.path.join(self.refdata_dir, '02.cdhit.all.fa'))
+        shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.fa.msh'), os.path.join(self.refdata_dir, '02.cdhit.all.fa.msh'))
         shutil.copyfile(os.path.join(data_dir, 'clusters_test_dummy_db.tsv'), os.path.join(self.refdata_dir, '01.filter.check_metadata.tsv'))
         with open(os.path.join(self.refdata_dir, '00.info.txt'), 'w') as f:
             print('genetic_code\t11', file=f)
