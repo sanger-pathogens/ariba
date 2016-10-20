@@ -30,6 +30,7 @@ __all__ = [
     'reference_data',
     'ref_genes_getter',
     'ref_preparer',
+    'ref_seq_chooser',
     'report',
     'report_filter',
     'scaffold_graph',
