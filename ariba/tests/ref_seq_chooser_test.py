@@ -35,9 +35,7 @@ class TestRefSeqChooser(unittest.TestCase):
         all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_not_in_cluster.allrefs.fa')
         cluster_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_not_in_cluster.clusterrefs.fa')
         contig_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_not_in_cluster.contigs.fa')
-        contig_seqs = {}
-        pyfastaq.tasks.file_to_dict(contig_fasta, contig_seqs)
-        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, contig_seqs, sys.stdout)
+        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, sys.stdout)
         refchooser.run()
         self.assertEqual(None, refchooser.closest_ref_within_cluster)
         self.assertEqual(None, refchooser.closest_ref_from_all_refs)
@@ -49,9 +47,7 @@ class TestRefSeqChooser(unittest.TestCase):
         all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_not_in_cluster.allrefs.fa')
         cluster_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_not_in_cluster.clusterrefs.fa')
         contig_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_not_in_cluster.contigs.fa')
-        contig_seqs = {}
-        pyfastaq.tasks.file_to_dict(contig_fasta, contig_seqs)
-        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, contig_seqs, sys.stdout)
+        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, sys.stdout)
         refchooser.run()
         self.assertEqual('ref1', refchooser.closest_ref_within_cluster)
         self.assertEqual('ref2', refchooser.closest_ref_from_all_refs)
@@ -63,9 +59,7 @@ class TestRefSeqChooser(unittest.TestCase):
         all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_is_in_cluster.allrefs.fa')
         cluster_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_is_in_cluster.clusterrefs.fa')
         contig_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_is_in_cluster.contigs.fa')
-        contig_seqs = {}
-        pyfastaq.tasks.file_to_dict(contig_fasta, contig_seqs)
-        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, contig_seqs, sys.stdout)
+        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, sys.stdout)
         refchooser.run()
         self.assertEqual('ref1', refchooser.closest_ref_within_cluster)
         self.assertEqual('ref1', refchooser.closest_ref_from_all_refs)

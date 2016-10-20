@@ -10,7 +10,6 @@ class RefSeqChooser:
         cluster_fasta,
         all_refs_fasta,
         assembly_fasta,
-        assembly_sequences,
         log_fh,
         extern_progs=None,
         nucmer_min_id=90,
@@ -20,7 +19,8 @@ class RefSeqChooser:
         self.cluster_fasta = os.path.abspath(cluster_fasta)
         self.all_refs_fasta = os.path.abspath(all_refs_fasta)
         self.assembly_fasta = os.path.abspath(assembly_fasta)
-        self.assembly_sequences = assembly_sequences
+        self.assembly_sequences = {}
+        pyfastaq.tasks.file_to_dict(self.assembly_fasta, self.assembly_sequences)
         self.log_fh = log_fh
         self.nucmer_min_id = nucmer_min_id
         self.nucmer_min_len = nucmer_min_len
