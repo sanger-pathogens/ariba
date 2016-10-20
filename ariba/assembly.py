@@ -4,7 +4,7 @@ import shutil
 import pyfastaq
 import pymummer
 import fermilite_ariba
-from ariba import common, faidx, mapping, bam_parse, external_progs, mash
+from ariba import common, faidx, mapping, bam_parse, external_progs, ref_seq_chooser
 
 class Error (Exception): pass
 
@@ -379,12 +379,33 @@ class Assembly:
                 self.log_fh = None
                 return
 
-            masher = mash.Masher(self.mash_reference_fasta, self.gapfilled_length_filtered, self.log_fh, self.extern_progs)
-            self.ref_seq_name = masher.run(self.mash_dist_file)
-            if self.ref_seq_name is None:
-                print('Could not determine closest reference sequence', file=self.log_fh)
+            ref_chooser = ref_seq_chooser.RefSeqChooser(
+                self.ref_fastas,
+                self.mash_reference_fasta,
+                self.gapfilled_length_filtered,
+                self.log_fh,
+                extern_progs=self.extern_progs,
+                nucmer_min_id=self.nucmer_min_id,
+                nucmer_min_len=self.nucmer_min_len,
+                nucmer_breaklen=self.nucmer_breaklen,
+            )
+            ref_chooser.run()
+
+            if ref_chooser.closest_ref_within_cluster is None:
+                print('Could not find match to reference sequences within cluster', file=self.log_fh)
+                self.ref_seq_name = None
                 self.log_fh = None
                 return
+            elif not ref_chooser.closest_ref_is_in_cluster:
+                print('Closest reference', ref_chooser.closest_ref_from_all_refs, 'was not in cluster', file=self.log_fh)
+                self.ref_seq_name = None
+                self.log_fh = None
+                return
+            else:
+                assert ref_chooser.closest_ref_from_all_refs is not None
+                self.ref_seq_name = ref_chooser.closest_ref_from_all_refs
+
+            print('Closest reference sequence according to mash: ', self.ref_seq_name, file=self.log_fh)
 
             file_reader = pyfastaq.sequences.file_reader(self.ref_fastas)
             for ref_seq in file_reader:
@@ -393,13 +414,6 @@ class Assembly:
                     print(ref_seq, file=f_out)
                     pyfastaq.utils.close(f_out)
                     break
-            else:
-                print('Closest reference sequence ', self.ref_seq_name, ' does not belong to this cluster', file=self.log_fh)
-                self.ref_seq_name = None
-                self.log_fh = None
-                return
-
-            print('Closest reference sequence according to mash: ', self.ref_seq_name, file=self.log_fh)
 
             contigs_both_strands = self._fix_contig_orientation(self.gapfilled_length_filtered, self.ref_fasta, self.final_assembly_fa, min_id=self.nucmer_min_id, min_length=self.nucmer_min_len, breaklen=self.nucmer_breaklen)
             self.has_contigs_on_both_strands = len(contigs_both_strands) > 0
