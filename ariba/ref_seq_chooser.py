@@ -58,6 +58,7 @@ class RefSeqChooser:
                 print(subseq, file=f_out)
 
         pyfastaq.utils.close(f_out)
+        return True
 
 
     @classmethod
@@ -75,6 +76,7 @@ class RefSeqChooser:
         masher = mash.Masher(self.cluster_fasta, self.assembly_fasta, self.log_fh, self.extern_progs)
         self.closest_ref_within_cluster = masher.run(mash_file_within_cluster)
         if self.closest_ref_within_cluster is None:
+            print('QUITTING no mash match')
             shutil.rmtree(tmpdir)
             return
 
@@ -91,7 +93,11 @@ class RefSeqChooser:
         ).run()
 
         pieces_matching_ref_fasta = os.path.join(tmpdir, 'pieces_matching_ref.fasta')
-        RefSeqChooser._make_matching_contig_pieces_fasta(self.assembly_fasta, self.assembly_sequences, coords_file, pieces_matching_ref_fasta)
+        made_pieces = RefSeqChooser._make_matching_contig_pieces_fasta(self.assembly_fasta, self.assembly_sequences, coords_file, pieces_matching_ref_fasta)
+        if not made_pieces:
+            shutil.rmtree(tmpdir)
+            print('No nucmer matches between contig and reference sequence', self.closest_ref_within_cluster, file=self.log_fh)
+            return
 
         mash_file_all_refs = os.path.join(tmpdir, 'mash.closest_ref_to_matching_pieces.dist')
         masher = mash.Masher(self.all_refs_fasta, pieces_matching_ref_fasta, self.log_fh, self.extern_progs)

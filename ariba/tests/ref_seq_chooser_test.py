@@ -42,6 +42,18 @@ class TestRefSeqChooser(unittest.TestCase):
         self.assertFalse(refchooser.closest_ref_is_in_cluster)
 
 
+    def test_run_no_nucmer_match(self):
+        '''Test full run when there is nearest match in cluster, but no nucmer matches'''
+        all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_no_nucmer_match.allrefs.fa')
+        cluster_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_no_nucmer_match.clusterrefs.fa')
+        contig_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_no_nucmer_match.contigs.fa')
+        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, sys.stdout)
+        refchooser.run()
+        self.assertEqual('ref1', refchooser.closest_ref_within_cluster)
+        self.assertEqual(None, refchooser.closest_ref_from_all_refs)
+        self.assertFalse(refchooser.closest_ref_is_in_cluster)
+
+
     def test_run_best_match_not_in_cluster(self):
         '''Test full run where there is a match in cluster, but better match to seq not in cluster'''
         all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_not_in_cluster.allrefs.fa')
