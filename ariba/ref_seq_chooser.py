@@ -76,7 +76,6 @@ class RefSeqChooser:
         masher = mash.Masher(self.cluster_fasta, self.assembly_fasta, self.log_fh, self.extern_progs)
         self.closest_ref_within_cluster = masher.run(mash_file_within_cluster)
         if self.closest_ref_within_cluster is None:
-            print('QUITTING no mash match')
             shutil.rmtree(tmpdir)
             return
 
