@@ -43,7 +43,7 @@ class Masher:
             'dist',
             self.reference_fa + '.msh',
             self.query_fa + '.msh',
-            '| sort -k3n >', outfile
+            '| sort -gk3 >', outfile
         ])
         common.syscall(cmd, verbose=True, verbose_filehandle=self.log_fh)
 
