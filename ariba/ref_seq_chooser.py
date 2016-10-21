@@ -72,6 +72,7 @@ class RefSeqChooser:
     def run(self):
         tmpdir = tempfile.mkdtemp(prefix='tmp.choose_ref.', dir=os.getcwd())
 
+        print('Looking for closest match from sequences within cluster', file=self.log_fh)
         mash_file_within_cluster = os.path.join(tmpdir, 'mash.closest_within_cluster.dist')
         masher = mash.Masher(self.cluster_fasta, self.assembly_fasta, self.log_fh, self.extern_progs)
         self.closest_ref_within_cluster = masher.run(mash_file_within_cluster)
@@ -79,6 +80,7 @@ class RefSeqChooser:
             shutil.rmtree(tmpdir)
             return
 
+        print('Finding matches between closest ref and contigs', file=self.log_fh)
         coords_file = os.path.join(tmpdir, 'matching_pieces_to_ref.coords')
 
         pymummer.nucmer.Runner(
@@ -98,6 +100,7 @@ class RefSeqChooser:
             print('No nucmer matches between contig and reference sequence', self.closest_ref_within_cluster, file=self.log_fh)
             return
 
+        print('Looking for closest match from all reference sequences', file=self.log_fh)
         mash_file_all_refs = os.path.join(tmpdir, 'mash.closest_ref_to_matching_pieces.dist')
         masher = mash.Masher(self.all_refs_fasta, pieces_matching_ref_fasta, self.log_fh, self.extern_progs)
         self.closest_ref_from_all_refs = masher.run(mash_file_all_refs)
