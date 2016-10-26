@@ -103,7 +103,7 @@ def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster,
     contig_positions = []
 
     for ref_position in range(ref_nuc_range[0], ref_nuc_range[1]+1, 1):
-        nucmer_match = cluster.assembly_compare.nucmer_hit_containing_reference_position(cluster.assembly_compare.nucmer_hits, cluster.ref_sequence.id, ref_position)
+        nucmer_match = cluster.assembly_compare.nucmer_hit_containing_reference_position(cluster.assembly_compare.nucmer_hits, cluster.ref_sequence.id, ref_position, qry_name=contig_name)
 
         if nucmer_match is not None:
             # work out contig position. Needs indels variants to correct the position
@@ -111,8 +111,6 @@ def _samtools_depths_at_known_snps_all_wild(sequence_meta, contig_name, cluster,
             contig_position, in_indel = nucmer_match.qry_coords_from_ref_coord(ref_position, variant_list)
             contig_positions.append(contig_position)
             bases, total_depth, base_depths = cluster.samtools_vars.get_depths_at_position(contig_name, contig_position)
-            #ctg_nts.append(ref)
-            #samtools_nts.append(bases)
             ctg_nts.append(cluster.assembly.sequences[contig_name][contig_position])
             smtls_nts.append(bases)
             smtls_total_depths.append(total_depth)

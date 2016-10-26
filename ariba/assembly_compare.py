@@ -346,13 +346,13 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def nucmer_hit_containing_reference_position(nucmer_hits, ref_name, ref_position):
+    def nucmer_hit_containing_reference_position(nucmer_hits, ref_name, ref_position, qry_name=None):
         '''Returns the first nucmer match found that contains the given
            reference location. nucmer_hits = hits made by self._parse_nucmer_coords_file.
            Returns None if no matching hit found'''
         for contig_name in nucmer_hits:
             for hit in nucmer_hits[contig_name]:
-                if hit.ref_name == ref_name and hit.ref_coords().distance_to_point(ref_position) == 0:
+                if hit.ref_name == ref_name and (qry_name is None or qry_name == hit.qry_name) and hit.ref_coords().distance_to_point(ref_position) == 0:
                     return hit
 
         return None
