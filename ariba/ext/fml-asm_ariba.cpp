@@ -15,7 +15,7 @@ class Assembly
 public:
     Assembly(int numberOfUnitigs, fml_utg_t *unitigs, unsigned short minCountIn, unsigned short overlapIn);
     void printStats(std::ostream& outStream) const;
-    void toFile(std::string filename) const;
+    void toFile(std::ostream& outStream) const;
 
     uint32_t numberOfContigs;
     unsigned short minCount;
@@ -58,22 +58,13 @@ void Assembly::printStats(std::ostream& outStream) const
 }
 
 
-void Assembly::toFile(std::string filename) const
+void Assembly::toFile(std::ostream& ofs) const
 {
-    std::ofstream ofs(filename.c_str());
-    if (!ofs.good())
-    {
-        std::cerr << "[ariba_fermilite] Error opening sequence output file '" << filename << "'. Cannot continue" << std::endl;
-        exit(1);
-    }
-
     for (unsigned int i = 0; i < sequences.size(); i++)
     {
-        ofs << ">contig." << i << '\n'
+        ofs << ">l" << overlap << ".c" << minCount << ".ctg." << i + 1 << '\n'
             << sequences[i] << '\n';
     }
-
-    ofs.close();
 }
 
 
@@ -153,17 +144,24 @@ int assemble(char *readsFile, char *fastaOut, char* logfileOut)
     std::vector<unsigned short> overlaps;
     overlaps.push_back(6);
     overlaps.push_back(15);
-    std::vector<Assembly> assemblies;
-    std::ofstream ofs(logfileOut);
+    unsigned short assemblyCount = 0;
+    std::ofstream ofs_stats(logfileOut);
 
-    if (!ofs.good())
+    if (!ofs_stats.good())
     {
         std::cerr << "[ariba_fermilite] Error opening log output file '" << logfileOut << "'. Cannot continue" << std::endl;
         return 1;
     }
 
-    ofs << "Fermilite assembly stats:\n"
+    ofs_stats << "Fermilite assembly stats:\n"
         << "Overlap\tMin_count\tContig_number\tMean_length\tLongest" << std::endl;
+
+    std::ofstream ofs_fa(fastaOut);
+    if (!ofs_fa.good())
+    {
+        std::cerr << "[ariba_fermilite] Error opening fasta output file '" << fastaOut << "'. Cannot continue" << std::endl;
+        return 1;
+    }
 
     for (std::vector<unsigned short>::iterator overlapsIter = overlaps.begin(); overlapsIter != overlaps.end(); overlapsIter++)
     {
@@ -179,22 +177,21 @@ int assemble(char *readsFile, char *fastaOut, char* logfileOut)
                 fml_utg_t *utg;
                 utg = fml_assemble(&opt, n_seqs, seqs, &n_utg);
                 Assembly a(n_utg, utg, *minCountIter, *overlapsIter);
-                assemblies.push_back(a);
-                a.printStats(ofs);
+                a.printStats(ofs_stats);
+                a.toFile(ofs_fa);
                 fml_utg_destroy(n_utg, utg);
+                assemblyCount++;
             }
         }
     }
 
-    if (assemblies.size() == 0 || assemblies[0].numberOfContigs == 0)
+    if (assemblyCount == 0)
     {
-        ofs << "Didn't get any assemblies!\n";
+        ofs_stats << "Didn't get any assemblies!\n";
         return 1;
     }
 
-    std::sort(assemblies.begin(), assemblies.end(), &assemblyCompare);
-    ofs << "Best assembly is from min_count " << assemblies[0].minCount << " and overlap " << assemblies[0].overlap << '\n';
-    assemblies[0].toFile(fastaOut);
-    ofs.close();
+    ofs_stats.close();
+    ofs_fa.close();
     return 0;
 }
