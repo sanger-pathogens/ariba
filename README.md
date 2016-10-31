@@ -23,7 +23,6 @@ ARIBA has the following dependencies, which need to be installed:
   * [Python3][python] version >= 3.3.2
   * [Bowtie2][bowtie2] version >= 2.1.0
   * [CD-HIT][cdhit] version >= 4.6
-  * [MASH][mash] version >= 1.0.2
   * [MUMmer][mummer] version >= 3.23
 
 
@@ -74,7 +73,6 @@ to the following dependencies.
 |----------------|------------------------|---------------------------|
 | Bowtie2        | `bowtie2`              | `$ARIBA_BOWTIE2`          |
 | CD-HIT (est)   | `cd-hit-est`           | `$ARIBA_CDHIT`            |
-| MASH           | `mash`                 | `$ARIBA_MASH`             |
 
 
 For example, you could specify an exact version of a bowtie2 executable
@@ -139,7 +137,6 @@ Build status: [![Build Status](https://travis-ci.org/sanger-pathogens/ariba.svg?
   [bowtie2]: http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
   [cdhit]: http://weizhongli-lab.org/cd-hit/
   [ARIBA wiki]: https://github.com/sanger-pathogens/ariba/wiki
-  [mash]: https://mash.readthedocs.io/en/latest/
   [mummer]: http://mummer.sourceforge.net/
   [python]: https://www.python.org/
 

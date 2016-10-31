@@ -23,7 +23,6 @@ __all__ = [
     'histogram',
     'link',
     'mapping',
-    'mash',
     'read_filter',
     'read_store',
     'refdata_query',

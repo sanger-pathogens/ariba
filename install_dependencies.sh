@@ -6,12 +6,10 @@ start_dir=$(pwd)
 
 BOWTIE2_VERSION=2.2.8
 CDHIT_VERSION=4.6.5
-MASH_VERSION=1.1
 MUMMER_VERSION=3.23
 
 BOWTIE2_DOWNLOAD_URL="http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip"
 CDHIT_DOWNLOAD_URL="https://github.com/weizhongli/cdhit/archive/V${CDHIT_VERSION}.tar.gz"
-MASH_DOWNLOAD_URL="https://github.com/marbl/Mash/releases/download/v${MASH_VERSION}/mash-Linux64-v${MASH_VERSION}.tar.gz"
 MUMMER_DOWNLOAD_URL="http://downloads.sourceforge.net/project/mummer/mummer/${MUMMER_VERSION}/MUMmer${MUMMER_VERSION}.tar.gz"
 
 
@@ -52,13 +50,6 @@ cd $cdhit_dir
 make
 
 
-# --------------- mash --------------------
-cd $build_dir
-download $MASH_DOWNLOAD_URL "mash-Linux64-v${MASH_VERSION}.tar.gz"
-mash_dir="$build_dir/mash-Linux64-v${MASH_VERSION}"
-tar zxf mash-Linux64-v${MASH_VERSION}.tar.gz
-
-
 # --------------- mummer ------------------
 cd $build_dir
 download $MUMMER_DOWNLOAD_URL "MUMmer${MUMMER_VERSION}.tar.gz"
@@ -79,5 +70,4 @@ update_path () {
 
 update_path ${bowtie2_dir}
 update_path ${cdhit_dir}
-update_path ${mash_dir}
 update_path ${mummer_dir}
