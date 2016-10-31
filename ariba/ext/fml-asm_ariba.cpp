@@ -13,24 +13,26 @@
 class Assembly
 {
 public:
-    Assembly(int numberOfUnitigs, fml_utg_t *unitigs, unsigned short minCountIn, unsigned short overlapIn);
+    Assembly(int numberOfUnitigs, fml_utg_t *unitigs, unsigned short minCountIn, unsigned short overlapIn, std::string namePrefixIn);
     void printStats(std::ostream& outStream) const;
     void toFile(std::ostream& outStream) const;
 
     uint32_t numberOfContigs;
     unsigned short minCount;
     unsigned short overlap;
+    std::string namePrefix;
     uint32_t longestContig;
     float meanLength;
     std::vector<std::string> sequences;
 };
 
 
-Assembly::Assembly(int numberOfUnitigs, fml_utg_t *unitigs, unsigned short minCountIn, unsigned short overlapIn)
+Assembly::Assembly(int numberOfUnitigs, fml_utg_t *unitigs, unsigned short minCountIn, unsigned short overlapIn, std::string namePrefixIn)
 {
     numberOfContigs = numberOfUnitigs;
     minCount = minCountIn;
     overlap = overlapIn;
+    namePrefix = namePrefixIn;
     longestContig = 0;
     meanLength = 0;
     uint32_t lengthSum = 0;
@@ -62,7 +64,7 @@ void Assembly::toFile(std::ostream& ofs) const
 {
     for (unsigned int i = 0; i < sequences.size(); i++)
     {
-        ofs << ">l" << overlap << ".c" << minCount << ".ctg." << i + 1 << '\n'
+        ofs << ">" << namePrefix << ".l" << overlap << ".c" << minCount << ".ctg." << i + 1 << '\n'
             << sequences[i] << '\n';
     }
 }
@@ -86,7 +88,7 @@ bool assemblyCompare(const Assembly&  lhs, const Assembly& rhs) {
 }
 
 
-int assemble(char *readsFile, char *fastaOut, char* logfileOut);
+int assemble(char *readsFile, char *fastaOut, char* logfileOut, char *contigNamePrefix);
 
 
 static PyObject * main_wrapper(PyObject * self, PyObject * args)
@@ -94,14 +96,15 @@ static PyObject * main_wrapper(PyObject * self, PyObject * args)
   char *readsFile;
   char *fastaOut;
   char *logOut;
+  char *contigNamePrefix;
   int gotFromMain = 1;
 
   // parse arguments
-  if (!PyArg_ParseTuple(args, "sss", &readsFile, &fastaOut, &logOut)) {
+  if (!PyArg_ParseTuple(args, "ssss", &readsFile, &fastaOut, &logOut, &contigNamePrefix)) {
       return NULL;
   }
 
-  gotFromMain = assemble(readsFile, fastaOut, logOut);
+  gotFromMain = assemble(readsFile, fastaOut, logOut, contigNamePrefix);
   return PyLong_FromLong((long) gotFromMain);
 }
 
@@ -129,7 +132,7 @@ PyInit_fermilite_ariba(void)
 }
 
 
-int assemble(char *readsFile, char *fastaOut, char* logfileOut)
+int assemble(char *readsFile, char *fastaOut, char* logfileOut, char* contigNamePrefix)
 {
     fml_opt_t opt;
     int n_seqs, n_utg;
@@ -159,6 +162,7 @@ int assemble(char *readsFile, char *fastaOut, char* logfileOut)
     std::ofstream ofs_fa(fastaOut);
     if (!ofs_fa.good())
     {
+        ofs_stats.close();
         std::cerr << "[ariba_fermilite] Error opening fasta output file '" << fastaOut << "'. Cannot continue" << std::endl;
         return 1;
     }
@@ -176,22 +180,27 @@ int assemble(char *readsFile, char *fastaOut, char* logfileOut)
             if (seqs && n_seqs > 0) {
                 fml_utg_t *utg;
                 utg = fml_assemble(&opt, n_seqs, seqs, &n_utg);
-                Assembly a(n_utg, utg, *minCountIter, *overlapsIter);
+                Assembly a(n_utg, utg, *minCountIter, *overlapsIter, contigNamePrefix);
                 a.printStats(ofs_stats);
                 a.toFile(ofs_fa);
                 fml_utg_destroy(n_utg, utg);
-                assemblyCount++;
+                if (a.numberOfContigs > 0)
+                {
+                    assemblyCount++;
+                }
             }
         }
     }
 
+    ofs_stats.close();
+    ofs_fa.close();
+
     if (assemblyCount == 0)
     {
         ofs_stats << "Didn't get any assemblies!\n";
+        std::remove(fastaOut);
         return 1;
     }
 
-    ofs_stats.close();
-    ofs_fa.close();
     return 0;
 }

@@ -7,7 +7,7 @@ import math
 import shutil
 import sys
 import pyfastaq
-from ariba import assembly, assembly_compare, assembly_variants, external_progs, flag, mapping, mash, report, samtools_variants
+from ariba import assembly, assembly_compare, assembly_variants, external_progs, flag, mapping, report, samtools_variants
 
 class Error (Exception): pass
 
@@ -18,7 +18,7 @@ class Cluster:
       root_dir,
       name,
       refdata,
-      refdata_seqs_fasta_for_mash=None,
+      all_ref_seqs_fasta=None,
       total_reads=None,
       total_reads_bases=None,
       fail_file=None,
@@ -128,12 +128,10 @@ class Cluster:
         else:
             self.extern_progs = extern_progs
 
-        if refdata_seqs_fasta_for_mash is None:
-            mash.Masher.sketch(self.references_fa, True, self.extern_progs, verbose=False)
-            self.refdata_seqs_fasta_for_mash = self.references_fa
+        if all_ref_seqs_fasta is None:
+            self.all_refs_fasta = self.references_fa
         else:
-            self.refdata_seqs_fasta_for_mash = os.path.abspath(refdata_seqs_fasta_for_mash)
-            assert os.path.exists(self.refdata_seqs_fasta_for_mash + '.msh')
+            self.all_refs_fasta = os.path.abspath(all_ref_seqs_fasta)
 
         self.random_seed = random_seed
         wanted_signals = [signal.SIGABRT, signal.SIGINT, signal.SIGSEGV, signal.SIGTERM]
@@ -321,14 +319,9 @@ class Cluster:
               self.final_assembly_fa,
               self.final_assembly_bam,
               self.log_fh,
-              self.refdata_seqs_fasta_for_mash,
-              scaff_name_prefix=self.name,
-              kmer=self.assembly_kmer,
+              self.all_refs_fasta,
+              contig_name_prefix=self.name,
               assembler=self.assembler,
-              spades_other_options=self.spades_other_options,
-              sspace_k=self.sspace_k,
-              sspace_sd=self.sspace_sd,
-              reads_insert=self.reads_insert,
               extern_progs=self.extern_progs,
               clean=self.clean
             )

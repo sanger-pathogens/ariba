@@ -3,6 +3,7 @@ import sys
 import os
 import pyfastaq
 import filecmp
+import pymummer
 from ariba import ref_seq_chooser
 
 modules_dir = os.path.dirname(os.path.abspath(ref_seq_chooser.__file__))
@@ -14,11 +15,10 @@ class TestRefSeqChooser(unittest.TestCase):
         '''test _make_matching_contig_pieces_fasta'''
         contigs_fasta =  os.path.join(data_dir, 'ref_seq_chooser_matching_contig_pieces.ctg.fa')
         coords_file = os.path.join(data_dir, 'ref_seq_chooser_matching_contig_pieces.coords')
+        coords_list = [hit for hit in pymummer.coords_file.reader(coords_file)]
         tmp_file = 'tmp.test.ref_seq_chooser_matching_contig_pieces.fa'
         expected_file = os.path.join(data_dir, 'ref_seq_chooser_matching_contig_pieces.expect.fa')
-        contig_seqs = {}
-        pyfastaq.tasks.file_to_dict(contigs_fasta, contig_seqs)
-        ref_seq_chooser.RefSeqChooser._make_matching_contig_pieces_fasta(contigs_fasta, contig_seqs, coords_file, tmp_file)
+        ref_seq_chooser.RefSeqChooser._make_matching_contig_pieces_fasta(contigs_fasta, coords_list, tmp_file)
         self.assertTrue(filecmp.cmp(expected_file, tmp_file, shallow=False))
         os.unlink(tmp_file)
 
@@ -35,11 +35,12 @@ class TestRefSeqChooser(unittest.TestCase):
         all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_not_in_cluster.allrefs.fa')
         cluster_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_not_in_cluster.clusterrefs.fa')
         contig_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_not_in_cluster.contigs.fa')
-        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, sys.stdout)
+        tmp_out = 'tmp.ref_seq_chooser_full_run_not_in_cluster.fa'
+        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, tmp_out, sys.stdout)
         refchooser.run()
-        self.assertEqual(None, refchooser.closest_ref_within_cluster)
         self.assertEqual(None, refchooser.closest_ref_from_all_refs)
         self.assertFalse(refchooser.closest_ref_is_in_cluster)
+        self.assertFalse(os.path.exists(tmp_out))
 
 
     def test_run_no_nucmer_match(self):
@@ -47,11 +48,12 @@ class TestRefSeqChooser(unittest.TestCase):
         all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_no_nucmer_match.allrefs.fa')
         cluster_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_no_nucmer_match.clusterrefs.fa')
         contig_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_no_nucmer_match.contigs.fa')
-        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, sys.stdout)
+        tmp_out = 'tmp.ref_seq_chooser_full_run_no_nucmer_match.fa'
+        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, tmp_out, sys.stdout)
         refchooser.run()
-        self.assertEqual('ref1', refchooser.closest_ref_within_cluster)
         self.assertEqual(None, refchooser.closest_ref_from_all_refs)
         self.assertFalse(refchooser.closest_ref_is_in_cluster)
+        self.assertFalse(os.path.exists(tmp_out))
 
 
     def test_run_best_match_not_in_cluster(self):
@@ -59,11 +61,12 @@ class TestRefSeqChooser(unittest.TestCase):
         all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_not_in_cluster.allrefs.fa')
         cluster_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_not_in_cluster.clusterrefs.fa')
         contig_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_not_in_cluster.contigs.fa')
-        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, sys.stdout)
+        tmp_out = 'tmp.ref_seq_chooser_full_run_best_match_not_in_cluster.fa'
+        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, tmp_out, sys.stdout)
         refchooser.run()
-        self.assertEqual('ref1', refchooser.closest_ref_within_cluster)
         self.assertEqual('ref2', refchooser.closest_ref_from_all_refs)
         self.assertFalse(refchooser.closest_ref_is_in_cluster)
+        self.assertFalse(os.path.exists(tmp_out))
 
 
     def test_run_best_match_is_in_cluster(self):
@@ -71,9 +74,11 @@ class TestRefSeqChooser(unittest.TestCase):
         all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_is_in_cluster.allrefs.fa')
         cluster_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_is_in_cluster.clusterrefs.fa')
         contig_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_best_match_is_in_cluster.contigs.fa')
-        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, sys.stdout)
+        tmp_out = 'tmp.ref_seq_chooser_full_run_best_match_is_in_cluster.fa'
+        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, tmp_out, sys.stdout)
         refchooser.run()
-        self.assertEqual('ref1', refchooser.closest_ref_within_cluster)
         self.assertEqual('ref1', refchooser.closest_ref_from_all_refs)
         self.assertTrue(refchooser.closest_ref_is_in_cluster)
+        self.assertTrue(os.path.exists(tmp_out))
+        os.unlink(tmp_out)
 
