@@ -244,13 +244,13 @@ class Summary:
 
 
     @classmethod
-    def _add_phandango_colour_columns(cls, header, matrix):
+    def _add_phandango_colour_columns(cls, header, matrix, nonunique_same_colour=True):
         header = copy.deepcopy(header)
         matrix = copy.deepcopy(matrix)
         cols_to_add_colour_col = [i for i in range(len(header)) if header[i].endswith(':o1')]
         field_to_col = {
             'yes': '#33a02c',
-            'yes_nonunique': '#b2df8a',
+            'yes_nonunique': '#33a02c' if nonunique_same_colour else '#b2df8a',
             'no': '#fb9a99',
             'NA': '#ffffff',
             'het': '#fdbf6f',
@@ -383,7 +383,7 @@ class Summary:
             if self.verbose:
                 print('Making Phandango csv file', csv_file, flush=True)
             csv_file = self.outprefix + '.phandango.csv'
-            phandango_header, phandango_matrix = Summary._add_phandango_colour_columns(phandango_header, matrix)
+            phandango_header, phandango_matrix = Summary._add_phandango_colour_columns(phandango_header, matrix, nonunique_same_colour=True)
             Summary._matrix_to_csv(phandango_matrix, phandango_header, csv_file, remove_nas=True)
 
             if self.make_phandango_tree:

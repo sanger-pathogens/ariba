@@ -1,0 +1,6 @@
+ref_seq_chooser_matching_contig_pieces.ref.fa ref_seq_chooser_matching_contig_pieces.ctg.fa
+NUCMER
+
+[S1]	[E1]	[S2]	[E2]	[LEN 1]	[LEN 2]	[% IDY]	[LEN R]	[LEN Q]	[FRM]	[TAGS]
+16	91	33	108	76	76	100.00	500	119	1	1	ref	ctg1
+254	391	21	158	138	138	100.00	500	183	1	1	ref	ctg2

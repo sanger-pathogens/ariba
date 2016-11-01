@@ -13,22 +13,26 @@
 class Assembly
 {
 public:
-    Assembly(int numberOfUnitigs, fml_utg_t *unitigs, unsigned short minCountIn);
+    Assembly(int numberOfUnitigs, fml_utg_t *unitigs, unsigned short minCountIn, unsigned short overlapIn, std::string namePrefixIn);
     void printStats(std::ostream& outStream) const;
-    void toFile(std::string filename) const;
+    void toFile(std::ostream& outStream) const;
 
     uint32_t numberOfContigs;
     unsigned short minCount;
+    unsigned short overlap;
+    std::string namePrefix;
     uint32_t longestContig;
     float meanLength;
     std::vector<std::string> sequences;
 };
 
 
-Assembly::Assembly(int numberOfUnitigs, fml_utg_t *unitigs, unsigned short minCountIn)
+Assembly::Assembly(int numberOfUnitigs, fml_utg_t *unitigs, unsigned short minCountIn, unsigned short overlapIn, std::string namePrefixIn)
 {
     numberOfContigs = numberOfUnitigs;
     minCount = minCountIn;
+    overlap = overlapIn;
+    namePrefix = namePrefixIn;
     longestContig = 0;
     meanLength = 0;
     uint32_t lengthSum = 0;
@@ -52,26 +56,17 @@ Assembly::Assembly(int numberOfUnitigs, fml_utg_t *unitigs, unsigned short minCo
 
 void Assembly::printStats(std::ostream& outStream) const
 {
-    outStream << minCount << '\t' << numberOfContigs << '\t' << meanLength << '\t' << longestContig << std::endl;
+    outStream << overlap << '\t' << minCount << '\t' << numberOfContigs << '\t' << meanLength << '\t' << longestContig << std::endl;
 }
 
 
-void Assembly::toFile(std::string filename) const
+void Assembly::toFile(std::ostream& ofs) const
 {
-    std::ofstream ofs(filename.c_str());
-    if (!ofs.good())
-    {
-        std::cerr << "[ariba_fermilite] Error opening sequence output file '" << filename << "'. Cannot continue" << std::endl;
-        exit(1);
-    }
-
     for (unsigned int i = 0; i < sequences.size(); i++)
     {
-        ofs << ">contig." << i << '\n'
+        ofs << ">" << namePrefix << ".l" << overlap << ".c" << minCount << ".ctg." << i + 1 << '\n'
             << sequences[i] << '\n';
     }
-
-    ofs.close();
 }
 
 
@@ -93,7 +88,7 @@ bool assemblyCompare(const Assembly&  lhs, const Assembly& rhs) {
 }
 
 
-int assemble(char *readsFile, char *fastaOut, char* logfileOut);
+int assemble(char *readsFile, char *fastaOut, char* logfileOut, char *contigNamePrefix);
 
 
 static PyObject * main_wrapper(PyObject * self, PyObject * args)
@@ -101,14 +96,15 @@ static PyObject * main_wrapper(PyObject * self, PyObject * args)
   char *readsFile;
   char *fastaOut;
   char *logOut;
+  char *contigNamePrefix;
   int gotFromMain = 1;
 
   // parse arguments
-  if (!PyArg_ParseTuple(args, "sss", &readsFile, &fastaOut, &logOut)) {
+  if (!PyArg_ParseTuple(args, "ssss", &readsFile, &fastaOut, &logOut, &contigNamePrefix)) {
       return NULL;
   }
 
-  gotFromMain = assemble(readsFile, fastaOut, logOut);
+  gotFromMain = assemble(readsFile, fastaOut, logOut, contigNamePrefix);
   return PyLong_FromLong((long) gotFromMain);
 }
 
@@ -136,61 +132,75 @@ PyInit_fermilite_ariba(void)
 }
 
 
-int assemble(char *readsFile, char *fastaOut, char* logfileOut)
+int assemble(char *readsFile, char *fastaOut, char* logfileOut, char* contigNamePrefix)
 {
     fml_opt_t opt;
     int n_seqs, n_utg;
     bseq1_t *seqs;
     fml_opt_init(&opt);
     opt.max_cnt = 10000;
-    opt.min_asm_ovlp = 15;
     opt.mag_opt.flag |= MAG_F_AGGRESSIVE;
     std::vector<unsigned short> minCounts;
     minCounts.push_back(4);
-    minCounts.push_back(8);
-    minCounts.push_back(12);
-    minCounts.push_back(16);
-    minCounts.push_back(20);
-    minCounts.push_back(25);
+    minCounts.push_back(17);
     minCounts.push_back(30);
-    std::vector<Assembly> assemblies;
-    std::ofstream ofs(logfileOut);
+    std::vector<unsigned short> overlaps;
+    overlaps.push_back(6);
+    overlaps.push_back(15);
+    unsigned short assemblyCount = 0;
+    std::ofstream ofs_stats(logfileOut);
 
-    if (!ofs.good())
+    if (!ofs_stats.good())
     {
         std::cerr << "[ariba_fermilite] Error opening log output file '" << logfileOut << "'. Cannot continue" << std::endl;
         return 1;
     }
 
-    ofs << "Fermilite assembly stats:\n"
-        << "Min_count\tContig_number\tMean_length\tLongest" << std::endl;
+    ofs_stats << "Fermilite assembly stats:\n"
+        << "Overlap\tMin_count\tContig_number\tMean_length\tLongest" << std::endl;
 
-    for (std::vector<unsigned short>::iterator minCountIter = minCounts.begin(); minCountIter != minCounts.end(); minCountIter++)
+    std::ofstream ofs_fa(fastaOut);
+    if (!ofs_fa.good())
     {
-        opt.min_cnt = *minCountIter;
-
-        // need to get the reads from the file every time, instead of before
-        // the loop because fml_assemble() destroys them :(
-        seqs = bseq_read(readsFile, &n_seqs);
-        if (seqs && n_seqs > 0) {
-            fml_utg_t *utg;
-            utg = fml_assemble(&opt, n_seqs, seqs, &n_utg);
-            Assembly a(n_utg, utg, *minCountIter);
-            assemblies.push_back(a);
-            a.printStats(ofs);
-            fml_utg_destroy(n_utg, utg);
-        }
-    }
-
-    if (assemblies.size() == 0 || assemblies[0].numberOfContigs == 0)
-    {
-        ofs << "Didn't get any assemblies!\n";
+        ofs_stats.close();
+        std::cerr << "[ariba_fermilite] Error opening fasta output file '" << fastaOut << "'. Cannot continue" << std::endl;
         return 1;
     }
 
-    std::sort(assemblies.begin(), assemblies.end(), &assemblyCompare);
-    ofs << "Best assembly is from min_count " << assemblies[0].minCount << '\n';
-    assemblies[0].toFile(fastaOut);
-    ofs.close();
+    for (std::vector<unsigned short>::iterator overlapsIter = overlaps.begin(); overlapsIter != overlaps.end(); overlapsIter++)
+    {
+        for (std::vector<unsigned short>::iterator minCountIter = minCounts.begin(); minCountIter != minCounts.end(); minCountIter++)
+        {
+            opt.min_cnt = *minCountIter;
+            opt.min_asm_ovlp = *overlapsIter;
+
+            // need to get the reads from the file every time, instead of before
+            // the loop because fml_assemble() destroys them :(
+            seqs = bseq_read(readsFile, &n_seqs);
+            if (seqs && n_seqs > 0) {
+                fml_utg_t *utg;
+                utg = fml_assemble(&opt, n_seqs, seqs, &n_utg);
+                Assembly a(n_utg, utg, *minCountIter, *overlapsIter, contigNamePrefix);
+                a.printStats(ofs_stats);
+                a.toFile(ofs_fa);
+                fml_utg_destroy(n_utg, utg);
+                if (a.numberOfContigs > 0)
+                {
+                    assemblyCount++;
+                }
+            }
+        }
+    }
+
+    ofs_stats.close();
+    ofs_fa.close();
+
+    if (assemblyCount == 0)
+    {
+        ofs_stats << "Didn't get any assemblies!\n";
+        std::remove(fastaOut);
+        return 1;
+    }
+
     return 0;
 }

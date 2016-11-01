@@ -132,7 +132,6 @@ class TestRefPreparer(unittest.TestCase):
             got = os.path.join(tmp_out, filename)
             self.assertTrue(filecmp.cmp(expected, got, shallow=False))
 
-        self.assertTrue(os.path.exists(os.path.join(tmp_out, '02.cdhit.all.fa.msh')))
         shutil.rmtree(tmp_out)
 
 

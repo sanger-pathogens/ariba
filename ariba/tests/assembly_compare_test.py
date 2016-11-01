@@ -40,7 +40,7 @@ class TestAssemblyCompare(unittest.TestCase):
                 pymummer.alignment.Alignment('\t'.join(hits[2])),
             ]
         }
-        expected = {'scaff1': round((90*10 + 100*34) / (10+34), 2), 'scaff2': 42.42}
+        expected = {'scaff1': 100.0, 'scaff2': 42.42}
         got = assembly_compare.AssemblyCompare._nucmer_hits_to_percent_identity(nucmer_hits)
         self.assertEqual(expected, got)
 

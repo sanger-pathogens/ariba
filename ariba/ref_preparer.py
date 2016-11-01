@@ -3,7 +3,7 @@ import os
 import shutil
 import pickle
 import pyfastaq
-from ariba import reference_data, mash
+from ariba import reference_data
 
 class Error (Exception): pass
 
@@ -209,9 +209,4 @@ class RefPreparer:
 
         with open(clusters_pickle_file, 'wb') as f:
             pickle.dump(clusters, f)
-
-        if self.verbose:
-            print('\nMash-sketching all reference sequences', flush=True)
-
-        mash.Masher.sketch(os.path.join(outdir, '02.cdhit.all.fa'), True, self.extern_progs, self.verbose, sys.stdout)
 

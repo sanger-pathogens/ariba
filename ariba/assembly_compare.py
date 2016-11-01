@@ -78,15 +78,16 @@ class AssemblyCompare:
         '''Input is hits made by self._parse_nucmer_coords_file.
            Returns dictionary. key = contig name. Value = percent identity of hits to that contig'''
         percent_identities = {}
+        max_lengths = {}
 
         for contig in nucmer_hits:
-            product_sum = 0
-            length_sum = 0
+            max_length = -1
+            percent_identity = 0
             for hit in nucmer_hits[contig]:
-                product_sum += hit.hit_length_qry * hit.percent_identity
-                length_sum += hit.hit_length_qry
-            assert length_sum > 0
-            percent_identities[contig] = round(product_sum / length_sum, 2)
+                if hit.hit_length_qry > max_length:
+                    max_length = hit.hit_length_qry
+                    percent_identity = hit.percent_identity
+            percent_identities[contig] = percent_identity
 
         return percent_identities
 
@@ -346,13 +347,13 @@ class AssemblyCompare:
 
 
     @staticmethod
-    def nucmer_hit_containing_reference_position(nucmer_hits, ref_name, ref_position):
+    def nucmer_hit_containing_reference_position(nucmer_hits, ref_name, ref_position, qry_name=None):
         '''Returns the first nucmer match found that contains the given
            reference location. nucmer_hits = hits made by self._parse_nucmer_coords_file.
            Returns None if no matching hit found'''
         for contig_name in nucmer_hits:
             for hit in nucmer_hits[contig_name]:
-                if hit.ref_name == ref_name and hit.ref_coords().distance_to_point(ref_position) == 0:
+                if hit.ref_name == ref_name and (qry_name is None or qry_name == hit.qry_name) and hit.ref_coords().distance_to_point(ref_position) == 0:
                     return hit
 
         return None
