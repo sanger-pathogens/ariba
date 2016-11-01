@@ -142,8 +142,8 @@ assembly_group.add_argument('--assembly_cov', type=int, help='Target read covera
 assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs [%(default)s]', default=10, metavar='INT')
 
 other_run_group = subparser_run.add_argument_group('Other options')
-#other_run_group.add_argument('--threads', type=int, help='Number of threads [%(default)s]', default=1, metavar='INT')
-other_run_group.add_argument('--threads', type=int, help=argparse.SUPPRESS, default=1, metavar='INT')
+other_run_group.add_argument('--threads', type=int, help='Experimental. Number of threads. Will run clusters in parallel, but not minimap (yet) [%(default)s]', default=1, metavar='INT')
+#other_run_group.add_argument('--threads', type=int, help=argparse.SUPPRESS, default=1, metavar='INT')
 other_run_group.add_argument('--assembled_threshold', type=float, help='If proportion of gene assembled (regardless of into how many contigs) is at least this value then the flag gene_assembled is set [%(default)s]', default=0.95, metavar='FLOAT (between 0 and 1)')
 other_run_group.add_argument('--gene_nt_extend', type=int, help='Max number of nucleotides to extend ends of gene matches to look for start/stop codons [%(default)s]', default=30, metavar='INT')
 other_run_group.add_argument('--unique_threshold', type=float, help='If proportion of bases in gene assembled more than once is <= this value, then the flag unique_contig is set [%(default)s]', default=0.03, metavar='FLOAT (between 0 and 1)')
