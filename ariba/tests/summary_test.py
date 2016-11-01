@@ -435,7 +435,17 @@ class TestSummary(unittest.TestCase):
             ['yes', 'no', '#fb9a99', 'NA', '#ffffff', 'yes', 'yes', '#33a02c'],
             ['yes', 'NA', '#ffffff', 'yes', '#33a02c', 'yes', 'yes_nonunique', '#b2df8a']
         ]
-        got_header, got_matrix = summary.Summary._add_phandango_colour_columns(header, matrix)
+        got_header, got_matrix = summary.Summary._add_phandango_colour_columns(header, matrix, nonunique_same_colour=False)
+        self.assertEqual(expected_header, got_header)
+        self.assertEqual(expected_matrix, got_matrix)
+
+        expected_matrix = [
+            ['yes', 'yes', '#33a02c', 'yes_nonunique', '#33a02c', 'yes', 'no', '#fb9a99'],
+            ['yes', 'yes_nonunique', '#33a02c', 'no', '#fb9a99', 'yes', 'NA', '#ffffff'],
+            ['yes', 'no', '#fb9a99', 'NA', '#ffffff', 'yes', 'yes', '#33a02c'],
+            ['yes', 'NA', '#ffffff', 'yes', '#33a02c', 'yes', 'yes_nonunique', '#33a02c']
+        ]
+        got_header, got_matrix = summary.Summary._add_phandango_colour_columns(header, matrix, nonunique_same_colour=True)
         self.assertEqual(expected_header, got_header)
         self.assertEqual(expected_matrix, got_matrix)
 
