@@ -78,15 +78,16 @@ class AssemblyCompare:
         '''Input is hits made by self._parse_nucmer_coords_file.
            Returns dictionary. key = contig name. Value = percent identity of hits to that contig'''
         percent_identities = {}
+        max_lengths = {}
 
         for contig in nucmer_hits:
-            product_sum = 0
-            length_sum = 0
+            max_length = -1
+            percent_identity = 0
             for hit in nucmer_hits[contig]:
-                product_sum += hit.hit_length_qry * hit.percent_identity
-                length_sum += hit.hit_length_qry
-            assert length_sum > 0
-            percent_identities[contig] = round(product_sum / length_sum, 2)
+                if hit.hit_length_qry > max_length:
+                    max_length = hit.hit_length_qry
+                    percent_identity = hit.percent_identity
+            percent_identities[contig] = percent_identity
 
         return percent_identities
 
