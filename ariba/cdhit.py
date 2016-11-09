@@ -13,7 +13,7 @@ class Runner:
       infile,
       seq_identity_threshold=0.9,
       threads=1,
-      length_diff_cutoff=0.9,
+      length_diff_cutoff=0.0,
       verbose=False,
       min_cluster_number=0
     ):

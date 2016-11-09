@@ -19,7 +19,7 @@ class RefPreparer:
         max_gene_length=10000,
         genetic_code=11,
         cdhit_min_id=0.9,
-        cdhit_min_length=0.9,
+        cdhit_min_length=0.0,
         run_cdhit=True,
         clusters_file=None,
         threads=1,

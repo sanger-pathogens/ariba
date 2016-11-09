@@ -419,7 +419,7 @@ class ReferenceData:
         pyfastaq.utils.close(f_out)
 
 
-    def cluster_with_cdhit(self, outprefix, seq_identity_threshold=0.9, threads=1, length_diff_cutoff=0.9, nocluster=False, verbose=False, clusters_file=None):
+    def cluster_with_cdhit(self, outprefix, seq_identity_threshold=0.9, threads=1, length_diff_cutoff=0.0, nocluster=False, verbose=False, clusters_file=None):
         clusters = {}
         ReferenceData._write_sequences_to_files(self.sequences, self.metadata, outprefix)
         ref_types = ('noncoding', 'noncoding.varonly', 'gene', 'gene.varonly')
