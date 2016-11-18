@@ -23,6 +23,7 @@ __all__ = [
     'histogram',
     'link',
     'mapping',
+    'pubmlst_getter',
     'read_filter',
     'read_store',
     'refdata_query',
