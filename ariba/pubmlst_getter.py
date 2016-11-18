@@ -21,7 +21,6 @@ class PubmlstGetter:
     def _get_xml_file_tree(self):
         xml_url = 'http://pubmlst.org/data/dbases.xml'
         tmpdir = tempfile.mkdtemp(prefix='tmp.get_pubmlst_xml', dir=os.getcwd())
-        tmpdir = 'tmp.get_pubmlst_xmlwpc0fz'
         xml_file = os.path.join(tmpdir, 'out.xml')
         self._download_file(xml_url, xml_file)
         xml_tree = ET.parse(xml_file)
