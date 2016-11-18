@@ -25,6 +25,7 @@ __all__ = [
     'mapping',
     'mlst_profile',
     'pubmlst_getter',
+    'pubmlst_ref_preparer',
     'read_filter',
     'read_store',
     'refdata_query',

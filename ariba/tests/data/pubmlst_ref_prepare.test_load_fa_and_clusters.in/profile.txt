@@ -1,0 +1,4 @@
+ST	gene1	gene2	clonal_complex
+1	1	1
+2	1	2
+3	2	1
