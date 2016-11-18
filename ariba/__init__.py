@@ -23,6 +23,7 @@ __all__ = [
     'histogram',
     'link',
     'mapping',
+    'mlst_profile',
     'pubmlst_getter',
     'read_filter',
     'read_store',
