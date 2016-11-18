@@ -52,7 +52,8 @@ class AssemblyCompare:
             min_length=self.nucmer_min_len,
             breaklen=self.nucmer_breaklen,
             maxmatch=True,
-            show_snps=True
+            show_snps=True,
+            show_snps_C=False,
         ).run()
 
 

@@ -116,6 +116,11 @@ int run_minimap(char *clustersFileIn, char *refFileIn, char *readsFile1In, char 
         return 1;
     }
 
+    // This sets the -f option of minimap:
+    // -f FLOAT    filter out top FLOAT fraction of repetitive minimizers [0.001]
+    // Needed so that reads map to sequences from large clusters.
+    mm_idx_set_max_occ(mi, 0.000001);
+
     // mapping
     mm_mapopt_t opt;
     mm_mapopt_init(&opt); // initialize mapping parameters

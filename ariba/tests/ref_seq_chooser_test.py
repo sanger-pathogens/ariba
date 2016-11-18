@@ -82,3 +82,17 @@ class TestRefSeqChooser(unittest.TestCase):
         self.assertTrue(os.path.exists(tmp_out))
         os.unlink(tmp_out)
 
+
+    def test_run_contained_ref_seq(self):
+        '''Test full run where ref seq completely contains another seq outside cluster'''
+        all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_contained_ref_seq.all_refs.fa')
+        cluster_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_contained_ref_seq.cluster_refs.fa')
+        contig_fasta = os.path.join(data_dir, 'ref_seq_chooser_full_run_contained_ref_seq.contigs.fa')
+        tmp_out = 'tmp.ref_seq_chooser_full_run_contained_ref_seq.fa'
+        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, tmp_out, sys.stdout)
+        refchooser.run()
+        self.assertEqual('ref2', refchooser.closest_ref_from_all_refs)
+        self.assertTrue(refchooser.closest_ref_is_in_cluster)
+        self.assertTrue(os.path.exists(tmp_out))
+        os.unlink(tmp_out)
+
