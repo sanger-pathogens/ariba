@@ -1,13 +1,9 @@
-#!/usr/bin/env python3
-
 import tempfile
 import time
-import sys
 import os
 import shutil
 import urllib.request
 import xml.etree.ElementTree as ET
-import argparse
 
 class Error (Exception): pass
 
