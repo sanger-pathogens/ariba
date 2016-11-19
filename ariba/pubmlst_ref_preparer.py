@@ -49,7 +49,7 @@ class PubmlstRefPreparer:
         except:
             raise Error('Error making output directory ' + self.outdir)
 
-        pubmlst = pubmlst_getter.PubmlstGetter(debug=self.debug)
+        pubmlst = pubmlst_getter.PubmlstGetter(debug=self.debug, verbose=self.verbose)
         pubmlst.get_species_files(self.species, self.mlst_download_dir)
         if self.verbose:
             print('Downloaded data from pubmlst')
