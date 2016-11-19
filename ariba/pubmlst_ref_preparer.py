@@ -1,8 +1,7 @@
-import sys
 import shutil
 import os
 import pyfastaq
-from ariba import external_progs, mlst_profile, pubmlst_getter, ref_preparer, versions
+from ariba import mlst_profile, pubmlst_getter, ref_preparer, versions
 
 class Error (Exception): pass
 
