@@ -10,8 +10,9 @@ class Error (Exception): pass
 
 
 class PubmlstGetter:
-    def __init__(self, debug=False, xml_file=None):
+    def __init__(self, debug=False, xml_file=None, verbose=False):
         self.debug = debug
+        self.verbose = verbose
 
         if xml_file is None:
             self.xml_tree = self._get_xml_file_tree()
@@ -33,7 +34,8 @@ class PubmlstGetter:
 
 
     def _download_file(self, url, outfile):
-        print('Downloading "', url, '" and saving as "', outfile, '" ...', end='', sep='', flush=True)
+        if self.verbose:
+            print('Downloading "', url, '" and saving as "', outfile, '" ...', end='', sep='', flush=True)
         max_attempts = 3
         sleep_time = 3
         for i in range(max_attempts):
@@ -45,7 +47,9 @@ class PubmlstGetter:
             break
         else:
             raise Error('Error downloading: ' + url)
-        print(' done', flush=True)
+
+        if self.verbose:
+            print(' done', flush=True)
 
 
     def _get_species_list(self):
