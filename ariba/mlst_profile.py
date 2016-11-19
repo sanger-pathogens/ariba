@@ -25,7 +25,6 @@ class MlstProfile:
 
             for row in reader:
                 type_tuple = tuple(int(row[x]) for x in self.genes_list)
-                assert type_tuple not in self.profile_to_type
                 self.profile_to_type[type_tuple] = int(row['ST'])
 
         self.genes_set = set(self.genes_list)
