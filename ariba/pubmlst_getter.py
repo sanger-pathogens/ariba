@@ -4,6 +4,7 @@ import os
 import shutil
 import urllib.request
 import xml.etree.ElementTree as ET
+import pyfastaq
 
 class Error (Exception): pass
 
@@ -70,6 +71,18 @@ class PubmlstGetter:
         return profile_url, fasta_urls
 
 
+    @classmethod
+    def _rename_seqs_in_fasta(cls, infile, outfile):
+        f = pyfastaq.utils.open_file_write(outfile)
+        file_reader = pyfastaq.sequences.file_reader(infile)
+
+        for seq in file_reader:
+            seq.id = seq.id.replace('_', '.').replace('-', '.')
+            print(seq, file=f)
+
+        pyfastaq.utils.close(f)
+
+
     def _download_profile_and_fastas(self, outdir, profile_url, fasta_urls):
         try:
             os.mkdir(outdir)
@@ -81,7 +94,9 @@ class PubmlstGetter:
 
         for fasta_url in fasta_urls:
             outfile = os.path.join(outdir, fasta_url.split('/')[-1])
-            self._download_file(fasta_url, outfile)
+            self._download_file(fasta_url, outfile + '.tmp')
+            PubmlstGetter._rename_seqs_in_fasta(outfile + '.tmp', outfile)
+            os.unlink(outfile + '.tmp')
 
 
     def print_available_species(self):

@@ -40,3 +40,12 @@ class TestPubmlstGetter(unittest.TestCase):
         self.assertEqual(expected_profile, got_profile)
         self.assertEqual(expected_fasta, got_fasta)
 
+    def test_rename_seqs_in_fasta(self):
+        '''test _rename_seqs_in_fasta'''
+        infile = os.path.join(data_dir, 'pubmlst_rename_seqs.in.fa')
+        expected_file = os.path.join(data_dir, 'pubmlst_rename_seqs.expected.fa')
+        tmp_out = 'tmp.test.pubmlst_rename_seqs.out.fa'
+        pubmlst_getter.PubmlstGetter._rename_seqs_in_fasta(infile, tmp_out)
+        self.assertTrue(filecmp.cmp(expected_file, tmp_out, shallow=False))
+        os.unlink(tmp_out)
+
