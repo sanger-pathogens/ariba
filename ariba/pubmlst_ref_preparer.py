@@ -72,7 +72,7 @@ class PubmlstRefPreparer:
             verbose=self.verbose,
         )
         refprep.run(self.prepareref_dir)
-        shutil.copy(profile_file, self.prepareref_dir)
+        shutil.copy(profile_file, os.path.join(self.prepareref_dir, 'pubmlst.profile.txt'))
 
         print('ariba db directory prepared. You can use it like this:')
         print('ariba run', self.prepareref_dir, 'reads_1.fq reads_2.fq output_directory')
