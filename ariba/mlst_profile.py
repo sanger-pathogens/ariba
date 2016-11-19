@@ -18,7 +18,10 @@ class MlstProfile:
             reader = csv.DictReader(f, delimiter='\t')
             if reader.fieldnames[0] != 'ST':
                 raise Error('Error. Expected first column of profile file "' + self.infile + '" to be "ST"')
-            self.genes_list = reader.fieldnames[1:-1]
+
+            self.genes_list = reader.fieldnames[1:]
+            if self.genes_list[-1] == 'clonal_complex':
+                self.genes_list.pop()
 
             for row in reader:
                 type_tuple = tuple(int(row[x]) for x in self.genes_list)
