@@ -93,7 +93,7 @@ class RefSeqChooser:
 
 
     @classmethod
-    def _best_of_two_hits(cls, hit1, hit2, use_qry_length=False):
+    def _best_of_two_hits(cls, hit1, hit2, use_qry_length=False, check_flanking=False):
         if use_qry_length:
             qry_length_percent1 = hit1.hit_length_qry / hit1.qry_length
             qry_length_percent2 = hit2.hit_length_qry / hit2.qry_length
@@ -107,6 +107,11 @@ class RefSeqChooser:
         elif hit1.percent_identity != hit2.percent_identity:
             return hit1 if hit1.percent_identity > hit2.percent_identity else hit2
         else:
+            if check_flanking:
+                flank1 = min(min(hit1.qry_start, hit1.qry_end), hit1.qry_length - 1 - max(hit1.qry_start, hit1.qry_end))
+                flank2 = min(min(hit2.qry_start, hit2.qry_end), hit2.qry_length - 1 - max(hit2.qry_start, hit2.qry_end))
+                if flank1 != flank2:
+                    return hit1 if flank1 > flank2 else hit2
             l1, c1 = RefSeqChooser._l_and_c_from_contig_name(hit1.qry_name)
             l2, c2 = RefSeqChooser._l_and_c_from_contig_name(hit2.qry_name)
             if l1 != l2:
@@ -116,20 +121,20 @@ class RefSeqChooser:
 
 
     @classmethod
-    def _choose_best_nucmer_match(cls, matches, use_qry_length=False):
+    def _choose_best_nucmer_match(cls, matches, use_qry_length=False, check_flanking=False):
         best_match = None
         for ref_name in matches:
             for hit in matches[ref_name]:
                 if best_match is None:
                     best_match = hit
                 else:
-                    best_match = RefSeqChooser._best_of_two_hits(best_match, hit, use_qry_length=use_qry_length)
+                    best_match = RefSeqChooser._best_of_two_hits(best_match, hit, use_qry_length=use_qry_length, check_flanking=check_flanking)
 
         return best_match
 
 
     @classmethod
-    def _closest_nucmer_match_between_fastas(cls, ref_fasta, qry_fasta, log_fh, min_id, min_length, breaklen, use_qry_length):
+    def _closest_nucmer_match_between_fastas(cls, ref_fasta, qry_fasta, log_fh, min_id, min_length, breaklen, use_qry_length, check_flanking):
         tmpdir = tempfile.mkdtemp(prefix='tmp.closest_nucmer_match.', dir=os.getcwd())
         coords_file = os.path.join(tmpdir, 'nucmer_vs_cluster_refs.coords')
         pymummer.nucmer.Runner(
@@ -147,13 +152,13 @@ class RefSeqChooser:
         if len(nucmer_matches) == 0:
             return None, {}
         else:
-            best_hit = RefSeqChooser._choose_best_nucmer_match(nucmer_matches, use_qry_length=use_qry_length)
+            best_hit = RefSeqChooser._choose_best_nucmer_match(nucmer_matches, use_qry_length=use_qry_length, check_flanking=check_flanking)
             return best_hit, nucmer_matches
 
 
     def run(self):
         print('Looking for closest match from sequences within cluster', file=self.log_fh)
-        best_hit_from_cluster, nucmer_matches = RefSeqChooser._closest_nucmer_match_between_fastas(self.cluster_fasta, self.assembly_fasta_in, self.log_fh, self.nucmer_min_id, self.nucmer_min_len, self.nucmer_breaklen, False)
+        best_hit_from_cluster, nucmer_matches = RefSeqChooser._closest_nucmer_match_between_fastas(self.cluster_fasta, self.assembly_fasta_in, self.log_fh, self.nucmer_min_id, self.nucmer_min_len, self.nucmer_breaklen, False, True)
         if best_hit_from_cluster is None:
             return
 
@@ -166,7 +171,7 @@ class RefSeqChooser:
         RefSeqChooser._make_matching_contig_pieces_fasta(self.assembly_fasta_in, pieces_coords, pieces_fasta_file)
 
         print('Checking for a better match to a ref sequence outside the cluster', file=self.log_fh)
-        best_hit_from_all_seqs, not_needed = RefSeqChooser._closest_nucmer_match_between_fastas(self.all_refs_fasta, pieces_fasta_file, self.log_fh, self.nucmer_min_id, self.nucmer_min_len, self.nucmer_breaklen, True)
+        best_hit_from_all_seqs, not_needed = RefSeqChooser._closest_nucmer_match_between_fastas(self.all_refs_fasta, pieces_fasta_file, self.log_fh, self.nucmer_min_id, self.nucmer_min_len, self.nucmer_breaklen, True, False)
         shutil.rmtree(tmpdir)
         self.closest_ref_from_all_refs = best_hit_from_all_seqs.ref_name
         if self.closest_ref_from_all_refs is None:
