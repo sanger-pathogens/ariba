@@ -96,3 +96,17 @@ class TestRefSeqChooser(unittest.TestCase):
         self.assertTrue(os.path.exists(tmp_out))
         os.unlink(tmp_out)
 
+
+    def test_run_flanking_different(self):
+        '''Test full run where amount of flanking seq varies'''
+        all_ref_fasta = os.path.join(data_dir, 'ref_seq_chooser_test_flanking.all_refs.fa')
+        cluster_fasta = os.path.join(data_dir, 'ref_seq_chooser_test_flanking.cluster_refs.fa')
+        contig_fasta = os.path.join(data_dir, 'ref_seq_chooser_test_flanking.contigs.fa')
+        expected_fa = os.path.join(data_dir, 'ref_seq_chooser_test_flanking.expected_contigs.fa')
+        tmp_out = 'tmp.ref_seq_chooser_test_flanking.fa'
+        refchooser = ref_seq_chooser.RefSeqChooser(cluster_fasta, all_ref_fasta, contig_fasta, tmp_out, sys.stdout)
+        refchooser.run()
+        self.assertEqual('ref1', refchooser.closest_ref_from_all_refs)
+        self.assertTrue(refchooser.closest_ref_is_in_cluster)
+        self.assertTrue(filecmp.cmp(expected_fa, tmp_out, shallow=False))
+        os.unlink(tmp_out)

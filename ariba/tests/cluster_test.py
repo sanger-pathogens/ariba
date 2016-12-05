@@ -277,7 +277,7 @@ class TestCluster(unittest.TestCase):
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=112, total_reads_bases=1080)
         c.run()
         expected = [
-            'gene\tgene\t1\t0\t27\t112\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t364\t27.0\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of gene'
+            'gene\tgene\t1\t0\t27\t112\tcluster_name\t96\t96\t100.0\tcluster_name.l6.c30.ctg.1\t362\t27.8\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of gene'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
@@ -490,7 +490,7 @@ class TestCluster(unittest.TestCase):
         c.run()
 
         expected = [
-            'presence_absence1\tpresence_absence1\t1\t0\t19\t278\tcluster_name\t96\t77\t100.0\tcluster_name.l15.c30.ctg.1\t807\t22.8\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of presence_absence1'
+            'presence_absence1\tpresence_absence1\t1\t0\t19\t278\tcluster_name\t96\t77\t100.0\tcluster_name.l15.c17.ctg.1\t949\t20.5\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of presence_absence1'
         ]
         self.assertEqual(expected, c.report_lines)
         shutil.rmtree(tmpdir)
