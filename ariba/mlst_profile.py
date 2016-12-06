@@ -1,3 +1,4 @@
+import sys
 import csv
 import os
 
@@ -25,7 +26,16 @@ class MlstProfile:
 
             for row in reader:
                 type_tuple = tuple(int(row[x]) for x in self.genes_list)
-                self.profile_to_type[type_tuple] = int(row['ST'])
+                if type_tuple in self.profile_to_type:
+                    previous_st = self.profile_to_type[type_tuple]
+                    this_st = int(row['ST'])
+                    if previous_st != this_st:
+                        new_st = min(previous_st, this_st)
+                        print('WARNING: Same profile found twice in input file, but two different STs. Going to use the ST with the smaller number (', new_st, ')', sep='', file=sys.stderr)
+                        print(' ... STs are', previous_st, this_st, 'and alleles are', ', '.join([x + ':' + row[x] for x in self.genes_list]), file=sys.stderr)
+                        self.profile_to_type[type_tuple] = new_st
+                else:
+                    self.profile_to_type[type_tuple] = int(row['ST'])
 
         self.genes_set = set(self.genes_list)
 

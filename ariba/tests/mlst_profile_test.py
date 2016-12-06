@@ -9,7 +9,7 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 class TestMlstProfile(unittest.TestCase):
     def test_init(self):
         '''test init'''
-        infile = os.path.join(data_dir, 'mlst_profile_test.profile.tsv')
+        infile = os.path.join(data_dir, 'mlst_profile_test.init.profile.tsv')
         profile = mlst_profile.MlstProfile(infile)
         expected_genes = ['nusA', 'rpoB', 'eno', 'gltB', 'lepA', 'nuoL', 'nrdA']
         self.assertEqual(expected_genes, profile.genes_list)
