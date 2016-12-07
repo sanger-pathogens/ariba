@@ -22,6 +22,7 @@ class MlstReporter:
             'pc': '.',
             'depth': '.',
             'hetmax': '.',
+            'hets': '.',
         }
 
         if gene not in self.summary_sample.clusters:
@@ -30,16 +31,36 @@ class MlstReporter:
         cluster = self.summary_sample.clusters[gene]
 
         best_hit = None
+
         for d in cluster.data:
             if best_hit is None or best_hit['ref_base_assembled'] < d['best_hit']:
                 best_hit = d
 
         assert best_hit is not None
+
+        het_data = []
+
+        for d in cluster.data:
+            if d['ctg'] == best_hit['ctg']:
+                if d['var_type'] == 'HET':
+                    het_data.append(d['smtls_nts_depth'])
+                    depths = [int(x) for x in d['smtls_nts_depth'].split(',')]
+                    depths.sort()
+                    het_pc = round(100.0 * depths[-2] / sum(depths), 2)
+                    if results['hetmax'] == '.' or results['hetmax'] < het_pc:
+                        results['hetmax'] = het_pc
+        if len(het_data):
+            results['hets'] = ':'.join(het_data)
+
         results['cov'] = round(100.0 * best_hit['ref_base_assembled'] / best_hit['ref_len'], 2)
         results['ctgs'] = len({x['ctg'] for x in cluster.data})
         results['depth'] = best_hit['ctg_cov']
         results['pc'] = best_hit['pc_ident']
         results['allele'] = int(best_hit['ref_name'].split('.')[-1])
+        results['sure'] = True
+
+        if results['hetmax'] != '.' or results['cov'] < 100 or results['ctgs'] != 1 or results['pc'] < 100:
+            results['sure'] = False
 
         return results
 
@@ -53,42 +74,35 @@ class MlstReporter:
         self.sequence_type = self.mlst_profile.get_sequence_type(type_dict)
 
 
-    @classmethod
-    def _report_strings(cls, results):
+    def _report_strings(self, results):
         allele_str = str(results['allele'])
         if results['sure'] is not None and not results['sure']:
             self.any_allele_unsure = True
             allele_str += '*'
 
-        details_list = [x + ':' + str(results[x]) for x in ['cov', 'pc', 'ctgs', 'depth', 'hetmax']]
-
-        if 'hets' in details_list:
-            details_list.append('hets:' + ','.join([str(x) for x in details_list['hets']]))
-
+        details_list = [x + ':' + str(results[x]) for x in ['cov', 'pc', 'ctgs', 'depth', 'hetmax', 'hets']]
         return allele_str, ';'.join(details_list)
 
 
     def _write_reports(self):
+        out_simple = [str(self.sequence_type)]
+        out_all = [str(self.sequence_type)]
+
+        for gene in self.mlst_profile.genes_list:
+            allele_str, detail_str = self._report_strings(self.gene_results[gene])
+            out_simple.append(allele_str)
+            out_all.extend([allele_str, detail_str])
+
+        if self.sequence_type != 'ND' and self.any_allele_unsure:
+            out_simple[0] += '*'
+            out_all[0] += '*'
+
         f_out_simple = pyfastaq.utils.open_file_write(self.outprefix + '.tsv')
         f_out_all = pyfastaq.utils.open_file_write(self.outprefix + '.all.tsv')
         print('ST', *self.mlst_profile.genes_list, sep='\t', file=f_out_simple)
         print('ST', *[x + '\t' + x + '_details' for x in self.mlst_profile.genes_list], sep='\t', file=f_out_all)
-
-        if self.sequence_type != 'ND' and self.any_allele_unsure:
-            st_string = self.sequence_type + '*'
-        else:
-            st_string = self.sequence_type
-
-        print(st_string, end='', file=f_out_simple)
-        print(st_string, end='', file=f_out_all)
-
-        for gene in self.mlst_profile.genes_list:
-            allele_str, detail_str = MlstReporter._report_strings(self.gene_results[gene])
-            print('\t', allele_str, sep='', end='', file=f_out_simple)
-            print('\t', allele_str, '\t', detail_str, sep='', end='', file=f_out_all)
-
-        print('', file=f_out_simple)
-        print('', file=f_out_all)
+        print(*out_simple, sep='\t', file=f_out_simple)
+        print(*out_all, sep='\t', file=f_out_all)
         pyfastaq.utils.close(f_out_simple)
         pyfastaq.utils.close(f_out_all)
 
