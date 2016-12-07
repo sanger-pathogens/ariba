@@ -25,6 +25,23 @@ class TestMlstReporter(unittest.TestCase):
         os.unlink(got_all)
 
 
+    def test_new_set(self):
+        '''test when allele combination is new'''
+        profile_in = os.path.join(data_dir, 'mlst_reporter.profile.in.tsv')
+        report_in = os.path.join(data_dir, 'mlst_reporter.new_st.report.in.tsv')
+        expected_out_simple = os.path.join(data_dir, 'mlst_reporter.new_st.report.out.tsv')
+        expected_out_all = os.path.join(data_dir, 'mlst_reporter.new_st.report.out.all.tsv')
+        tmp_out = 'tmp.mlst_reporter.test_new_st'
+        got_simple = tmp_out + '.tsv'
+        got_all = tmp_out + '.all.tsv'
+        reporter = mlst_reporter.MlstReporter(report_in, profile_in, tmp_out)
+        reporter.run()
+        self.assertTrue(filecmp.cmp(expected_out_simple, got_simple, shallow=False))
+        self.assertTrue(filecmp.cmp(expected_out_all, got_all, shallow=False))
+        os.unlink(got_simple)
+        os.unlink(got_all)
+
+
     def test_one_gene_missing(self):
         '''test when one gene missing'''
         profile_in = os.path.join(data_dir, 'mlst_reporter.profile.in.tsv')
