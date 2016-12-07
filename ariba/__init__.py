@@ -24,6 +24,7 @@ __all__ = [
     'link',
     'mapping',
     'mlst_profile',
+    'mlst_reporter',
     'pubmlst_getter',
     'pubmlst_ref_preparer',
     'read_filter',
