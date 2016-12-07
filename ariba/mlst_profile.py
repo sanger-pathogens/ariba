@@ -5,8 +5,10 @@ import os
 class Error (Exception): pass
 
 class MlstProfile:
-    def __init__(self, infile):
+    def __init__(self, infile, duplicate_warnings=True):
         self.infile = infile
+        self.duplicate_warnings = duplicate_warnings
+
         if not os.path.exists(self.infile):
             raise Error('Error! Input file "' + self.infile + '" not found.')
         self._load_input_file()
@@ -31,8 +33,9 @@ class MlstProfile:
                     this_st = int(row['ST'])
                     if previous_st != this_st:
                         new_st = min(previous_st, this_st)
-                        print('WARNING: Same profile found twice in input file, but two different STs. Going to use the ST with the smaller number (', new_st, ')', sep='', file=sys.stderr)
-                        print(' ... STs are', previous_st, this_st, 'and alleles are', ', '.join([x + ':' + row[x] for x in self.genes_list]), file=sys.stderr)
+                        if self.duplicate_warnings:
+                            print('WARNING: Same profile found twice in input file, but two different STs. Going to use the ST with the smaller number (', new_st, ')', sep='', file=sys.stderr)
+                            print(' ... STs are', previous_st, this_st, 'and alleles are', ', '.join([x + ':' + row[x] for x in self.genes_list]), file=sys.stderr)
                         self.profile_to_type[type_tuple] = new_st
                 else:
                     self.profile_to_type[type_tuple] = int(row['ST'])

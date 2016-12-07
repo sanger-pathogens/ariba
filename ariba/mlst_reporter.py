@@ -6,7 +6,7 @@ from ariba import mlst_profile, summary_sample
 class MlstReporter:
     def __init__(self, report_tsv, mlst_file, outprefix):
         self.summary_sample = summary_sample.SummarySample(report_tsv)
-        self.mlst_profile = mlst_profile.MlstProfile(mlst_file)
+        self.mlst_profile = mlst_profile.MlstProfile(mlst_file, duplicate_warnings=False)
         self.outprefix = outprefix
         self.allele_calls = {}
         self.any_allele_unsure = False

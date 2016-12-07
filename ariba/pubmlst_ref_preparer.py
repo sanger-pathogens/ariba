@@ -55,7 +55,7 @@ class PubmlstRefPreparer:
             print('Downloaded data from pubmlst')
 
         profile_file = os.path.join(self.mlst_download_dir, 'profile.txt')
-        self.profile = mlst_profile.MlstProfile(profile_file)
+        self.profile = mlst_profile.MlstProfile(profile_file, duplicate_warnings=True)
         if self.verbose:
             print('Loaded mlst profile file', profile_file)
 
