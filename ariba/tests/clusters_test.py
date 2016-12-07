@@ -295,3 +295,23 @@ class TestClusters(unittest.TestCase):
         self.assertTrue(filecmp.cmp(expected, tmp_file, shallow=False))
         os.unlink(tmp_file)
 
+
+    def test_write_mlst_reports(self):
+        '''test _write_mlst_reports'''
+        ariba_report = os.path.join(data_dir, 'clusters_test_write_mlst_reports.ariba.report.tsv')
+        mlst_file = os.path.join(data_dir, 'clusters_test_write_mlst_reports.mlst_profile.tsv')
+        expected_short = os.path.join(data_dir, 'clusters_test_write_mlst_reports.out.tsv')
+        expected_long = os.path.join(data_dir, 'clusters_test_write_mlst_reports.out.all.tsv')
+        outprefix = 'tmp.test_clusters__write_mlst_reports'
+        got_short = outprefix + '.tsv'
+        got_long = outprefix + '.all.tsv'
+
+        clusters.Clusters._write_mlst_reports('filenotthere', ariba_report, outprefix)
+        self.assertFalse(os.path.exists(got_short))
+        self.assertFalse(os.path.exists(got_long))
+
+        clusters.Clusters._write_mlst_reports(mlst_file, ariba_report, outprefix)
+        self.assertTrue(filecmp.cmp(expected_short, got_short, shallow=False))
+        self.assertTrue(filecmp.cmp(expected_long, got_long, shallow=False))
+        os.unlink(got_short)
+        os.unlink(got_long)

@@ -10,7 +10,7 @@ import shutil
 import multiprocessing
 import pyfastaq
 import minimap_ariba
-from ariba import cluster, common, histogram, read_store, report, report_filter, reference_data
+from ariba import cluster, common, histogram, mlst_reporter, read_store, report, report_filter, reference_data
 
 class Error (Exception): pass
 
@@ -97,6 +97,8 @@ class Clusters:
         self.bam = self.bam_prefix + '.bam'
         self.report_file_all_tsv = os.path.join(self.outdir, 'debug.report.tsv')
         self.report_file_filtered = os.path.join(self.outdir, 'report.tsv')
+        self.mlst_reports_prefix = os.path.join(self.outdir, 'mlst_report')
+        self.mlst_profile_file = os.path.join(self.refdata_dir, 'pubmlst.profile.txt')
         self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa.gz')
         self.catted_genes_matching_refs_fasta = os.path.join(self.outdir, 'assembled_genes.fa.gz')
         self.catted_assemblies_fasta = os.path.join(self.outdir, 'assemblies.fa.gz')
@@ -521,6 +523,15 @@ class Clusters:
                 print('Not deleting anything because --noclean used')
 
 
+    @classmethod
+    def _write_mlst_reports(cls, mlst_profile_file, ariba_report_tsv, outprefix, verbose=False):
+        if os.path.exists(mlst_profile_file):
+            if verbose:
+                print('\nMaking MLST reports', flush=True)
+            reporter = mlst_reporter.MlstReporter(ariba_report_tsv, mlst_profile_file, outprefix)
+            reporter.run()
+
+
     def write_versions_file(self, original_dir):
         with open('version_info.txt', 'w') as f:
             print('ARIBA run with this command:', file=f)
@@ -597,6 +608,10 @@ class Clusters:
             print()
             print('{:_^79}'.format(' Cleaning files '), flush=True)
         self._clean()
+
+        print('self.mlst_profile_file', self.mlst_profile_file)
+        print('self.report_file_filtered', self.report_file_filtered)
+        Clusters._write_mlst_reports(self.mlst_profile_file, self.report_file_filtered, self.mlst_reports_prefix, verbose=self.verbose)
 
         if self.clusters_all_ran_ok and self.verbose:
             print('\nAll done!\n')
