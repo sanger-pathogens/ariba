@@ -14,10 +14,10 @@ class MlstReporter:
 
     def _call_gene(self, gene):
         results = {
-            'allele': None,
+            'allele': 'ND',
             'sure': None,
-            'cov': 0,
-            'ctgs': 0,
+            'cov': '.',
+            'ctgs': '.',
             'gene': None,
             'pc': '.',
             'depth': '.',
@@ -55,7 +55,7 @@ class MlstReporter:
 
     @classmethod
     def _report_strings(cls, results):
-        allele_str = '.' if results['allele'] is None else str(results['allele'])
+        allele_str = str(results['allele'])
         if results['sure'] is not None and not results['sure']:
             self.any_allele_unsure = True
             allele_str += '*'
