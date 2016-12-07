@@ -1,2 +1,2 @@
 ST	gene1	gene1_details	gene2	gene2_details
-2*	1*	cov:100.0;pc:100.0;ctgs:1;depth:42.2;hetmax:25.0;hets:30,10	2	cov:100.0;pc:100.0;ctgs:1;depth:40.2;hetmax:.;hets:.
+2*	1*	cov:100.0;pc:100.0;ctgs:1;depth:42.2;hetmin:75.0;hets:30,10	2	cov:100.0;pc:100.0;ctgs:1;depth:40.2;hetmin:.;hets:.

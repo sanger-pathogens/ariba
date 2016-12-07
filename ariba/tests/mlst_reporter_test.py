@@ -57,3 +57,20 @@ class TestMlstReporter(unittest.TestCase):
         self.assertTrue(filecmp.cmp(expected_out_all, got_all, shallow=False))
         os.unlink(got_simple)
         os.unlink(got_all)
+
+
+    def test_het_snps(self):
+        '''test when one gene has two het snps'''
+        profile_in = os.path.join(data_dir, 'mlst_reporter.profile.in.tsv')
+        report_in = os.path.join(data_dir, 'mlst_reporter.het_snps.in.tsv')
+        expected_out_simple = os.path.join(data_dir, 'mlst_reporter.het_snps.out.tsv')
+        expected_out_all = os.path.join(data_dir, 'mlst_reporter.het_snps.out.all.tsv')
+        tmp_out = 'tmp.mlst_reporter.test_het_snps'
+        got_simple = tmp_out + '.tsv'
+        got_all = tmp_out + '.all.tsv'
+        reporter = mlst_reporter.MlstReporter(report_in, profile_in, tmp_out)
+        reporter.run()
+        self.assertTrue(filecmp.cmp(expected_out_simple, got_simple, shallow=False))
+        self.assertTrue(filecmp.cmp(expected_out_all, got_all, shallow=False))
+        os.unlink(got_simple)
+        os.unlink(got_all)

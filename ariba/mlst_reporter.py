@@ -21,7 +21,7 @@ class MlstReporter:
             'gene': None,
             'pc': '.',
             'depth': '.',
-            'hetmax': '.',
+            'hetmin': '.',
             'hets': '.',
         }
 
@@ -33,7 +33,7 @@ class MlstReporter:
         best_hit = None
 
         for d in cluster.data:
-            if best_hit is None or best_hit['ref_base_assembled'] < d['best_hit']:
+            if best_hit is None or best_hit['ref_base_assembled'] < d['ref_base_assembled']:
                 best_hit = d
 
         assert best_hit is not None
@@ -46,11 +46,11 @@ class MlstReporter:
                     het_data.append(d['smtls_nts_depth'])
                     depths = [int(x) for x in d['smtls_nts_depth'].split(',')]
                     depths.sort()
-                    het_pc = round(100.0 * depths[-2] / sum(depths), 2)
-                    if results['hetmax'] == '.' or results['hetmax'] < het_pc:
-                        results['hetmax'] = het_pc
+                    het_pc = round(100.0 * depths[-1] / sum(depths), 2)
+                    if results['hetmin'] == '.' or results['hetmin'] < het_pc:
+                        results['hetmin'] = het_pc
         if len(het_data):
-            results['hets'] = ':'.join(het_data)
+            results['hets'] = '.'.join(het_data)
 
         results['cov'] = round(100.0 * best_hit['ref_base_assembled'] / best_hit['ref_len'], 2)
         results['ctgs'] = len({x['ctg'] for x in cluster.data})
@@ -59,7 +59,7 @@ class MlstReporter:
         results['allele'] = int(best_hit['ref_name'].split('.')[-1])
         results['sure'] = True
 
-        if results['hetmax'] != '.' or results['cov'] < 100 or results['ctgs'] != 1 or results['pc'] < 100:
+        if results['hetmin'] != '.' or results['cov'] < 100 or results['ctgs'] != 1 or results['pc'] < 100:
             results['sure'] = False
 
         return results
@@ -80,7 +80,7 @@ class MlstReporter:
             self.any_allele_unsure = True
             allele_str += '*'
 
-        details_list = [x + ':' + str(results[x]) for x in ['cov', 'pc', 'ctgs', 'depth', 'hetmax', 'hets']]
+        details_list = [x + ':' + str(results[x]) for x in ['cov', 'pc', 'ctgs', 'depth', 'hetmin', 'hets']]
         return allele_str, ';'.join(details_list)
 
 
