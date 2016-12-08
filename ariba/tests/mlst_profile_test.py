@@ -39,6 +39,8 @@ class TestMlstProfile(unittest.TestCase):
             ('ND', {'foo': 1}),
             (1, {'nusA': 1, 'rpoB': 26, 'eno': 2, 'gltB': 2, 'lepA': 59, 'nuoL': 8, 'nrdA': 1}),
             (2, {'nusA': 1, 'rpoB': 26, 'eno': 2, 'gltB': 4, 'lepA': 59, 'nuoL': 2, 'nrdA': 5}),
+            ('ND', {'nusA': 'ND', 'rpoB': 26, 'eno': 2, 'gltB': 4, 'lepA': 59, 'nuoL': 2, 'nrdA': 5}),
+            ('Novel', {'nusA': 1000, 'rpoB': 26, 'eno': 2, 'gltB': 4, 'lepA': 59, 'nuoL': 2, 'nrdA': 5}),
         ]
         for expected, profile_dict in tests:
             self.assertEqual(expected, profile.get_sequence_type(profile_dict))

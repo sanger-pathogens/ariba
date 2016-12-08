@@ -49,5 +49,9 @@ class MlstProfile:
 
     def get_sequence_type(self, type_dict):
         key = tuple(type_dict.get(x, 'ND') for x in self.genes_list)
-        return self.profile_to_type.get(key, 'ND')
+        if 'ND' in key:
+            return 'ND'
+        else:
+            return self.profile_to_type.get(key, 'Novel')
+
 
