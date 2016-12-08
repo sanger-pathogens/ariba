@@ -16,7 +16,10 @@ void openFileWrite(std::string filename, std::ofstream& ofs);
 void split(const std::string& s, char delim, std::vector<std::string>& elems);
 void split(const std::string& s, char delim, std::vector<uint32_t> &elems);
 std::string getKey(const std::string& key, const std::string& s);
+void vectorSumAndMax(const std::vector<uint32_t>& v, uint32_t& maxValue, uint32_t& sum);
+bool twoDepthsRatioOk(const uint32_t& d1, const uint32_t& d2, const uint32_t& minSecondDepth, const float& maxAlleleFreq);
 bool adStringPassesFilter(std::string& adString, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq);
+bool adStringsPass(const std::string& adfString, const std::string& adrString, const uint32_t& minTotalDepth, const uint32_t& minSecondDepth, const float& maxAlleleFreq);
 
 int run(char* infileIn, char* outprefixIn, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq);
 
@@ -116,6 +119,76 @@ std::string getKey(const std::string& key, const std::string& s)
 }
 
 
+void vectorSumAndMax(const std::vector<uint32_t>& v, uint32_t& maxValue, uint32_t& sum)
+{
+    sum = 0;
+    maxValue = 0;
+
+    for (std::vector<uint32_t>::const_iterator iter = v.begin(); iter != v.end(); iter++)
+    {
+        sum += *iter;
+        maxValue = std::max(maxValue, *iter);
+    }
+}
+
+
+bool depthOk(const uint32_t& totalDepth, const uint32_t& testNum, const uint32_t& minSecondDepth, const float& maxAlleleFreq)
+{
+    return (testNum >= minSecondDepth && 1.0 * testNum / totalDepth <= maxAlleleFreq);
+}
+
+
+bool adStringsPass(const std::string& adfString, const std::string& adrString, const uint32_t& minTotalDepth, const uint32_t& minSecondDepth, const float& maxAlleleFreq)
+{
+    std::vector<uint32_t> adfDepths;
+    std::vector<uint32_t> adrDepths;
+    split(adfString, ',', adfDepths);
+    split(adrString, ',', adrDepths);
+    if (adfDepths.size() != adrDepths.size())
+    {
+        std::cerr << "Error parsing allele depths. ADF:" << adfString << ", ADR:" << adrString << std::endl;
+        exit(1);
+    }
+
+    if (adfDepths.size() == 1 && adrDepths.size() == 1)
+    {
+        return true;
+    }
+
+    uint32_t adfTotal, adfMax, adrTotal, adrMax;
+    vectorSumAndMax(adfDepths, adfMax, adfTotal);
+    vectorSumAndMax(adrDepths, adrMax, adrTotal);
+
+    if (adfTotal < minTotalDepth || adrTotal < minTotalDepth)
+    {
+        return false;
+    }
+
+    // If more of the reads disagree with the reference than agree with it,
+    // then it's not het, but we still want it
+    if (adfMax != adfDepths[0] && adrMax != adrDepths[0])
+    {
+        return true;
+    }
+
+    std::vector<uint32_t> goodIndexes;
+    uint32_t numberGood = 0;
+
+    for (uint32_t i = 0; i < adfDepths.size(); i++)
+    {
+        if (depthOk(adfTotal, adfDepths[i], minSecondDepth, maxAlleleFreq) && depthOk(adrTotal, adrDepths[i], minSecondDepth, maxAlleleFreq))
+        {
+            numberGood++;
+        }
+        if (numberGood > 1)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 bool adStringPassesFilter(std::string& adString, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq)
 {
     std::vector<uint32_t> depths;
@@ -156,6 +229,8 @@ int run(char* infileIn, char* outprefixIn, uint32_t minTotalDepth, uint32_t minS
     std::string refString;
     std::string varString;
     std::string adString;
+    std::string adfString;
+    std::string adrString;
     std::string dpString;
     std::map<std::string, uint32_t> totalDepths;
 
@@ -174,6 +249,8 @@ int run(char* infileIn, char* outprefixIn, uint32_t minTotalDepth, uint32_t minS
 
         split(line, '\t', fields);
         adString = getKey("AD=", fields[7]);
+        adfString = getKey("ADF=", fields[7]);
+        adrString = getKey("ADR=", fields[7]);
         dpString = getKey("DP=", fields[7]);
 
         if (adString.size() == 0 || dpString.size() == 0)
@@ -223,7 +300,8 @@ int run(char* infileIn, char* outprefixIn, uint32_t minTotalDepth, uint32_t minS
                        << '\t' << dpString
                        << '\t' << adString << '\n';
 
-        if (varString.compare(".") && adStringPassesFilter(adString, minTotalDepth, minSecondDepth, maxAlleleFreq))
+        //if (varString.compare(".") && adStringPassesFilter(adString, minTotalDepth, minSecondDepth, maxAlleleFreq))
+        if (varString.compare(".") && adStringsPass(adfString, adrString, minTotalDepth, minSecondDepth, maxAlleleFreq))
         {
             variantOutFh << line << '\n';
         }

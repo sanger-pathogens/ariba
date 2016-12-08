@@ -13,7 +13,7 @@ class SamtoolsVariants:
       bam,
       outprefix,
       log_fh=sys.stdout,
-      min_var_read_depth=5,
+      min_var_read_depth=4,
       min_second_var_read_depth=2,
       max_allele_freq=0.90
     ):
@@ -37,7 +37,7 @@ class SamtoolsVariants:
         tmp_vcf = self.vcf_file + '.tmp'
         with open(tmp_vcf, 'w') as f:
             print(pysam.mpileup(
-                '-t', 'INFO/AD',
+                '-t', 'INFO/AD,INFO/ADF,INFO/ADR',
                 '-L', '99999999',
                 '-A',
                 '-f', self.ref_fa,
