@@ -1,5 +1,6 @@
 import unittest
 import os
+import copy
 import filecmp
 import shutil
 import pyfastaq
@@ -10,6 +11,23 @@ data_dir = os.path.join(modules_dir, 'tests', 'data')
 
 
 class TestPubmlstRefPreparer(unittest.TestCase):
+    def test_filter_seq_dict(self):
+        '''test _filter_seq_dict'''
+        d = {
+            'seq1': pyfastaq.sequences.Fasta('seq1', 'A'),
+            'seq2': pyfastaq.sequences.Fasta('seq2', 'ACGTA'),
+            'seq3': pyfastaq.sequences.Fasta('seq3', 'ACGTT'),
+            'seq4': pyfastaq.sequences.Fasta('seq4', 'AACGC'),
+            'seq5': pyfastaq.sequences.Fasta('seq5', 'AACGTGTGGTTGGT'),
+        }
+
+        expect = copy.copy(d)
+        del expect['seq1']
+        del expect['seq5']
+        pubmlst_ref_preparer.PubmlstRefPreparer._filter_seq_dict(d)
+        self.assertEqual(expect, d)
+
+
     def test_load_fasta_files_and_write_clusters_file(self):
         '''test _load_fasta_files_and_write_clusters_file'''
         indir = os.path.join(data_dir, 'pubmlst_ref_prepare.test_load_fa_and_clusters.in')
