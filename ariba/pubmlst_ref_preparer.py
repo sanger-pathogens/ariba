@@ -1,4 +1,5 @@
 import shutil
+import sys
 import os
 import pyfastaq
 from ariba import mlst_profile, pubmlst_getter, ref_preparer, versions
@@ -18,6 +19,23 @@ class PubmlstRefPreparer:
         self.extern_progs, version_report_lines = versions.get_all_versions()
 
 
+    @classmethod
+    def _filter_seq_dict(cls, d):
+        lengths = [len(x) for x in d.values()]
+        lengths.sort()
+        median_length = lengths[int(len(d) / 2)]
+        min_length = 0.9 * median_length
+        max_length = 1.1 * median_length
+        to_delete = []
+        for seq in d:
+            if not min_length <= len(d[seq]) <= max_length:
+                to_delete.append(seq)
+                print('WARNING: Median sequence length is', median_length, 'but', seq, 'has length', len(d[seq]), 'which is too long or short. Removing.', file=sys.stderr)
+
+        for seq in to_delete:
+            del d[seq]
+
+
     def _load_fasta_files_and_write_clusters_file(self, indir):
         self.sequences = {}
         self.fasta_files = []
@@ -32,11 +50,16 @@ class PubmlstRefPreparer:
 
             self.sequences[gene_name] = {}
             pyfastaq.tasks.file_to_dict(infile, self.sequences[gene_name])
+            PubmlstRefPreparer._filter_seq_dict(self.sequences[gene_name])
             seq_names = sorted(list(self.sequences[gene_name].keys()))
             print(*seq_names, sep='\t', file=clusters_fh)
 
             if self.verbose:
                 print('Loaded fasta file for gene', gene_name)
+
+            with open(infile, 'w') as f:
+                for seq in sorted(self.sequences[gene_name]):
+                    print(self.sequences[gene_name][seq], file=f)
 
             self.fasta_files.append(infile)
 
