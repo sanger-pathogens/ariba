@@ -18,7 +18,6 @@ void split(const std::string& s, char delim, std::vector<uint32_t> &elems);
 std::string getKey(const std::string& key, const std::string& s);
 void vectorSumAndMax(const std::vector<uint32_t>& v, uint32_t& maxValue, uint32_t& sum);
 bool twoDepthsRatioOk(const uint32_t& d1, const uint32_t& d2, const uint32_t& minSecondDepth, const float& maxAlleleFreq);
-bool adStringPassesFilter(std::string& adString, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq);
 bool adStringsPass(const std::string& adfString, const std::string& adrString, const uint32_t& minTotalDepth, const uint32_t& minSecondDepth, const float& maxAlleleFreq);
 
 int run(char* infileIn, char* outprefixIn, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq);
@@ -189,26 +188,6 @@ bool adStringsPass(const std::string& adfString, const std::string& adrString, c
 }
 
 
-bool adStringPassesFilter(std::string& adString, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq)
-{
-    std::vector<uint32_t> depths;
-    split(adString, ',', depths);
-    uint32_t firstDepth = depths[0];
-    std::sort(depths.begin(), depths.end());
-    uint32_t totalDepth = 0;
-
-    for (std::vector<uint32_t>::const_iterator p = depths.begin(); p != depths.end(); p++)
-    {
-        totalDepth += *p;
-    }
-
-    bool secondDepthOk = (depths.size() == 1 || (depths.size() > 1 && depths[depths.size() - 2] >= minSecondDepth));
-    bool maxDepthOk = (totalDepth >= minTotalDepth && 1.0 * depths.back() / totalDepth <= maxAlleleFreq);
-    return ( firstDepth < depths.back() || (secondDepthOk && maxDepthOk) );
-}
-
-
-
 int run(char* infileIn, char* outprefixIn, uint32_t minTotalDepth, uint32_t minSecondDepth, float maxAlleleFreq)
 {
     std::string infile(infileIn);
@@ -300,7 +279,6 @@ int run(char* infileIn, char* outprefixIn, uint32_t minTotalDepth, uint32_t minS
                        << '\t' << dpString
                        << '\t' << adString << '\n';
 
-        //if (varString.compare(".") && adStringPassesFilter(adString, minTotalDepth, minSecondDepth, maxAlleleFreq))
         if (varString.compare(".") && adStringsPass(adfString, adrString, minTotalDepth, minSecondDepth, maxAlleleFreq))
         {
             variantOutFh << line << '\n';
