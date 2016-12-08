@@ -301,10 +301,10 @@ class TestClusters(unittest.TestCase):
         ariba_report = os.path.join(data_dir, 'clusters_test_write_mlst_reports.ariba.report.tsv')
         mlst_file = os.path.join(data_dir, 'clusters_test_write_mlst_reports.mlst_profile.tsv')
         expected_short = os.path.join(data_dir, 'clusters_test_write_mlst_reports.out.tsv')
-        expected_long = os.path.join(data_dir, 'clusters_test_write_mlst_reports.out.all.tsv')
+        expected_long = os.path.join(data_dir, 'clusters_test_write_mlst_reports.out.details.tsv')
         outprefix = 'tmp.test_clusters__write_mlst_reports'
         got_short = outprefix + '.tsv'
-        got_long = outprefix + '.all.tsv'
+        got_long = outprefix + '.details.tsv'
 
         clusters.Clusters._write_mlst_reports('filenotthere', ariba_report, outprefix)
         self.assertFalse(os.path.exists(got_short))

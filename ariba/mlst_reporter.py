@@ -80,31 +80,29 @@ class MlstReporter:
             self.any_allele_unsure = True
             allele_str += '*'
 
-        details_list = [x + ':' + str(results[x]) for x in ['cov', 'pc', 'ctgs', 'depth', 'hetmin', 'hets']]
-        return allele_str, ';'.join(details_list)
+        details_list = [str(results[x]) for x in ['cov', 'pc', 'ctgs', 'depth', 'hetmin', 'hets']]
+        return allele_str, '\t'.join(details_list)
 
 
     def _write_reports(self):
+        f_out_all = pyfastaq.utils.open_file_write(self.outprefix + '.details.tsv')
+        print('gene\tallele\tcov\tpc\tctgs\tdepth\thetmin\thets', file=f_out_all)
         out_simple = [str(self.sequence_type)]
-        out_all = [str(self.sequence_type)]
 
         for gene in self.mlst_profile.genes_list:
             allele_str, detail_str = self._report_strings(self.gene_results[gene])
             out_simple.append(allele_str)
-            out_all.extend([allele_str, detail_str])
+            print(gene, allele_str, detail_str, sep='\t', file=f_out_all)
+
+        pyfastaq.utils.close(f_out_all)
 
         if self.sequence_type != 'ND' and self.any_allele_unsure:
             out_simple[0] += '*'
-            out_all[0] += '*'
 
         f_out_simple = pyfastaq.utils.open_file_write(self.outprefix + '.tsv')
-        f_out_all = pyfastaq.utils.open_file_write(self.outprefix + '.all.tsv')
         print('ST', *self.mlst_profile.genes_list, sep='\t', file=f_out_simple)
-        print('ST', *[x + '\t' + x + '_details' for x in self.mlst_profile.genes_list], sep='\t', file=f_out_all)
         print(*out_simple, sep='\t', file=f_out_simple)
-        print(*out_all, sep='\t', file=f_out_all)
         pyfastaq.utils.close(f_out_simple)
-        pyfastaq.utils.close(f_out_all)
 
 
     def run(self):
