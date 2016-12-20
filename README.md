@@ -33,7 +33,7 @@ Once the dependencies are installed, install ARIBA using pip:
 ARIBA also depends on several Python packages, all of which are available
 via pip, so the above command will get those automatically if they
 are not installed. The packages are dendropy >= 4.1.0,
-pyfastaq >= 3.12.0, pysam >= 0.9.1, and pymummer >= 0.8.1.
+pyfastaq >= 3.12.0, pysam >= 0.9.1, and pymummer >= 0.10.1.
 
 Alternatively, you can download the latest release from this github repository,
 or clone the repository. Then run the tests:
