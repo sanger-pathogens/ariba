@@ -3,6 +3,8 @@ __all__ = [
     'flag',
     'getref',
     'prepareref',
+    'pubmlstget',
+    'pubmlstspecies',
     'refquery',
     'reportfilter',
     'run',

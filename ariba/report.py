@@ -2,7 +2,6 @@ import copy
 import re
 import sys
 import pymummer
-from ariba import sequence_variant
 
 class Error (Exception): pass
 

@@ -1,0 +1,3 @@
+#ariba_ref_name	ref_name	gene	var_only	flag	reads	cluster	ref_len	ref_base_assembled	pc_ident	ctg	ctg_len	ctg_cov	known_var	var_type	var_seq_type	known_var_change	has_known_var	ref_ctg_change	ref_ctg_effect	ref_start	ref_end	ref_nt	ctg_start	ctg_end	ctg_nt	smtls_total_depth	smtls_nts	smtls_nts_depth	var_description	free_text
+gene1.1	gene1.1	0	0	19	456	gene1	200	200	100.0	gene1.l15.c30.ctg.1	400	42.2	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.
+gene2.2	gene2.2	0	0	19	462	gene2	300	300	100.0	gene2.l15.c30.ctg.1	500	40.2	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.

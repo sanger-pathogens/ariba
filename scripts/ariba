@@ -88,6 +88,29 @@ subparser_prepareref.add_argument('outdir', help='Output directory (must not alr
 subparser_prepareref.set_defaults(func=ariba.tasks.prepareref.run)
 
 
+#----------------------------- pubmlstget -------------------------------
+subparser_pubmlstget = subparsers.add_parser(
+    'pubmlstget',
+    help='Download species from PubMLST and make db',
+    usage='ariba pubmlstget [options] <"species in quotes"> <output_directory>',
+    description='Download typing scheme for a given species from PubMLST, and make an ARIBA db',
+)
+subparser_pubmlstget.add_argument('--verbose', action='store_true', help='Be verbose')
+subparser_pubmlstget.add_argument('species', help='Species to download. Put it in quotes')
+subparser_pubmlstget.add_argument('outdir', help='Name of output directory to be made (must not already exist)')
+subparser_pubmlstget.set_defaults(func=ariba.tasks.pubmlstget.run)
+
+
+#----------------------------- pubmlstspecies -------------------------------
+subparser_pubmlstspecies = subparsers.add_parser(
+    'pubmlstspecies',
+    help='Get list of available species from PubMLST',
+    usage='ariba pubmlstspecies <outfile>',
+    description='Get a list of species available from PubMLST. Use this to show the possible species that can be used when running pubmlstget',
+)
+#subparser_pubmlstspecies.add_argument('outfile', help='Name of output file')
+subparser_pubmlstspecies.set_defaults(func=ariba.tasks.pubmlstspecies.run)
+
 
 #----------------------------- refquery -------------------------------
 subparser_refquery = subparsers.add_parser(
