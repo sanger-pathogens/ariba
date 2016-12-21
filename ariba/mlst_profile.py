@@ -8,6 +8,7 @@ class MlstProfile:
     def __init__(self, infile, duplicate_warnings=True):
         self.infile = infile
         self.duplicate_warnings = duplicate_warnings
+        self.columns_to_ignore = ['clonal_complex', 'CC', 'Lineage', 'mlst_clade', 'species']
 
         if not os.path.exists(self.infile):
             raise Error('Error! Input file "' + self.infile + '" not found.')
@@ -22,9 +23,7 @@ class MlstProfile:
             if reader.fieldnames[0] != 'ST':
                 raise Error('Error. Expected first column of profile file "' + self.infile + '" to be "ST"')
 
-            self.genes_list = reader.fieldnames[1:]
-            if self.genes_list[-1] == 'clonal_complex':
-                self.genes_list.pop()
+            self.genes_list = [column_name for column_name in reader.fieldnames[1:] if column_name not in self.columns_to_ignore]
 
             for row in reader:
                 type_tuple = tuple(int(row[x]) for x in self.genes_list)

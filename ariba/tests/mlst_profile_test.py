@@ -19,6 +19,19 @@ class TestMlstProfile(unittest.TestCase):
             (1, 26, 2, 4, 59, 2, 5): 2
         }
         self.assertEqual(expected_dict, profile.profile_to_type)
+		
+    def test_init_multiple_extra_columns(self):
+        '''test init'''
+        infile = os.path.join(data_dir, 'mlst_profile_test.init_multiple_extra_columns.profile.tsv')
+        profile = mlst_profile.MlstProfile(infile)
+        expected_genes = ['nusA', 'rpoB', 'eno', 'gltB', 'lepA', 'nuoL', 'nrdA']
+        self.assertEqual(expected_genes, profile.genes_list)
+        self.assertEqual(set(expected_genes), profile.genes_set)
+        expected_dict = {
+            (1, 26, 2, 2, 59, 8, 1): 1,
+            (1, 26, 2, 4, 59, 2, 5): 2
+        }
+        self.assertEqual(expected_dict, profile.profile_to_type)
 
 
     def test_has_gene(self):
