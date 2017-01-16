@@ -1,5 +1,4 @@
 import urllib.request
-import csv
 from bs4 import BeautifulSoup
 from distutils.version import LooseVersion
 
