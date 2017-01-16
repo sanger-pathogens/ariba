@@ -1,7 +1,12 @@
 import os
 import sys
 import subprocess
+import urllib.request
 import pyfastaq
+
+
+class Error (Exception): pass
+
 
 def syscall(cmd, allow_fail=False, verbose=False, verbose_filehandle=sys.stdout, print_errors=True):
     if verbose:
@@ -44,3 +49,22 @@ def cat_files(infiles, outfile):
             pyfastaq.utils.close(f_in)
 
     pyfastaq.utils.close(f_out)
+
+
+def download_file(url, outfile, max_attempts=3, sleep_time=2, verbose=False):
+    if verbose:
+        print('Downloading "', url, '" and saving as "', outfile, '" ...', end='', sep='', flush=True)
+
+    for i in range(max_attempts):
+        time.sleep(sleep_time)
+        try:
+            urllib.request.urlretrieve(url, filename=outfile)
+        except:
+            continue
+        break
+    else:
+        raise Error('Error downloading: ' + url)
+
+    if verbose:
+        print(' done', flush=True)
+

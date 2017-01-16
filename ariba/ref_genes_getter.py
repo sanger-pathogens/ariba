@@ -5,7 +5,6 @@ import re
 import shutil
 import tarfile
 import pyfastaq
-import urllib.request
 import time
 import json
 from ariba import common, card_record, vfdb_parser
@@ -37,23 +36,9 @@ class RefGenesGetter:
         pyfastaq.sequences.genetic_code = self.genetic_code
 
 
-    def _download_file(self, url, outfile):
-        print('Downloading "', url, '" and saving as "', outfile, '" ...', end='', sep='', flush=True)
-        for i in range(self.max_download_attempts):
-            time.sleep(self.sleep_time)
-            try:
-                urllib.request.urlretrieve(url, filename=outfile)
-            except:
-                continue
-            break
-        else:
-            raise Error('Error downloading: ' + url)
-        print(' done', flush=True)
-
-
     def _get_card_versions(self, tmp_file):
         print('Getting available CARD versions')
-        self._download_file('https://card.mcmaster.ca/download', tmp_file)
+        common.download_file('https://card.mcmaster.ca/download', tmp_file, max_attempts=self.max_download_attempts, sleep_time=self.sleep_time, verbose=True)
         p = re.compile(r'''href="(/download/.*?broad.*?v([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz)"''')
         versions = {}
 
@@ -269,7 +254,7 @@ class RefGenesGetter:
             raise Error('Error mkdir/chdir ' + tmpdir)
 
         zipfile = 'arg-annot-database_doc.zip'
-        self._download_file('http://www.mediterranee-infection.com/arkotheque/client/ihumed/_depot_arko/articles/304/arg-annot-database_doc.zip', zipfile)
+        common.download_file('http://www.mediterranee-infection.com/arkotheque/client/ihumed/_depot_arko/articles/304/arg-annot-database_doc.zip', zipfile, max_attempts=self.max_download_attempts, sleep_time=self.sleep_time, verbose=True)
         common.syscall('unzip ' + zipfile)
         os.chdir(current_dir)
         print('Extracted files.')
@@ -408,7 +393,7 @@ class RefGenesGetter:
             raise Error('Error mkdir ' + tmpdir)
 
         zipfile = os.path.join(tmpdir, filename)
-        self._download_file('http://www.mgc.ac.cn/VFs/Down/' + filename, zipfile)
+        common.download_file('http://www.mgc.ac.cn/VFs/Down/' + filename, zipfile, max_attempts=self.max_download_attempts, sleep_time=self.sleep_time, verbose=True)
         print('Extracting files ... ', end='', flush=True)
         vparser = vfdb_parser.VfdbParser(zipfile, outprefix)
         vparser.run()
