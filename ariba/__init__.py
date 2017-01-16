@@ -23,6 +23,7 @@ __all__ = [
     'histogram',
     'link',
     'mapping',
+    'megares_data_finder',
     'mlst_profile',
     'mlst_reporter',
     'pubmlst_getter',
