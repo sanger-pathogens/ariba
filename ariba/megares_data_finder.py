@@ -60,7 +60,6 @@ class MegaresDataFinder:
     def run(self):
         print('Finding available megares versions from', self.index_url)
         html_text = self._get_available_zips()
-        print(html_text)
         zips = MegaresDataFinder._zips_from_index_page_string(html_text)
         print('Found versions: ', ', '.join(list(zips.keys())))
         url = MegaresDataFinder._get_url_for_version(zips, version=self.version)
