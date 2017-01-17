@@ -1,0 +1,3 @@
+Source_Database	MEGARes_Header	Source_Headers(space_separated)
+SOURCE1	Bla|OXA-1|JN123456|42-141|100|betalactams|Class_A_betalactamases|OXA	source header 1
+SOURCE2	Foo|Bar-1|JN42|1-11|10|foobar|Class_foobar|Bar	source header 2

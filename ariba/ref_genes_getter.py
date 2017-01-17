@@ -5,15 +5,15 @@ import re
 import shutil
 import tarfile
 import pyfastaq
-import urllib.request
 import time
 import json
-from ariba import common, card_record, vfdb_parser
+from ariba import common, card_record, vfdb_parser, megares_data_finder, megares_zip_parser
 
 
 allowed_ref_dbs = {
     'argannot',
     'card',
+    'megares',
     'plasmidfinder',
     'resfinder',
     'srst2_argannot',
@@ -37,23 +37,9 @@ class RefGenesGetter:
         pyfastaq.sequences.genetic_code = self.genetic_code
 
 
-    def _download_file(self, url, outfile):
-        print('Downloading "', url, '" and saving as "', outfile, '" ...', end='', sep='', flush=True)
-        for i in range(self.max_download_attempts):
-            time.sleep(self.sleep_time)
-            try:
-                urllib.request.urlretrieve(url, filename=outfile)
-            except:
-                continue
-            break
-        else:
-            raise Error('Error downloading: ' + url)
-        print(' done', flush=True)
-
-
     def _get_card_versions(self, tmp_file):
         print('Getting available CARD versions')
-        self._download_file('https://card.mcmaster.ca/download', tmp_file)
+        common.download_file('https://card.mcmaster.ca/download', tmp_file, max_attempts=self.max_download_attempts, sleep_time=self.sleep_time, verbose=True)
         p = re.compile(r'''href="(/download/.*?broad.*?v([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz)"''')
         versions = {}
 
@@ -269,7 +255,7 @@ class RefGenesGetter:
             raise Error('Error mkdir/chdir ' + tmpdir)
 
         zipfile = 'arg-annot-database_doc.zip'
-        self._download_file('http://www.mediterranee-infection.com/arkotheque/client/ihumed/_depot_arko/articles/304/arg-annot-database_doc.zip', zipfile)
+        common.download_file('http://www.mediterranee-infection.com/arkotheque/client/ihumed/_depot_arko/articles/304/arg-annot-database_doc.zip', zipfile, max_attempts=self.max_download_attempts, sleep_time=self.sleep_time, verbose=True)
         common.syscall('unzip ' + zipfile)
         os.chdir(current_dir)
         print('Extracted files.')
@@ -299,6 +285,20 @@ class RefGenesGetter:
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print(argannot_ref)
+
+
+    def _get_from_megares(self, outprefix):
+        data_finder = megares_data_finder.MegaresDataFinder(version=self.version)
+        download_url = data_finder.run()
+        zip_parser = megares_zip_parser.MegaresZipParser(download_url, outprefix)
+        zip_parser.run()
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
+        print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
+        print('If you use this downloaded data, please cite:')
+        print('"MEGARes: an antimicrobial database for high throughput sequencing", Lakin et al 2016, PMID: PMC5210519\n')
 
 
     def _get_from_plasmidfinder(self, outprefix):
@@ -408,7 +408,7 @@ class RefGenesGetter:
             raise Error('Error mkdir ' + tmpdir)
 
         zipfile = os.path.join(tmpdir, filename)
-        self._download_file('http://www.mgc.ac.cn/VFs/Down/' + filename, zipfile)
+        common.download_file('http://www.mgc.ac.cn/VFs/Down/' + filename, zipfile, max_attempts=self.max_download_attempts, sleep_time=self.sleep_time, verbose=True)
         print('Extracting files ... ', end='', flush=True)
         vparser = vfdb_parser.VfdbParser(zipfile, outprefix)
         vparser.run()

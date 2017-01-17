@@ -50,7 +50,7 @@ subparser_getref = subparsers.add_parser(
     description='Download reference data from one of a few supported public resources',
 )
 subparser_getref.add_argument('--debug', action='store_true', help='Do not delete temporary downloaded files')
-subparser_getref.add_argument('--version', help='Version of reference data to download. If not used, gets the latest version. Only applies to card')
+subparser_getref.add_argument('--version', help='Version of reference data to download. If not used, gets the latest version. Only applies to card and megares')
 subparser_getref.add_argument('db', help='Database to download. Must be one of: ' + ' '.join(allowed_dbs), choices=allowed_dbs, metavar="DB name")
 subparser_getref.add_argument('outprefix', help='Prefix of output filenames')
 subparser_getref.set_defaults(func=ariba.tasks.getref.run)

@@ -1,0 +1,6 @@
+>OXA.Bla|OXA-1|JN123456|42-141|100|betalactams|Class_A_betalactamases|OXA
+ATGACCGAAAGCAGCGAACGCGCGTGCACCTGA
+>group1.Foo|Bar-1|JN42|1-11|10|foobar|Class_foobar|Bar
+ATGTGCGCGCGCTGCGCGAGCAGCCGCGTGCTGGAATGA
+>unknown.Only_in_fasta_file
+ATGTGA
