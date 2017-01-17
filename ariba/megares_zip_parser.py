@@ -79,23 +79,27 @@ class MegaresZipParser:
         fh_tsv = pyfastaq.utils.open_file_write(tsv)
 
         for seq in sorted(sequences):
-            print(sequences[seq], file=fh_fasta)
             final_column = []
 
             if seq in annotations:
-                final_column.append('class:' + annotations[seq]['class'] + '; mechanism:' + annotations[seq]['mechanism'] + '; group:' + annotations[seq]['group'])
+                group = annotations[seq]['group']
+                final_column.append('class:' + annotations[seq]['class'] + '; mechanism:' + annotations[seq]['mechanism'] + '; group:' + group)
             else:
+                group = 'unknown'
                 print('WARNING: sequence "', seq, '" has no record in annotations file', sep='', file=sys.stderr)
 
-            if seq  in header_mappings:
+            if seq in header_mappings:
                 final_column.append('Source_Database:' + header_mappings[seq]['Source_Database'] + '; Source_Headers:' + header_mappings[seq]['Source_Headers(space_separated)'])
             else:
                 print('WARNING: sequence "', seq, '" has no record in header mappings file', sep='', file=sys.stderr)
 
             if len(final_column) > 0:
-                print(seq, '1', '0', '.', '.', '; '.join(final_column), sep='\t', file=fh_tsv)
+                print(group + '.' + seq, '1', '0', '.', '.', '; '.join(final_column), sep='\t', file=fh_tsv)
             else:
-                print(seq, '1', '0', '.', '.', '.', sep='\t', file=fh_tsv)
+                print(group + '.' + seq, '1', '0', '.', '.', '.', sep='\t', file=fh_tsv)
+
+            sequences[seq].id = group + '.' + sequences[seq].id
+            print(sequences[seq], file=fh_fasta)
 
         fh_fasta.close()
         fh_tsv.close()

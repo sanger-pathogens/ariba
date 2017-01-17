@@ -1,3 +1,3 @@
-Bla|OXA-1|JN123456|42-141|100|betalactams|Class_A_betalactamases|OXA	1	0	.	.	class:betalactams; mechanism:Class A betalactamases; group:OXA; Source_Database:SOURCE1; Source_Headers:source header 1
-Foo|Bar-1|JN42|1-11|10|foobar|Class_foobar|Bar	1	0	.	.	class:Class foobar; mechanism:Bar; group:group1; Source_Database:SOURCE2; Source_Headers:source header 2
-Only_in_fasta_file	1	0	.	.	.
+OXA.Bla|OXA-1|JN123456|42-141|100|betalactams|Class_A_betalactamases|OXA	1	0	.	.	class:betalactams; mechanism:Class A betalactamases; group:OXA; Source_Database:SOURCE1; Source_Headers:source header 1
+group1.Foo|Bar-1|JN42|1-11|10|foobar|Class_foobar|Bar	1	0	.	.	class:Class foobar; mechanism:Bar; group:group1; Source_Database:SOURCE2; Source_Headers:source header 2
+unknown.Only_in_fasta_file	1	0	.	.	.
