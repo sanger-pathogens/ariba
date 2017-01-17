@@ -104,11 +104,12 @@ class MegaresZipParser:
     def run(self):
         common.download_file(self.zip_url, self.zip_file, verbose=True)
         tmpdir = self.zip_file + '.tmp.extract'
-        original_files = MegaresZipParser.extract_files(self.zip_file, tmpdir)
-        annotation_data = MegaresZipParser._load_annotations_file(original_files['annotation'])
-        header_data = MegaresZipParser._load_header_mappings_file(original_files['header_mappings'])
+        original_files = MegaresZipParser._extract_files(self.zip_file, tmpdir)
+        annotation_data = MegaresZipParser._load_annotations_file(os.path.join(tmpdir, original_files['annotations']))
+        header_data = MegaresZipParser._load_header_mappings_file(os.path.join(tmpdir, original_files['header_mappings']))
         sequences = {}
-        pyfastaq.tasks.file_to_dict(original_files['fasta'], sequences)
+        pyfastaq.tasks.file_to_dict(os.path.join(tmpdir, original_files['fasta']), sequences)
         MegaresZipParser._write_files(self.outprefix, sequences, annotation_data, header_data)
         shutil.rmtree(tmpdir)
+        os.unlink(self.zip_file)
 
