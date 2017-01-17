@@ -66,6 +66,7 @@ setup(
     test_suite='nose.collector',
     tests_require=['nose >= 1.3'],
     install_requires=[
+        'BeautifulSoup4 >= 4.1.0',
         'dendropy >= 4.1.0',
         'pyfastaq >= 3.12.0',
         'pysam >= 0.9.1',
