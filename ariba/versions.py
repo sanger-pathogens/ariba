@@ -5,6 +5,7 @@ from ariba import __version__ as ariba_version
 
 
 package_min_versions = {
+    'bs4': '4.1.0',
     'dendropy': '4.1.0',
     'pyfastaq': '3.12.0',
     'pysam': '0.8.1',
@@ -31,7 +32,7 @@ def get_all_versions(raise_error=True):
 
     python_packages_ok = True
 
-    for package in ['ariba', 'dendropy', 'pyfastaq', 'pymummer', 'pysam']:
+    for package in ['ariba', 'bs4', 'dendropy', 'pyfastaq', 'pymummer', 'pysam']:
         try:
             exec('import ' + package)
             version = eval(package + '.__version__')
