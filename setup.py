@@ -70,7 +70,7 @@ setup(
         'dendropy >= 4.2.0',
         'pyfastaq >= 3.12.0',
         'pysam >= 0.9.1',
-        'pymummer>=0.10.1',
+        'pymummer>=0.10.2',
     ],
     license='GPLv3',
     classifiers=[
