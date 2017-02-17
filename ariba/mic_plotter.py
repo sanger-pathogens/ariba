@@ -83,3 +83,42 @@ class MicPlotter:
 
         return data
 
+
+    @classmethod
+    def _to_boxplot_tsv(cls, summary_data, mic_data, antibiotic, outfile):
+        ignore_columns = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
+        with open(outfile, 'w') as f:
+            print('Sample\tMIC\tMutations', file=f)
+
+            for sample in sorted(summary_data):
+                if sample not in mic_data:
+                    raise Error('No MIC data found for sample "' + sample + '". Cannot continue')
+
+                if antibiotic not in mic_data[sample]:
+                    raise Error('Antibiotic "' + antibiotic + '" not found. Cannot continue')
+
+                if mic_data[sample][antibiotic] == 'NA':
+                    continue
+
+                mutations = set()
+
+                for cluster in summary_data[sample]:
+                    if summary_data[sample][cluster]['assembled'] == 'interrupted':
+                        mutations.add(cluster + '.interrupted')
+
+                    for column, value in summary_data[sample][cluster].items():
+                        if column in ignore_columns or column.endswith('.%'):
+                            continue
+
+                        if value == 'yes':
+                            mutations.add(cluster + '.' + column)
+
+                if len(mutations):
+                    mutations = list(mutations)
+                    mutations.sort()
+                    mutations = '+'.join(mutations)
+                else:
+                    mutations = 'without_mutation'
+
+                print(sample, mic_data[sample][antibiotic], mutations, sep='\t', file=f)
+

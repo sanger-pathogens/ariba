@@ -1,4 +1,5 @@
 import unittest
+import filecmp
 import os
 from ariba import mic_plotter
 
@@ -59,4 +60,38 @@ class TestMicPlotter(unittest.TestCase):
         }
         self.maxDiff = None
         self.assertEqual(got, expected)
+
+
+    def test_to_boxplot_tsv(self):
+        '''Test _to_boxplot_tsv'''
+        mic_data = {
+            'name1': {'antibio1': 0.25, 'antibio2': 0.004},
+            'name2': {'antibio1': 0.125, 'antibio2': 'NA'},
+            'name3': {'antibio1': 'NA', 'antibio2': 0.002},
+        }
+
+        summary_data = {
+            'name1': {
+                'cluster1': {'assembled': 'yes', 'match': 'yes', 'ref_seq': 'ref1', 'pct_id': 100.0, 'known_var': 'no', 'novel_var': 'no', 'group1.A42T': 'no', 'group1.A42T.%': 'NA'},
+                'cluster2': {'assembled': 'yes', 'match': 'yes', 'ref_seq': 'ref2', 'pct_id': 99.0, 'known_var': 'yes', 'novel_var': 'no', 'group2.A43T': 'yes', 'group2.A43T.%': 95.42},
+                'cluster3': {'assembled': 'interrupted', 'match': 'no', 'ref_seq': 'ref3', 'pct_id': 99.0, 'known_var': 'no', 'novel_var': 'yes', 'A42T': 'no', 'A44T.%': 'NA'},
+            },
+            'name2': {
+                'cluster1': {'assembled': 'yes', 'match': 'yes_nonunique', 'ref_seq': 'ref3', 'pct_id': 99.0, 'known_var': 'yes', 'novel_var': 'no', 'group1.A42T': 'yes', 'group1.A42T.%': 90.90},
+                'cluster2': {'assembled': 'no', 'match': 'no', 'ref_seq': 'NA', 'pct_id': 'NA', 'known_var': 'NA', 'novel_var': 'NA', 'group2.A43T': 'NA', 'group2.A43T.%': 'NA'},
+                'cluster3': {'assembled': 'no', 'match': 'no', 'ref_seq': 'NA', 'pct_id': 'NA', 'known_var': 'no', 'novel_var': 'no', 'A42T': 'no', 'A44T.%': 'NA'},
+            },
+            'name3': {
+                'cluster1': {'assembled': 'yes', 'match': 'yes', 'ref_seq': 'ref_seq42', 'pct_id': 100.0, 'known_var': 'no', 'novel_var': 'no', 'group1.A42T': 'no', 'group1.A42T.%': 'NA'},
+                'cluster2': {'assembled': 'no', 'match': 'no', 'ref_seq': 'NA', 'pct_id': 'NA', 'known_var': 'NA', 'novel_var': 'NA', 'group2.A43T': 'NA', 'group2.A43T.%': 'NA'},
+                'cluster3': {'assembled': 'no', 'match': 'no', 'ref_seq': 'NA', 'pct_id': 'NA', 'known_var': 'no', 'novel_var': 'no', 'A42T': 'no', 'A44T.%': 'NA'},
+            },
+        } 
+
+        tmp_tsv = 'tmp.mic_plotter_test.to_boxplot.tsv'
+        for i in ['1', '2']:
+            mic_plotter.MicPlotter._to_boxplot_tsv(summary_data, mic_data, 'antibio' + i, tmp_tsv)
+            expected_antibio1 = os.path.join(data_dir, 'mic_plotter_to_boxplot_tsv.antibio' + i + '.tsv')
+            self.assertTrue(filecmp.cmp(tmp_tsv, expected_antibio1, shallow=False))
+            os.unlink(tmp_tsv)
 
