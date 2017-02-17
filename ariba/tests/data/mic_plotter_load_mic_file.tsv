@@ -1,0 +1,7 @@
+Sample	antibio1	antibio2
+sample1	0.25	0.004
+sample2	<0.25	<=0.004
+sample3	< 0.25	<= 0.004
+sample4	>256	>=256
+sample5	> 256	>= 256
+sample6	NA	1
