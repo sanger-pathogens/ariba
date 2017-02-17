@@ -43,10 +43,43 @@ class MicPlotter:
         with open(infile) as f:
             reader = csv.DictReader(f, delimiter='\t')
             if reader.fieldnames[0] != 'Sample':
-                raise Error('Error. Expected first column of MIC file "' + self.infile + '" to be "Sample"')
+                raise Error('Error. Expected first column of MIC file "' + infile + '" to be "Sample"')
                 
             for row in reader:
                 mic_data[row['Sample']] = {x: MicPlotter._mic_string_to_float(row[x]) for x in reader.fieldnames[1:]}
 
         return mic_data
+
+
+    @classmethod
+    def _load_summary_file(cls, infile):
+        data = {}
+
+        with open(infile) as f:
+            reader = csv.DictReader(f, delimiter='\t')
+            if reader.fieldnames[0] != 'name':
+                raise Error('Error. Expected first column of summary file "' + infile + '" to be "name"')
+
+            clusters = [x.split('.', maxsplit=1)[0] for x in reader.fieldnames[1:]]
+
+            for row in reader:
+                data[row['name']] = {}
+
+                for field in row:
+                    if field == 'name':
+                        continue 
+
+                    cluster, col = field.split('.', maxsplit=1)
+                    if cluster not in clusters:
+                        raise Error('Cluster "' + cluster + '" not recognised. Cannot continue')
+                    if cluster not in data[row['name']]:
+                        data[row['name']][cluster] = {}
+
+                    try:
+                        value = float(row[field])
+                    except:
+                        value = row[field]
+                    data[row['name']][cluster][col] = value
+
+        return data
 
