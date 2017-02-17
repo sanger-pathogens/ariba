@@ -87,6 +87,9 @@ class MicPlotter:
     @classmethod
     def _to_boxplot_tsv(cls, summary_data, mic_data, antibiotic, outfile):
         ignore_columns = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
+        all_mutations = set()
+        all_mutations_seen_combinations = set()
+
         with open(outfile, 'w') as f:
             print('Sample\tMIC\tMutations', file=f)
 
@@ -113,12 +116,15 @@ class MicPlotter:
                         if value == 'yes':
                             mutations.add(cluster + '.' + column)
 
-                if len(mutations):
-                    mutations = list(mutations)
-                    mutations.sort()
-                    mutations = '+'.join(mutations)
-                else:
-                    mutations = 'without_mutation'
+                if len(mutations) == 0:
+                    mutations.add('without_mutation')
 
+                all_mutations.update(mutations)
+                mutations = list(mutations)
+                mutations.sort()
+                all_mutations_seen_combinations.add(tuple(mutations))
+                mutations = '+'.join(mutations)
                 print(sample, mic_data[sample][antibiotic], mutations, sep='\t', file=f)
+
+        return all_mutations, all_mutations_seen_combinations
 
