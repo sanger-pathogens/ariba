@@ -69,7 +69,7 @@ def run(options):
         min_id=options.min_id,
         cluster_cols=options.cluster_cols,
         make_phandango_tree=(not options.no_tree),
-        only_clusters=None if options.only_cluster is None else {options.only_cluster},
+        only_clusters=None if options.only_clusters is None else set(options.only_clusters.split(',')),
         show_var_groups=options.v_groups,
         show_known_vars=options.known_variants,
         show_novel_vars=options.novel_variants,

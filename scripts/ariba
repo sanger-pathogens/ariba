@@ -194,7 +194,7 @@ subparser_summary.add_argument('--col_filter', choices=['y', 'n'], default='y', 
 subparser_summary.add_argument('--no_tree', action='store_true', help='Do not make phandango tree')
 subparser_summary.add_argument('--row_filter', choices=['y', 'n'], default='y', help='Choose whether rows where all values are "no" or "NA" are removed [%(default)s]', metavar='y|n')
 subparser_summary.add_argument('--min_id', type=float, help='Minimum percent identity cutoff to count as assembled [%(default)s]', default=90, metavar='FLOAT')
-subparser_summary.add_argument('--only_cluster', help='Only report data for the given cluster name', metavar='Cluster_name')
+subparser_summary.add_argument('--only_clusters', help='Only report data for the given comma-separated list of cluster names, eg: cluster1,cluster2,cluster42', metavar='Cluster_names')
 subparser_summary.add_argument('--v_groups', action='store_true', help='Show a group column for each group of variants')
 subparser_summary.add_argument('--known_variants', action='store_true', help='Report all known variants')
 subparser_summary.add_argument('--novel_variants', action='store_true', help='Report all novel variants')
