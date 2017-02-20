@@ -1,6 +1,7 @@
 import csv
 import re
 import os
+from ariba import common
 
 class Error (Exception): pass
 
@@ -123,7 +124,7 @@ class MicPlotter:
                 mutations = list(mutations)
                 mutations.sort()
                 all_mutations_seen_combinations.add(tuple(mutations))
-                mutations = '+'.join(mutations)
+                mutations = '.'.join(mutations)
                 print(sample, mic_data[sample][antibiotic], mutations, sep='\t', file=f)
 
         return all_mutations, all_mutations_seen_combinations
@@ -154,7 +155,7 @@ class MicPlotter:
         with open(outfile, 'w') as f:
             print('Mutation\t', end='', file=f)
             for x in combinations:
-                print('\t', '+'.join(x), sep='', end='', file=f)
+                print('\t', '.'.join(x), sep='', end='', file=f)
             print('', file=f)
 
             for i in range(len(all_mutations)):
