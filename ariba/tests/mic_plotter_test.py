@@ -107,3 +107,27 @@ class TestMicPlotter(unittest.TestCase):
             self.assertEqual(got_combs, expected_combs[i-1])
             os.unlink(tmp_tsv)
 
+
+    def test_to_dots_tsv(self):
+        '''test _to_dots_tsv'''
+        all_mutations = {'m1', 'm2', 'm3'}
+        combinations = {
+            ('m1',),
+            ('m1', 'm3'),
+            ('m2', 'm3'),
+        }
+
+        tmp_tsv = 'tmp.test.mic_plotter_to_dots.tsv'
+        expected_tsv = os.path.join(data_dir, 'mic_plotter_to_dots.tsv')
+        mic_plotter.MicPlotter._to_dots_tsv(all_mutations, combinations, tmp_tsv)
+        self.assertTrue(filecmp.cmp(tmp_tsv, expected_tsv, shallow=False))
+        os.unlink(tmp_tsv)
+
+        all_mutations.update({'without_mutation', 'z1'})
+        combinations.add(('without_mutation',))
+        combinations.add(('m1', 'z1'))
+        expected_tsv = os.path.join(data_dir, 'mic_plotter_to_dots_without_mutation.tsv')
+        mic_plotter.MicPlotter._to_dots_tsv(all_mutations, combinations, tmp_tsv)
+        self.assertTrue(filecmp.cmp(tmp_tsv, expected_tsv, shallow=False))
+        os.unlink(tmp_tsv)
+

@@ -128,3 +128,36 @@ class MicPlotter:
 
         return all_mutations, all_mutations_seen_combinations
 
+
+    @classmethod
+    def _to_dots_tsv(cls, all_mutations, combinations, outfile):
+        if 'without_mutation' in all_mutations:
+            all_mutations.remove('without_mutation')
+            combinations.remove(('without_mutation',))
+            has_without_mutation = True
+        else:
+            has_without_mutation = False
+
+        all_mutations = list(all_mutations)
+        all_mutations.sort()
+        combinations = list(combinations)
+        combinations.sort()
+
+        if has_without_mutation:
+            all_mutations.append('without_mutation')
+            combinations.append(('without_mutation',))
+
+        output_columns = {}
+        for combination in combinations:
+            output_columns[combination] = [(1 if x in combination else 0) for x in all_mutations]
+
+        with open(outfile, 'w') as f:
+            print('Mutation\t', end='', file=f)
+            for x in combinations:
+                print('\t', '+'.join(x), sep='', end='', file=f)
+            print('', file=f)
+
+            for i in range(len(all_mutations)):
+                row = [all_mutations[i]] + [output_columns[x][i] for x in combinations]
+                print(*row, sep='\t', file=f)
+
