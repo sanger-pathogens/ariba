@@ -71,6 +71,7 @@ subparser_micplot.add_argument('--main_title', help='Main title of plot. Default
 subparser_micplot.add_argument('--plot_height', help='Height of plot (used in plot_height=X when running ggsave [%(default)s]', default=15)
 subparser_micplot.add_argument('--plot_width', help='Height of plot (used in plot_width=X when running ggsave [%(default)s]', default=15)
 subparser_micplot.add_argument('--no_log_y', action='store_true', help='Do not log scale the y axis')
+subparser_micplot.add_argument('--plot_types', help='Types of plots to make, separated by commas. Choose from boxplot,violin,point [%(default)s]', default='violin,point')
 subparser_micplot.set_defaults(func=ariba.tasks.micplot.run)
 
 #----------------------------- prepareref -------------------------------

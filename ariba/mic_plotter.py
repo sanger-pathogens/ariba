@@ -17,6 +17,7 @@ class MicPlotter:
       plot_height=15,
       plot_width=15,
       log_y=True,
+      plot_types="points,violin",
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -26,6 +27,11 @@ class MicPlotter:
         self.plot_height = plot_height
         self.plot_width = plot_width
         self.log_y = log_y
+        self.plot_types = set(plot_types.split(','))
+
+        allowed_plot_types = {'point', 'violin', 'boxplot'}
+        if not self.plot_types.issubset(allowed_plot_types):
+            raise Error('Error in plot_types option. Allowed types are: ' + str(allowed_plot_types) + '. Got: ' +  str(self.plot_types))
 
 
     @classmethod
@@ -251,26 +257,34 @@ dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
 range.mics <- c(0,0.001,0.0025,0.0075,0.015,0.03,0.06,0.125,0.25,0.5,1,2,4,8,16,32,64,128,256,512,1024)
 if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
 
-violinplot <- ggplot(data=samples, aes(x=Mutations, y=log(MIC))) +
-    geom_point(aes(color=Mutations), position = position_jitter(width=0.01, height=0.01), size=4, alpha=.5) +
-    geom_violin(aes(color=Mutations),alpha=.10, show.legend = FALSE) +
-    ylab(expression(paste("MIC ", mu, "g/mL"))) +
-    scale_colour_manual(values = cols) +
-    ggtitle("''' + self.main_title + r'''") +
-    scale_y_continuous(breaks=final.mics, labels=range.mics) +
-    theme_bw() +
-    theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            panel.border = element_blank(),
-            axis.line.x = element_line(color="black"),
-            axis.line.y = element_line(color="black"),
-            axis.title.x = element_blank(),
-            axis.title.y = element_text(size=22),
-            axis.text.x = element_blank(),
-            axis.text.y = element_text(size=24),
-            axis.title = element_text(size=20),
-            plot.title = element_text(lineheight=.6, size = 24, hjust=.5, face="bold"),
-            legend.position="none")
+violinplot <- ggplot(data=samples, aes(x=Mutations, y=log(MIC))) + ''', file=f)
+
+        if 'point' in self.plot_types:
+            print(r'''    geom_point(aes(color=Mutations), position = position_jitter(width=0.01, height=0.01), size=4, alpha=.5) +''', file=f)
+
+        if 'violin' in self.plot_types:
+            print(r'''    geom_violin(aes(color=Mutations),alpha=.10, show.legend = FALSE) +''', file=f)
+
+        if 'boxplot' in self.plot_types:
+            print(r'''    geom_boxplot(aes(color=Mutations),alpha=.10, show.legend = FALSE) +''', file=f)
+
+        print(r'''    ylab(expression(paste("MIC ", mu, "g/mL"))) +
+        scale_colour_manual(values = cols) +
+        ggtitle("''' + self.main_title + r'''") +
+        scale_y_continuous(breaks=final.mics, labels=range.mics) +
+        theme_bw() +
+        theme(panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(),
+                panel.border = element_blank(),
+                axis.line.x = element_line(color="black"),
+                axis.line.y = element_line(color="black"),
+                axis.title.x = element_blank(),
+                axis.title.y = element_text(size=22),
+                axis.text.x = element_blank(),
+                axis.text.y = element_text(size=24),
+                axis.title = element_text(size=20),
+                plot.title = element_text(lineheight=.6, size = 24, hjust=.5, face="bold"),
+                legend.position="none")
 
 plot_grid(violinplot, dotplot, ncol=1, align="v", rel_heights=c(3,1))
 ''', file=f)
