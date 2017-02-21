@@ -2,6 +2,7 @@ __all__ = [
     'aln2meta',
     'flag',
     'getref',
+    'micplot',
     'prepareref',
     'pubmlstget',
     'pubmlstspecies',

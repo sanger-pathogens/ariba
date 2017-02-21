@@ -56,6 +56,23 @@ subparser_getref.add_argument('outprefix', help='Prefix of output filenames')
 subparser_getref.set_defaults(func=ariba.tasks.getref.run)
 
 
+#----------------------------- micplot -------------------------------
+subparser_micplot = subparsers.add_parser(
+    'micplot',
+    help='Make violin/dot plots using MIC data',
+    usage='ariba prepareref [options] <antibiotic> <MIC file> <summary file> <outprefix>',
+    description='Makes a violin and scatter plot of MIC per variant in the summary file',
+)
+subparser_micplot.add_argument('antibiotic', help='Antibiotic name. Must exactly match a column from the MIC file')
+subparser_micplot.add_argument('mic_file', help='File containing MIC data for each sample and one or more antibiotics')
+subparser_micplot.add_argument('summary_file', help='File made by running "ariba summary"')
+subparser_micplot.add_argument('outprefix', help='Prefix of output files')
+subparser_micplot.add_argument('--main_title', help='Main title of plot. Default is to use the antibiotic name')
+subparser_micplot.add_argument('--plot_height', help='Height of plot (used in plot_height=X when running ggsave [%(default)s]', default=15)
+subparser_micplot.add_argument('--plot_width', help='Height of plot (used in plot_width=X when running ggsave [%(default)s]', default=15)
+subparser_micplot.add_argument('--no_log_y', action='store_true', help='Do not log scale the y axis')
+subparser_micplot.set_defaults(func=ariba.tasks.micplot.run)
+
 #----------------------------- prepareref -------------------------------
 subparser_prepareref = subparsers.add_parser(
     'prepareref',
