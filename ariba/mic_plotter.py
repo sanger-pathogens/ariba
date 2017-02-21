@@ -256,8 +256,12 @@ dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
 
 range.mics <- c(0,0.001,0.0025,0.0075,0.015,0.03,0.06,0.125,0.25,0.5,1,2,4,8,16,32,64,128,256,512,1024)
 if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
+''', file=f)
 
-violinplot <- ggplot(data=samples, aes(x=Mutations, y=log(MIC))) + ''', file=f)
+        if self.log_y:
+            print(r'''violinplot <- ggplot(data=samples, aes(x=Mutations, y=log(MIC))) +''', file=f)
+        else:
+            print(r'''violinplot <- ggplot(data=samples, aes(x=Mutations, y=MIC)) +''', file=f)
 
         if 'point' in self.plot_types:
             print(r'''    geom_point(aes(color=Mutations), position = position_jitter(width=0.01, height=0.01), size=4, alpha=.5) +''', file=f)
