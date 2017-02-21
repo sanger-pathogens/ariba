@@ -195,7 +195,7 @@ class MicPlotter:
             print('library(', lib, ')', sep='', file=f)
 
         print('samples = read.csv(file="', samples_file, r'''", header=TRUE, sep="\t")''', sep='', file=f)
-        print('dots = read.csv(file="', dots_file, r'''", header=TRUE, sep="\t")''', sep='', file=f)
+        print('dots = read.csv(file="', dots_file, r'''", header=TRUE, sep="\t", check.names=FALSE)''', sep='', file=f)
 
         if self.log_y:
             print('use.log = TRUE', file=f)
