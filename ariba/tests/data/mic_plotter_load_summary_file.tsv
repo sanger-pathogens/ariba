@@ -1,3 +1,3 @@
-name	cluster1.assembled	cluster1.match	cluster1.ref_seq	cluster1.pct_id	cluster1.known_var	cluster1.novel_var	cluster1.group1.A42T	cluster1.group1.A42T.%	cluster2.assembled	cluster2.match	cluster2.ref_seq	cluster2.pct_id	cluster2.known_var	cluster2.novel_var	cluster2.group1.A42T	cluster2.group1.A42T.%
-name1	yes	yes	ref1	100.0	no	no	no	NA	yes	yes	ref2	99.0	yes	no	yes	95.42
-name2	yes	yes_nonunique	ref3	99.0	yes	no	yes	90.90	no	no	NA	NA	NA	NA	NA	NA
+name,cluster1.assembled,cluster1.match,cluster1.ref_seq,cluster1.pct_id,cluster1.known_var,cluster1.novel_var,cluster1.group1.A42T,cluster1.group1.A42T.%,cluster2.assembled,cluster2.match,cluster2.ref_seq,cluster2.pct_id,cluster2.known_var,cluster2.novel_var,cluster2.group1.A42T,cluster2.group1.A42T.%
+name1,yes,yes,ref1,100.0,no,no,no,NA,yes,yes,ref2,99.0,yes,no,yes,95.42
+name2,yes,yes_nonunique,ref3,99.0,yes,no,yes,90.90,no,no,NA,NA,NA,NA,NA,NA
