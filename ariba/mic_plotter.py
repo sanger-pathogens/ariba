@@ -18,6 +18,8 @@ class MicPlotter:
       plot_width=15,
       log_y=True,
       plot_types="points,violin",
+      jitter_width=0.1,
+      jitter_height=0.01,
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -32,6 +34,9 @@ class MicPlotter:
         allowed_plot_types = {'point', 'violin', 'boxplot'}
         if not self.plot_types.issubset(allowed_plot_types):
             raise Error('Error in plot_types option. Allowed types are: ' + str(allowed_plot_types) + '. Got: ' +  str(self.plot_types))
+
+        self.jitter_width = jitter_width
+        self.jitter_height = jitter_height
 
 
     @classmethod
@@ -264,7 +269,7 @@ if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
             print(r'''violinplot <- ggplot(data=samples, aes(x=Mutations, y=MIC)) +''', file=f)
 
         if 'point' in self.plot_types:
-            print(r'''    geom_point(aes(color=Mutations), position = position_jitter(width=0.01, height=0.01), size=4, alpha=.5) +''', file=f)
+            print(r'''    geom_point(aes(color=Mutations), position = position_jitter(width=''', self.jitter_width, ', height=', self.jitter_height, '), size=4, alpha=.5) +', sep='', file=f)
 
         if 'violin' in self.plot_types:
             print(r'''    geom_violin(aes(color=Mutations),alpha=.10, show.legend = FALSE) +''', file=f)

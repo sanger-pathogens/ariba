@@ -11,7 +11,9 @@ def run(options):
       plot_height=options.plot_height,
       plot_width=options.plot_width,
       log_y=not options.no_log_y,
-      plot_types=options.plot_types
+      plot_types=options.plot_types,
+      jitter_width=options.jitter_width,
+      jitter_height=options.jitter_height,
     )
 
     plotter.run()
