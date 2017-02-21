@@ -2,7 +2,6 @@ import argparse
 import ariba
 
 def run(options):
-    print('HELLO')
     plotter = ariba.mic_plotter.MicPlotter(
       options.antibiotic,
       options.mic_file,
