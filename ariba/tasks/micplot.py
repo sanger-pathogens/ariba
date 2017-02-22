@@ -16,7 +16,9 @@ def run(options):
       jitter_height=options.jitter_height,
       no_combinations=options.no_combinations,
       mic_values=options.mic_values,
-      hlines=options.hlines
+      hlines=options.hlines,
+      point_size=options.point_size,
+      dot_size=options.dot_size
     )
 
     plotter.run()

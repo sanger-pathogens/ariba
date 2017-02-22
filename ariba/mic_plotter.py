@@ -22,7 +22,9 @@ class MicPlotter:
       jitter_height=0.01,
       no_combinations=False,
       mic_values='0,0.001,0.0025,0.0075,0.015,0.03,0.06,0.125,0.25,0.5,1,2,4,8,16,32,64,128,256,512,1024',
-      hlines='0.25,2'
+      hlines='0.25,2',
+      point_size=4,
+      dot_size=8,
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -55,6 +57,8 @@ class MicPlotter:
         except:
             raise Error('Error in hlines option. Needs to be a list of numbers separated by commas, or empty. Got this:\n' + hlines)
 
+        self.point_size = point_size
+        self.dot_size = dot_size
 
     @classmethod
     def _mic_string_to_float(cls, s):
@@ -266,7 +270,7 @@ if (!is.na(i)) {
 
 
 dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
-  geom_point(aes(fill=setcols, colour=setcols), size=8) +
+  geom_point(aes(fill=setcols, colour=setcols), size=''' + str(self.dot_size) + r''') +
           scale_fill_identity()+
           scale_colour_identity()+
           ylim(rev(mutations)) +
@@ -291,7 +295,7 @@ if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
             print(r'''violinplot <- ggplot(data=samples, aes(x=Mutations, y=MIC)) +''', file=f)
 
         if 'point' in self.plot_types:
-            print(r'''    geom_point(aes(color=Mutations), position = position_jitter(width=''', self.jitter_width, ', height=', self.jitter_height, '), size=4, alpha=.5) +', sep='', file=f)
+            print(r'''    geom_point(aes(color=Mutations), position = position_jitter(width=''', self.jitter_width, ', height=', self.jitter_height, '), size=', self.point_size, ', alpha=.5) +', sep='', file=f)
 
         if 'violin' in self.plot_types:
             print(r'''    geom_violin(aes(color=Mutations),alpha=.10, show.legend = FALSE) +''', file=f)
