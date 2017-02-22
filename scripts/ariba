@@ -76,7 +76,7 @@ subparser_micplot.add_argument('--jitter_width', help='Jitter width option when 
 subparser_micplot.add_argument('--jitter_height', help='Jitter height option when plotting points [%(default)s]', default=0.02, type=float, metavar='FLOAT')
 subparser_micplot.add_argument('--no_combinations', action='store_true', help='Do not show combinations of variants. Instead separate out into one box/violin plot per variant.')
 subparser_micplot.add_argument('--mic_values', help='Comma-separated list of MIC values to be shown on y axis ticks [%(default)s]', default='0,0.001,0.0025,0.0075,0.015,0.03,0.06,0.125,0.25,0.5,1,2,4,8,16,32,64,128,256,512,1024', metavar='float1,float2,...')
-subparser_micplot.add_argument('--hlines', help='Comma-separated list of positions at which to draw horizontal lines. For no lines use an empty string, ie: --hlines '' [%(default)s]', default='0.25,2', metavar='float1,float2,...')
+subparser_micplot.add_argument('--hlines', help='Comma-separated list of positions at which to draw horizontal lines. For no lines use an empty string, ie: --hlines \'\' [%(default)s]', default='0.25,2', metavar='float1,float2,...')
 subparser_micplot.add_argument('--point_size', type=float, help='Size of points when --plot_types includes point [%(default)s]', default=4, metavar='FLOAT')
 subparser_micplot.add_argument('--dot_size', type=float, help='Size of dots in lower part of plot [%(default)s]', default=8, metavar='FLOAT')
 subparser_micplot.set_defaults(func=ariba.tasks.micplot.run)
