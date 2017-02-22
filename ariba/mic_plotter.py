@@ -20,7 +20,8 @@ class MicPlotter:
       plot_types="points,violin",
       jitter_width=0.1,
       jitter_height=0.01,
-      no_combinations=False
+      no_combinations=False,
+      mic_values='0,0.001,0.0025,0.0075,0.015,0.03,0.06,0.125,0.25,0.5,1,2,4,8,16,32,64,128,256,512,1024'
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -39,6 +40,11 @@ class MicPlotter:
         self.jitter_width = jitter_width
         self.jitter_height = jitter_height
         self.no_combinations = no_combinations
+
+        try:
+            self.mic_values = [float(x) for x in mic_values.split(',')]
+        except:
+            raise Error('Error in mic_values option. Needs to be a list of numbers separated by commas. Got this:\n' + mic_values)
 
 
     @classmethod
@@ -266,7 +272,7 @@ dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
         panel.grid.major = element_blank(),
         legend.position="none")
 
-range.mics <- c(0,0.001,0.0025,0.0075,0.015,0.03,0.06,0.125,0.25,0.5,1,2,4,8,16,32,64,128,256,512,1024)
+range.mics <- c(''' + ','.join([str(x) for x in self.mic_values]) + r''')
 if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
 ''', file=f)
 
