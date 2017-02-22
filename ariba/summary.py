@@ -30,12 +30,12 @@ class Summary:
             raise Error('Error! Must supply filenames or fofn to Summary(). Cannot continue')
 
         if filenames is None:
-            self.filenames = []
+            self.filenames = {}
         else:
-            self.filenames = filenames
+            self.filenames = {x: None for x in filenames}
 
         if fofn is not None:
-            self.filenames.extend(self._load_fofn(fofn))
+            self.filenames.update(self._load_fofn(fofn))
 
         self.cluster_columns = self._determine_cluster_cols(cluster_cols)
         self.filter_rows = filter_rows
@@ -66,9 +66,21 @@ class Summary:
         return Summary._determine_cols(cols_string, allowed_cols, 'cluster columns')
 
 
-    def _load_fofn(self, fofn):
+    @classmethod
+    def _load_fofn(cls, fofn):
+        '''Returns dictionary of filename -> short name. Value is None
+        whenever short name is not provided'''
+        filenames = {}
         f = pyfastaq.utils.open_file_read(fofn)
-        filenames = [x.rstrip() for x in f.readlines()]
+        for line in f:
+            fields = line.rstrip().split()
+            if len(fields) == 1:
+                filenames[fields[0]] = None
+            elif len(fields) == 2:
+                filenames[fields[0]] = fields[1]
+            else:
+                raise Error('Error at the following line of file ' + fofn + '. Expected at most 2 fields.\n' + line)
+
         pyfastaq.utils.close(f)
         return filenames
 
@@ -159,8 +171,8 @@ class Summary:
         summary_cols_set = set(['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
         summary_cols_in_order = [x for x in summary_cols_in_order if cluster_cols[x]]
 
-        for filename in filenames:
-            line = [filename]
+        for filename in sorted(filenames):
+            line = [filename if filenames[filename] is None else filenames[filename]]
 
             for cluster_name in sorted(all_potential_columns):
                 group_cols = sorted(list(all_potential_columns[cluster_name]['groups']))
