@@ -74,6 +74,7 @@ subparser_micplot.add_argument('--no_log_y', action='store_true', help='Do not l
 subparser_micplot.add_argument('--plot_types', help='Types of plots to make, separated by commas. Choose from boxplot,violin,point [%(default)s]', default='violin,point', metavar='type1,type2,...')
 subparser_micplot.add_argument('--jitter_width', help='Jitter width option when plotting points [%(default)s]', default=0.1, type=float, metavar='FLOAT')
 subparser_micplot.add_argument('--jitter_height', help='Jitter height option when plotting points [%(default)s]', default=0.02, type=float, metavar='FLOAT')
+subparser_micplot.add_argument('--no_combinations', action='store_true', help='Do not show combinations of variants. Instead separate out into one box/violin plot per variant.')
 subparser_micplot.set_defaults(func=ariba.tasks.micplot.run)
 
 #----------------------------- prepareref -------------------------------

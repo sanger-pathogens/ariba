@@ -99,12 +99,24 @@ class TestMicPlotter(unittest.TestCase):
             {('without_mutation',), ('cluster2.group2.A43T', 'cluster3.interrupted')}
         ]
 
+        expected_no_combs = [
+            {('cluster2.group2.A43T',),  ('cluster3.interrupted',), ('cluster1.group1.A42T',)},
+            {('without_mutation',), ('cluster2.group2.A43T', ), ('cluster3.interrupted',)}
+        ]
+
         for i in [1, 2]:
             got_muts, got_combs = mic_plotter.MicPlotter._to_boxplot_tsv(summary_data, mic_data, 'antibio' + str(i), tmp_tsv)
             expected_tsv = os.path.join(data_dir, 'mic_plotter_to_boxplot_tsv.antibio' + str(i) + '.tsv')
             self.assertTrue(filecmp.cmp(tmp_tsv, expected_tsv, shallow=False))
             self.assertEqual(got_muts, expected_mutations[i-1])
             self.assertEqual(got_combs, expected_combs[i-1])
+            os.unlink(tmp_tsv)
+
+            got_muts, got_combs = mic_plotter.MicPlotter._to_boxplot_tsv(summary_data, mic_data, 'antibio' + str(i), tmp_tsv, no_combinations=True)
+            expected_tsv = os.path.join(data_dir, 'mic_plotter_to_boxplot_tsv.antibio_no_combinations.' + str(i) + '.tsv')
+            self.assertTrue(filecmp.cmp(tmp_tsv, expected_tsv, shallow=False))
+            self.assertEqual(got_muts, expected_mutations[i-1])
+            self.assertEqual(got_combs, expected_no_combs[i-1])
             os.unlink(tmp_tsv)
 
 

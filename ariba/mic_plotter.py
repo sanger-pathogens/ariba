@@ -20,6 +20,7 @@ class MicPlotter:
       plot_types="points,violin",
       jitter_width=0.1,
       jitter_height=0.01,
+      no_combinations=False
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -37,6 +38,7 @@ class MicPlotter:
 
         self.jitter_width = jitter_width
         self.jitter_height = jitter_height
+        self.no_combinations = no_combinations
 
 
     @classmethod
@@ -113,7 +115,7 @@ class MicPlotter:
 
 
     @classmethod
-    def _to_boxplot_tsv(cls, summary_data, mic_data, antibiotic, outfile):
+    def _to_boxplot_tsv(cls, summary_data, mic_data, antibiotic, outfile, no_combinations=False):
         ignore_columns = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
         all_mutations = set()
         all_mutations_seen_combinations = set()
@@ -150,9 +152,14 @@ class MicPlotter:
                 all_mutations.update(mutations)
                 mutations = list(mutations)
                 mutations.sort()
-                all_mutations_seen_combinations.add(tuple(mutations))
-                mutations = '.'.join(mutations)
-                print(sample, mic_data[sample][antibiotic], mutations, sep='\t', file=f)
+                if no_combinations:
+                    for mutation in mutations:
+                        all_mutations_seen_combinations.add((mutation,))
+                        print(sample, mic_data[sample][antibiotic], mutation, sep='\t', file=f)
+                else:
+                    all_mutations_seen_combinations.add(tuple(mutations))
+                    mutations = '.'.join(mutations)
+                    print(sample, mic_data[sample][antibiotic], mutations, sep='\t', file=f)
 
         return all_mutations, all_mutations_seen_combinations
 
@@ -277,26 +284,34 @@ if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
         if 'boxplot' in self.plot_types:
             print(r'''    geom_boxplot(aes(color=Mutations),alpha=.10, show.legend = FALSE) +''', file=f)
 
-        print(r'''    ylab(expression(paste("MIC ", mu, "g/mL"))) +
-        scale_colour_manual(values = cols) +
-        ggtitle("''' + self.main_title + r'''") +
-        scale_y_continuous(breaks=final.mics, labels=range.mics) +
-        theme_bw() +
-        theme(panel.grid.major = element_blank(),
-                panel.grid.minor = element_blank(),
-                panel.border = element_blank(),
-                axis.line.x = element_line(color="black"),
-                axis.line.y = element_line(color="black"),
-                axis.title.x = element_blank(),
-                axis.title.y = element_text(size=22),
-                axis.text.x = element_blank(),
-                axis.text.y = element_text(size=24),
-                axis.title = element_text(size=20),
-                plot.title = element_text(lineheight=.6, size = 24, hjust=.5, face="bold"),
-                legend.position="none")
+        if self.no_combinations:
+            axis_text_x = 'element_text(size=24, angle=45, hjust=1)'
+        else:
+            axis_text_x = 'element_blank()'
 
-plot_grid(violinplot, dotplot, ncol=1, align="v", rel_heights=c(3,1))
+        print(r'''    ylab(expression(paste("MIC ", mu, "g/mL"))) +
+    scale_colour_manual(values = cols) +
+    ggtitle("''' + self.main_title + r'''") +
+    scale_y_continuous(breaks=final.mics, labels=range.mics) +
+    theme_bw() +
+    theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.border = element_blank(),
+            axis.line.x = element_line(color="black"),
+            axis.line.y = element_line(color="black"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size=22),
+            axis.text.x = ''' + axis_text_x + r''',
+            axis.text.y = element_text(size=24),
+            axis.title = element_text(size=20),
+            plot.title = element_text(lineheight=.6, size = 24, hjust=.5, face="bold"),
+            legend.position="none")
 ''', file=f)
+
+        if self.no_combinations:
+            print('violinplot', file=f)
+        else:
+            print('plot_grid(violinplot, dotplot, ncol=1, align="v", rel_heights=c(3,1))', file=f)
 
         print('ggsave("', self.outprefix, '.pdf", height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)
         f.close()
@@ -307,7 +322,7 @@ plot_grid(violinplot, dotplot, ncol=1, align="v", rel_heights=c(3,1))
         mic_data = MicPlotter._load_mic_file(self.mic_file)
         summary_data = MicPlotter._load_summary_file(self.summary_file)
         boxplot_tsv = self.outprefix + '.boxplot.tsv'
-        all_mutations, combinations = MicPlotter._to_boxplot_tsv(summary_data, mic_data, self.antibiotic, boxplot_tsv)
+        all_mutations, combinations = MicPlotter._to_boxplot_tsv(summary_data, mic_data, self.antibiotic, boxplot_tsv, no_combinations=self.no_combinations)
         dots_tsv = self.outprefix + '.dots.tsv'
         MicPlotter._to_dots_tsv(all_mutations, combinations, dots_tsv)
         self._make_plot(boxplot_tsv, dots_tsv)
