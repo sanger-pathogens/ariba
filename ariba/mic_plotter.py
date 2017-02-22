@@ -313,7 +313,7 @@ if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
         else:
             print('plot_grid(violinplot, dotplot, ncol=1, align="v", rel_heights=c(3,1))', file=f)
 
-        print('ggsave("', self.outprefix, '.pdf", height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)
+        print('ggsave("', self.outprefix, '.pdf", useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)
         f.close()
         common.syscall('R CMD BATCH ' + r_script)
 
