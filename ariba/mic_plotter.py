@@ -227,7 +227,7 @@ class MicPlotter:
         except:
             raise Error('Error opening R script for writing "' + r_script + '"')
 
-        libraries = ['ggplot2', 'RColorBrewer', 'reshape2', 'cowplot']
+        libraries = ['ggplot2', 'RColorBrewer', 'reshape2']
         for lib in libraries:
             print('library(', lib, ')', sep='', file=f)
 
@@ -335,10 +335,20 @@ if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
 
         if self.no_combinations:
             print('violinplot', file=f)
+            print('ggsave("', self.outprefix, '.pdf", useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)
         else:
-            print('plot_grid(violinplot, dotplot, ncol=1, align="v", rel_heights=c(3,1))', file=f)
+            print(r'''library(gtable)
+library(grid)
+g1 <- ggplotGrob(violinplot)
+g2 <- ggplotGrob(dotplot)
+g <- rbind(g1, g2, size="first")
+g$widths <- unit.pmax(g1$widths, g2$widths)
+panels <- g$layout$t[grepl("panel", g$layout$name)]
+g$heights[panels][1] = unit(2,"null")
+grid.newpage()
+grid.draw(g)
+ggsave("''', self.outprefix, '.pdf", plot=g, useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)
 
-        print('ggsave("', self.outprefix, '.pdf", useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)
         f.close()
         common.syscall('R CMD BATCH ' + r_script)
 
