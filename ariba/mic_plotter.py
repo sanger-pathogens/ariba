@@ -227,7 +227,7 @@ class MicPlotter:
         except:
             raise Error('Error opening R script for writing "' + r_script + '"')
 
-        libraries = ['ggplot2', 'RColorBrewer', 'reshape2', 'cowplot', 'latex2exp']
+        libraries = ['ggplot2', 'RColorBrewer', 'reshape2', 'cowplot']
         for lib in libraries:
             print('library(', lib, ')', sep='', file=f)
 
