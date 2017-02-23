@@ -79,6 +79,7 @@ subparser_micplot.add_argument('--mic_values', help='Comma-separated list of MIC
 subparser_micplot.add_argument('--hlines', help='Comma-separated list of positions at which to draw horizontal lines. For no lines use an empty string, ie: --hlines \'\' [%(default)s]', default='0.25,2', metavar='float1,float2,...')
 subparser_micplot.add_argument('--point_size', type=float, help='Size of points when --plot_types includes point [%(default)s]', default=4, metavar='FLOAT')
 subparser_micplot.add_argument('--dot_size', type=float, help='Size of dots in lower part of plot [%(default)s]', default=8, metavar='FLOAT')
+subparser_micplot.add_argument('--panel_heights', help='Two integers that determine relative height of top and bottom panels. eg 5,1 means ratio of 5:1 between top and bottom panel heights [%(default)s]', default='5,1', metavar='height1,height2')
 subparser_micplot.set_defaults(func=ariba.tasks.micplot.run)
 
 #----------------------------- prepareref -------------------------------

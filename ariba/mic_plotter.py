@@ -25,6 +25,7 @@ class MicPlotter:
       hlines='0.25,2',
       point_size=4,
       dot_size=8,
+      panel_heights='5,1'
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -59,6 +60,12 @@ class MicPlotter:
 
         self.point_size = point_size
         self.dot_size = dot_size
+
+        try:
+            self.panel_heights = [int(x) for x in panel_heights.split(',')]
+        except:
+            raise Error('Error in panel_heights option. Needs to be of the form integer1,integer2. Got this:\n' + panel_heights)
+
 
     @classmethod
     def _mic_string_to_float(cls, s):
@@ -344,7 +351,8 @@ g2 <- ggplotGrob(dotplot)
 g <- rbind(g1, g2, size="first")
 g$widths <- unit.pmax(g1$widths, g2$widths)
 panels <- g$layout$t[grepl("panel", g$layout$name)]
-g$heights[panels][1] = unit(2,"null")
+g$heights[panels][1] = unit(''', self.panel_heights[0], r''',"null")
+g$heights[panels][2] = unit(''', self.panel_heights[1], r''',"null")
 grid.newpage()
 grid.draw(g)
 ggsave("''', self.outprefix, '.pdf", plot=g, useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)

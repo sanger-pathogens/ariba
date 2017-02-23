@@ -18,7 +18,8 @@ def run(options):
       mic_values=options.mic_values,
       hlines=options.hlines,
       point_size=options.point_size,
-      dot_size=options.dot_size
+      dot_size=options.dot_size,
+      panel_heights=options.panel_heights,
     )
 
     plotter.run()
