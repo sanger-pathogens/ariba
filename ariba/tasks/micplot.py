@@ -20,6 +20,8 @@ def run(options):
       point_size=options.point_size,
       dot_size=options.dot_size,
       panel_heights=options.panel_heights,
+      palette=options.palette,
+      number_of_colours=options.number_of_colours
     )
 
     plotter.run()

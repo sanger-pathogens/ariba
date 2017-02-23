@@ -80,6 +80,8 @@ subparser_micplot.add_argument('--hlines', help='Comma-separated list of positio
 subparser_micplot.add_argument('--point_size', type=float, help='Size of points when --plot_types includes point [%(default)s]', default=4, metavar='FLOAT')
 subparser_micplot.add_argument('--dot_size', type=float, help='Size of dots in lower part of plot [%(default)s]', default=8, metavar='FLOAT')
 subparser_micplot.add_argument('--panel_heights', help='Two integers that determine relative height of top and bottom panels. eg 5,1 means ratio of 5:1 between top and bottom panel heights [%(default)s]', default='5,1', metavar='height1,height2')
+subparser_micplot.add_argument('--palette', help='ColourBrewer palette to use [%(default)s]', default='Accent', metavar='palette_name')
+subparser_micplot.add_argument('--number_of_colours', help='Number of colours in plot. 0:same number as columns in the plot. 1:all black. >1: take the first N colours from the colour palette specified by --palette and cycle them [%(default)s]', default=0, metavar='INT')
 subparser_micplot.set_defaults(func=ariba.tasks.micplot.run)
 
 #----------------------------- prepareref -------------------------------

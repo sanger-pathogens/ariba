@@ -25,7 +25,9 @@ class MicPlotter:
       hlines='0.25,2',
       point_size=4,
       dot_size=8,
-      panel_heights='5,1'
+      panel_heights='5,1',
+      palette='Accent',
+      number_of_colours=0
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -66,6 +68,8 @@ class MicPlotter:
         except:
             raise Error('Error in panel_heights option. Needs to be of the form integer1,integer2. Got this:\n' + panel_heights)
 
+        self.palette = palette
+        self.number_of_colours = number_of_colours
 
     @classmethod
     def _mic_string_to_float(cls, s):
@@ -250,11 +254,26 @@ class MicPlotter:
 dots.melt = melt(dots)
 colnames(dots.melt) <- c("var1", "var2", "value")
 
-accent <- brewer.pal(8, 'Accent')
-        accentPalette <- colorRampPalette(accent)
-        ncols <- length(as.vector(unique(samples$Mutations)))
-        cols <- accentPalette(ncols)
+palette.name = "''', self.palette, r'''"
+colour.number = ''', self.number_of_colours, r'''
+ncols <- length(as.vector(unique(samples$Mutations)))
 
+if (colour.number == 0) {
+    accent <- brewer.pal(8, palette.name)
+    accentPalette <- colorRampPalette(accent)
+    cols <- accentPalette(ncols)
+} else if (colour.number == 1) {
+        cols <- rep("black", ncols)
+} else {
+    if (colour.number == 2) {
+        unique_cols <- c("#7FC97F", "#BEAED4")
+    }
+    else {
+        unique_cols <- brewer.pal(colour.number, palette.name)
+    }
+
+    cols <- rep(unique_cols, ncols)
+}
 
 names(cols) <- sort(as.vector(unique(samples$Mutations)))
 setcols <- c()
@@ -277,7 +296,7 @@ if (!is.na(i)) {
 
 
 dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
-  geom_point(aes(fill=setcols, colour=setcols), size=''' + str(self.dot_size) + r''') +
+  geom_point(aes(fill=setcols, colour=setcols), size=''', self.dot_size, r''') +
           scale_fill_identity()+
           scale_colour_identity()+
           ylim(rev(mutations)) +
@@ -294,7 +313,7 @@ dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
 
 range.mics <- c(''' + ','.join([str(x) for x in self.mic_values]) + r''')
 if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
-''', file=f)
+''', sep='', file=f)
 
         if self.log_y:
             print(r'''violinplot <- ggplot(data=samples, aes(x=Mutations, y=log(MIC))) +''', file=f)
