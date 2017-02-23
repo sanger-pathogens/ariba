@@ -313,21 +313,26 @@ dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
 
 range.mics <- c(''' + ','.join([str(x) for x in self.mic_values]) + r''')
 if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
-''', sep='', file=f)
 
-        if self.log_y:
-            print(r'''violinplot <- ggplot(data=samples, aes(x=Mutations, y=log(MIC))) +''', file=f)
-        else:
-            print(r'''violinplot <- ggplot(data=samples, aes(x=Mutations, y=MIC)) +''', file=f)
+sized_dot_data <- aggregate(samples$Sample,by=list(x=samples$Mutations,y=samples$MIC),length)
+names(sized_dot_data)[3] <- "count"
+
+top_plot = ggplot() +''', sep='', file=f)
+
+        ymic = 'log(MIC)' if self.log_y else 'MIC'
 
         if 'point' in self.plot_types:
-            print(r'''    geom_point(aes(color=Mutations), position = position_jitter(width=''', self.jitter_width, ', height=', self.jitter_height, '), size=', self.point_size, ', alpha=.5) +', sep='', file=f)
+            if self.point_size > 0:
+                print('    geom_point(data=samples, aes(x=Mutations, y=', ymic, ', color=Mutations), position = position_jitter(width=''', self.jitter_width, ', height=', self.jitter_height, '), size=', self.point_size, ', alpha=.5) +', sep='', file=f)
+            else:
+                y = 'log(y)' if self.log_y else 'y'
+                print('    geom_point(data=sized_dot_data, aes(x=x, y=', y, ', size=count, color=x)) +', sep='', file=f)
 
         if 'violin' in self.plot_types:
-            print(r'''    geom_violin(aes(color=Mutations),alpha=.10, show.legend = FALSE) +''', file=f)
+            print('    geom_violin(data=samples, aes(x=Mutations, y=', ymic, ', color=Mutations), alpha=.10, show.legend = FALSE) +''', file=f)
 
         if 'boxplot' in self.plot_types:
-            print(r'''    geom_boxplot(aes(color=Mutations),alpha=.10, show.legend = FALSE) +''', file=f)
+            print('    geom_boxplot(data=samples, aes(x=Mutations, y=', ymic, ', color=Mutations), alpha=.10, show.legend = FALSE) +''', file=f)
 
         if self.no_combinations:
             axis_text_x = 'element_text(size=24, angle=45, hjust=1)'
@@ -360,12 +365,12 @@ if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
 ''', file=f)
 
         if self.no_combinations:
-            print('violinplot', file=f)
+            print('top_plot', file=f)
             print('ggsave("', self.outprefix, '.pdf", useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)
         else:
             print(r'''library(gtable)
 library(grid)
-g1 <- ggplotGrob(violinplot)
+g1 <- ggplotGrob(top_plot)
 g2 <- ggplotGrob(dotplot)
 g <- rbind(g1, g2, size="first")
 g$widths <- unit.pmax(g1$widths, g2$widths)
