@@ -163,7 +163,7 @@ class MicPlotter:
                             continue
 
                         if value == 'yes':
-                            mutations.add(cluster + '.' + column)
+                            mutations.add(cluster + '.' + column.strip())
 
                 if len(mutations) == 0:
                     mutations.add('without_mutation')
