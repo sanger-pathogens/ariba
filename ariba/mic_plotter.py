@@ -301,9 +301,9 @@ if (!is.na(i)) {
 
 dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
   geom_point(aes(fill=setcols, colour=''', dot_colour, '), shape=21, size=''', self.dot_size, r''') +
-          scale_fill_identity()+
-          scale_colour_identity()+
-          ylim(rev(mutations)) +
+  scale_fill_identity()+
+  scale_colour_identity()+
+  ylim(rev(mutations)) +
   theme_bw() +
   theme(axis.text.x = element_blank(),
         axis.text.y = element_text(size=18),
@@ -321,7 +321,7 @@ if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
 sized_dot_data <- aggregate(samples$Sample,by=list(x=samples$Mutations,y=samples$MIC),length)
 names(sized_dot_data)[3] <- "count"
 
-top_plot = ggplot() +''', sep='', file=f)
+top_plot <- ggplot() +''', sep='', file=f)
 
         ymic = 'log(MIC)' if self.log_y else 'MIC'
 
