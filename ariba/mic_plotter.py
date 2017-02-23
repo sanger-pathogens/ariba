@@ -24,6 +24,10 @@ class MicPlotter:
       mic_values='0,0.001,0.0025,0.0075,0.015,0.03,0.06,0.125,0.25,0.5,1,2,4,8,16,32,64,128,256,512,1024',
       hlines='0.25,2',
       point_size=4,
+      point_range='2,15',
+      point_break='10,50,100,200,300',
+      point_legend_x=-0.15,
+      point_legend_y=0.9,
       dot_size=8,
       dot_outline=False,
       panel_heights='5,1',
@@ -62,6 +66,19 @@ class MicPlotter:
             raise Error('Error in hlines option. Needs to be a list of numbers separated by commas, or empty. Got this:\n' + hlines)
 
         self.point_size = point_size
+
+        try:
+            self.point_range = [int(x) for x in point_range.split(',')]
+        except:
+            raise Error('Error in point_range option. Needs to be of the form integer1,integer2. Got this:\n' + point_range)
+
+        try:
+            self.point_break = [int(x) for x in point_break.split(',')]
+        except:
+            raise Error('Error in point_break option. Needs to be comma-sparated list of integers. Got this:\n' + point_break)
+
+        self.point_legend_x = point_legend_x
+        self.point_legend_y = point_legend_y
         self.dot_size = dot_size
         self.dot_outline = dot_outline
 
@@ -324,6 +341,7 @@ names(sized_dot_data)[3] <- "count"
 top_plot <- ggplot() +''', sep='', file=f)
 
         ymic = 'log(MIC)' if self.log_y else 'MIC'
+        legend_position = '"none"'
 
         if 'point' in self.plot_types:
             if self.point_size > 0:
@@ -331,6 +349,7 @@ top_plot <- ggplot() +''', sep='', file=f)
             else:
                 y = 'log(y)' if self.log_y else 'y'
                 print('    geom_point(data=sized_dot_data, aes(x=x, y=', y, ', size=count, color=x)) +', sep='', file=f)
+                legend_position = 'c(' + str(self.point_legend_x) + ',' + str(self.point_legend_y) + ')'
 
         if 'violin' in self.plot_types:
             print('    geom_violin(data=samples, aes(x=Mutations, y=', ymic, ', color=Mutations), alpha=.10, show.legend = FALSE) +''', file=f)
@@ -350,7 +369,8 @@ top_plot <- ggplot() +''', sep='', file=f)
                 print('    geom_hline(yintercept=', x, ', lty=2) +', sep='', file=f)
 
         print(r'''    ylab(expression(paste("MIC ", mu, "g/mL"))) +
-    scale_colour_manual(values = cols) +
+    scale_colour_manual(values = cols, guide=FALSE) +
+    scale_size(range=c(''' + ','.join([str(x) for x in self.point_range]) + r'''), breaks = c(''' + ','.join([str(x) for x in self.point_break])  + r''')) +
     ggtitle("''' + self.main_title + r'''") +
     scale_y_continuous(breaks=final.mics, labels=range.mics) +
     theme_bw() +
@@ -365,8 +385,9 @@ top_plot <- ggplot() +''', sep='', file=f)
             axis.text.y = element_text(size=24),
             axis.title = element_text(size=20),
             plot.title = element_text(lineheight=.6, size = 24, hjust=.5, face="bold"),
-            legend.position="none")
-''', file=f)
+            legend.title = element_text(size=30),
+            legend.text = element_text(size=20),
+            legend.position=''' + legend_position + ')', file=f)
 
         if self.no_combinations:
             print('top_plot', file=f)
