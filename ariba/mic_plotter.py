@@ -25,6 +25,7 @@ class MicPlotter:
       hlines='0.25,2',
       point_size=4,
       dot_size=8,
+      dot_outline=False,
       panel_heights='5,1',
       palette='Accent',
       number_of_colours=0
@@ -62,6 +63,7 @@ class MicPlotter:
 
         self.point_size = point_size
         self.dot_size = dot_size
+        self.dot_outline = dot_outline
 
         try:
             self.panel_heights = [int(x) for x in panel_heights.split(',')]
@@ -250,6 +252,8 @@ class MicPlotter:
         else:
             print('use.log = FALSE', file=f)
 
+        dot_colour = '"black"' if self.dot_outline else 'setcols'
+
         print(r'''
 dots.melt = melt(dots)
 colnames(dots.melt) <- c("var1", "var2", "value")
@@ -283,7 +287,7 @@ for (i in 1:nrow(dots.melt)){
         setcols <- c(setcols, cols[as.vector(dots.melt[i,2])])
     }
     else{
-      setcols <- c(setcols, NA)
+      setcols <- c(setcols, "white")
     }
 }
 dots.melt <- cbind(dots.melt, setcols)
@@ -296,7 +300,7 @@ if (!is.na(i)) {
 
 
 dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
-  geom_point(aes(fill=setcols, colour=setcols), size=''', self.dot_size, r''') +
+  geom_point(aes(fill=setcols, colour=''', dot_colour, '), shape=21, size=''', self.dot_size, r''') +
           scale_fill_identity()+
           scale_colour_identity()+
           ylim(rev(mutations)) +
