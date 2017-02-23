@@ -266,7 +266,7 @@ if (colour.number == 0) {
         cols <- rep("black", ncols)
 } else {
     if (colour.number == 2) {
-        unique_cols <- c("#7FC97F", "#BEAED4")
+        unique_cols <- brewer.pal(3, palette.name)[1:2]
     }
     else {
         unique_cols <- brewer.pal(colour.number, palette.name)
