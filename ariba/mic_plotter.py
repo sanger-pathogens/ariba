@@ -381,8 +381,7 @@ top_plot <- ggplot() +''', sep='', file=f)
     theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             panel.border = element_blank(),
-            axis.line.x = element_line(color="black"),
-            axis.line.y = element_line(color="black"),
+            axis.line = element_line(color="black"),
             axis.title.x = element_blank(),
             axis.title.y = element_text(size=22),
             axis.text.x = ''' + axis_text_x + r''',
@@ -404,8 +403,16 @@ g2 <- ggplotGrob(dotplot)
 g <- rbind(g1, g2, size="first")
 g$widths <- unit.pmax(g1$widths, g2$widths)
 panels <- g$layout$t[grepl("panel", g$layout$name)]
-g$heights[panels][1] = unit(''', self.panel_heights[0], r''',"null")
-g$heights[panels][2] = unit(''', self.panel_heights[1], r''',"null")
+
+if(getRversion() < "3.3.0"){
+    g$heights <- grid:::unit.list(g$heights)
+    g$heights[panels][1] <- list(unit(''', self.panel_heights[0], r''', "null"))
+    g$heights[panels][2] <- list(unit(''', self.panel_heights[1], r''', "null"))
+} else {
+    g$heights[panels][1] = unit(''', self.panel_heights[0], r''',"null")
+    g$heights[panels][2] = unit(''', self.panel_heights[1], r''',"null")
+}
+
 grid.newpage()
 grid.draw(g)
 ggsave("''', self.outprefix, '.pdf", plot=g, useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)
