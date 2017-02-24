@@ -413,9 +413,11 @@ if(getRversion() < "3.3.0"){
     g$heights[panels][2] = unit(''', self.panel_heights[1], r''',"null")
 }
 
+pdf("''', self.outprefix, '.pdf", useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, r''')
 grid.newpage()
 grid.draw(g)
-ggsave("''', self.outprefix, '.pdf", plot=g, useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)
+dev.off()
+''', sep='', file=f)
 
         f.close()
         common.syscall('R CMD BATCH ' + r_script)
