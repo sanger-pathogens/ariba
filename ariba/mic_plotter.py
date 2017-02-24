@@ -371,7 +371,8 @@ top_plot <- ggplot() +''', sep='', file=f)
             else:
                 print('    geom_hline(yintercept=', x, ', lty=2) +', sep='', file=f)
 
-        print(r'''    ylab(expression(paste("MIC ", mu, "g/mL"))) +
+
+        print(r'''    ylab(expression(paste("''' + ymic + r''' ", mu, "g/mL"))) +
     scale_colour_manual(values = cols, guide=FALSE) +
     scale_size(range=c(''' + ','.join([str(x) for x in self.point_range]) + r'''), breaks = c(''' + ','.join([str(x) for x in self.point_break])  + r''')) +
     ggtitle("''' + self.main_title + r'''") +
