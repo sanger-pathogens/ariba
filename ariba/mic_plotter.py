@@ -332,7 +332,10 @@ dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
         panel.grid.major = element_blank(),
         legend.position="none")
 
-range.mics <- c(''' + ','.join([str(x) for x in self.mic_values]) + r''')
+range.mics <- sort(c(''' + ','.join([str(x) for x in self.mic_values]) + r'''))
+if (use.log & range.mics[1] == 0) {
+    range.mics <- range.mics[-1]
+}
 if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
 
 sized_dot_data <- aggregate(samples$Sample,by=list(x=samples$Mutations,y=samples$MIC),length)
