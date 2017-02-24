@@ -7,6 +7,7 @@ def run(options):
       options.mic_file,
       options.summary_file,
       options.outprefix,
+      use_hets=options.use_hets,
       main_title=options.main_title,
       plot_height=options.plot_height,
       plot_width=options.plot_width,

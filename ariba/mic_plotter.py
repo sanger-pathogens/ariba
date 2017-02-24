@@ -13,6 +13,7 @@ class MicPlotter:
       mic_file,
       summary_file,
       outprefix,
+      use_hets='yes',
       main_title=None,
       plot_height=15,
       plot_width=15,
@@ -38,6 +39,12 @@ class MicPlotter:
         self.mic_file = mic_file
         self.summary_file = summary_file
         self.outprefix = outprefix
+
+        allowed_use_hets = {'yes', 'no', 'exclude'}
+        if not use_hets in allowed_use_hets:
+            raise Error('Error in use_hets option. Allowed options are: ' + str(allowed_use_hets) + '. Got: ' + use_hets)
+        self.use_hets = use_hets
+
         self.main_title = self.antibiotic if main_title is None else main_title
         self.plot_height = plot_height
         self.plot_width = plot_width
@@ -89,6 +96,7 @@ class MicPlotter:
 
         self.palette = palette
         self.number_of_colours = number_of_colours
+
 
     @classmethod
     def _mic_string_to_float(cls, s):
@@ -164,7 +172,8 @@ class MicPlotter:
 
 
     @classmethod
-    def _to_boxplot_tsv(cls, summary_data, mic_data, antibiotic, outfile, no_combinations=False):
+    def _to_boxplot_tsv(cls, summary_data, mic_data, antibiotic, outfile, use_hets, no_combinations=False):
+        assert use_hets in {'yes', 'no', 'exclude'}
         ignore_columns = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
         all_mutations = set()
         all_mutations_seen_combinations = set()
@@ -183,6 +192,7 @@ class MicPlotter:
                     continue
 
                 mutations = set()
+                found_het_and_exclude = False
 
                 for cluster in summary_data[sample]:
                     if summary_data[sample][cluster]['assembled'] == 'interrupted':
@@ -192,8 +202,18 @@ class MicPlotter:
                         if column in ignore_columns or column.endswith('.%'):
                             continue
 
-                        if value == 'yes':
+                        if value == 'yes' or (use_hets == 'yes' and value == 'het'):
                             mutations.add(cluster + '.' + column.strip())
+                        elif use_hets == 'exclude' and value == 'het':
+                            found_het_and_exclude = True
+                            break
+
+                    if found_het_and_exclude:
+                        break
+
+                if found_het_and_exclude:
+                    continue
+
 
                 if len(mutations) == 0:
                     mutations.add('without_mutation')
@@ -427,7 +447,7 @@ dev.off()
         mic_data = MicPlotter._load_mic_file(self.mic_file)
         summary_data = MicPlotter._load_summary_file(self.summary_file)
         boxplot_tsv = self.outprefix + '.boxplot.tsv'
-        all_mutations, combinations = MicPlotter._to_boxplot_tsv(summary_data, mic_data, self.antibiotic, boxplot_tsv, no_combinations=self.no_combinations)
+        all_mutations, combinations = MicPlotter._to_boxplot_tsv(summary_data, mic_data, self.antibiotic, boxplot_tsv, self.use_hets, no_combinations=self.no_combinations)
         dots_tsv = self.outprefix + '.dots.tsv'
         MicPlotter._to_dots_tsv(all_mutations, combinations, dots_tsv)
         self._make_plot(boxplot_tsv, dots_tsv)

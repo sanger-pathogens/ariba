@@ -67,6 +67,7 @@ subparser_micplot.add_argument('antibiotic', help='Antibiotic name. Must exactly
 subparser_micplot.add_argument('mic_file', help='File containing MIC data for each sample and one or more antibiotics')
 subparser_micplot.add_argument('summary_file', help='File made by running "ariba summary"')
 subparser_micplot.add_argument('outprefix', help='Prefix of output files')
+subparser_micplot.add_argument('--use_hets', choices=['yes', 'no', 'exclude'], help='How to deal with HET snps. Choose from yes,no,exclude. yes: count a het SNP as present. no: do not count a het SNP as present. exclude: completely remove any sample with any het SNP [%(default)s]', default='yes')
 subparser_micplot.add_argument('--main_title', help='Main title of plot. Default is to use the antibiotic name', metavar='"title in quotes"')
 subparser_micplot.add_argument('--plot_height', help='Height of plot (used in plot_height=X when running ggsave [%(default)s]', default=15, type=float, metavar='FLOAT')
 subparser_micplot.add_argument('--plot_width', help='Height of plot (used in plot_width=X when running ggsave [%(default)s]', default=15, type=float, metavar='FLOAT')
