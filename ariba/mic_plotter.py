@@ -31,6 +31,7 @@ class MicPlotter:
       point_legend_y=0.9,
       dot_size=8,
       dot_outline=False,
+      dot_y_text_size=18,
       panel_heights='5,1',
       palette='Accent',
       number_of_colours=0
@@ -88,6 +89,7 @@ class MicPlotter:
         self.point_legend_y = point_legend_y
         self.dot_size = dot_size
         self.dot_outline = dot_outline
+        self.dot_y_text_size = dot_y_text_size
 
         try:
             self.panel_heights = [int(x) for x in panel_heights.split(',')]
@@ -343,7 +345,7 @@ dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
   ylim(rev(mutations)) +
   theme_bw() +
   theme(axis.text.x = element_blank(),
-        axis.text.y = element_text(size=18),
+        axis.text.y = element_text(size=''', self.dot_y_text_size, r'''),
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         axis.ticks = element_blank(),

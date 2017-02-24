@@ -25,6 +25,7 @@ def run(options):
       point_legend_y=options.point_legend_y,
       dot_size=options.dot_size,
       dot_outline=options.dot_outline,
+      dot_y_text_size=options.dot_y_text_size,
       panel_heights=options.panel_heights,
       palette=options.palette,
       number_of_colours=options.number_of_colours

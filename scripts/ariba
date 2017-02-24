@@ -85,6 +85,7 @@ subparser_micplot.add_argument('--point_legend_x', type=float, help='x coord of 
 subparser_micplot.add_argument('--point_legend_y', type=float, help='y coord of legend when --point_size is 0 [%(default)s]', default=0.9, metavar='FLOAT')
 subparser_micplot.add_argument('--dot_size', type=float, help='Size of dots in lower part of plot [%(default)s]', default=8, metavar='FLOAT')
 subparser_micplot.add_argument('--dot_outline', action='store_true', help='Black outline around all dots (whether coloured or not) in lower part of plots')
+subparser_micplot.add_argument('--dot_y_text_size', type=int, help='Text size of labels in lower dot plot [%(default)s]', default=18, metavar='INT')
 subparser_micplot.add_argument('--panel_heights', help='Two integers that determine relative height of top and bottom panels. eg 5,1 means ratio of 5:1 between top and bottom panel heights [%(default)s]', default='5,1', metavar='height1,height2')
 subparser_micplot.add_argument('--palette', help='ColourBrewer palette to use [%(default)s]', default='Accent', metavar='palette_name')
 subparser_micplot.add_argument('--number_of_colours', help='Number of colours in plot. 0:same number as columns in the plot. 1:all black. >1: take the first N colours from the colour palette specified by --palette and cycle them [%(default)s]', default=0, metavar='INT')
