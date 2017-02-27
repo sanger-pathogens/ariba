@@ -321,17 +321,19 @@ if (colour.number == 0) {
 names(cols) <- sort(as.vector(unique(samples$Mutations)))
 setcols <- c()
 
-for (i in 1:nrow(dots.melt)){
-    if (dots.melt[i,3]==1){
-        setcols <- c(setcols, cols[as.vector(dots.melt[i,2])])
-    }
-    else{
-      setcols <- c(setcols, "white")
-    }
-}
+setcols <- apply(dots.melt, 1, function(x){
+
+  if (x[3]==1){ cols[x[2]] }else{ "white" }
+
+})
+
 dots.melt <- cbind(dots.melt, setcols)
 
 mutations <- levels(dots.melt$var1)
+mut.order <- gsub(".*\\.\\w", "", mutations)
+mut.order <- as.numeric(gsub("\\D+", "", mut.order))
+mutations <- mutations[order(mut.order)]
+
 i <- match("without_mutation", mutations)
 if (!is.na(i)) {
     mutations <- c(mutations[-i], "without_mutation")
