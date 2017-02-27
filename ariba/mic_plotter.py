@@ -35,7 +35,8 @@ class MicPlotter:
       panel_heights='5,1',
       palette='Accent',
       number_of_colours=0,
-      interrupted=False
+      interrupted=False,
+      no_clust_when_group=False,
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -331,10 +332,18 @@ setcols <- apply(dots.melt, 1, function(x){
 
 dots.melt <- cbind(dots.melt, setcols)
 
-mutations <- levels(dots.melt$var1)
-mut.order <- gsub(".*\\.\\w", "", mutations)
-mut.order <- as.numeric(gsub("\\D+", "", mut.order))
-mutations <- mutations[order(mut.order)]
+mutlevels <- levels(dots.melt$var1)
+genes <- unique(gsub("\\..*", "", mutlevels))
+mutations <- c()
+
+for (i in 1:length(genes)){
+  curmutations <- mutlevels[grep(paste0(genes[i], "."), mutlevels)]
+  curgene <- gsub("^.*\\.", "", curmutations)
+  curgene <- gsub("^\\D+", "", curgene) # if there is a reference base
+  genepos <- as.numeric(gsub("\\D+", "", curgene))
+  curmutations <- curmutations[order(genepos)]
+  mutations <- c(mutations, curmutations)
+}
 
 i <- match("without_mutation", mutations)
 if (!is.na(i)) {
