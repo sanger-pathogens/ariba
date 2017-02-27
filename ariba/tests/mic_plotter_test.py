@@ -136,14 +136,14 @@ class TestMicPlotter(unittest.TestCase):
 
         for antibio in ['antibio1', 'antibio2']:
             for use_het in ['no', 'yes', 'exclude']:
-                got_muts, got_combs = mic_plotter.MicPlotter._to_boxplot_tsv(summary_data, mic_data, antibio, tmp_tsv, use_het)
+                got_muts, got_combs = mic_plotter.MicPlotter._to_boxplot_tsv(summary_data, mic_data, antibio, tmp_tsv, use_het, interrupted=True)
                 expected_tsv = os.path.join(data_dir, 'mic_plotter_to_boxplot_tsv.' + antibio + '.' + use_het + '.tsv')
                 self.assertTrue(filecmp.cmp(tmp_tsv, expected_tsv, shallow=False))
                 self.assertEqual(got_muts, expected_mutations[antibio][use_het])
                 self.assertEqual(got_combs, expected_combs[antibio][use_het])
                 os.unlink(tmp_tsv)
 
-                got_muts, got_combs = mic_plotter.MicPlotter._to_boxplot_tsv(summary_data, mic_data, antibio, tmp_tsv, use_het, no_combinations=True)
+                got_muts, got_combs = mic_plotter.MicPlotter._to_boxplot_tsv(summary_data, mic_data, antibio, tmp_tsv, use_het, no_combinations=True, interrupted=True)
                 expected_tsv = os.path.join(data_dir, 'mic_plotter_to_boxplot_tsv.' + antibio + '.' + use_het +  '.no_combinations.tsv')
                 self.assertTrue(filecmp.cmp(tmp_tsv, expected_tsv, shallow=False))
                 self.assertEqual(got_muts, expected_mutations[antibio][use_het])
