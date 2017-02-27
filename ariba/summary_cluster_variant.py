@@ -126,8 +126,9 @@ class SummaryClusterVariant:
         if var_bases is not None:
             self.var_string = re.sub(r'[^0-9]', '', self.var_string) + var_bases
 
-        if not SummaryClusterVariant._has_nonsynonymous(data_dict):
-            self.has_nonsynon = False
+        self.has_nonsynon = SummaryClusterVariant._has_nonsynonymous(data_dict) and not (data_dict['var_type'] == 'HET' and not self.is_het)
+
+        if not self.has_nonsynon:
             return
 
         self.has_nonsynon = True
