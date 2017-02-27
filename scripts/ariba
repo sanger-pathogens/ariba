@@ -73,6 +73,7 @@ micplot_general_group.add_argument('--main_title', help='Main title of plot. Def
 micplot_general_group.add_argument('--plot_height', help='Height of plot (used in plot_height=X when running ggsave [%(default)s]', default=15, type=float, metavar='FLOAT')
 micplot_general_group.add_argument('--plot_width', help='Height of plot (used in plot_width=X when running ggsave [%(default)s]', default=15, type=float, metavar='FLOAT')
 micplot_general_group.add_argument('--use_hets', choices=['yes', 'no', 'exclude'], help='How to deal with HET snps. Choose from yes,no,exclude. yes: count a het SNP as present. no: do not count a het SNP as present. exclude: completely remove any sample with any het SNP [%(default)s]', default='yes')
+micplot_general_group.add_argument('--interrupted', action='store_true', help='Include interrupted genes (as in the assembled column of the ariba summary files)')
 micplot_general_group.add_argument('--no_combinations', action='store_true', help='Do not show combinations of variants. Instead separate out into one box/violin plot per variant.')
 micplot_general_group.add_argument('--panel_heights', help='Two integers that determine relative height of top and bottom plots. eg 5,1 means ratio of 5:1 between top and bottom panel heights [%(default)s]', default='5,1', metavar='height1,height2')
 

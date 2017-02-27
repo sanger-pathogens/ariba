@@ -34,7 +34,8 @@ class MicPlotter:
       dot_y_text_size=18,
       panel_heights='5,1',
       palette='Accent',
-      number_of_colours=0
+      number_of_colours=0,
+      interrupted=False
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -98,6 +99,7 @@ class MicPlotter:
 
         self.palette = palette
         self.number_of_colours = number_of_colours
+        self.interrupted = interrupted
 
 
     @classmethod
@@ -174,7 +176,7 @@ class MicPlotter:
 
 
     @classmethod
-    def _to_boxplot_tsv(cls, summary_data, mic_data, antibiotic, outfile, use_hets, no_combinations=False):
+    def _to_boxplot_tsv(cls, summary_data, mic_data, antibiotic, outfile, use_hets, no_combinations=False, interrupted=False):
         assert use_hets in {'yes', 'no', 'exclude'}
         ignore_columns = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
         all_mutations = set()
@@ -197,7 +199,7 @@ class MicPlotter:
                 found_het_and_exclude = False
 
                 for cluster in summary_data[sample]:
-                    if summary_data[sample][cluster]['assembled'] == 'interrupted':
+                    if summary_data[sample][cluster]['assembled'] == 'interrupted' and interrupted:
                         mutations.add(cluster + '.interrupted')
 
                     for column, value in summary_data[sample][cluster].items():
@@ -451,7 +453,7 @@ dev.off()
         mic_data = MicPlotter._load_mic_file(self.mic_file)
         summary_data = MicPlotter._load_summary_file(self.summary_file)
         boxplot_tsv = self.outprefix + '.boxplot.tsv'
-        all_mutations, combinations = MicPlotter._to_boxplot_tsv(summary_data, mic_data, self.antibiotic, boxplot_tsv, self.use_hets, no_combinations=self.no_combinations)
+        all_mutations, combinations = MicPlotter._to_boxplot_tsv(summary_data, mic_data, self.antibiotic, boxplot_tsv, self.use_hets, no_combinations=self.no_combinations, interrupted=self.interrupted)
         dots_tsv = self.outprefix + '.dots.tsv'
         MicPlotter._to_dots_tsv(all_mutations, combinations, dots_tsv)
         self._make_plot(boxplot_tsv, dots_tsv)

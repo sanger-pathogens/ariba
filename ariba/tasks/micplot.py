@@ -28,7 +28,8 @@ def run(options):
       dot_y_text_size=options.dot_y_text_size,
       panel_heights=options.panel_heights,
       palette=options.palette,
-      number_of_colours=options.number_of_colours
+      number_of_colours=options.number_of_colours,
+      interrupted=options.interrupted
     )
 
     plotter.run()
