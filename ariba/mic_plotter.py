@@ -331,8 +331,11 @@ setcols <- apply(dots.melt, 1, function(x){
 
 dots.melt <- cbind(dots.melt, setcols)
 
+
 mutlevels <- levels(dots.melt$var1)
 genes <- unique(gsub("\\..*", "", mutlevels))
+check.without <- match("without_mutation", genes)
+if(!is.na(check.without)){ genes <- genes[-check.without] }
 mutations <- c()
 
 for (i in 1:length(genes)){
@@ -344,10 +347,7 @@ for (i in 1:length(genes)){
   mutations <- c(mutations, curmutations)
 }
 
-i <- match("without_mutation", mutations)
-if (!is.na(i)) {
-    mutations <- c(mutations[-i], "without_mutation")
-}
+if (!is.na(check.without)){ mutations <- c(mutations, "without_mutation") }
 
 
 dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
