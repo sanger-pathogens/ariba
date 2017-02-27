@@ -35,8 +35,7 @@ class MicPlotter:
       panel_heights='5,1',
       palette='Accent',
       number_of_colours=0,
-      interrupted=False,
-      no_clust_when_group=False,
+      interrupted=False
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
