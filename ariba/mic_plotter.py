@@ -35,7 +35,9 @@ class MicPlotter:
       panel_heights='5,1',
       palette='Accent',
       number_of_colours=0,
-      interrupted=False
+      interrupted=False,
+      violin_y_jitter=0,
+      violin_scale_width=False
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -100,6 +102,8 @@ class MicPlotter:
         self.palette = palette
         self.number_of_colours = number_of_colours
         self.interrupted = interrupted
+        self.violin_y_jitter = violin_y_jitter
+        self.violin_scale_width = violin_scale_width
 
 
     @classmethod
@@ -389,7 +393,11 @@ top_plot <- ggplot() +''', sep='', file=f)
                 legend_position = 'c(' + str(self.point_legend_x) + ',' + str(self.point_legend_y) + ')'
 
         if 'violin' in self.plot_types:
-            print('    geom_violin(data=samples, aes(x=Mutations, y=', ymic, ', color=Mutations), alpha=.10, show.legend = FALSE) +''', file=f)
+            print('    geom_violin(data=samples, aes(x=Mutations, y=jitter(', ymic, ',', self.violin_y_jitter, '), color=Mutations)', sep='', end='', file=f)
+            if self.violin_scale_width:
+                print(', scale="width"', end='', file=f)
+
+            print(', alpha=.10, show.legend = FALSE) +', file=f)
 
         if 'boxplot' in self.plot_types:
             print('    geom_boxplot(data=samples, aes(x=Mutations, y=', ymic, ', color=Mutations), alpha=.10, show.legend = FALSE) +''', file=f)

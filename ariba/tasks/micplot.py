@@ -29,7 +29,9 @@ def run(options):
       panel_heights=options.panel_heights,
       palette=options.palette,
       number_of_colours=options.number_of_colours,
-      interrupted=options.interrupted
+      interrupted=options.interrupted,
+      violin_y_jitter=options.violin_y_jitter,
+      violin_scale_width=options.violin_scale_width
     )
 
     plotter.run()
