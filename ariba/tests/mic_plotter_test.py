@@ -62,8 +62,27 @@ class TestMicPlotter(unittest.TestCase):
         self.assertEqual(got, expected)
 
 
-    def test_to_boxplot_tsv(self):
-        '''Test _to_boxplot_tsv'''
+    def test_get_colours(self):
+        '''test _get_colours'''
+        col1 = (0.0, 0.0, 0.5, 1.0)
+        col2 = (0.0, 0.0, 0.517825311942959, 1.0)
+
+        tests = [
+            (1, 1, 'jet', ["black"]),
+            (2, 1, 'jet', ["black", "black"]),
+            (3, 1, 'jet', ["black", "black", "black"]),
+            (2, 2, 'jet', [col1, col2]),
+            (3, 2, 'jet', [col1, col2, col1]),
+            (4, 2, 'jet', [col1, col2, col1, col2]),
+            (3, 0, 'jet', [(0.0, 0.0, 0.5, 1.0), (0.49019607843137247, 1.0, 0.47754585705249841, 1.0), (0.5, 0.0, 0.0, 1.0)])
+        ]
+
+        for total_length, number_of_colours, colormap, expected in tests:
+            self.assertEqual(expected, mic_plotter.MicPlotter._get_colours(total_length, number_of_colours, colormap))
+
+
+    def test_get_top_plot_data(self):
+        '''Test _get_top_plot_data'''
         mic_data = {
             'name1': {'antibio1': 0.25, 'antibio2': 0.004},
             'name2': {'antibio1': 0.125, 'antibio2': 'NA'},
@@ -90,6 +109,32 @@ class TestMicPlotter(unittest.TestCase):
                 'cluster4': {'assembled': 'yes', 'match': 'yes', 'ref_seq': 'ref4', 'pct_id': 100.0, 'known_var': 'yes', 'novel_var': 'no', 'group4.A44T': 'no', 'group4.A44T.%': 'NA'},
             },
         } 
+
+        expected_top_plot_data = {
+            'antibio1': {
+                'yes': {'cluster1.group1.A42T.cluster4.group4.A44T': [0.125], 'cluster2.group2.A43T.cluster3.interrupted': [0.25]},
+                'no': {'cluster1.group1.A42T': [0.125], 'cluster2.group2.A43T.cluster3.interrupted': [0.25]},
+                'exclude': {'cluster2.group2.A43T.cluster3.interrupted': [0.25]},
+            },
+            'antibio2': {
+                'yes': {'without_mutation': [0.002], 'cluster2.group2.A43T.cluster3.interrupted': [0.004]},
+                'no': {'without_mutation': [0.002], 'cluster2.group2.A43T.cluster3.interrupted': [0.004]},
+                'exclude': {'without_mutation': [0.002], 'cluster2.group2.A43T.cluster3.interrupted': [0.004]},
+            }
+        }
+
+        expected_top_plot_data_no_combs = {
+            'antibio1': {
+                'yes': {'cluster2.group2.A43T': [0.25], 'cluster4.group4.A44T': [0.125], 'cluster3.interrupted': [0.25], 'cluster1.group1.A42T': [0.125]},
+                'no': {'cluster2.group2.A43T': [0.25], 'cluster3.interrupted': [0.25], 'cluster1.group1.A42T': [0.125]},
+                'exclude': {'cluster2.group2.A43T': [0.25], 'cluster3.interrupted': [0.25]},
+            },
+            'antibio2': {
+                'yes': {'cluster2.group2.A43T': [0.004], 'without_mutation': [0.002], 'cluster3.interrupted': [0.004]},
+                'no': {'cluster2.group2.A43T': [0.004], 'without_mutation': [0.002], 'cluster3.interrupted': [0.004]},
+                'exclude': {'cluster2.group2.A43T': [0.004], 'without_mutation': [0.002], 'cluster3.interrupted': [0.004]},
+            }
+        }
 
         expected_mutations = {
             'antibio1': {
@@ -136,41 +181,57 @@ class TestMicPlotter(unittest.TestCase):
 
         for antibio in ['antibio1', 'antibio2']:
             for use_het in ['no', 'yes', 'exclude']:
-                got_muts, got_combs = mic_plotter.MicPlotter._to_boxplot_tsv(summary_data, mic_data, antibio, tmp_tsv, use_het, interrupted=True)
+                got_data, got_muts, got_combs = mic_plotter.MicPlotter._get_top_plot_data(summary_data, mic_data, antibio, use_het, interrupted=True, outfile=tmp_tsv)
                 expected_tsv = os.path.join(data_dir, 'mic_plotter_to_boxplot_tsv.' + antibio + '.' + use_het + '.tsv')
                 self.assertTrue(filecmp.cmp(tmp_tsv, expected_tsv, shallow=False))
                 self.assertEqual(got_muts, expected_mutations[antibio][use_het])
                 self.assertEqual(got_combs, expected_combs[antibio][use_het])
+                self.assertEqual(got_data, expected_top_plot_data[antibio][use_het])
                 os.unlink(tmp_tsv)
 
-                got_muts, got_combs = mic_plotter.MicPlotter._to_boxplot_tsv(summary_data, mic_data, antibio, tmp_tsv, use_het, no_combinations=True, interrupted=True)
+                got_data, got_muts, got_combs = mic_plotter.MicPlotter._get_top_plot_data(summary_data, mic_data, antibio, use_het, no_combinations=True, interrupted=True, outfile=tmp_tsv)
                 expected_tsv = os.path.join(data_dir, 'mic_plotter_to_boxplot_tsv.' + antibio + '.' + use_het +  '.no_combinations.tsv')
                 self.assertTrue(filecmp.cmp(tmp_tsv, expected_tsv, shallow=False))
                 self.assertEqual(got_muts, expected_mutations[antibio][use_het])
                 self.assertEqual(got_combs, expected_no_combs[antibio][use_het])
+                self.assertEqual(got_data, expected_top_plot_data_no_combs[antibio][use_het])
                 os.unlink(tmp_tsv)
 
 
-    def test_to_dots_tsv(self):
-        '''test _to_dots_tsv'''
-        all_mutations = {'m1', 'm2', 'm3'}
-        combinations = {
-            ('m1',),
-            ('m1', 'm3'),
-            ('m2', 'm3'),
-        }
+    def test_ordered_bottom_plot_rows(self):
+        '''test _ordered_bottom_plot_rows'''
+        to_order = {'clust1.grp1.42T', 'clust1.grp1.47G', 'clust0.10T', 'abcdefg'}
+        got = mic_plotter.MicPlotter._ordered_bottom_plot_rows(to_order)
+        expected = ['abcdefg', 'clust0.10T', 'clust1.grp1.42T', 'clust1.grp1.47G']
+        self.assertEqual(expected, got)
 
-        tmp_tsv = 'tmp.test.mic_plotter_to_dots.tsv'
-        expected_tsv = os.path.join(data_dir, 'mic_plotter_to_dots.tsv')
-        mic_plotter.MicPlotter._to_dots_tsv(all_mutations, combinations, tmp_tsv)
-        self.assertTrue(filecmp.cmp(tmp_tsv, expected_tsv, shallow=False))
-        os.unlink(tmp_tsv)
 
-        all_mutations.update({'without_mutation', 'z1'})
-        combinations.add(('without_mutation',))
-        combinations.add(('m1', 'z1'))
-        expected_tsv = os.path.join(data_dir, 'mic_plotter_to_dots_without_mutation.tsv')
-        mic_plotter.MicPlotter._to_dots_tsv(all_mutations, combinations, tmp_tsv)
-        self.assertTrue(filecmp.cmp(tmp_tsv, expected_tsv, shallow=False))
-        os.unlink(tmp_tsv)
+    def test_ordered_columns(self):
+        '''test _ordered_colunns'''
+        top_plot_data = {}
+        # FIXME
+
+
+    def test_bottom_scatter_data(self):
+        '''test _bottom_scatter_data'''
+        #FIXME
+        pass
+
+
+    def test_top_plot_y_ticks(self):
+        '''test _top_plot_y_ticks'''
+        # FIXME
+        pass
+        
+
+    def test_top_plot_scatter_counts(self):
+        '''test _top_plot_scatter_counts'''
+        top_plot_data = {}
+        # FIXME
+
+
+    def test_top_plot_violin_data(self):
+        '''test _top_plot_violin_data'''
+        top_plot_data = {}
+        # FIXME
 

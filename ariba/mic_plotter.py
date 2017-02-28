@@ -1,11 +1,20 @@
 import csv
 import re
 import os
+import itertools
+import collections
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+import matplotlib.cm as cmx
+import math
+import pyfastaq
 from ariba import common
 
 class Error (Exception): pass
 
 regex_string_to_float = re.compile(r'\s*(?P<lt_or_gt>[<>]?)\s*(?P<equals>=?)\s*(?P<number>[0-9.]+)\s*$')
+
+regex_position_from_var = re.compile(r'^[^0-9]*(?P<coord>[0-9]+)[^0-9]*$')
 
 class MicPlotter:
     def __init__(self,
@@ -15,29 +24,25 @@ class MicPlotter:
       outprefix,
       use_hets='yes',
       main_title=None,
-      plot_height=15,
-      plot_width=15,
-      log_y=True,
+      plot_height=7,
+      plot_width=7,
+      log_y=2,
       plot_types="points,violin",
       jitter_width=0.1,
       jitter_height=0.01,
       no_combinations=False,
-      mic_values='0,0.001,0.0025,0.0075,0.015,0.03,0.06,0.125,0.25,0.5,1,2,4,8,16,32,64,128,256,512,1024',
       hlines='0.25,2',
       point_size=4,
       point_range='2,15',
       point_break='10,50,100,200,300',
-      point_legend_x=-0.15,
-      point_legend_y=0.9,
-      dot_size=8,
+      dot_size=100,
       dot_outline=False,
       dot_y_text_size=18,
       panel_heights='5,1',
       palette='Accent',
       number_of_colours=0,
       interrupted=False,
-      violin_y_jitter=0,
-      violin_scale_width=False
+      violin_width=0.75
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -64,11 +69,6 @@ class MicPlotter:
         self.no_combinations = no_combinations
 
         try:
-            self.mic_values = [float(x) for x in mic_values.split(',')]
-        except:
-            raise Error('Error in mic_values option. Needs to be a list of numbers separated by commas. Got this:\n' + mic_values)
-
-        try:
             if len(hlines) == 0:
                 self.hlines = []
             else:
@@ -88,8 +88,6 @@ class MicPlotter:
         except:
             raise Error('Error in point_break option. Needs to be comma-sparated list of integers. Got this:\n' + point_break)
 
-        self.point_legend_x = point_legend_x
-        self.point_legend_y = point_legend_y
         self.dot_size = dot_size
         self.dot_outline = dot_outline
         self.dot_y_text_size = dot_y_text_size
@@ -102,8 +100,7 @@ class MicPlotter:
         self.palette = palette
         self.number_of_colours = number_of_colours
         self.interrupted = interrupted
-        self.violin_y_jitter = violin_y_jitter
-        self.violin_scale_width = violin_scale_width
+        self.violin_width = violin_width
 
 
     @classmethod
@@ -180,297 +177,310 @@ class MicPlotter:
 
 
     @classmethod
-    def _to_boxplot_tsv(cls, summary_data, mic_data, antibiotic, outfile, use_hets, no_combinations=False, interrupted=False):
-        assert use_hets in {'yes', 'no', 'exclude'}
-        ignore_columns = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
-        all_mutations = set()
-        all_mutations_seen_combinations = set()
-
-        with open(outfile, 'w') as f:
-            print('Sample\tMIC\tMutations', file=f)
-
-            for sample in sorted(summary_data):
-                if sample not in mic_data:
-                    raise Error('No MIC data found for sample "' + sample + '". Cannot continue')
-
-                if antibiotic not in mic_data[sample]:
-                    raise Error('Antibiotic "' + antibiotic + '" not found. Cannot continue')
-
-                if mic_data[sample][antibiotic] == 'NA':
-                    continue
-
-                mutations = set()
-                found_het_and_exclude = False
-
-                for cluster in summary_data[sample]:
-                    if summary_data[sample][cluster]['assembled'] == 'interrupted' and interrupted:
-                        mutations.add(cluster + '.interrupted')
-
-                    for column, value in summary_data[sample][cluster].items():
-                        if column in ignore_columns or column.endswith('.%'):
-                            continue
-
-                        if value == 'yes' or (use_hets == 'yes' and value == 'het'):
-                            mutations.add(cluster + '.' + column.strip())
-                        elif use_hets == 'exclude' and value == 'het':
-                            found_het_and_exclude = True
-                            break
-
-                    if found_het_and_exclude:
-                        break
-
-                if found_het_and_exclude:
-                    continue
-
-
-                if len(mutations) == 0:
-                    mutations.add('without_mutation')
-
-                all_mutations.update(mutations)
-                mutations = list(mutations)
-                mutations.sort()
-                if no_combinations:
-                    for mutation in mutations:
-                        all_mutations_seen_combinations.add((mutation,))
-                        print(sample, mic_data[sample][antibiotic], mutation, sep='\t', file=f)
-                else:
-                    all_mutations_seen_combinations.add(tuple(mutations))
-                    mutations = '.'.join(mutations)
-                    print(sample, mic_data[sample][antibiotic], mutations, sep='\t', file=f)
-
-        return all_mutations, all_mutations_seen_combinations
+    def _get_colours(cls, total_length, number_of_colours, colormap):
+        if number_of_colours == 1:
+            return ["black"] * total_length
+        elif number_of_colours == 0:
+            cmap = cmx.get_cmap(colormap)
+            vals = [1.0 * x / (total_length - 1) for x in range(total_length)]
+            return [cmap(x) for x in vals]
+        else:
+            cmap = cmx.get_cmap(colormap)
+            colours = []
+            for i in itertools.cycle(range(number_of_colours)):
+                colours.append(cmap(i))
+                if len(colours) >= total_length:
+                    break
+            return colours
 
 
     @classmethod
-    def _to_dots_tsv(cls, all_mutations, combinations, outfile):
-        if 'without_mutation' in all_mutations:
-            all_mutations.remove('without_mutation')
-            combinations.remove(('without_mutation',))
-            has_without_mutation = True
-        else:
-            has_without_mutation = False
+    def _get_top_plot_data(cls, summary_data, mic_data, antibiotic, use_hets, no_combinations=False, interrupted=False, outfile=None):
+        assert use_hets in {'yes', 'no', 'exclude'}
+        if outfile is not None:
+            f = pyfastaq.utils.open_file_write(outfile)
+            print('Sample\tMIC\tMutations', file=f)
 
-        all_mutations = list(all_mutations)
-        all_mutations.sort()
-        combinations = list(combinations)
-        combinations.sort()
+        ignore_columns = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
+        all_mutations = set()
+        all_mutations_seen_combinations = set()
+        top_plot_data = {} # cluster combination -> list of y coords (MIC values)
 
-        if has_without_mutation:
-            all_mutations.append('without_mutation')
-            combinations.append(('without_mutation',))
+        for sample in sorted(summary_data):
+            if sample not in mic_data:
+                raise Error('No MIC data found for sample "' + sample + '". Cannot continue')
+            if antibiotic not in mic_data[sample]:
+                raise Error('Antibiotic "' + antibiotic + '" not found. Cannot continue')
 
-        output_columns = {}
-        for combination in combinations:
-            output_columns[combination] = [(1 if x in combination else 0) for x in all_mutations]
+            if mic_data[sample][antibiotic] == 'NA':
+                continue
 
-        with open(outfile, 'w') as f:
-            print('Mutation', end='', file=f)
-            for x in combinations:
-                print('\t', '.'.join(x), sep='', end='', file=f)
-            print('', file=f)
+            mutations = set()
+            found_het_and_exclude = False
 
-            for i in range(len(all_mutations)):
-                row = [all_mutations[i]] + [output_columns[x][i] for x in combinations]
-                print(*row, sep='\t', file=f)
+            for cluster in summary_data[sample]:
+                if summary_data[sample][cluster]['assembled'] == 'interrupted' and interrupted:
+                    mutations.add(cluster + '.interrupted')
 
+                for column, value in summary_data[sample][cluster].items():
+                    if column in ignore_columns or column.endswith('.%'):
+                        continue
 
-    def _make_plot(self,
-      samples_file,
-      dots_file,
-    ):
-        r_script = self.outprefix + '.R'
+                    if value == 'yes' or (use_hets == 'yes' and value == 'het'):
+                        mutations.add(cluster + '.' + column.strip())
+                    elif use_hets == 'exclude' and value == 'het':
+                        found_het_and_exclude = True
+                        break
 
-        try:
-            f = open(r_script, 'w')
-        except:
-            raise Error('Error opening R script for writing "' + r_script + '"')
+                if found_het_and_exclude:
+                    break
 
-        libraries = ['ggplot2', 'RColorBrewer', 'reshape2']
-        for lib in libraries:
-            print('library(', lib, ')', sep='', file=f)
-
-        print('samples = read.csv(file="', samples_file, r'''", header=TRUE, sep="\t")''', sep='', file=f)
-        print('dots = read.csv(file="', dots_file, r'''", header=TRUE, sep="\t", check.names=FALSE)''', sep='', file=f)
-
-        if self.log_y:
-            print('use.log = TRUE', file=f)
-        else:
-            print('use.log = FALSE', file=f)
-
-        dot_colour = '"black"' if self.dot_outline else 'setcols'
-
-        print(r'''
-dots.melt = melt(dots)
-colnames(dots.melt) <- c("var1", "var2", "value")
-
-palette.name = "''', self.palette, r'''"
-colour.number = ''', self.number_of_colours, r'''
-ncols <- length(as.vector(unique(samples$Mutations)))
-
-if (colour.number == 0) {
-    accent <- brewer.pal(8, palette.name)
-    accentPalette <- colorRampPalette(accent)
-    cols <- accentPalette(ncols)
-} else if (colour.number == 1) {
-        cols <- rep("black", ncols)
-} else {
-    if (colour.number == 2) {
-        unique_cols <- brewer.pal(3, palette.name)[1:2]
-    }
-    else {
-        unique_cols <- brewer.pal(colour.number, palette.name)
-    }
-
-    cols <- rep(unique_cols, ncols)
-}
-
-names(cols) <- sort(as.vector(unique(samples$Mutations)))
-setcols <- c()
-
-setcols <- apply(dots.melt, 1, function(x){
-
-  if (x[3]==1){ cols[x[2]] }else{ "white" }
-
-})
-
-dots.melt <- cbind(dots.melt, setcols)
+            if found_het_and_exclude:
+                continue
 
 
-mutlevels <- levels(dots.melt$var1)
-genes <- unique(gsub("\\..*", "", mutlevels))
-check.without <- match("without_mutation", genes)
-if(!is.na(check.without)){ genes <- genes[-check.without] }
-mutations <- c()
+            if len(mutations) == 0:
+                mutations.add('without_mutation')
 
-for (i in 1:length(genes)){
-  curmutations <- mutlevels[grep(paste0(genes[i], "."), mutlevels)]
-  curgene <- gsub("^.*\\.", "", curmutations)
-  curgene <- gsub("^\\D+", "", curgene) # if there is a reference base
-  genepos <- as.numeric(gsub("\\D+", "", curgene))
-  curmutations <- curmutations[order(genepos)]
-  mutations <- c(mutations, curmutations)
-}
-
-if (!is.na(check.without)){ mutations <- c(mutations, "without_mutation") }
-
-
-dotplot <- ggplot(dots.melt, aes(x=var2, y=var1)) +
-  geom_point(aes(fill=setcols, colour=''', dot_colour, '), shape=21, size=''', self.dot_size, r''') +
-  scale_fill_identity()+
-  scale_colour_identity()+
-  ylim(rev(mutations)) +
-  theme_bw() +
-  theme(axis.text.x = element_blank(),
-        axis.text.y = element_text(size=''', self.dot_y_text_size, r'''),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        axis.ticks = element_blank(),
-        panel.border = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        legend.position="none")
-
-range.mics <- sort(c(''' + ','.join([str(x) for x in self.mic_values]) + r'''))
-if (use.log & range.mics[1] == 0) {
-    range.mics <- range.mics[-1]
-}
-if (use.log){ final.mics <- log(range.mics) }else{ final.mics <- range.mics }
-
-sized_dot_data <- aggregate(samples$Sample,by=list(x=samples$Mutations,y=samples$MIC),length)
-names(sized_dot_data)[3] <- "count"
-
-top_plot <- ggplot() +''', sep='', file=f)
-
-        ymic = 'log(MIC)' if self.log_y else 'MIC'
-        legend_position = '"none"'
-
-        if 'point' in self.plot_types:
-            if self.point_size > 0:
-                print('    geom_point(data=samples, aes(x=Mutations, y=', ymic, ', color=Mutations), position = position_jitter(width=''', self.jitter_width, ', height=', self.jitter_height, '), size=', self.point_size, ', alpha=.5) +', sep='', file=f)
+            all_mutations.update(mutations)
+            mutations = list(mutations)
+            mutations.sort()
+            if no_combinations:
+                for mutation in mutations:
+                    all_mutations_seen_combinations.add((mutation,))
+                    if mutation not in top_plot_data:
+                        top_plot_data[mutation] = []
+                    top_plot_data[mutation].append(mic_data[sample][antibiotic])
+                    if outfile is not None:
+                        print(sample, mic_data[sample][antibiotic], mutation, sep='\t', file=f)
             else:
-                y = 'log(y)' if self.log_y else 'y'
-                print('    geom_point(data=sized_dot_data, aes(x=x, y=', y, ', size=count, color=x)) +', sep='', file=f)
-                legend_position = 'c(' + str(self.point_legend_x) + ',' + str(self.point_legend_y) + ')'
+                all_mutations_seen_combinations.add(tuple(mutations))
+                mutations = '.'.join(mutations)
+                if mutations not in top_plot_data:
+                    top_plot_data[mutations] = []
+                top_plot_data[mutations].append(mic_data[sample][antibiotic])
+                if outfile is not None:
+                    print(sample, mic_data[sample][antibiotic], mutations, sep='\t', file=f)
 
-        if 'violin' in self.plot_types:
-            print('    geom_violin(data=samples, aes(x=Mutations, y=jitter(', ymic, ',', self.violin_y_jitter, '), color=Mutations)', sep='', end='', file=f)
-            if self.violin_scale_width:
-                print(', scale="width"', end='', file=f)
 
-            print(', alpha=.10, show.legend = FALSE) +', file=f)
+        if outfile is not None:
+            pyfastaq.utils.close(f)
 
-        if 'boxplot' in self.plot_types:
-            print('    geom_boxplot(data=samples, aes(x=Mutations, y=', ymic, ', color=Mutations), alpha=.10, show.legend = FALSE) +''', file=f)
+        return top_plot_data, all_mutations, all_mutations_seen_combinations
 
-        if self.no_combinations:
-            axis_text_x = 'element_text(size=24, angle=45, hjust=1)'
+
+    @classmethod
+    def _top_plot_y_ticks(cls, mic_data, antibiotic, log_y):
+        mic_values = set()
+        for sample in mic_data:
+            mic = mic_data[sample][antibiotic]
+            if mic not in [None, 'NA']:
+                mic_values.add(mic)
+
+        max_mic = max(mic_values)
+        min_mic = min(mic_values)
+        new_mic_values = []
+        i = 1
+        while i < max_mic * 2:
+            new_mic_values.append(i)
+            i *= 2
+
+        i = 0.5
+        while i > min_mic / 2:
+            new_mic_values.append(i)
+            i *= 0.5
+
+        new_mic_values.sort()
+        new_mic_values = [round(x, 4) for x in new_mic_values]
+
+        if log_y > 0:
+            tick_positions = [math.log(x, log_y) for x in new_mic_values]
         else:
-            axis_text_x = 'element_blank()'
+            tick_positions = new_mic_values
 
-        for x in self.hlines:
-            if self.log_y:
-                print('    geom_hline(yintercept=log(', x, '), lty=2) +', sep='', file=f)
+        return tick_positions, new_mic_values
+
+
+    @classmethod
+    def _top_plot_scatter_counts(cls, mutations, top_plot_data, colours, log_y):
+        x_coords = []
+        y_coords = []
+        sizes = []
+        colour_list = []
+
+        for i, mutation in enumerate(mutations):
+            counts = collections.Counter(top_plot_data[mutation])
+            for mic in sorted(counts):
+                x_coords.append(i + 1)
+                if log_y > 0:
+                    y_coords.append(math.log(mic, log_y))
+                else:
+                    y_coords.append(mic)
+                sizes.append(counts[mic])
+                colour_list.append(colours[i])
+                
+        return x_coords, y_coords, sizes, colour_list
+
+
+    @classmethod
+    def _top_plot_violin_data(cls, mutations, top_plot_data, log_y):
+        violin_data = []
+        violin_pos = []
+
+        for i, mutation in enumerate(mutations):
+            if log_y > 0:
+                violin_data.append([math.log(x, log_y) for x in top_plot_data[mutation]])
             else:
-                print('    geom_hline(yintercept=', x, ', lty=2) +', sep='', file=f)
+                violin_data.append(top_plot_data[mutation])
+            violin_pos.append(i + 1)
+
+        return violin_data, violin_pos
+
+            
+    @classmethod
+    def _ordered_bottom_plot_rows(cls, mutations):
+        l = []
+        infinity = float('inf')
+
+        for x in mutations:
+            try:
+                cluster, variant = x.split('.', maxsplit=1)
+            except:
+                l.append((x, infinity, x))
+                continue
+
+            if '.' in variant:
+                try:
+                    var_group, var = variant.split('.', maxsplit=1)
+                except:
+                    var_group = None
+                    var = variant
+
+                variant = var
+
+            regex_match = regex_position_from_var.match(variant)
+            if regex_match is not None and regex_match.group('coord') != '':
+                coord = int(regex_match.group('coord'))
+            else:
+                coord = infinity
+
+            l.append((cluster, coord, x))
+
+        l.sort()
+        return [x[-1] for x in l]
 
 
-        print(r'''    ylab(expression(paste("''' + ymic + r''' ", mu, "g/mL"))) +
-    scale_colour_manual(values = cols, guide=FALSE) +
-    scale_size(range=c(''' + ','.join([str(x) for x in self.point_range]) + r'''), breaks = c(''' + ','.join([str(x) for x in self.point_break])  + r''')) +
-    ggtitle("''' + self.main_title + r'''") +
-    scale_y_continuous(breaks=final.mics, labels=range.mics) +
-    theme_bw() +
-    theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            panel.border = element_blank(),
-            axis.line = element_line(color="black"),
-            axis.title.x = element_blank(),
-            axis.title.y = element_text(size=22),
-            axis.text.x = ''' + axis_text_x + r''',
-            axis.text.y = element_text(size=24),
-            axis.title = element_text(size=20),
-            plot.title = element_text(lineheight=.6, size = 24, hjust=.5, face="bold"),
-            legend.title = element_text(size=30),
-            legend.text = element_text(size=20),
-            legend.position=''' + legend_position + ')', file=f)
+    @classmethod
+    def _ordered_columns(cls, mutations, top_plot_data):
+        # FIXME
+        return sorted(list(mutations))
 
-        if self.no_combinations:
-            print('top_plot', file=f)
-            print('ggsave("', self.outprefix, '.pdf", useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, ')', sep='', file=f)
+
+    @classmethod
+    def _bottom_scatter_data(cls, bottom_plot_rows, columns, colours):
+        x_coords = []
+        y_coords = []
+        colour_list = []
+
+        for i, row in enumerate(bottom_plot_rows):
+            for j, col in enumerate(columns):
+                if row in col:
+                    x_coords.append(j + 1)
+                    y_coords.append(len(bottom_plot_rows) - i)
+                    colour_list.append(colours[j])
+
+        return x_coords, y_coords, colour_list
+
+
+    @classmethod
+    def _right_plot_data(cls, scatter_count_sizes, number_of_circles, x_pos):
+        y_max = max(scatter_count_sizes)
+        if y_max > 100:
+            y_max = int(math.ceil(y_max / 100.0)) * 100
+            sizes = [5, 50] + [x for x in range(100, y_max, 100)]
         else:
-            print(r'''library(gtable)
-library(grid)
-g1 <- ggplotGrob(top_plot)
-g2 <- ggplotGrob(dotplot)
-g <- rbind(g1, g2, size="first")
-g$widths <- unit.pmax(g1$widths, g2$widths)
-panels <- g$layout$t[grepl("panel", g$layout$name)]
+            y_max = int(math.ceil(y_max / 10.0)) * 10
+            sizes = [5] + [x for x in range(10, y_max, 10)]
+        x_coords = [x_pos] * len(sizes)
+        y_coords = [x + 1 for x in range(len(sizes))]
+        y_coords.reverse()
+        return x_coords, y_coords, sizes
 
-if(getRversion() < "3.3.0"){
-    g$heights <- grid:::unit.list(g$heights)
-    g$heights[panels][1] <- list(unit(''', self.panel_heights[0], r''', "null"))
-    g$heights[panels][2] <- list(unit(''', self.panel_heights[1], r''', "null"))
-} else {
-    g$heights[panels][1] = unit(''', self.panel_heights[0], r''',"null")
-    g$heights[panels][2] = unit(''', self.panel_heights[1], r''',"null")
-}
 
-pdf("''', self.outprefix, '.pdf", useDingbats=FALSE, height=', self.plot_height, ', width=', self.plot_width, r''')
-grid.newpage()
-grid.draw(g)
-dev.off()
-''', sep='', file=f)
+    def _make_plot(self, mic_data, top_plot_data, all_mutations, mut_combinations):
+        bottom_plot_rows = MicPlotter._ordered_bottom_plot_rows(all_mutations)
+        columns = MicPlotter._ordered_columns(mut_combinations, top_plot_data)
+        colours = MicPlotter._get_colours(len(columns), self.number_of_colours, self.palette)
+        bottom_scatter_x, bottom_scatter_y, bottom_colours = MicPlotter._bottom_scatter_data(bottom_plot_rows, columns, colours)
+        columns = ['.'.join(x) for x in columns]
+        assert len(colours) == len(columns)
+        max_x = len(colours) + 1
+    
+        scatter_count_x, scatter_count_y, scatter_count_sizes, scatter_count_colours = MicPlotter._top_plot_scatter_counts(columns, top_plot_data, colours, self.log_y)
 
-        f.close()
-        common.syscall('R CMD BATCH ' + r_script)
+        violin_data, violin_positions = MicPlotter._top_plot_violin_data(columns, top_plot_data, self.log_y)
+
+        # -------------------- SET UP GRID & PLOTS -----------------
+        fig=plt.figure(figsize=(self.plot_height, self.plot_width))
+        gs = gridspec.GridSpec(2, 2, height_ratios=self.panel_heights, width_ratios=[5,1])
+        plots=[]
+        plots.append(plt.subplot(gs[0]))
+        plots.append(plt.subplot(gs[1]))
+        plots.append(plt.subplot(gs[2]))
+
+        # ------------------------- TOP PLOT -----------------------
+        for h in self.hlines:
+            if self.log_y > 0:
+                h = math.log(h, self.log_y)
+            plots[0].hlines(h, 0, max_x, linestyle='--', linewidth=1, color='black')
+
+
+        violins = plots[0].violinplot(violin_data, violin_positions, widths=self.violin_width, showmeans=False, showextrema=False, showmedians=False)
+        for x, pc in enumerate(violins['bodies']):
+            pc.set_facecolor(colours[x])
+            pc.set_edgecolor(colours[x])
+
+        plots[0].scatter(scatter_count_x, scatter_count_y, s=scatter_count_sizes, c=scatter_count_colours, linewidth=0)
+        plots[0].axis([0,max(bottom_scatter_x) + 1,min(scatter_count_y), max(scatter_count_y)])
+
+        y_tick_positions, y_tick_labels = MicPlotter._top_plot_y_ticks(mic_data, self.antibiotic, self.log_y)
+        plots[0].yaxis.set_ticks(y_tick_positions)
+        plots[0].set_yticklabels(y_tick_labels)
+        ylabel = r'$\log_' + str(int(self.log_y)) + '$(MIC) $\mu$g/mL' if self.log_y > 0 else r'MIC $\mu$g/mL'
+        plots[0].set_ylabel(ylabel)
+        plots[0].set_xticklabels([])
+        plots[0].set_title(self.main_title, fontsize=18)
+
+        # ------------------------- BOTTOM PLOT -----------------------
+        plots[2].axis([0,max(bottom_scatter_x) + 1,0,max(bottom_scatter_y) + 1])
+        plots[2].scatter(bottom_scatter_x, bottom_scatter_y, marker='o', s=self.dot_size, color=bottom_colours)
+        plots[2].spines["top"].set_visible(False)
+        plots[2].spines["right"].set_visible(False)
+        plots[2].spines["bottom"].set_visible(False)
+        plots[2].spines["left"].set_visible(False)
+        plots[2].yaxis.set_tick_params(length=0)
+        plots[2].xaxis.set_ticks([])
+        plots[2].set_xticklabels([])
+        plots[2].yaxis.set_ticks([(i+1) for i in range(len(bottom_plot_rows))])
+        plots[2].set_yticklabels(bottom_plot_rows[::-1])
+
+        # ------------------------- RIGHT PLOT -------------------------
+        right_x_coord = 0.75
+        right_x, right_y, right_sizes = MicPlotter._right_plot_data(scatter_count_sizes, 5, right_x_coord)
+        plots[1].scatter(right_x, right_y, s=right_sizes, c="black")
+        plots[1].axis('off')
+        plots[1].axis([0,4,-2*len(right_y),len(right_y)+1])
+        for i, y in enumerate(right_y):
+            plots[1].annotate(right_sizes[i], [right_x_coord + 0.75, y-0.2])
+        plots[1].annotate("Counts", [right_x_coord - 0.1, len(right_y) + 0.5])
+
+        plt.tight_layout()
+        plt.savefig(self.outprefix + '.pdf')
 
 
     def run(self):
         mic_data = MicPlotter._load_mic_file(self.mic_file)
         summary_data = MicPlotter._load_summary_file(self.summary_file)
         boxplot_tsv = self.outprefix + '.boxplot.tsv'
-        all_mutations, combinations = MicPlotter._to_boxplot_tsv(summary_data, mic_data, self.antibiotic, boxplot_tsv, self.use_hets, no_combinations=self.no_combinations, interrupted=self.interrupted)
-        dots_tsv = self.outprefix + '.dots.tsv'
-        MicPlotter._to_dots_tsv(all_mutations, combinations, dots_tsv)
-        self._make_plot(boxplot_tsv, dots_tsv)
-        
+        top_plot_data, all_mutations, combinations = MicPlotter._get_top_plot_data(summary_data, mic_data, self.antibiotic, self.use_hets, no_combinations=self.no_combinations, interrupted=self.interrupted, outfile=boxplot_tsv)
+        self._make_plot(mic_data, top_plot_data, all_mutations, combinations)
