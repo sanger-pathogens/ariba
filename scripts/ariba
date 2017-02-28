@@ -93,7 +93,7 @@ micplot_upper_plot_group.add_argument('--point_range', help='Min and max size of
 micplot_upper_plot_group.add_argument('--point_break', help='Comma-separated list of breakpoints in point sizes when --point_size is 0 [%(default)s]', default='10,50,100,200,300', metavar='integer1.integer2,integer3,...')
 micplot_upper_plot_group.add_argument('--point_legend_x', type=float, help='x coord of legend when --point_size is 0 [%(default)s]', default=-0.15, metavar='FLOAT')
 micplot_upper_plot_group.add_argument('--point_legend_y', type=float, help='y coord of legend when --point_size is 0 [%(default)s]', default=0.9, metavar='FLOAT')
-micplot_upper_plot_group.add_argument('--violin_y_jitter', type=float, help='y jitter in violin plot. Set to a small number>0, eg 0.001, if violins are not visible. Also see --violin_scale_width [%(default)s]', default=0)
+micplot_upper_plot_group.add_argument('--violin_y_jitter', type=float, help='y jitter in violin plot. Set to a small number>0, eg 0.001, if violins are not visible. Also see --violin_scale_width [%(default)s]', default=0, metavar='FLOAT')
 micplot_upper_plot_group.add_argument('--violin_scale_width', action='store_true', help='Use this if violins are too narrow. Also see --violin_y_jitter')
 
 micplot_lower_plot_group = subparser_micplot.add_argument_group('Lower plot options')
