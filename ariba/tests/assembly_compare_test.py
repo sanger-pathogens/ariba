@@ -107,6 +107,37 @@ class TestAssemblyCompare(unittest.TestCase):
         self.assertEqual(expected, got)
 
 
+    def test_nucmer_hits_to_ref_and_qry_coords(self):
+        '''test _nucmer_hits_to_ref_and_qry_coords'''
+        hits = [
+            ['1', '42', '1', '42', '42', '42', '100.00', '1000', '1000', '1', '1', 'ref', 'contig1'],
+            ['31', '52', '1', '22', '22', '22', '100.00', '1000', '1000', '1', '1', 'ref', 'contig1'],
+            ['11', '32', '1000', '1022', '22', '22', '100.00', '1000', '1000', '1', '1', 'ref', 'contig1'],
+            ['100', '142', '200', '242', '42', '42', '99.42', '1000', '1000', '1', '1', 'ref', 'contig1'],
+            ['100', '110', '200', '210', '11', '11', '99.42', '1000', '1000', '1', '1', 'ref', 'contig2'],
+        ]
+        nucmer_hits = {
+            'contig1': [
+                pymummer.alignment.Alignment('\t'.join(hits[0])),
+                pymummer.alignment.Alignment('\t'.join(hits[1])),
+                pymummer.alignment.Alignment('\t'.join(hits[2])),
+            ],
+            'contig2': [
+                pymummer.alignment.Alignment('\t'.join(hits[3])),
+            ]
+        }
+
+        got_ctg, got_ref = assembly_compare.AssemblyCompare.nucmer_hits_to_ref_and_qry_coords(nucmer_hits)
+        expected_ctg = {
+            'contig1': [pyfastaq.intervals.Interval(0,51), pyfastaq.intervals.Interval(99, 141)],
+            'contig2': [pyfastaq.intervals.Interval(99, 109)]
+        }
+        expected_ref = {
+            'contig1': [pyfastaq.intervals.Interval(0,51), pyfastaq.intervals.Interval(99, 141)],
+            'contig2': [pyfastaq.intervals.Interval(99, 109)]
+        }
+
+
     def test_ref_cov_per_contig(self):
         '''test ref_cov_per_contig'''
         hits = [
