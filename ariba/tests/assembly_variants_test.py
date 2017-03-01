@@ -309,7 +309,12 @@ class TestAssemblyVariants(unittest.TestCase):
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('14\tC\tA\t14\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig1'))
         v3 = pymummer.variant.Variant(pymummer.snp.Snp('15\tG\tC\t15\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig1'))
 
-        nucmer_coords = {
+        ref_nucmer_coords = {
+            'contig1': [pyfastaq.intervals.Interval(0, 30)],
+            'contig2': [pyfastaq.intervals.Interval(10, 41)],
+        }
+
+        ctg_nucmer_coords = {
             'contig1': [pyfastaq.intervals.Interval(0, 30)],
             'contig2': [pyfastaq.intervals.Interval(10, 41)],
         }
@@ -328,7 +333,7 @@ class TestAssemblyVariants(unittest.TestCase):
         }
 
         a_variants = assembly_variants.AssemblyVariants(refdata, nucmer_snp_file)
-        got = a_variants.get_variants('presence_absence', nucmer_coords)
+        got = a_variants.get_variants('presence_absence', ctg_nucmer_coords, ref_nucmer_coords)
         self.assertEqual(expected, got)
 
 
@@ -352,11 +357,15 @@ class TestAssemblyVariants(unittest.TestCase):
         v2 = pymummer.variant.Variant(pymummer.snp.Snp('14\tC\tA\t14\tx\tx\t42\t42\tx\tx\tvariants_only\tcontig1'))
         v3 = pymummer.variant.Variant(pymummer.snp.Snp('15\tG\tC\t15\tx\tx\t42\t42\tx\tx\tvariants_only\tcontig1'))
 
-        nucmer_coords = {
+        ctg_nucmer_coords = {
             'contig1': [pyfastaq.intervals.Interval(0, 41)],
             'contig2': [pyfastaq.intervals.Interval(10, 41)],
         }
 
+        ref_nucmer_coords = {
+            'contig1': [pyfastaq.intervals.Interval(0, 41)],
+            'contig2': [pyfastaq.intervals.Interval(10, 41)],
+        }
         expected = {
             'contig1': [
                 (4, 'p', 'A5D', 'NONSYN', [v2, v3], set(), set()),
@@ -367,6 +376,6 @@ class TestAssemblyVariants(unittest.TestCase):
         }
 
         a_variants = assembly_variants.AssemblyVariants(refdata, nucmer_snp_file)
-        got = a_variants.get_variants('variants_only', nucmer_coords)
+        got = a_variants.get_variants('variants_only', ctg_nucmer_coords, ref_nucmer_coords)
         self.assertEqual(expected, got)
 

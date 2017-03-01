@@ -382,9 +382,9 @@ class Cluster:
             self.assembly_compare.run()
             self.status_flag = self.assembly_compare.update_flag(self.status_flag)
 
-            nucmer_hits_to_ref = assembly_compare.AssemblyCompare.nucmer_hits_to_ref_coords(self.assembly_compare.nucmer_hits)
+            allowed_ctg_pos, allowed_ref_pos = assembly_compare.AssemblyCompare.nucmer_hits_to_ref_and_qry_coords(self.assembly_compare.nucmer_hits)
             assembly_variants_obj = assembly_variants.AssemblyVariants(self.refdata, self.assembly_compare.nucmer_snps_file)
-            self.assembly_variants = assembly_variants_obj.get_variants(self.ref_sequence.id, nucmer_hits_to_ref)
+            self.assembly_variants = assembly_variants_obj.get_variants(self.ref_sequence.id, allowed_ctg_pos, allowed_ref_pos)
 
             for var_list in self.assembly_variants.values():
                 for var in var_list:
