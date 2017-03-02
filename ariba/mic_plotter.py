@@ -42,7 +42,8 @@ class MicPlotter:
       palette='Accent',
       number_of_colours=0,
       interrupted=False,
-      violin_width=0.75
+      violin_width=0.75,
+      xkcd=False
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -101,6 +102,8 @@ class MicPlotter:
         self.number_of_colours = number_of_colours
         self.interrupted = interrupted
         self.violin_width = violin_width
+        if xkcd:
+            plt.xkcd()
 
 
     @classmethod
