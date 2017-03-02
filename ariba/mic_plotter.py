@@ -41,6 +41,7 @@ class MicPlotter:
       panel_heights='5,1',
       palette='Accent',
       number_of_colours=0,
+      colour_skip=None,
       interrupted=False,
       violin_width=0.75,
       xkcd=False
@@ -100,6 +101,15 @@ class MicPlotter:
 
         self.palette = palette
         self.number_of_colours = number_of_colours
+
+        if colour_skip is None:
+            self.colour_skip = None
+        else:
+            try:
+                self.colour_skip = [float(x) for x in colour_skip.split(',')]
+            except:
+                raise Error('Error in colour_skip option. Needs to be of the form a,b where 0 <= a < b <= 1. Got this:\n' + colour_skip)
+
         self.interrupted = interrupted
         self.violin_width = violin_width
         if xkcd:
@@ -180,12 +190,24 @@ class MicPlotter:
 
 
     @classmethod
-    def _get_colours(cls, total_length, number_of_colours, colormap):
+    def _get_colours(cls, total_length, number_of_colours, colormap, skip=None):
         if number_of_colours == 1:
             return ["black"] * total_length
         elif number_of_colours == 0:
             cmap = cmx.get_cmap(colormap)
-            vals = [1.0 * x / (total_length - 1) for x in range(total_length)]
+            if skip is None:
+                vals = [1.0 * x / (total_length - 1) for x in range(total_length)]
+            else:
+                assert len(skip) == 2 and 0 <= skip[0] <= 1 and 0 <= skip[1] <= 1
+                if skip[-1] == 1:
+                    vals = [skip[0] * x / (total_length - 1) for x in range(total_length)]
+                elif skip[0] == 0:
+                    vals = [skip[1] + (1 - skip[1]) * x / (total_length - 1) for x in range(total_length)]
+                else:
+                    length = 1 - (skip[1] - skip[0])
+                    vals = [(length) * x / (total_length - 1) for x in range(total_length)]
+                    vals = [x if x < skip[0] else x + (1-length) for x in vals]
+                    
             return [cmap(x) for x in vals]
         else:
             cmap = cmx.get_cmap(colormap)
@@ -413,7 +435,7 @@ class MicPlotter:
     def _make_plot(self, mic_data, top_plot_data, all_mutations, mut_combinations):
         bottom_plot_rows = MicPlotter._ordered_bottom_plot_rows(all_mutations)
         columns = MicPlotter._ordered_columns(mut_combinations, top_plot_data)
-        colours = MicPlotter._get_colours(len(columns), self.number_of_colours, self.palette)
+        colours = MicPlotter._get_colours(len(columns), self.number_of_colours, self.palette, self.colour_skip)
         bottom_scatter_x, bottom_scatter_y, bottom_colours = MicPlotter._bottom_scatter_data(bottom_plot_rows, columns, colours)
         columns = ['.'.join(x) for x in columns]
         assert len(colours) == len(columns)

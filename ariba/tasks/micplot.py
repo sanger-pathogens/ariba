@@ -26,6 +26,7 @@ def run(options):
       panel_heights=options.panel_heights,
       palette=options.palette,
       number_of_colours=options.number_of_colours,
+      colour_skip=options.colour_skip,
       interrupted=options.interrupted,
       violin_width=options.violin_width,
       xkcd=options.xkcd
