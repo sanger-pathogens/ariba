@@ -77,7 +77,7 @@ micplot_general_group.add_argument('--use_hets', choices=['yes', 'no', 'exclude'
 micplot_general_group.add_argument('--interrupted', action='store_true', help='Include interrupted genes (as in the assembled column of the ariba summary files)')
 micplot_general_group.add_argument('--min_samples', type=int, help='Minimum number of samples in each column required to include in plot [%(default)s]', metavar='INT', default=1)
 micplot_general_group.add_argument('--no_combinations', action='store_true', help='Do not show combinations of variants. Instead separate out into one box/violin plot per variant.')
-micplot_general_group.add_argument('--panel_heights', help='Two integers that determine relative height of top and bottom plots. eg 5,1 means ratio of 5:1 between top and bottom panel heights [%(default)s]', default='5,1', metavar='height1,height2')
+micplot_general_group.add_argument('--panel_heights', help='Two integers that determine relative height of top and bottom plots. eg 5,1 means ratio of 5:1 between top and bottom panel heights [%(default)s]', default='9,2', metavar='height1,height2')
 micplot_general_group.add_argument('--xkcd', action='store_true', help='Best used with xkcd font installed ;)')
 
 micplot_colour_group = subparser_micplot.add_argument_group('Colour options')
@@ -96,7 +96,7 @@ micplot_upper_plot_group.add_argument('--violin_width', type=float, help='Width 
 micplot_lower_plot_group = subparser_micplot.add_argument_group('Lower plot options')
 micplot_lower_plot_group.add_argument('--dot_size', type=float, help='Size of dots in lower part of plot [%(default)s]', default=100, metavar='FLOAT')
 micplot_lower_plot_group.add_argument('--dot_outline', action='store_true', help='Black outline around all dots (whether coloured or not) in lower part of plots')
-micplot_lower_plot_group.add_argument('--dot_y_text_size', type=int, help='Text size of labels [%(default)s]', default=18, metavar='INT')
+micplot_lower_plot_group.add_argument('--dot_y_text_size', type=int, help='Text size of labels [%(default)s]', default=7, metavar='INT')
 
 subparser_micplot.set_defaults(func=ariba.tasks.micplot.run)
 

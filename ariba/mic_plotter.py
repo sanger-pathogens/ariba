@@ -36,8 +36,8 @@ class MicPlotter:
       point_size=4,
       dot_size=100,
       dot_outline=False,
-      dot_y_text_size=18,
-      panel_heights='5,1',
+      dot_y_text_size=7,
+      panel_heights='9,2',
       colourmap='Accent',
       number_of_colours=0,
       colour_skip=None,
@@ -544,7 +544,7 @@ class MicPlotter:
         plots[bottom_plot_index].xaxis.set_ticks([])
         plots[bottom_plot_index].set_xticklabels([])
         plots[bottom_plot_index].yaxis.set_ticks([(i+1) for i in range(len(bottom_plot_rows))])
-        plots[bottom_plot_index].set_yticklabels(bottom_plot_rows[::-1])
+        plots[bottom_plot_index].set_yticklabels(bottom_plot_rows[::-1], fontsize=self.dot_y_text_size)
 
         # ------------------------- RIGHT PLOT -------------------------
         if self.point_size == 0:
