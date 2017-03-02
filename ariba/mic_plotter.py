@@ -529,4 +529,5 @@ class MicPlotter:
         summary_data = MicPlotter._load_summary_file(self.summary_file)
         boxplot_tsv = self.outprefix + '.boxplot.tsv'
         top_plot_data, all_mutations, combinations = MicPlotter._get_top_plot_data(summary_data, mic_data, self.antibiotic, self.use_hets, no_combinations=self.no_combinations, interrupted=self.interrupted, outfile=boxplot_tsv)
+        top_plot_data, all_mutations, combinations = MicPlotter._filter_top_plot_data(top_plot_data, all_mutations, combinations, self.min_samples)
         self._make_plot(mic_data, top_plot_data, all_mutations, combinations)

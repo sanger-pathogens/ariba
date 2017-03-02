@@ -14,7 +14,6 @@ def run(options):
       log_y=options.log_y,
       plot_types=options.plot_types,
       jitter_width=options.jitter_width,
-      jitter_height=options.jitter_height,
       no_combinations=options.no_combinations,
       hlines=options.hlines,
       point_size=options.point_size,
@@ -29,7 +28,8 @@ def run(options):
       colour_skip=options.colour_skip,
       interrupted=options.interrupted,
       violin_width=options.violin_width,
-      xkcd=options.xkcd
+      xkcd=options.xkcd,
+      min_samples=options.min_samples
     )
 
     plotter.run()
