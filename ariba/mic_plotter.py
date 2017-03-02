@@ -231,7 +231,7 @@ class MicPlotter:
             f = pyfastaq.utils.open_file_write(outfile)
             print('Sample\tMIC\tMutations', file=f)
 
-        ignore_columns = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
+        ignore_columns = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var', 'MULTIPLE'}
         all_mutations = set()
         all_mutations_seen_combinations = set()
         top_plot_data = {} # cluster combination -> list of y coords (MIC values)
