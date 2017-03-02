@@ -270,6 +270,12 @@ class TestMicPlotter(unittest.TestCase):
         # FIXME
 
 
+    def test_top_plot_scatter_data(self):
+        '''test _top_plot_scatter_data'''
+        top_plot_data = {}
+        # FIXME
+
+
     def test_top_plot_violin_data(self):
         '''test _top_plot_violin_data'''
         top_plot_data = {}

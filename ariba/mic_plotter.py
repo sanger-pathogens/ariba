@@ -369,6 +369,24 @@ class MicPlotter:
 
 
     @classmethod
+    def _top_plot_scatter_data(cls, mutations, top_plot_data, colours, log_y):
+        x_coords = []
+        y_coords = []
+        colour_list = []
+
+        for i, mutation in enumerate(mutations):
+            for mic in top_plot_data[mutation]:
+                x_coords.append(i + 1)
+                if log_y > 0:
+                    y_coords.append(math.log(mic, log_y))
+                else:
+                    y_coords.append(mic)
+                colour_list.append(colours[i])
+                
+        return x_coords, y_coords, colour_list
+
+
+    @classmethod
     def _top_plot_violin_data(cls, mutations, top_plot_data, log_y):
         violin_data = []
         violin_pos = []
@@ -463,16 +481,24 @@ class MicPlotter:
         max_x = len(colours) + 1
     
         scatter_count_x, scatter_count_y, scatter_count_sizes, scatter_count_colours = MicPlotter._top_plot_scatter_counts(columns, top_plot_data, colours, self.log_y)
-
+        scatter_data_x, scatter_data_y, scatter_data_colours = MicPlotter._top_plot_scatter_data(columns, top_plot_data, colours, self.log_y)
         violin_data, violin_positions = MicPlotter._top_plot_violin_data(columns, top_plot_data, self.log_y)
 
         # -------------------- SET UP GRID & PLOTS -----------------
         fig=plt.figure(figsize=(self.plot_width, self.plot_height))
-        gs = gridspec.GridSpec(2, 2, height_ratios=self.panel_heights, width_ratios=[5,1])
+        if self.point_size == 0:
+            gs = gridspec.GridSpec(2, 2, height_ratios=self.panel_heights, width_ratios=[5,1])
+        else:
+            gs = gridspec.GridSpec(2, 1, height_ratios=self.panel_heights)
+
         plots=[]
         plots.append(plt.subplot(gs[0]))
         plots.append(plt.subplot(gs[1]))
-        plots.append(plt.subplot(gs[2]))
+        if self.point_size == 0:
+            plots.append(plt.subplot(gs[2]))
+            bottom_plot_index = 2
+        else:
+            bottom_plot_index = 1
 
         # ------------------------- TOP PLOT -----------------------
         for h in self.hlines:
@@ -486,7 +512,11 @@ class MicPlotter:
             pc.set_facecolor(colours[x])
             pc.set_edgecolor(colours[x])
 
-        plots[0].scatter(scatter_count_x, scatter_count_y, s=scatter_count_sizes, c=scatter_count_colours, linewidth=0)
+        if self.point_size == 0:
+            plots[0].scatter(scatter_count_x, scatter_count_y, s=scatter_count_sizes, c=scatter_count_colours, linewidth=0)
+        else:
+            plots[0].scatter(scatter_data_x, scatter_data_y, c=scatter_data_colours, s=self.point_size)
+
         plots[0].axis([0,max(bottom_scatter_x) + 1,min(scatter_count_y), max(scatter_count_y)])
 
         y_tick_positions, y_tick_labels = MicPlotter._top_plot_y_ticks(mic_data, self.antibiotic, self.log_y)
@@ -498,27 +528,28 @@ class MicPlotter:
         plots[0].set_title(self.main_title, fontsize=18)
 
         # ------------------------- BOTTOM PLOT -----------------------
-        plots[2].axis([0,max(bottom_scatter_x) + 1,0,max(bottom_scatter_y) + 1])
-        plots[2].scatter(bottom_scatter_x, bottom_scatter_y, marker='o', s=self.dot_size, color=bottom_colours)
-        plots[2].spines["top"].set_visible(False)
-        plots[2].spines["right"].set_visible(False)
-        plots[2].spines["bottom"].set_visible(False)
-        plots[2].spines["left"].set_visible(False)
-        plots[2].yaxis.set_tick_params(length=0)
-        plots[2].xaxis.set_ticks([])
-        plots[2].set_xticklabels([])
-        plots[2].yaxis.set_ticks([(i+1) for i in range(len(bottom_plot_rows))])
-        plots[2].set_yticklabels(bottom_plot_rows[::-1])
+        plots[bottom_plot_index].axis([0,max(bottom_scatter_x) + 1,0,max(bottom_scatter_y) + 1])
+        plots[bottom_plot_index].scatter(bottom_scatter_x, bottom_scatter_y, marker='o', s=self.dot_size, color=bottom_colours)
+        plots[bottom_plot_index].spines["top"].set_visible(False)
+        plots[bottom_plot_index].spines["right"].set_visible(False)
+        plots[bottom_plot_index].spines["bottom"].set_visible(False)
+        plots[bottom_plot_index].spines["left"].set_visible(False)
+        plots[bottom_plot_index].yaxis.set_tick_params(length=0)
+        plots[bottom_plot_index].xaxis.set_ticks([])
+        plots[bottom_plot_index].set_xticklabels([])
+        plots[bottom_plot_index].yaxis.set_ticks([(i+1) for i in range(len(bottom_plot_rows))])
+        plots[bottom_plot_index].set_yticklabels(bottom_plot_rows[::-1])
 
         # ------------------------- RIGHT PLOT -------------------------
-        right_x_coord = 0.75
-        right_x, right_y, right_sizes = MicPlotter._right_plot_data(scatter_count_sizes, 5, right_x_coord)
-        plots[1].scatter(right_x, right_y, s=right_sizes, c="black")
-        plots[1].axis('off')
-        plots[1].axis([0,4,-2*len(right_y),len(right_y)+1])
-        for i, y in enumerate(right_y):
-            plots[1].annotate(right_sizes[i], [right_x_coord + 0.75, y-0.2])
-        plots[1].annotate("Counts", [right_x_coord - 0.1, len(right_y) + 0.5])
+        if self.point_size == 0:
+            right_x_coord = 0.75
+            right_x, right_y, right_sizes = MicPlotter._right_plot_data(scatter_count_sizes, 5, right_x_coord)
+            plots[1].scatter(right_x, right_y, s=right_sizes, c="black")
+            plots[1].axis('off')
+            plots[1].axis([0,4,-2*len(right_y),len(right_y)+1])
+            for i, y in enumerate(right_y):
+                plots[1].annotate(right_sizes[i], [right_x_coord + 0.75, y-0.2])
+            plots[1].annotate("Counts", [right_x_coord - 0.1, len(right_y) + 0.5])
 
         plt.tight_layout()
         plt.savefig(self.outprefix + '.pdf')
