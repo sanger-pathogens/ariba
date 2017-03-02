@@ -32,10 +32,8 @@ class MicPlotter:
       plot_types="points,violin",
       jitter_width=0.1,
       no_combinations=False,
-      hlines='0.25,2',
+      hlines='',
       point_size=4,
-      point_range='2,15',
-      point_break='10,50,100,200,300',
       dot_size=100,
       dot_outline=False,
       dot_y_text_size=18,
@@ -83,17 +81,6 @@ class MicPlotter:
             raise Error('Error in hlines option. Needs to be a list of numbers separated by commas, or empty. Got this:\n' + hlines)
 
         self.point_size = point_size
-
-        try:
-            self.point_range = [int(x) for x in point_range.split(',')]
-        except:
-            raise Error('Error in point_range option. Needs to be of the form integer1,integer2. Got this:\n' + point_range)
-
-        try:
-            self.point_break = [int(x) for x in point_break.split(',')]
-        except:
-            raise Error('Error in point_break option. Needs to be comma-sparated list of integers. Got this:\n' + point_break)
-
         self.dot_size = dot_size
         self.dot_outline = dot_outline
         self.dot_y_text_size = dot_y_text_size

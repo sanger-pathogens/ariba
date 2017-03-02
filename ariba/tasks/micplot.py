@@ -18,8 +18,6 @@ def run(options):
       no_combinations=options.no_combinations,
       hlines=options.hlines,
       point_size=options.point_size,
-      point_range=options.point_range,
-      point_break=options.point_break,
       dot_size=options.dot_size,
       dot_outline=options.dot_outline,
       dot_y_text_size=options.dot_y_text_size,
