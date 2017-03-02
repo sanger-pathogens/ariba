@@ -9,7 +9,7 @@ import matplotlib.gridspec as gridspec
 import matplotlib.cm as cmx
 import math
 import pyfastaq
-from ariba import common
+from ariba import common, reference_data
 
 class Error (Exception): pass
 
@@ -19,6 +19,7 @@ regex_position_from_var = re.compile(r'^[^0-9]*(?P<coord>[0-9]+)[^0-9]*$')
 
 class MicPlotter:
     def __init__(self,
+      refdata_dir,
       antibiotic,
       mic_file,
       summary_file,
@@ -47,6 +48,9 @@ class MicPlotter:
       xkcd=False,
       min_samples=1
     ):
+        refdata_fa = os.path.join(refdata_dir, '02.cdhit.all.fa')
+        refdata_tsv = os.path.join(refdata_dir, '01.filter.check_metadata.tsv')
+        self.refdata = reference_data.ReferenceData([refdata_fa], [refdata_tsv])
         self.antibiotic = antibiotic
         self.mic_file = mic_file
         self.summary_file = summary_file
@@ -221,7 +225,7 @@ class MicPlotter:
 
 
     @classmethod
-    def _get_top_plot_data(cls, summary_data, mic_data, antibiotic, use_hets, no_combinations=False, interrupted=False, outfile=None):
+    def _get_top_plot_data(cls, summary_data, mic_data, antibiotic, use_hets, refdata=None, no_combinations=False, interrupted=False, outfile=None):
         assert use_hets in {'yes', 'no', 'exclude'}
         if outfile is not None:
             f = pyfastaq.utils.open_file_write(outfile)
@@ -245,8 +249,13 @@ class MicPlotter:
             found_het_and_exclude = False
 
             for cluster in summary_data[sample]:
-                if summary_data[sample][cluster]['assembled'] == 'interrupted' and interrupted:
+                if 'assembled' in summary_data[sample][cluster] and summary_data[sample][cluster]['assembled'] == 'interrupted' and interrupted:
                     mutations.add(cluster + '.interrupted')
+
+                if refdata is not None and 'match' in summary_data[sample][cluster] and summary_data[sample][cluster]['match'] == 'yes' and 'ref_seq' in summary_data[sample][cluster]:
+                    ref_type, variant_only = self.refdata.sequence_type(summary_data[sample][cluster]['ref_seq'])
+                    if not variant_only:
+                        mutations.add(cluster + '.present')
 
                 for column, value in summary_data[sample][cluster].items():
                     if column in ignore_columns or column.endswith('.%'):
@@ -564,6 +573,6 @@ class MicPlotter:
         mic_data = MicPlotter._load_mic_file(self.mic_file)
         summary_data = MicPlotter._load_summary_file(self.summary_file)
         boxplot_tsv = self.outprefix + '.boxplot.tsv'
-        top_plot_data, all_mutations, combinations = MicPlotter._get_top_plot_data(summary_data, mic_data, self.antibiotic, self.use_hets, no_combinations=self.no_combinations, interrupted=self.interrupted, outfile=boxplot_tsv)
+        top_plot_data, all_mutations, combinations = MicPlotter._get_top_plot_data(summary_data, mic_data, self.antibiotic, self.use_hets, refdata=self.refdata, no_combinations=self.no_combinations, interrupted=self.interrupted, outfile=boxplot_tsv)
         top_plot_data, all_mutations, combinations = MicPlotter._filter_top_plot_data(top_plot_data, all_mutations, combinations, self.min_samples)
         self._make_plot(mic_data, top_plot_data, all_mutations, combinations)

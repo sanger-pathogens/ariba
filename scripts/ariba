@@ -63,6 +63,7 @@ subparser_micplot = subparsers.add_parser(
     usage='ariba prepareref [options] <antibiotic> <MIC file> <summary file> <outprefix>',
     description='Makes a violin and scatter plot of MIC per variant in the summary file',
 )
+subparser_micplot.add_argument('prepareref_dir', help='Name of output directory when "ariba prepareref" was run')
 subparser_micplot.add_argument('antibiotic', help='Antibiotic name. Must exactly match a column from the MIC file')
 subparser_micplot.add_argument('mic_file', help='File containing MIC data for each sample and one or more antibiotics')
 subparser_micplot.add_argument('summary_file', help='File made by running "ariba summary"')

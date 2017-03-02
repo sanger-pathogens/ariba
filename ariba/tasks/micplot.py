@@ -3,6 +3,7 @@ import ariba
 
 def run(options):
     plotter = ariba.mic_plotter.MicPlotter(
+      options.prepareref_dir,
       options.antibiotic,
       options.mic_file,
       options.summary_file,
