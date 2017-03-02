@@ -442,7 +442,7 @@ class MicPlotter:
 
 
     @classmethod
-    def _bottom_scatter_data(cls, bottom_plot_rows, columns, colours):
+    def _bottom_scatter_data(cls, bottom_plot_rows, columns, colours, outline=False):
         x_coords = []
         y_coords = []
         colour_list = []
@@ -453,6 +453,10 @@ class MicPlotter:
                     x_coords.append(j + 1)
                     y_coords.append(len(bottom_plot_rows) - i)
                     colour_list.append(colours[j])
+                elif outline:
+                    x_coords.append(j + 1)
+                    y_coords.append(len(bottom_plot_rows) - i)
+                    colour_list.append("white")
 
         return x_coords, y_coords, colour_list
 
@@ -476,7 +480,7 @@ class MicPlotter:
         bottom_plot_rows = MicPlotter._ordered_bottom_plot_rows(all_mutations)
         columns = MicPlotter._ordered_columns(mut_combinations, top_plot_data)
         colours = MicPlotter._get_colours(len(columns), self.number_of_colours, self.colourmap, self.colour_skip)
-        bottom_scatter_x, bottom_scatter_y, bottom_colours = MicPlotter._bottom_scatter_data(bottom_plot_rows, columns, colours)
+        bottom_scatter_x, bottom_scatter_y, bottom_colours = MicPlotter._bottom_scatter_data(bottom_plot_rows, columns, colours, outline=self.dot_outline)
         columns = ['.'.join(x) for x in columns]
         assert len(colours) == len(columns)
         max_x = len(colours) + 1
@@ -534,8 +538,9 @@ class MicPlotter:
         plots[0].set_title(self.main_title, fontsize=18)
 
         # ------------------------- BOTTOM PLOT -----------------------
+        edgecolor = "black" if self.dot_outline else bottom_colours
         plots[bottom_plot_index].axis([0,max(bottom_scatter_x) + 1,0,max(bottom_scatter_y) + 1])
-        plots[bottom_plot_index].scatter(bottom_scatter_x, bottom_scatter_y, marker='o', s=self.dot_size, color=bottom_colours)
+        plots[bottom_plot_index].scatter(bottom_scatter_x, bottom_scatter_y, marker='o', s=self.dot_size, c=bottom_colours, edgecolor=edgecolor, lw=1)
         plots[bottom_plot_index].spines["top"].set_visible(False)
         plots[bottom_plot_index].spines["right"].set_visible(False)
         plots[bottom_plot_index].spines["bottom"].set_visible(False)
