@@ -60,7 +60,7 @@ subparser_getref.set_defaults(func=ariba.tasks.getref.run)
 subparser_micplot = subparsers.add_parser(
     'micplot',
     help='Make violin/dot plots using MIC data',
-    usage='ariba prepareref [options] <antibiotic> <MIC file> <summary file> <outprefix>',
+    usage='ariba prepareref [options] <prepareref_dir> <antibiotic> <MIC file> <summary file> <outprefix>',
     description='Makes a violin and scatter plot of MIC per variant in the summary file',
 )
 subparser_micplot.add_argument('prepareref_dir', help='Name of output directory when "ariba prepareref" was run')
