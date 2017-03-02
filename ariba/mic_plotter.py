@@ -29,7 +29,6 @@ class MicPlotter:
       log_y=2,
       plot_types="points,violin",
       jitter_width=0.1,
-      jitter_height=0.01,
       no_combinations=False,
       hlines='0.25,2',
       point_size=4,
@@ -67,7 +66,6 @@ class MicPlotter:
             raise Error('Error in plot_types option. Allowed types are: ' + str(allowed_plot_types) + '. Got: ' +  str(self.plot_types))
 
         self.jitter_width = jitter_width
-        self.jitter_height = jitter_height
         self.no_combinations = no_combinations
 
         try:
