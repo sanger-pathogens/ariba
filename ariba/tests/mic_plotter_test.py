@@ -1,4 +1,5 @@
 import unittest
+import copy
 import filecmp
 import os
 from ariba import mic_plotter
@@ -196,6 +197,45 @@ class TestMicPlotter(unittest.TestCase):
                 self.assertEqual(got_combs, expected_no_combs[antibio][use_het])
                 self.assertEqual(got_data, expected_top_plot_data_no_combs[antibio][use_het])
                 os.unlink(tmp_tsv)
+
+
+    def test_filter_top_plot_data(self):
+        '''test _filter_top_plot_data'''
+        top_plot_data = {
+            'var1': [1, 2, 3],
+            'var2.var3': [1],
+            'var1.var3': [1, 2],
+        }
+
+        all_mutations = {'var1', 'var2', 'var3'}
+        seen_combinations = {('var1',), ('var1', 'var3'), ('var2', 'var3')}
+
+        got_top, got_all, got_seen = mic_plotter.MicPlotter._filter_top_plot_data(top_plot_data, all_mutations, seen_combinations, 1)
+        self.assertEqual(got_top, top_plot_data)
+        self.assertEqual(got_all, all_mutations)
+        self.assertEqual(got_seen, seen_combinations)
+
+
+        got_top, got_all, got_seen = mic_plotter.MicPlotter._filter_top_plot_data(top_plot_data, all_mutations, seen_combinations, 2)
+        expected_top_plot_data = {
+            'var1': [1, 2, 3],
+            'var1.var3': [1, 2],
+        }
+        expected_all_mutations = {'var1', 'var3'}
+        expected_seen_combinations = {('var1',), ('var1', 'var3')}
+        self.assertEqual(got_top, expected_top_plot_data)
+        self.assertEqual(got_all, expected_all_mutations)
+        self.assertEqual(got_seen, expected_seen_combinations)
+
+        got_top, got_all, got_seen = mic_plotter.MicPlotter._filter_top_plot_data(top_plot_data, all_mutations, seen_combinations, 3)
+        expected_top_plot_data = {
+            'var1': [1, 2, 3],
+        }
+        expected_all_mutations = {'var1'}
+        expected_seen_combinations = {('var1',),}
+        self.assertEqual(got_top, expected_top_plot_data)
+        self.assertEqual(got_all, expected_all_mutations)
+        self.assertEqual(got_seen, expected_seen_combinations)
 
 
     def test_ordered_bottom_plot_rows(self):

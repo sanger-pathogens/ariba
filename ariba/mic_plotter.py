@@ -43,7 +43,8 @@ class MicPlotter:
       colour_skip=None,
       interrupted=False,
       violin_width=0.75,
-      xkcd=False
+      xkcd=False,
+      min_samples=1
     ):
         self.antibiotic = antibiotic
         self.mic_file = mic_file
@@ -112,6 +113,7 @@ class MicPlotter:
         self.violin_width = violin_width
         if xkcd:
             plt.xkcd()
+        self.min_samples = min_samples
 
 
     @classmethod
@@ -290,6 +292,27 @@ class MicPlotter:
             pyfastaq.utils.close(f)
 
         return top_plot_data, all_mutations, all_mutations_seen_combinations
+
+
+    @classmethod
+    def _filter_top_plot_data(cls, top_plot_data, all_mutations, seen_combinations, min_samples):
+        if min_samples == 1:
+            return top_plot_data, all_mutations, seen_combinations
+
+        new_top_plot_data = {}
+        new_all_mutations = set()
+        new_seen_combinations = set()
+
+        for mutation_tuple in seen_combinations:
+            mutation_string = '.'.join(mutation_tuple)
+            mics = top_plot_data[mutation_string]
+
+            if len(mics) >= min_samples:
+                new_top_plot_data[mutation_string] = mics
+                new_seen_combinations.add(mutation_tuple)
+                new_all_mutations.update(mutation_tuple)
+
+        return new_top_plot_data, new_all_mutations, new_seen_combinations
 
 
     @classmethod
