@@ -78,6 +78,8 @@ micplot_general_group.add_argument('--interrupted', action='store_true', help='I
 micplot_general_group.add_argument('--min_samples', type=int, help='Minimum number of samples in each column required to include in plot [%(default)s]', metavar='INT', default=1)
 micplot_general_group.add_argument('--no_combinations', action='store_true', help='Do not show combinations of variants. Instead separate out into one box/violin plot per variant.')
 micplot_general_group.add_argument('--panel_heights', help='Two integers that determine relative height of top and bottom plots. eg 5,1 means ratio of 5:1 between top and bottom panel heights [%(default)s]', default='9,2', metavar='height1,height2')
+micplot_general_group.add_argument('--panel_widths', help='Two integers that determine relative width of plots and space used by counts legend. eg 5,1 means ratio of 5:1 between top and bottom panel widths. Only applies when plotting points and --point_size 0 [%(default)s]', default='5,1', metavar='width1,width2')
+micplot_general_group.add_argument('--count_legend_x', type=float, help='Control x position of counts legend when plotting points and --point_size 0 [%(default)s]', default=-2, metavar='FLOAT')
 micplot_general_group.add_argument('--xkcd', action='store_true', help='Best used with xkcd font installed ;)')
 
 micplot_colour_group = subparser_micplot.add_argument_group('Colour options')

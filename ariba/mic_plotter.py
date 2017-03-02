@@ -38,13 +38,15 @@ class MicPlotter:
       dot_outline=False,
       dot_y_text_size=7,
       panel_heights='9,2',
+      panel_widths='5,1',
       colourmap='Accent',
       number_of_colours=0,
       colour_skip=None,
       interrupted=False,
       violin_width=0.75,
       xkcd=False,
-      min_samples=1
+      min_samples=1,
+      count_legend_x=-2
     ):
         refdata_fa = os.path.join(refdata_dir, '02.cdhit.all.fa')
         refdata_tsv = os.path.join(refdata_dir, '01.filter.check_metadata.tsv')
@@ -90,6 +92,11 @@ class MicPlotter:
         except:
             raise Error('Error in panel_heights option. Needs to be of the form integer1,integer2. Got this:\n' + panel_heights)
 
+        try:
+            self.panel_widths = [int(x) for x in panel_widths.split(',')]
+        except:
+            raise Error('Error in panel_widths option. Needs to be of the form integer1,integer2. Got this:\n' + panel_widths)
+
         self.colourmap = colourmap
         self.number_of_colours = number_of_colours
 
@@ -106,6 +113,7 @@ class MicPlotter:
         if xkcd:
             plt.xkcd()
         self.min_samples = min_samples
+        self.count_legend_x = count_legend_x
 
 
     @classmethod
@@ -495,7 +503,7 @@ class MicPlotter:
             self.point_size = 42
 
         if self.point_size == 0:
-            gs = gridspec.GridSpec(2, 2, height_ratios=self.panel_heights, width_ratios=[5,1])
+            gs = gridspec.GridSpec(2, 2, height_ratios=self.panel_heights, width_ratios=self.panel_widths)
         else:
             gs = gridspec.GridSpec(2, 1, height_ratios=self.panel_heights)
 
@@ -569,7 +577,7 @@ class MicPlotter:
                 plots[1].annotate(right_sizes[i], [right_x_coord + 0.75, y-0.2])
             plots[1].annotate("Counts", [right_x_coord - 0.1, len(right_y) + 0.5])
 
-        plt.tight_layout()
+        plt.tight_layout(w_pad=self.count_legend_x)
         plt.savefig(self.outprefix + '.pdf')
 
 

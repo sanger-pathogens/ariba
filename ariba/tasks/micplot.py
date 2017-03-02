@@ -22,13 +22,15 @@ def run(options):
       dot_outline=options.dot_outline,
       dot_y_text_size=options.dot_y_text_size,
       panel_heights=options.panel_heights,
+      panel_widths=options.panel_widths,
       colourmap=options.colourmap,
       number_of_colours=options.number_of_colours,
       colour_skip=options.colour_skip,
       interrupted=options.interrupted,
       violin_width=options.violin_width,
       xkcd=options.xkcd,
-      min_samples=options.min_samples
+      min_samples=options.min_samples,
+      count_legend_x=options.count_legend_x
     )
 
     plotter.run()
