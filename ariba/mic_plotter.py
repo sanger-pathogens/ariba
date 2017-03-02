@@ -424,7 +424,7 @@ class MicPlotter:
         violin_data, violin_positions = MicPlotter._top_plot_violin_data(columns, top_plot_data, self.log_y)
 
         # -------------------- SET UP GRID & PLOTS -----------------
-        fig=plt.figure(figsize=(self.plot_height, self.plot_width))
+        fig=plt.figure(figsize=(self.plot_width, self.plot_height))
         gs = gridspec.GridSpec(2, 2, height_ratios=self.panel_heights, width_ratios=[5,1])
         plots=[]
         plots.append(plt.subplot(gs[0]))
