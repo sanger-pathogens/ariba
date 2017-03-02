@@ -1,4 +1,5 @@
 import csv
+import random
 import re
 import os
 import itertools
@@ -369,14 +370,18 @@ class MicPlotter:
 
 
     @classmethod
-    def _top_plot_scatter_data(cls, mutations, top_plot_data, colours, log_y):
+    def _top_plot_scatter_data(cls, mutations, top_plot_data, colours, log_y, x_jitter):
         x_coords = []
         y_coords = []
         colour_list = []
 
         for i, mutation in enumerate(mutations):
             for mic in top_plot_data[mutation]:
-                x_coords.append(i + 1)
+                if len(top_plot_data[mutation]) > 1:
+                    x_coords.append(i + 1 + random.uniform(-x_jitter, x_jitter))
+                else:
+                    x_coords.append(i + 1)
+
                 if log_y > 0:
                     y_coords.append(math.log(mic, log_y))
                 else:
@@ -481,7 +486,7 @@ class MicPlotter:
         max_x = len(colours) + 1
     
         scatter_count_x, scatter_count_y, scatter_count_sizes, scatter_count_colours = MicPlotter._top_plot_scatter_counts(columns, top_plot_data, colours, self.log_y)
-        scatter_data_x, scatter_data_y, scatter_data_colours = MicPlotter._top_plot_scatter_data(columns, top_plot_data, colours, self.log_y)
+        scatter_data_x, scatter_data_y, scatter_data_colours = MicPlotter._top_plot_scatter_data(columns, top_plot_data, colours, self.log_y, self.jitter_width)
         violin_data, violin_positions = MicPlotter._top_plot_violin_data(columns, top_plot_data, self.log_y)
 
         # -------------------- SET UP GRID & PLOTS -----------------
