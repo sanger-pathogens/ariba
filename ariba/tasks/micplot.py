@@ -24,7 +24,7 @@ def run(options):
       dot_outline=options.dot_outline,
       dot_y_text_size=options.dot_y_text_size,
       panel_heights=options.panel_heights,
-      palette=options.palette,
+      colourmap=options.colourmap,
       number_of_colours=options.number_of_colours,
       colour_skip=options.colour_skip,
       interrupted=options.interrupted,

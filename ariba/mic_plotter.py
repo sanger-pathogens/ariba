@@ -39,7 +39,7 @@ class MicPlotter:
       dot_outline=False,
       dot_y_text_size=18,
       panel_heights='5,1',
-      palette='Accent',
+      colourmap='Accent',
       number_of_colours=0,
       colour_skip=None,
       interrupted=False,
@@ -99,7 +99,7 @@ class MicPlotter:
         except:
             raise Error('Error in panel_heights option. Needs to be of the form integer1,integer2. Got this:\n' + panel_heights)
 
-        self.palette = palette
+        self.colourmap = colourmap
         self.number_of_colours = number_of_colours
 
         if colour_skip is None:
@@ -435,7 +435,7 @@ class MicPlotter:
     def _make_plot(self, mic_data, top_plot_data, all_mutations, mut_combinations):
         bottom_plot_rows = MicPlotter._ordered_bottom_plot_rows(all_mutations)
         columns = MicPlotter._ordered_columns(mut_combinations, top_plot_data)
-        colours = MicPlotter._get_colours(len(columns), self.number_of_colours, self.palette, self.colour_skip)
+        colours = MicPlotter._get_colours(len(columns), self.number_of_colours, self.colourmap, self.colour_skip)
         bottom_scatter_x, bottom_scatter_y, bottom_colours = MicPlotter._bottom_scatter_data(bottom_plot_rows, columns, colours)
         columns = ['.'.join(x) for x in columns]
         assert len(colours) == len(columns)
