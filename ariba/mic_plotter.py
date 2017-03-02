@@ -46,7 +46,8 @@ class MicPlotter:
       violin_width=0.75,
       xkcd=False,
       min_samples=1,
-      count_legend_x=-2
+      count_legend_x=-2,
+      out_format='pdf'
     ):
         refdata_fa = os.path.join(refdata_dir, '02.cdhit.all.fa')
         refdata_tsv = os.path.join(refdata_dir, '01.filter.check_metadata.tsv')
@@ -114,6 +115,7 @@ class MicPlotter:
             plt.xkcd()
         self.min_samples = min_samples
         self.count_legend_x = count_legend_x
+        self.out_format = out_format
 
 
     @classmethod
@@ -578,7 +580,7 @@ class MicPlotter:
             plots[1].annotate("Counts", [right_x_coord - 0.1, len(right_y) + 0.5])
 
         plt.tight_layout(w_pad=self.count_legend_x)
-        plt.savefig(self.outprefix + '.pdf')
+        plt.savefig(self.outprefix + '.' + self.out_format)
 
 
     def run(self):

@@ -70,6 +70,7 @@ subparser_micplot.add_argument('summary_file', help='File made by running "ariba
 subparser_micplot.add_argument('outprefix', help='Prefix of output files')
 
 micplot_general_group = subparser_micplot.add_argument_group('General options')
+micplot_general_group.add_argument('--out_format', help='Output format of image file. Use anything that matplotlib can save to, eg pdf or png [%(default)s]', default='pdf')
 micplot_general_group.add_argument('--main_title', help='Main title of plot. Default is to use the antibiotic name', metavar='"title in quotes"')
 micplot_general_group.add_argument('--plot_height', help='Height of plot in inches [%(default)s]', default=7, type=float, metavar='FLOAT')
 micplot_general_group.add_argument('--plot_width', help='Width of plot in inches [%(default)s]', default=7, type=float, metavar='FLOAT')

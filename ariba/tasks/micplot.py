@@ -30,7 +30,8 @@ def run(options):
       violin_width=options.violin_width,
       xkcd=options.xkcd,
       min_samples=options.min_samples,
-      count_legend_x=options.count_legend_x
+      count_legend_x=options.count_legend_x,
+      out_format=options.out_format
     )
 
     plotter.run()
