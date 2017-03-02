@@ -527,7 +527,14 @@ class MicPlotter:
             else:
                 plots[0].scatter(scatter_data_x, scatter_data_y, c=scatter_data_colours, s=self.point_size)
 
-        plots[0].axis([0,max(bottom_scatter_x) + 1,min(scatter_count_y), max(scatter_count_y)])
+        if self.log_y > 0:
+            miny = min(scatter_count_y) - 0.5
+            maxy = max(scatter_count_y) + 0.5
+        else:
+            miny = 0
+            maxy = 1.05 * max(scatter_count_y)
+
+        plots[0].axis([0,max(bottom_scatter_x) + 1, miny, maxy])
 
         y_tick_positions, y_tick_labels = MicPlotter._top_plot_y_ticks(mic_data, self.antibiotic, self.log_y)
         plots[0].yaxis.set_ticks(y_tick_positions)
