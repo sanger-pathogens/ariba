@@ -150,7 +150,7 @@ class MicPlotter:
             reader = csv.DictReader(f, delimiter='\t')
             if reader.fieldnames[0] != 'Sample':
                 raise Error('Error. Expected first column of MIC file "' + infile + '" to be "Sample"')
-                
+
             for row in reader:
                 mic_data[row['Sample']] = {x: MicPlotter._mic_string_to_float(row[x]) for x in reader.fieldnames[1:]}
 
@@ -174,7 +174,7 @@ class MicPlotter:
 
                 for field in row:
                     if field == 'name':
-                        continue 
+                        continue
 
                     cluster, col = field.split('.', maxsplit=1)
                     if cluster not in clusters:
@@ -209,7 +209,7 @@ class MicPlotter:
                     length = 1 - (skip[1] - skip[0])
                     vals = [(length) * x / (total_length - 1) for x in range(total_length)]
                     vals = [x if x < skip[0] else x + (1-length) for x in vals]
-                    
+
             return [cmap(x) for x in vals]
         else:
             cmap = cmx.get_cmap(colormap)
@@ -250,7 +250,7 @@ class MicPlotter:
                     mutations.add(cluster + '.interrupted')
 
                 if refdata is not None and 'match' in summary_data[sample][cluster] and summary_data[sample][cluster]['match'] == 'yes' and 'ref_seq' in summary_data[sample][cluster]:
-                    ref_type, variant_only = self.refdata.sequence_type(summary_data[sample][cluster]['ref_seq'])
+                    ref_type, variant_only = refdata.sequence_type(summary_data[sample][cluster]['ref_seq'])
                     if not variant_only:
                         mutations.add(cluster + '.present')
 
@@ -371,7 +371,7 @@ class MicPlotter:
                     y_coords.append(mic)
                 sizes.append(counts[mic])
                 colour_list.append(colours[i])
-                
+
         return x_coords, y_coords, sizes, colour_list
 
 
@@ -393,7 +393,7 @@ class MicPlotter:
                 else:
                     y_coords.append(mic)
                 colour_list.append(colours[i])
-                
+
         return x_coords, y_coords, colour_list
 
 
@@ -411,7 +411,7 @@ class MicPlotter:
 
         return violin_data, violin_pos
 
-            
+
     @classmethod
     def _ordered_bottom_plot_rows(cls, mutations):
         l = []
@@ -494,7 +494,7 @@ class MicPlotter:
         columns = ['.'.join(x) for x in columns]
         assert len(colours) == len(columns)
         max_x = len(colours) + 1
-    
+
         scatter_count_x, scatter_count_y, scatter_count_sizes, scatter_count_colours = MicPlotter._top_plot_scatter_counts(columns, top_plot_data, colours, self.log_y)
         scatter_data_x, scatter_data_y, scatter_data_colours = MicPlotter._top_plot_scatter_data(columns, top_plot_data, colours, self.log_y, self.jitter_width)
         violin_data, violin_positions = MicPlotter._top_plot_violin_data(columns, top_plot_data, self.log_y)
