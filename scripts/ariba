@@ -86,7 +86,7 @@ micplot_colour_group.add_argument('--number_of_colours', type=int, help='Number 
 micplot_colour_group.add_argument('--colour_skip', help='If using a continuous colourmap, --colour_skip a,b (where 0 <= a < b <= 1) will skip the range between a and b. Useful for excluding near-white colours', metavar='FLOAT1,FLOAT2')
 
 micplot_upper_plot_group = subparser_micplot.add_argument_group('Upper plot options')
-micplot_upper_plot_group.add_argument('--plot_types', help='Types of plots to make, separated by commas. Choose from boxplot,violin,point [%(default)s]', default='violin,point', metavar='type1,type2,...')
+micplot_upper_plot_group.add_argument('--plot_types', help='Types of plots to make, separated by commas. Choose from violin,point [%(default)s]', default='violin,point', metavar='type1,type2,...')
 micplot_upper_plot_group.add_argument('--hlines', help='Comma-separated list of positions at which to draw horizontal lines. Default is to draw no lines.', metavar='float1,float2,...', default='')
 micplot_upper_plot_group.add_argument('--jitter_width', help='Jitter width option when plotting points [%(default)s]', default=0.1, type=float, metavar='FLOAT')
 micplot_upper_plot_group.add_argument('--log_y', type=float, help='Base of log applied to y values. Set to zero to not log [%(default)s]', default=2, metavar='FLOAT')

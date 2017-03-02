@@ -67,7 +67,7 @@ class MicPlotter:
         self.log_y = log_y
         self.plot_types = set(plot_types.split(','))
 
-        allowed_plot_types = {'point', 'violin', 'boxplot'}
+        allowed_plot_types = {'point', 'violin'}
         if not self.plot_types.issubset(allowed_plot_types):
             raise Error('Error in plot_types option. Allowed types are: ' + str(allowed_plot_types) + '. Got: ' +  str(self.plot_types))
 
@@ -500,6 +500,9 @@ class MicPlotter:
 
         # -------------------- SET UP GRID & PLOTS -----------------
         fig=plt.figure(figsize=(self.plot_width, self.plot_height))
+        if 'point' not in self.plot_types:
+            self.point_size = 42
+
         if self.point_size == 0:
             gs = gridspec.GridSpec(2, 2, height_ratios=self.panel_heights, width_ratios=[5,1])
         else:
@@ -521,15 +524,17 @@ class MicPlotter:
             plots[0].hlines(h, 0, max_x, linestyle='--', linewidth=1, color='black')
 
 
-        violins = plots[0].violinplot(violin_data, violin_positions, widths=self.violin_width, showmeans=False, showextrema=False, showmedians=False)
-        for x, pc in enumerate(violins['bodies']):
-            pc.set_facecolor(colours[x])
-            pc.set_edgecolor(colours[x])
+        if 'violin' in self.plot_types:
+            violins = plots[0].violinplot(violin_data, violin_positions, widths=self.violin_width, showmeans=False, showextrema=False, showmedians=False)
+            for x, pc in enumerate(violins['bodies']):
+                pc.set_facecolor(colours[x])
+                pc.set_edgecolor(colours[x])
 
-        if self.point_size == 0:
-            plots[0].scatter(scatter_count_x, scatter_count_y, s=scatter_count_sizes, c=scatter_count_colours, linewidth=0)
-        else:
-            plots[0].scatter(scatter_data_x, scatter_data_y, c=scatter_data_colours, s=self.point_size)
+        if 'point' in self.plot_types:
+            if self.point_size == 0:
+                plots[0].scatter(scatter_count_x, scatter_count_y, s=scatter_count_sizes, c=scatter_count_colours, linewidth=0)
+            else:
+                plots[0].scatter(scatter_data_x, scatter_data_y, c=scatter_data_colours, s=self.point_size)
 
         plots[0].axis([0,max(bottom_scatter_x) + 1,min(scatter_count_y), max(scatter_count_y)])
 
@@ -572,7 +577,7 @@ class MicPlotter:
     def run(self):
         mic_data = MicPlotter._load_mic_file(self.mic_file)
         summary_data = MicPlotter._load_summary_file(self.summary_file)
-        boxplot_tsv = self.outprefix + '.boxplot.tsv'
+        boxplot_tsv = self.outprefix + '.data.tsv'
         top_plot_data, all_mutations, combinations = MicPlotter._get_top_plot_data(summary_data, mic_data, self.antibiotic, self.use_hets, refdata=self.refdata, no_combinations=self.no_combinations, interrupted=self.interrupted, outfile=boxplot_tsv)
         top_plot_data, all_mutations, combinations = MicPlotter._filter_top_plot_data(top_plot_data, all_mutations, combinations, self.min_samples)
         self._make_plot(mic_data, top_plot_data, all_mutations, combinations)
