@@ -49,7 +49,8 @@ class MicPlotter:
       xkcd=False,
       min_samples=1,
       count_legend_x=-2,
-      out_format='pdf'
+      out_format='pdf',
+      p_cutoff=0.05
     ):
         refdata_fa = os.path.join(refdata_dir, '02.cdhit.all.fa')
         refdata_tsv = os.path.join(refdata_dir, '01.filter.check_metadata.tsv')
@@ -119,6 +120,7 @@ class MicPlotter:
         self.min_samples = min_samples
         self.count_legend_x = count_legend_x
         self.out_format = out_format
+        self.p_cutoff = p_cutoff
 
 
     @classmethod
@@ -494,7 +496,7 @@ class MicPlotter:
 
 
     @classmethod
-    def _pairwise_mannwhitney(cls, violin_data, columns, outfile):
+    def _pairwise_mannwhitney(cls, violin_data, columns, outfile, p_cutoff):
         try:
             from scipy.stats import mannwhitneyu
         except:
@@ -514,9 +516,12 @@ class MicPlotter:
         output.sort(key=lambda x: x[-1])
 
         with open(outfile, 'w') as f:
-            print('Combination1', 'Combination2', 'Size1', 'Size2', 'Mann_Whitney_U', 'p-value', sep='\t', file=f)
+            print('Combination1', 'Combination2', 'Size1', 'Size2', 'Mann_Whitney_U', 'p-value', 'significant', 'corrected_p-value', 'corrected_significant', sep='\t', file=f)
             for x in output:
-                print(*x, sep='\t', file=f)
+                significant = 'yes' if x[5] < p_cutoff else 'no'
+                corrected_p = min(1, len(output) * x[5])
+                corrected_significant = 'yes' if corrected_p < p_cutoff else 'no'
+                print(*x, significant, corrected_p, corrected_significant, sep='\t', file=f)
 
 
     def _make_plot(self, mic_data, top_plot_data, all_mutations, mut_combinations):
@@ -531,7 +536,7 @@ class MicPlotter:
         scatter_count_x, scatter_count_y, scatter_count_sizes, scatter_count_colours = MicPlotter._top_plot_scatter_counts(columns, top_plot_data, colours, self.log_y)
         scatter_data_x, scatter_data_y, scatter_data_colours = MicPlotter._top_plot_scatter_data(columns, top_plot_data, colours, self.log_y, self.jitter_width)
         violin_data, violin_positions = MicPlotter._top_plot_violin_data(columns, top_plot_data, self.log_y)
-        MicPlotter._pairwise_mannwhitney(violin_data, columns, self.outprefix + '.mannwhitney.tsv')
+        MicPlotter._pairwise_mannwhitney(violin_data, columns, self.outprefix + '.mannwhitney.tsv', self.p_cutoff)
 
         # -------------------- SET UP GRID & PLOTS -----------------
         fig=plt.figure(figsize=(self.plot_width, self.plot_height))

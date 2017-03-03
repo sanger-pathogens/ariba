@@ -32,7 +32,8 @@ def run(options):
       xkcd=options.xkcd,
       min_samples=options.min_samples,
       count_legend_x=options.count_legend_x,
-      out_format=options.out_format
+      out_format=options.out_format,
+      p_cutoff=options.p_cutoff
     )
 
     plotter.run()
