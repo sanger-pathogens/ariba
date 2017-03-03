@@ -473,14 +473,18 @@ class MicPlotter:
 
 
     @classmethod
-    def _right_plot_data(cls, scatter_count_sizes, number_of_circles, x_pos):
+    def _right_plot_data(cls, scatter_count_sizes, x_pos):
         y_max = max(scatter_count_sizes)
         if y_max > 100:
             y_max = int(math.ceil(y_max / 100.0)) * 100
-            sizes = [5, 50] + [x for x in range(100, y_max, 100)]
+            sizes = [5, 50]
         else:
             y_max = int(math.ceil(y_max / 10.0)) * 10
-            sizes = [5] + [x for x in range(10, y_max, 10)]
+            sizes = [5, 10]
+
+        while sizes[-1] < y_max:
+            sizes.append(sizes[-1]*2)
+
         x_coords = [x_pos] * len(sizes)
         y_coords = [x + 1 for x in range(len(sizes))]
         y_coords.reverse()
@@ -599,7 +603,7 @@ class MicPlotter:
         # ------------------------- RIGHT PLOT -------------------------
         if self.point_size == 0:
             right_x_coord = 0.75
-            right_x, right_y, right_sizes = MicPlotter._right_plot_data(scatter_count_sizes, 5, right_x_coord)
+            right_x, right_y, right_sizes = MicPlotter._right_plot_data(scatter_count_sizes, right_x_coord)
             plots[1].scatter(right_x, right_y, s=right_sizes, c="black")
             plots[1].axis('off')
             plots[1].axis([0,4,-2*len(right_y),len(right_y)+1])
