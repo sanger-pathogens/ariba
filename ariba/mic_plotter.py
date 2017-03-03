@@ -1,4 +1,5 @@
 import csv
+import sys
 import random
 import re
 import os
@@ -486,6 +487,32 @@ class MicPlotter:
         return x_coords, y_coords, sizes
 
 
+    @classmethod
+    def _pairwise_mannwhitney(cls, violin_data, columns, outfile):
+        try:
+            from scipy.stats import mannwhitneyu
+        except:
+            print('WARNING: skipping Mann Whitney tests because scipy.stats.mannwhitneyu not found', file=sys.stderr)
+            return
+
+        output = []
+
+        for i, list1 in enumerate(violin_data):
+            for j, list2 in enumerate(violin_data):
+                if j <= i or len(list1) < 2 or len(list2) < 2:
+                    continue
+
+                statistic, pvalue = mannwhitneyu(list1, list2, alternative='two-sided')
+                output.append((columns[i], columns[j], len(list1), len(list2), statistic, pvalue))
+
+        output.sort(key=lambda x: x[-1])
+
+        with open(outfile, 'w') as f:
+            print('Combination1', 'Combination2', 'Size1', 'Size2', 'Mann_Whitney_U', 'p-value', sep='\t', file=f)
+            for x in output:
+                print(*x, sep='\t', file=f)
+
+
     def _make_plot(self, mic_data, top_plot_data, all_mutations, mut_combinations):
         bottom_plot_rows = MicPlotter._ordered_bottom_plot_rows(all_mutations)
         columns = MicPlotter._ordered_columns(mut_combinations, top_plot_data)
@@ -498,6 +525,7 @@ class MicPlotter:
         scatter_count_x, scatter_count_y, scatter_count_sizes, scatter_count_colours = MicPlotter._top_plot_scatter_counts(columns, top_plot_data, colours, self.log_y)
         scatter_data_x, scatter_data_y, scatter_data_colours = MicPlotter._top_plot_scatter_data(columns, top_plot_data, colours, self.log_y, self.jitter_width)
         violin_data, violin_positions = MicPlotter._top_plot_violin_data(columns, top_plot_data, self.log_y)
+        MicPlotter._pairwise_mannwhitney(violin_data, columns, self.outprefix + '.mannwhitney.tsv')
 
         # -------------------- SET UP GRID & PLOTS -----------------
         fig=plt.figure(figsize=(self.plot_width, self.plot_height))
@@ -581,6 +609,8 @@ class MicPlotter:
 
         plt.tight_layout(w_pad=self.count_legend_x)
         plt.savefig(self.outprefix + '.' + self.out_format)
+
+        
 
 
     def run(self):
