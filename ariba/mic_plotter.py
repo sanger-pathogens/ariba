@@ -35,6 +35,7 @@ class MicPlotter:
       no_combinations=False,
       hlines='',
       point_size=4,
+      point_scale=1,
       dot_size=100,
       dot_outline=False,
       dot_y_text_size=7,
@@ -85,6 +86,7 @@ class MicPlotter:
             raise Error('Error in hlines option. Needs to be a list of numbers separated by commas, or empty. Got this:\n' + hlines)
 
         self.point_size = point_size
+        self.point_scale = point_scale
         self.dot_size = dot_size
         self.dot_outline = dot_outline
         self.dot_y_text_size = dot_y_text_size
@@ -563,9 +565,11 @@ class MicPlotter:
                 pc.set_facecolor(colours[x])
                 pc.set_edgecolor(colours[x])
 
+        scaled_count_sizes = [self.point_scale * x for x in scatter_count_sizes]
+
         if 'point' in self.plot_types:
             if self.point_size == 0:
-                plots[0].scatter(scatter_count_x, scatter_count_y, s=scatter_count_sizes, c=scatter_count_colours, linewidth=0)
+                plots[0].scatter(scatter_count_x, scatter_count_y, s=scaled_count_sizes, c=scatter_count_colours, linewidth=0)
             else:
                 plots[0].scatter(scatter_data_x, scatter_data_y, c=scatter_data_colours, s=self.point_size)
 
@@ -604,7 +608,8 @@ class MicPlotter:
         if self.point_size == 0:
             right_x_coord = 0.75
             right_x, right_y, right_sizes = MicPlotter._right_plot_data(scatter_count_sizes, right_x_coord)
-            plots[1].scatter(right_x, right_y, s=right_sizes, c="black")
+            right_scaled_sizes = [self.point_scale * x for x in right_sizes]
+            plots[1].scatter(right_x, right_y, s=right_scaled_sizes, c="black")
             plots[1].axis('off')
             plots[1].axis([0,4,-2*len(right_y),len(right_y)+1])
             for i, y in enumerate(right_y):

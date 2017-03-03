@@ -94,6 +94,7 @@ micplot_upper_plot_group.add_argument('--hlines', help='Comma-separated list of 
 micplot_upper_plot_group.add_argument('--jitter_width', help='Jitter width option when plotting points [%(default)s]', default=0.1, type=float, metavar='FLOAT')
 micplot_upper_plot_group.add_argument('--log_y', type=float, help='Base of log applied to y values. Set to zero to not log [%(default)s]', default=2, metavar='FLOAT')
 micplot_upper_plot_group.add_argument('--point_size', type=float, help='Size of points when --plot_types includes point. If zero, will group points and size them proportional to the group size [%(default)s]', default=4, metavar='FLOAT')
+micplot_upper_plot_group.add_argument('--point_scale', type=float, help='Scale point sizes when --point_size 0. All point sizes are multiplied by this number. Useful if you have large data set [%(default)s]', default=1, metavar='FLOAT')
 micplot_upper_plot_group.add_argument('--violin_width', type=float, help='Width of violins [%(default)s]', default=0.75)
 
 micplot_lower_plot_group = subparser_micplot.add_argument_group('Lower plot options')
