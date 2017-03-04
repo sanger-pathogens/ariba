@@ -27,7 +27,7 @@ class SummarySample:
                     raise Error('Error parsing the following line.\n' + line)
                 continue
 
-            data_dict = summary_cluster.SummaryCluster.line2dict(line)
+            data_dict = summary_cluster.SummaryCluster.line2dict(line, filename=filename)
             cluster = data_dict['cluster']
             if only_clusters is not None and cluster not in only_clusters:
                 continue

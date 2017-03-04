@@ -133,7 +133,8 @@ void vectorSumAndMax(const std::vector<uint32_t>& v, uint32_t& maxValue, uint32_
 
 bool depthOk(const uint32_t& totalDepth, const uint32_t& testNum, const uint32_t& minSecondDepth, const float& maxAlleleFreq)
 {
-    return (testNum >= minSecondDepth && 1.0 * testNum / totalDepth <= maxAlleleFreq);
+    double depthFreq = 1.0 * testNum / totalDepth;
+    return (testNum >= minSecondDepth && depthFreq >= (1 - maxAlleleFreq) && depthFreq <= maxAlleleFreq);
 }
 
 

@@ -260,7 +260,7 @@ class AssemblyVariants:
         return variants
 
 
-    def get_variants(self, ref_sequence_name, nucmer_coords):
+    def get_variants(self, ref_sequence_name, allowed_ctg_coords, allowed_ref_coords, nucmer_matches=None):
         '''Nucmr coords = dict. Key=contig name. Value = list of intervals of ref coords that match the contig.
            Made by assembly_compare.AssemblyCompare.nucmer_hits_to_ref_coords
            Returns dictionary. Key=contig name. Value = list of variants. Each variant
@@ -287,12 +287,27 @@ class AssemblyVariants:
 
         known_non_wild_variants_in_ref = self.refdata.all_non_wild_type_variants(ref_sequence_name)
 
-        for contig in nucmer_coords:
+        for contig in allowed_ctg_coords:
+            if contig not in allowed_ref_coords:
+                continue
+
             used_known_variants = set()
             variants[contig] = []
 
             if contig in mummer_variants:
                 for mummer_variant_list in mummer_variants[contig]:
+                    ref_start = min([x.ref_start for x in mummer_variant_list])
+                    ref_end = max([x.ref_end for x in mummer_variant_list])
+                    ctg_start = min([x.qry_start for x in mummer_variant_list])
+                    ctg_end = min([x.qry_end for x in mummer_variant_list])
+                    ref_interval = intervals.Interval(ref_start, ref_end)
+                    ctg_interval = intervals.Interval(ctg_start, ctg_end)
+                    ref_ok = True in {x.intersects(ref_interval) for x in allowed_ref_coords[contig]}
+                    qry_ok = True in {x.intersects(ctg_interval) for x in allowed_ctg_coords[contig]}
+
+                    if not (ref_ok and qry_ok):
+                        continue
+
                     if seq_type == 'p':
                         new_variant, used_variants = self._get_one_variant_for_one_contig_coding(ref_sequence, refdata_var_dict, mummer_variant_list)
                     else:
@@ -306,10 +321,10 @@ class AssemblyVariants:
             # for this contig, need to know all the ref sequence and coords it maps to.
             # Then report just the unused known variants, as the contig also has these variants
             if seq_type == 'p':
-                new_variants = self._get_remaining_known_ref_variants(known_non_wild_variants_in_ref['p'], used_known_variants, nucmer_coords[contig])
+                new_variants = self._get_remaining_known_ref_variants(known_non_wild_variants_in_ref['p'], used_known_variants, allowed_ref_coords[contig])
 
             else:
-                new_variants = self._get_remaining_known_ref_variants(known_non_wild_variants_in_ref['n'], used_known_variants, nucmer_coords[contig])
+                new_variants = self._get_remaining_known_ref_variants(known_non_wild_variants_in_ref['n'], used_known_variants, allowed_ref_coords[contig])
 
             if is_variant_only:
                 new_variants = [x for x in new_variants if len(x[5]) > 0]

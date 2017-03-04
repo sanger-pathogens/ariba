@@ -25,6 +25,7 @@ __all__ = [
     'mapping',
     'megares_data_finder',
     'megares_zip_parser',
+    'mic_plotter',
     'mlst_profile',
     'mlst_reporter',
     'pubmlst_getter',

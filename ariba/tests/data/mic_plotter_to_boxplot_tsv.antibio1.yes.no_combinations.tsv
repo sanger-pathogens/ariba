@@ -1,0 +1,5 @@
+Sample	MIC	Mutations
+name1	0.25	cluster2.group2.A43T
+name1	0.25	cluster3.interrupted
+name2	0.125	cluster1.group1.A42T
+name2	0.125	cluster4.group4.A44T

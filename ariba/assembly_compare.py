@@ -135,6 +135,39 @@ class AssemblyCompare:
         return coords
 
 
+    @classmethod
+    def nucmer_hits_to_ref_and_qry_coords(cls, nucmer_hits, contig=None):
+        '''Same as nucmer_hits_to_ref_coords, except removes containing hits first,
+           and returns ref and qry coords lists'''
+        if contig is None:
+            ctg_coords = {key: [] for key in nucmer_hits.keys()}
+        else:
+            ctg_coords = {contig: []}
+
+        ref_coords = {}
+
+        for key in ctg_coords:
+            hits = copy.copy(nucmer_hits[key])
+            hits.sort(key=lambda x: len(x.ref_coords()))
+
+            if len(hits) > 1:
+                i = 0
+                while i < len(hits) - 1:
+                    c1 = hits[i].ref_coords()
+                    c2 = hits[i+1].ref_coords()
+                    if c2.contains(c1):
+                        hits.pop(i)
+                    else:
+                        i += 1
+
+            ref_coords[key] = [hit.ref_coords() for hit in hits]
+            ctg_coords[key] = [hit.qry_coords() for hit in hits]
+            pyfastaq.intervals.merge_overlapping_in_list(ref_coords[key])
+            pyfastaq.intervals.merge_overlapping_in_list(ctg_coords[key])
+
+        return ctg_coords, ref_coords
+
+
     @staticmethod
     def ref_cov_per_contig(nucmer_hits):
         '''Input is hits made by self._parse_nucmer_coords_file.

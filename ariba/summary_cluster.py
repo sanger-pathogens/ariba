@@ -1,3 +1,4 @@
+import sys
 from ariba import flag, report, summary_cluster_variant
 
 class Error (Exception): pass
@@ -30,10 +31,15 @@ class SummaryCluster:
 
 
     @classmethod
-    def line2dict(cls, line):
+    def line2dict(cls, line, filename=None):
         data = line.rstrip().split('\t')
         if len(data) != len(report.columns):
-            raise Error('Wrong number of columns in the following line. Expected ' + str(len(report.columns)) + ' but got ' + str(len(data)) + '\n' + line)
+            if filename is not None:
+                filename_message = 'Error reading ariba summary file "' + filename + '". '
+            else:
+                filename_message = ''
+            raise Error(filename_message + 'Wrong number of columns in the following line. Expected ' + str(len(report.columns)) + ' but got ' + str(len(data)) + '\n' + line)
+
         d = {report.columns[i]: data[i] for i in range(len(data))}
         try:
             d['flag'] = flag.Flag(int(d['flag']) )
