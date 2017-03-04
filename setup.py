@@ -68,6 +68,7 @@ setup(
     install_requires=[
         'BeautifulSoup4 >= 4.1.0',
         'dendropy >= 4.2.0',
+        'matplotlib',
         'pyfastaq >= 3.12.0',
         'pysam >= 0.9.1',
         'pymummer>=0.10.2',
