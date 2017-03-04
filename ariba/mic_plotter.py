@@ -535,7 +535,7 @@ class MicPlotter:
                 corrected_p = min(1, len(output) * x[4])
                 corrected_significant = 'yes' if corrected_p < p_cutoff else 'no'
                 corrected_effect_size = scipy.stats.norm.ppf(corrected_p) / math.sqrt(x[2] + x[3])
-                print(*x, corrected_p, corrected_significant, corrected_effect_size, sep='\t', file=f)
+                print('\t'.join([str(z) for z in x]), corrected_p, corrected_significant, corrected_effect_size, sep='\t', file=f)
 
 
     def _make_plot(self, mic_data, top_plot_data, all_mutations, mut_combinations):
