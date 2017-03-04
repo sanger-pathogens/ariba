@@ -496,11 +496,11 @@ class MicPlotter:
 
 
     @classmethod
-    def _pairwise_mannwhitney(cls, violin_data, columns, outfile, p_cutoff):
+    def _pairwise_compare(cls, violin_data, columns, outfile, p_cutoff, compare_test):
         try:
-            from scipy.stats import mannwhitneyu
+            import scipy.stats
         except:
-            print('WARNING: skipping Mann Whitney tests because scipy.stats.mannwhitneyu not found', file=sys.stderr)
+            print('WARNING: skipping Mann Whitney tests because scipy.stats not found', file=sys.stderr)
             return
 
         output = []
@@ -510,18 +510,32 @@ class MicPlotter:
                 if j <= i or len(list1) < 2 or len(list2) < 2:
                     continue
 
-                statistic, pvalue = mannwhitneyu(list1, list2, alternative='two-sided')
-                output.append((columns[i], columns[j], len(list1), len(list2), statistic, pvalue))
+                list1set = set(list1)
 
-        output.sort(key=lambda x: x[-1])
+                if len(list1set) == 1 and list1set == set(list2):
+                    statistic = 'NA'
+                    pvalue = 1
+                else:
+                    if compare_test == 'mannwhitneyu':
+                        statistic, pvalue = scipy.stats.mannwhitneyu(list1, list2, alternative='two-sided')
+                    elif compare_test == 'ks_2samp':
+                        statistic, pvalue = scipy.stats.ks_2samp(list1, list2)
+                    else:
+                        raise Error('Test "' + compare_test + '" not recognised. Cannot continue')
+
+                effect_size = abs(scipy.stats.norm.ppf(pvalue) / math.sqrt(len(list1) + len(list2)))
+                significant = 'yes' if pvalue < p_cutoff else 'no'
+                output.append((columns[i], columns[j], len(list1), len(list2), pvalue, significant, effect_size))
+
+        output.sort(key=lambda x: x[4])
 
         with open(outfile, 'w') as f:
-            print('Combination1', 'Combination2', 'Size1', 'Size2', 'Mann_Whitney_U', 'p-value', 'significant', 'corrected_p-value', 'corrected_significant', sep='\t', file=f)
+            print('Combination1', 'Combination2', 'Size1', 'Size2', 'p-value', 'significant', 'effect_size', 'corrected_p-value', 'corrected_significant', 'corrected_effect_size', sep='\t', file=f)
             for x in output:
-                significant = 'yes' if x[5] < p_cutoff else 'no'
-                corrected_p = min(1, len(output) * x[5])
+                corrected_p = min(1, len(output) * x[4])
                 corrected_significant = 'yes' if corrected_p < p_cutoff else 'no'
-                print(*x, significant, corrected_p, corrected_significant, sep='\t', file=f)
+                corrected_effect_size = scipy.stats.norm.ppf(corrected_p) / math.sqrt(x[2] + x[3])
+                print(*x, corrected_p, corrected_significant, corrected_effect_size, sep='\t', file=f)
 
 
     def _make_plot(self, mic_data, top_plot_data, all_mutations, mut_combinations):
@@ -536,7 +550,8 @@ class MicPlotter:
         scatter_count_x, scatter_count_y, scatter_count_sizes, scatter_count_colours = MicPlotter._top_plot_scatter_counts(columns, top_plot_data, colours, self.log_y)
         scatter_data_x, scatter_data_y, scatter_data_colours = MicPlotter._top_plot_scatter_data(columns, top_plot_data, colours, self.log_y, self.jitter_width)
         violin_data, violin_positions = MicPlotter._top_plot_violin_data(columns, top_plot_data, self.log_y)
-        MicPlotter._pairwise_mannwhitney(violin_data, columns, self.outprefix + '.mannwhitney.tsv', self.p_cutoff)
+        MicPlotter._pairwise_compare(violin_data, columns, self.outprefix + '.mannwhitney.tsv', self.p_cutoff, 'mannwhitneyu')
+        MicPlotter._pairwise_compare(violin_data, columns, self.outprefix + '.ks_2sample.tsv', self.p_cutoff, 'ks_2samp')
 
         # -------------------- SET UP GRID & PLOTS -----------------
         fig=plt.figure(figsize=(self.plot_width, self.plot_height))
@@ -624,7 +639,7 @@ class MicPlotter:
         plt.tight_layout(w_pad=self.count_legend_x)
         plt.savefig(self.outprefix + '.' + self.out_format)
 
-        
+
 
 
     def run(self):
