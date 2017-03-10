@@ -9,7 +9,7 @@ user support is not provided at this time.
 ARIBA
 =====
 
-Antibiotic Resistance Identification By Assembly
+Antimicrobial Resistance Identification By Assembly
 
 
 For how to use ARIBA, please see the [ARIBA wiki page][ARIBA wiki].
