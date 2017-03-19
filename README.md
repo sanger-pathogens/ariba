@@ -87,8 +87,9 @@ it would try to use
 
     $HOME/bowtie2-2.1.0/bowtie2-build
 
-
-### Temporary files
+ 
+### Temporary files
+ 
 
 ARIBA can temporarily make a large number of files whilst running, which
 are put in a temporary directory made by ARIBA.  The total size of these
