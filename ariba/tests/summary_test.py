@@ -20,6 +20,7 @@ class TestSummary(unittest.TestCase):
 
     def test_determine_cluster_cols(self):
         col_strings = [
+            'assembled,match,ref_seq,pct_id,ctg_cov,known_var,novel_var',
             'assembled,match,ref_seq,pct_id,known_var,novel_var',
             'ref_seq,pct_id,known_var,novel_var',
             'assembled,pct_id,known_var,novel_var',
@@ -29,12 +30,13 @@ class TestSummary(unittest.TestCase):
         ]
 
         expected = [
-            {'assembled': True, 'match': True, 'ref_seq': True, 'pct_id': True, 'known_var': True, 'novel_var': True},
-            {'assembled': False, 'match': False, 'ref_seq': True, 'pct_id': True, 'known_var': True, 'novel_var': True},
-            {'assembled': True, 'match': False, 'ref_seq': False, 'pct_id': True, 'known_var': True, 'novel_var': True},
-            {'assembled': True, 'match': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
-            {'assembled': False, 'match': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
-            {'assembled': False, 'match': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
+            {'assembled': True, 'match': True, 'ref_seq': True, 'pct_id': True, 'ctg_cov': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'match': True, 'ref_seq': True, 'pct_id': True, 'ctg_cov': False, 'known_var': True, 'novel_var': True},
+            {'assembled': False, 'match': False, 'ref_seq': True, 'pct_id': True, 'ctg_cov': False, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'match': False, 'ref_seq': False, 'pct_id': True, 'ctg_cov': False, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'match': False, 'ref_seq': False, 'pct_id': False, 'ctg_cov': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'match': False, 'ref_seq': False, 'pct_id': False, 'ctg_cov': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'match': False, 'ref_seq': False, 'pct_id': False, 'ctg_cov': False, 'known_var': False, 'novel_var': False},
         ]
 
         assert len(col_strings) == len(expected)

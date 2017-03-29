@@ -18,7 +18,7 @@ class Summary:
       filter_rows=True,
       filter_columns=True,
       min_id=90.0,
-      cluster_cols='assembled,match,ref_seq,pct_id,known_var,novel_var',
+      cluster_cols='assembled,match,ref_seq,pct_id,ctg_cov,known_var,novel_var',
       make_phandango_tree=True,
       only_clusters=None,
       show_var_groups=False,
@@ -62,7 +62,7 @@ class Summary:
 
     @staticmethod
     def _determine_cluster_cols(cols_string):
-        allowed_cols = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
+        allowed_cols = {'assembled', 'match', 'ref_seq', 'pct_id', 'ctg_cov', 'known_var', 'novel_var'}
         return Summary._determine_cols(cols_string, allowed_cols, 'cluster columns')
 
 
