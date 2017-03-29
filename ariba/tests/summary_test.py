@@ -93,6 +93,7 @@ class TestSummary(unittest.TestCase):
                         'match': 'yes',
                         'novel_var': 'no',
                         'pct_id': '98.33',
+                        'ctg_cov': '10.0',
                         'ref_seq': 'noncoding_ref1'
                     },
                     'groups': {},
@@ -105,6 +106,7 @@ class TestSummary(unittest.TestCase):
                         'match': 'yes',
                         'novel_var': 'no',
                         'pct_id': '98.33',
+                        'ctg_cov': '10.0',
                         'ref_seq': 'noncoding_ref2'
                     },
                     'groups': {},
@@ -117,6 +119,7 @@ class TestSummary(unittest.TestCase):
                         'match': 'yes',
                         'novel_var': 'yes',
                         'pct_id': '98.96',
+                        'ctg_cov': '20.1',
                         'ref_seq': 'presence_absence_ref1'
                     },
                     'groups': {},
@@ -129,6 +132,7 @@ class TestSummary(unittest.TestCase):
                             'match': 'no',
                             'novel_var': 'yes',
                             'pct_id': '99.1',
+                            'ctg_cov': '22.3',
                             'ref_seq': 'presence_absence_ref2'
                     },
                     'groups': {},
@@ -142,6 +146,7 @@ class TestSummary(unittest.TestCase):
                         'match': 'yes',
                         'novel_var': 'no',
                         'pct_id': '98.33',
+                        'ctg_cov': '50.1',
                         'ref_seq': 'noncoding_ref1'
                      },
                     'groups': {},
@@ -154,6 +159,7 @@ class TestSummary(unittest.TestCase):
                         'match': 'yes',
                         'novel_var': 'no',
                         'pct_id': '98.33',
+                        'ctg_cov': '10.0',
                         'ref_seq': 'noncoding_ref2'
                     },
                     'groups': {},
@@ -166,6 +172,7 @@ class TestSummary(unittest.TestCase):
                             'match': 'yes',
                             'novel_var': 'yes',
                             'pct_id': '98.96',
+                            'ctg_cov': '51.1',
                             'ref_seq': 'presence_absence1'
                     },
                     'groups': {},
@@ -182,6 +189,7 @@ class TestSummary(unittest.TestCase):
                     'match',
                     'novel_var',
                     'pct_id',
+                    'ctg_cov',
                     'ref_seq'
                 },
                 'groups': set(),
@@ -194,6 +202,7 @@ class TestSummary(unittest.TestCase):
                     'match',
                     'novel_var',
                     'pct_id',
+                    'ctg_cov',
                     'ref_seq'
                 },
                 'groups': set(),
@@ -206,6 +215,7 @@ class TestSummary(unittest.TestCase):
                     'match',
                     'novel_var',
                     'pct_id',
+                    'ctg_cov',
                     'ref_seq'
                 },
                 'groups': set(),
@@ -218,6 +228,7 @@ class TestSummary(unittest.TestCase):
                     'match',
                     'novel_var',
                     'pct_id',
+                    'ctg_cov',
                     'ref_seq'
                 },
                 'groups': set(),
@@ -280,7 +291,7 @@ class TestSummary(unittest.TestCase):
         with open(fofn, 'w') as f:
             print(infiles[0], 'sample1', file=f)
             print(infiles[1], file=f)
-    
+
 
         s = summary.Summary('out', fofn=fofn, show_var_groups=True, show_known_vars=True, show_novel_vars=True)
         os.unlink(fofn)

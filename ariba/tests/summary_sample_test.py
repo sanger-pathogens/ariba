@@ -52,7 +52,8 @@ class TestSummarySample(unittest.TestCase):
                 'ref_seq': 'noncoding1',
                 'known_var': 'yes',
                 'novel_var': 'yes',
-                'pct_id': '98.33'
+                'pct_id': '98.33',
+                'ctg_cov': '35.4',
             },
             'cluster.p': {
                 'assembled': 'yes',
@@ -60,7 +61,8 @@ class TestSummarySample(unittest.TestCase):
                 'ref_seq': 'presence_absence1',
                 'known_var': 'yes',
                 'novel_var': 'no',
-                'pct_id': '98.96'
+                'pct_id': '98.96',
+                'ctg_cov': '35.1',
             },
             'cluster.v': {
                 'assembled': 'yes',
@@ -68,7 +70,8 @@ class TestSummarySample(unittest.TestCase):
                 'ref_seq': 'variants_only1',
                 'known_var': 'yes',
                 'novel_var': 'no',
-                'pct_id': '100.0'
+                'pct_id': '100.0',
+                'ctg_cov': '42.4',
             }
         }
         self.maxDiff = None
