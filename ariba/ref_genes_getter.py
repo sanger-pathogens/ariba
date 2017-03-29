@@ -19,6 +19,7 @@ allowed_ref_dbs = {
     'srst2_argannot',
     'vfdb_core',
     'vfdb_full',
+    'virulencefinder',
 }
 
 argannot_ref = '"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n'
@@ -424,6 +425,58 @@ class RefGenesGetter:
         print('If you use this downloaded data, please cite:')
         print('"VFDB 2016: hierarchical and refined dataset for big data analysis-10 years on",\nChen LH et al 2016, Nucleic Acids Res. 44(Database issue):D694-D697. PMID: 26578559\n')
 
+
+    def _get_from_virulencefinder(self, outprefix):
+        outprefix = os.path.abspath(outprefix)
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
+        tmpdir = outprefix + '.tmp.download'
+        current_dir = os.getcwd()
+
+        try:
+            os.mkdir(tmpdir)
+            os.chdir(tmpdir)
+        except:
+            raise Error('Error mkdir/chdir ' + tmpdir)
+
+        zipfile = 'plasmidfinder.zip'
+        cmd = 'curl -X POST --data "folder=virulencefinder&filename=virulencefinder.zip" -o ' + zipfile + ' https://cge.cbs.dtu.dk/cge/download_data.php'
+        print('Downloading data with:', cmd, sep='\n')
+        common.syscall(cmd)
+        common.syscall('unzip ' + zipfile)
+
+        print('Combining downloaded fasta files...')
+        fout_fa = pyfastaq.utils.open_file_write(final_fasta)
+        fout_tsv = pyfastaq.utils.open_file_write(final_tsv)
+        name_count = {}
+
+        for filename in os.listdir(tmpdir):
+            if filename.endswith('.fsa'):
+                print('   ', filename)
+                file_reader = pyfastaq.sequences.file_reader(os.path.join(tmpdir, filename))
+                for seq in file_reader:
+                    original_id = seq.id
+                    seq.id = seq.id.replace('_', '.', 1)
+                    seq.id = seq.id.replace(' ', '_')
+                    if seq.id in name_count:
+                        name_count[seq.id] += 1
+                        seq.id = seq.id + '.' + str(name_count[seq.id])
+                    else:
+                        name_count[seq.id] = 1
+                    print(seq, file=fout_fa)
+                    print(seq.id, '0', '0', '.', '.', 'Original name was ' + original_id, sep='\t', file=fout_tsv)
+
+        pyfastaq.utils.close(fout_fa)
+        pyfastaq.utils.close(fout_tsv)
+        print('\nFinished combining files\n')
+        os.chdir(current_dir)
+        if not self.debug:
+            shutil.rmtree(tmpdir)
+        print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+        print('You can use them with ARIBA like this:')
+        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
+        print('If you use this downloaded data, please cite:')
+        print('"Real-time whole-genome sequencing for routine typing, surveillance, and outbreak detection of verotoxigenic Escherichia coli", Joensen al 2014, PMID: 24574290\n')
 
     def run(self, outprefix):
         exec('self._get_from_' + self.ref_db + '(outprefix)')
