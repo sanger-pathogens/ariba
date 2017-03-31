@@ -18,7 +18,7 @@ class Summary:
       filter_rows=True,
       filter_columns=True,
       min_id=90.0,
-      cluster_cols='assembled,match,ref_seq,pct_id,known_var,novel_var',
+      cluster_cols='assembled,match,ref_seq,pct_id,ctg_cov,known_var,novel_var',
       make_phandango_tree=True,
       only_clusters=None,
       show_var_groups=False,
@@ -62,7 +62,7 @@ class Summary:
 
     @staticmethod
     def _determine_cluster_cols(cols_string):
-        allowed_cols = {'assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'}
+        allowed_cols = {'assembled', 'match', 'ref_seq', 'pct_id', 'ctg_cov', 'known_var', 'novel_var'}
         return Summary._determine_cols(cols_string, allowed_cols, 'cluster columns')
 
 
@@ -122,6 +122,7 @@ class Summary:
                             'match': 'no',
                             'novel_var': 'NA',
                             'pct_id': 'NA',
+                            'ctg_cov': 'NA',
                             'ref_seq': 'NA'
                     }
                 else:
@@ -164,11 +165,11 @@ class Summary:
         matrix = []
         making_header_lines = True
         phandango_header = ['name']
-        phandango_suffixes = {'assembled': ':o1', 'match': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'known_var': ':o1', 'novel_var': ':o1'}
+        phandango_suffixes = {'assembled': ':o1', 'match': ':o1', 'ref_seq': ':o2', 'pct_id': ':c1', 'ctg_cov': ':c3', 'known_var': ':o1', 'novel_var': ':o1'}
         ref_seq_counter = 2
         csv_header = ['name']
-        summary_cols_in_order = ['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var']
-        summary_cols_set = set(['assembled', 'match', 'ref_seq', 'pct_id', 'known_var', 'novel_var'])
+        summary_cols_in_order = ['assembled', 'match', 'ref_seq', 'pct_id', 'ctg_cov', 'known_var', 'novel_var']
+        summary_cols_set = set(['assembled', 'match', 'ref_seq', 'pct_id', 'ctg_cov', 'known_var', 'novel_var'])
         summary_cols_in_order = [x for x in summary_cols_in_order if cluster_cols[x]]
 
         for filename in sorted(filenames):

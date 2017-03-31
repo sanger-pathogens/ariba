@@ -18,22 +18,22 @@ def use_preset(options):
             'row_filter': 'y',
         },
         'cluster_all': {
-            'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
+            'cluster_cols': 'assembled,match,ref_seq,pct_id,ctg_cov,known_var,novel_var',
             'col_filter': 'y',
             'row_filter': 'y',
         },
         'cluster_var_groups': {
-            'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
+            'cluster_cols': 'assembled,match,ref_seq,pct_id,ctg_cov,known_var,novel_var',
             'col_filter': 'y',
             'row_filter': 'y',
         },
         'all': {
-            'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
+            'cluster_cols': 'assembled,match,ref_seq,pct_id,ctg_cov,known_var,novel_var',
             'col_filter': 'y',
             'row_filter': 'y',
         },
         'all_no_filter': {
-            'cluster_cols': 'assembled,match,ref_seq,pct_id,known_var,novel_var',
+            'cluster_cols': 'assembled,match,ref_seq,pct_id,ctg_cov,known_var,novel_var',
             'col_filter': 'n',
             'row_filter': 'n',
         },

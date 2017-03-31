@@ -23,7 +23,7 @@ class TestSummaryCluster(unittest.TestCase):
             'pc_ident': 98.33,
             'ctg': 'ctg_name',
             'ctg_len': 279,
-            'ctg_cov': '24.4',
+            'ctg_cov': 24.4,
             'known_var': '1',
             'var_type': 'SNP',
             'var_seq_type': 'n',
@@ -85,20 +85,20 @@ class TestSummaryCluster(unittest.TestCase):
         self.assertTrue(cluster._has_any_part_of_ref_assembled())
 
 
-    def test_pc_id_of_longest(self):
-        '''Test pc_id_of_longest'''
+    def test_pc_id_and_read_depth_of_longest(self):
+        '''Test _pc_id_and_read_depth_of_longest'''
         cluster = summary_cluster.SummaryCluster()
         self.assertTrue(cluster.name is None)
-        line1 = 'ariba_refname\trefname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
-        line2 = 'ariba_refname\trefname\t1\t0\t19\t78\tcluster\t120\t119\t98.20\tctg_name2\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
-        line3 = 'ariba_refname\trefname\t1\t0\t19\t78\tcluster\t120\t114\t98.32\tctg_name3\t279\t24.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line1 = 'ariba_refname\trefname\t1\t0\t19\t78\tcluster\t120\t100\t98.33\tctg_name\t279\t42.2\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line2 = 'ariba_refname\trefname\t1\t0\t19\t78\tcluster\t120\t119\t98.20\tctg_name2\t279\t42.42\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
+        line3 = 'ariba_refname\trefname\t1\t0\t19\t78\tcluster\t120\t114\t98.32\tctg_name3\t279\t42.4\t1\tSNP\tn\tA14T\t1\tA14T\tSNP\t13\t13\tA\t84\t84\tT\t17\tT\t17\tnoncoding1:1:0:A14T:id1:ref has wild type, foo bar\tsome free text'
         data_dict1 = summary_cluster.SummaryCluster.line2dict(line1)
         data_dict2 = summary_cluster.SummaryCluster.line2dict(line2)
         data_dict3 = summary_cluster.SummaryCluster.line2dict(line3)
         cluster.add_data_dict(data_dict1)
         cluster.add_data_dict(data_dict2)
         cluster.add_data_dict(data_dict3)
-        self.assertEqual(98.2, cluster.pc_id_of_longest())
+        self.assertEqual((98.2, 42.42), cluster._pc_id_and_read_depth_of_longest())
 
 
     def test_to_cluster_summary_number(self):
@@ -465,6 +465,7 @@ class TestSummaryCluster(unittest.TestCase):
             'novel_var': 'no',
             'known_var': 'yes',
             'pct_id': '98.33',
+            'ctg_cov': '24.4',
         }
         got = cluster.column_summary_data()
         self.assertEqual(expected, got)
@@ -543,6 +544,7 @@ class TestSummaryCluster(unittest.TestCase):
             'match': 'yes',
             'ref_seq': 'ref1',
             'pct_id': '98.33',
+            'ctg_cov': '24.4',
             'known_var': 'yes',
             'novel_var': 'no',
         }

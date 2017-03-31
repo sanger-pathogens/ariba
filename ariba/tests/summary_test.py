@@ -20,6 +20,7 @@ class TestSummary(unittest.TestCase):
 
     def test_determine_cluster_cols(self):
         col_strings = [
+            'assembled,match,ref_seq,pct_id,ctg_cov,known_var,novel_var',
             'assembled,match,ref_seq,pct_id,known_var,novel_var',
             'ref_seq,pct_id,known_var,novel_var',
             'assembled,pct_id,known_var,novel_var',
@@ -29,12 +30,13 @@ class TestSummary(unittest.TestCase):
         ]
 
         expected = [
-            {'assembled': True, 'match': True, 'ref_seq': True, 'pct_id': True, 'known_var': True, 'novel_var': True},
-            {'assembled': False, 'match': False, 'ref_seq': True, 'pct_id': True, 'known_var': True, 'novel_var': True},
-            {'assembled': True, 'match': False, 'ref_seq': False, 'pct_id': True, 'known_var': True, 'novel_var': True},
-            {'assembled': True, 'match': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
-            {'assembled': False, 'match': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
-            {'assembled': False, 'match': False, 'ref_seq': False, 'pct_id': False, 'known_var': False, 'novel_var': False},
+            {'assembled': True, 'match': True, 'ref_seq': True, 'pct_id': True, 'ctg_cov': True, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'match': True, 'ref_seq': True, 'pct_id': True, 'ctg_cov': False, 'known_var': True, 'novel_var': True},
+            {'assembled': False, 'match': False, 'ref_seq': True, 'pct_id': True, 'ctg_cov': False, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'match': False, 'ref_seq': False, 'pct_id': True, 'ctg_cov': False, 'known_var': True, 'novel_var': True},
+            {'assembled': True, 'match': False, 'ref_seq': False, 'pct_id': False, 'ctg_cov': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'match': False, 'ref_seq': False, 'pct_id': False, 'ctg_cov': False, 'known_var': False, 'novel_var': False},
+            {'assembled': False, 'match': False, 'ref_seq': False, 'pct_id': False, 'ctg_cov': False, 'known_var': False, 'novel_var': False},
         ]
 
         assert len(col_strings) == len(expected)
@@ -93,6 +95,7 @@ class TestSummary(unittest.TestCase):
                         'match': 'yes',
                         'novel_var': 'no',
                         'pct_id': '98.33',
+                        'ctg_cov': '10.0',
                         'ref_seq': 'noncoding_ref1'
                     },
                     'groups': {},
@@ -105,6 +108,7 @@ class TestSummary(unittest.TestCase):
                         'match': 'yes',
                         'novel_var': 'no',
                         'pct_id': '98.33',
+                        'ctg_cov': '10.0',
                         'ref_seq': 'noncoding_ref2'
                     },
                     'groups': {},
@@ -117,6 +121,7 @@ class TestSummary(unittest.TestCase):
                         'match': 'yes',
                         'novel_var': 'yes',
                         'pct_id': '98.96',
+                        'ctg_cov': '20.1',
                         'ref_seq': 'presence_absence_ref1'
                     },
                     'groups': {},
@@ -129,6 +134,7 @@ class TestSummary(unittest.TestCase):
                             'match': 'no',
                             'novel_var': 'yes',
                             'pct_id': '99.1',
+                            'ctg_cov': '22.3',
                             'ref_seq': 'presence_absence_ref2'
                     },
                     'groups': {},
@@ -142,6 +148,7 @@ class TestSummary(unittest.TestCase):
                         'match': 'yes',
                         'novel_var': 'no',
                         'pct_id': '98.33',
+                        'ctg_cov': '50.1',
                         'ref_seq': 'noncoding_ref1'
                      },
                     'groups': {},
@@ -154,6 +161,7 @@ class TestSummary(unittest.TestCase):
                         'match': 'yes',
                         'novel_var': 'no',
                         'pct_id': '98.33',
+                        'ctg_cov': '10.0',
                         'ref_seq': 'noncoding_ref2'
                     },
                     'groups': {},
@@ -166,6 +174,7 @@ class TestSummary(unittest.TestCase):
                             'match': 'yes',
                             'novel_var': 'yes',
                             'pct_id': '98.96',
+                            'ctg_cov': '51.1',
                             'ref_seq': 'presence_absence1'
                     },
                     'groups': {},
@@ -182,6 +191,7 @@ class TestSummary(unittest.TestCase):
                     'match',
                     'novel_var',
                     'pct_id',
+                    'ctg_cov',
                     'ref_seq'
                 },
                 'groups': set(),
@@ -194,6 +204,7 @@ class TestSummary(unittest.TestCase):
                     'match',
                     'novel_var',
                     'pct_id',
+                    'ctg_cov',
                     'ref_seq'
                 },
                 'groups': set(),
@@ -206,6 +217,7 @@ class TestSummary(unittest.TestCase):
                     'match',
                     'novel_var',
                     'pct_id',
+                    'ctg_cov',
                     'ref_seq'
                 },
                 'groups': set(),
@@ -218,6 +230,7 @@ class TestSummary(unittest.TestCase):
                     'match',
                     'novel_var',
                     'pct_id',
+                    'ctg_cov',
                     'ref_seq'
                 },
                 'groups': set(),
@@ -280,7 +293,7 @@ class TestSummary(unittest.TestCase):
         with open(fofn, 'w') as f:
             print(infiles[0], 'sample1', file=f)
             print(infiles[1], file=f)
-    
+
 
         s = summary.Summary('out', fofn=fofn, show_var_groups=True, show_known_vars=True, show_novel_vars=True)
         os.unlink(fofn)
@@ -288,11 +301,11 @@ class TestSummary(unittest.TestCase):
         s._gather_unfiltered_output_data()
         got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(s.filenames, s.all_data, s.all_potential_columns, s.cluster_columns)
 
-        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding1.id1:o1', 'noncoding1.id1.%:c2', 'noncoding1.id3:o1', 'noncoding1.id3.%:c2', 'noncoding1.14GT:o1', 'noncoding1.14GT.%:c2', 'noncoding1.14T:o1', 'noncoding1.14T.%:c2', 'noncoding1.6G:o1', 'noncoding1.6G.%:c2', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'noncoding2.id2:o1', 'noncoding2.id2.%:c2', 'noncoding2.42T:o1', 'noncoding2.42T.%:c2', 'noncoding2.52GT:o1', 'noncoding2.52GT.%:c2', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1', 'presence_absence1.A10V:o1']
-        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding1.id1', 'noncoding1.id1.%', 'noncoding1.id3', 'noncoding1.id3.%', 'noncoding1.14GT', 'noncoding1.14GT.%', 'noncoding1.14T', 'noncoding1.14T.%', 'noncoding1.6G', 'noncoding1.6G.%', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.known_var', 'noncoding2.novel_var', 'noncoding2.id2', 'noncoding2.id2.%', 'noncoding2.42T', 'noncoding2.42T.%', 'noncoding2.52GT', 'noncoding2.52GT.%', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.known_var', 'presence_absence1.novel_var', 'presence_absence1.A10V']
+        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.ctg_cov:c3', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding1.id1:o1', 'noncoding1.id1.%:c2', 'noncoding1.id3:o1', 'noncoding1.id3.%:c2', 'noncoding1.14GT:o1', 'noncoding1.14GT.%:c2', 'noncoding1.14T:o1', 'noncoding1.14T.%:c2', 'noncoding1.6G:o1', 'noncoding1.6G.%:c2', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.ctg_cov:c3', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'noncoding2.id2:o1', 'noncoding2.id2.%:c2', 'noncoding2.42T:o1', 'noncoding2.42T.%:c2', 'noncoding2.52GT:o1', 'noncoding2.52GT.%:c2', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.ctg_cov:c3', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1', 'presence_absence1.A10V:o1']
+        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.ctg_cov', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding1.id1', 'noncoding1.id1.%', 'noncoding1.id3', 'noncoding1.id3.%', 'noncoding1.14GT', 'noncoding1.14GT.%', 'noncoding1.14T', 'noncoding1.14T.%', 'noncoding1.6G', 'noncoding1.6G.%', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.ctg_cov', 'noncoding2.known_var', 'noncoding2.novel_var', 'noncoding2.id2', 'noncoding2.id2.%', 'noncoding2.42T', 'noncoding2.42T.%', 'noncoding2.52GT', 'noncoding2.52GT.%', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.ctg_cov', 'presence_absence1.known_var', 'presence_absence1.novel_var', 'presence_absence1.A10V']
         expected_matrix = [
-            ['sample1', 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'yes', 100.0, 'no', 'NA', 'no', 'NA', 'yes', 100.0, 'no', 'NA', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'yes_multi_het', 'NA', 'yes', 100.0, 'het', 40.0, 'yes', 'yes', 'presence_absence_ref1', '98.96', 'no', 'yes', 'yes'],
-            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'het', 80.0, 'yes', 100.0, 'het', 80.0, 'no', 'NA', 'yes', 100.0, 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'het', 40.0, 'no', 'NA', 'het', 40.0, 'yes', 'yes', 'presence_absence1', '98.96', 'no', 'yes', 'yes']
+            ['sample1', 'yes', 'yes', 'noncoding_ref1', '98.33', '10.0', 'yes', 'no', 'yes', 100.0, 'no', 'NA', 'no', 'NA', 'yes', 100.0, 'no', 'NA', 'yes', 'yes', 'noncoding_ref2', '98.33', '10.0', 'yes', 'no', 'yes_multi_het', 'NA', 'yes', 100.0, 'het', 40.0, 'yes', 'yes', 'presence_absence_ref1', '98.96', '20.1', 'no', 'yes', 'yes'],
+            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', '50.1', 'yes', 'no', 'het', 80.0, 'yes', 100.0, 'het', 80.0, 'no', 'NA', 'yes', 100.0, 'yes', 'yes', 'noncoding_ref2', '98.33', '10.0', 'yes', 'no', 'het', 40.0, 'no', 'NA', 'het', 40.0, 'yes', 'yes', 'presence_absence1', '98.96', '51.1', 'no', 'yes', 'yes']
         ]
 
         self.assertEqual(expected_phandango_header, got_phandango_header)
@@ -312,11 +325,11 @@ class TestSummary(unittest.TestCase):
         s._gather_unfiltered_output_data()
         got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(s.filenames, s.all_data, s.all_potential_columns, s.cluster_columns)
 
-        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding1.id1:o1', 'noncoding1.id1.%:c2', 'noncoding1.id3:o1', 'noncoding1.id3.%:c2', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'noncoding2.id2:o1', 'noncoding2.id2.%:c2', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1']
-        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding1.id1', 'noncoding1.id1.%', 'noncoding1.id3', 'noncoding1.id3.%', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.known_var', 'noncoding2.novel_var', 'noncoding2.id2', 'noncoding2.id2.%', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.known_var', 'presence_absence1.novel_var']
+        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.ctg_cov:c3', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding1.id1:o1', 'noncoding1.id1.%:c2', 'noncoding1.id3:o1', 'noncoding1.id3.%:c2', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.ctg_cov:c3', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'noncoding2.id2:o1', 'noncoding2.id2.%:c2', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.ctg_cov:c3', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1']
+        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.ctg_cov', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding1.id1', 'noncoding1.id1.%', 'noncoding1.id3', 'noncoding1.id3.%', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.ctg_cov', 'noncoding2.known_var', 'noncoding2.novel_var', 'noncoding2.id2', 'noncoding2.id2.%', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.ctg_cov', 'presence_absence1.known_var', 'presence_absence1.novel_var']
         expected_matrix = [
-            [infiles[0], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'yes', 100.0, 'no', 'NA', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'yes_multi_het', 'NA', 'yes', 'yes', 'presence_absence_ref1', '98.96', 'no', 'yes'],
-            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'het', 80.0, 'yes', 100.0, 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'het', 40.0, 'yes', 'yes', 'presence_absence1', '98.96', 'no', 'yes']
+            [infiles[0], 'yes', 'yes', 'noncoding_ref1', '98.33', '10.0', 'yes', 'no', 'yes', 100.0, 'no', 'NA', 'yes', 'yes', 'noncoding_ref2', '98.33', '10.0', 'yes', 'no', 'yes_multi_het', 'NA', 'yes', 'yes', 'presence_absence_ref1', '98.96', '20.1', 'no', 'yes'],
+            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', '50.1', 'yes', 'no', 'het', 80.0, 'yes', 100.0, 'yes', 'yes', 'noncoding_ref2', '98.33', '10.0', 'yes', 'no', 'het', 40.0, 'yes', 'yes', 'presence_absence1', '98.96', '51.1', 'no', 'yes']
         ]
 
         self.assertEqual(expected_phandango_header, got_phandango_header)
@@ -336,11 +349,11 @@ class TestSummary(unittest.TestCase):
         s._gather_unfiltered_output_data()
         got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(s.filenames, s.all_data, s.all_potential_columns, s.cluster_columns)
 
-        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding1.14GT:o1', 'noncoding1.14GT.%:c2', 'noncoding1.14T:o1', 'noncoding1.14T.%:c2', 'noncoding1.6G:o1', 'noncoding1.6G.%:c2', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'noncoding2.42T:o1', 'noncoding2.42T.%:c2', 'noncoding2.52GT:o1', 'noncoding2.52GT.%:c2', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1', 'presence_absence1.A10V:o1']
-        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding1.14GT', 'noncoding1.14GT.%', 'noncoding1.14T', 'noncoding1.14T.%', 'noncoding1.6G', 'noncoding1.6G.%', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.known_var', 'noncoding2.novel_var', 'noncoding2.42T', 'noncoding2.42T.%', 'noncoding2.52GT', 'noncoding2.52GT.%', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.known_var', 'presence_absence1.novel_var', 'presence_absence1.A10V']
+        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.ctg_cov:c3', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding1.14GT:o1', 'noncoding1.14GT.%:c2', 'noncoding1.14T:o1', 'noncoding1.14T.%:c2', 'noncoding1.6G:o1', 'noncoding1.6G.%:c2', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.ctg_cov:c3', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'noncoding2.42T:o1', 'noncoding2.42T.%:c2', 'noncoding2.52GT:o1', 'noncoding2.52GT.%:c2', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.ctg_cov:c3', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1', 'presence_absence1.A10V:o1']
+        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.ctg_cov', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding1.14GT', 'noncoding1.14GT.%', 'noncoding1.14T', 'noncoding1.14T.%', 'noncoding1.6G', 'noncoding1.6G.%', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.ctg_cov', 'noncoding2.known_var', 'noncoding2.novel_var', 'noncoding2.42T', 'noncoding2.42T.%', 'noncoding2.52GT', 'noncoding2.52GT.%', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.ctg_cov', 'presence_absence1.known_var', 'presence_absence1.novel_var', 'presence_absence1.A10V']
         expected_matrix = [
-            [infiles[0], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'no', 'NA', 'yes', 100.0, 'no', 'NA', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'yes', 100.0, 'het', 40.0, 'yes', 'yes', 'presence_absence_ref1', '98.96', 'no', 'yes', 'yes'],
-            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'het', 80.0, 'no', 'NA', 'yes', 100.0, 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'no', 'NA', 'het', 40.0, 'yes', 'yes', 'presence_absence1', '98.96', 'no', 'yes', 'yes']
+            [infiles[0], 'yes', 'yes', 'noncoding_ref1', '98.33', '10.0', 'yes', 'no', 'no', 'NA', 'yes', 100.0, 'no', 'NA', 'yes', 'yes', 'noncoding_ref2', '98.33', '10.0', 'yes', 'no', 'yes', 100.0, 'het', 40.0, 'yes', 'yes', 'presence_absence_ref1', '98.96', '20.1', 'no', 'yes', 'yes'],
+            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', '50.1', 'yes', 'no', 'het', 80.0, 'no', 'NA', 'yes', 100.0, 'yes', 'yes', 'noncoding_ref2', '98.33', '10.0', 'yes', 'no', 'no', 'NA', 'het', 40.0, 'yes', 'yes', 'presence_absence1', '98.96', '51.1', 'no', 'yes', 'yes']
         ]
 
         self.assertEqual(expected_phandango_header, got_phandango_header)
@@ -360,11 +373,11 @@ class TestSummary(unittest.TestCase):
         s._gather_unfiltered_output_data()
         got_phandango_header, got_csv_header, got_matrix = summary.Summary._to_matrix(s.filenames, s.all_data, s.all_potential_columns, s.cluster_columns)
 
-        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1']
-        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.known_var', 'noncoding2.novel_var', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.known_var', 'presence_absence1.novel_var']
+        expected_phandango_header = ['name', 'noncoding1.assembled:o1', 'noncoding1.match:o1', 'noncoding1.ref_seq:o2', 'noncoding1.pct_id:c1', 'noncoding1.ctg_cov:c3', 'noncoding1.known_var:o1', 'noncoding1.novel_var:o1', 'noncoding2.assembled:o1', 'noncoding2.match:o1', 'noncoding2.ref_seq:o3', 'noncoding2.pct_id:c1', 'noncoding2.ctg_cov:c3', 'noncoding2.known_var:o1', 'noncoding2.novel_var:o1', 'presence_absence1.assembled:o1', 'presence_absence1.match:o1', 'presence_absence1.ref_seq:o4', 'presence_absence1.pct_id:c1', 'presence_absence1.ctg_cov:c3', 'presence_absence1.known_var:o1', 'presence_absence1.novel_var:o1']
+        expected_csv_header = ['name', 'noncoding1.assembled', 'noncoding1.match', 'noncoding1.ref_seq', 'noncoding1.pct_id', 'noncoding1.ctg_cov', 'noncoding1.known_var', 'noncoding1.novel_var', 'noncoding2.assembled', 'noncoding2.match', 'noncoding2.ref_seq', 'noncoding2.pct_id', 'noncoding2.ctg_cov', 'noncoding2.known_var', 'noncoding2.novel_var', 'presence_absence1.assembled', 'presence_absence1.match', 'presence_absence1.ref_seq', 'presence_absence1.pct_id', 'presence_absence1.ctg_cov', 'presence_absence1.known_var', 'presence_absence1.novel_var']
         expected_matrix = [
-            [infiles[0], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'yes', 'yes', 'presence_absence_ref1', '98.96', 'no', 'yes'],
-            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', 'yes', 'no', 'yes', 'yes', 'noncoding_ref2', '98.33', 'yes', 'no', 'yes', 'yes', 'presence_absence1', '98.96', 'no', 'yes']
+            [infiles[0], 'yes', 'yes', 'noncoding_ref1', '98.33', '10.0', 'yes', 'no', 'yes', 'yes', 'noncoding_ref2', '98.33', '10.0', 'yes', 'no', 'yes', 'yes', 'presence_absence_ref1', '98.96', '20.1', 'no', 'yes'],
+            [infiles[1], 'yes', 'yes', 'noncoding_ref1', '98.33', '50.1', 'yes', 'no', 'yes', 'yes', 'noncoding_ref2', '98.33', '10.0', 'yes', 'no', 'yes', 'yes', 'presence_absence1', '98.96', '51.1', 'no', 'yes']
         ]
 
         self.assertEqual(expected_phandango_header, got_phandango_header)

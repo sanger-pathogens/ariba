@@ -15,7 +15,8 @@ int_columns = [
 ]
 
 
-float_columns = ['pc_ident']
+float_columns = ['pc_ident', 'ctg_cov']
+
 
 class SummaryCluster:
     def __init__(self, min_pc_id=90):
@@ -90,16 +91,18 @@ class SummaryCluster:
         self.data.append(data_dict)
 
 
-    def pc_id_of_longest(self):
+    def _pc_id_and_read_depth_of_longest(self):
         longest = 0
         identity = 0
+        depth = 0
 
         for d in self.data:
             if d['ref_base_assembled'] > longest:
                 longest = d['ref_base_assembled']
                 identity = d['pc_ident']
+                depth = d['ctg_cov']
 
-        return identity
+        return identity, depth
 
 
     def _has_any_part_of_ref_assembled(self):
@@ -316,12 +319,14 @@ class SummaryCluster:
     def column_summary_data(self):
         '''Returns a dictionary of column name -> value, for cluster-level results'''
         assembled_summary = self._to_cluster_summary_assembled()
+        pct_id, read_depth = self._pc_id_and_read_depth_of_longest()
 
         columns = {
             'assembled': self._to_cluster_summary_assembled(),
             'match': self._has_match(assembled_summary),
             'ref_seq': self.ref_name,
-            'pct_id': str(self.pc_id_of_longest()),
+            'pct_id': str(pct_id),
+            'ctg_cov': str(read_depth),
             'known_var': self._to_cluster_summary_has_known_nonsynonymous(assembled_summary),
             'novel_var': self._to_cluster_summary_has_novel_nonsynonymous(assembled_summary)
         }
