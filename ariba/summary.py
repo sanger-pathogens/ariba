@@ -267,6 +267,7 @@ class Summary:
             'no': '#fb9a99',
             'NA': '#ffffff',
             'het': '#fdbf6f',
+            'yes_multi_het': '#fdbf6f',
             'fragmented': '#1f78b4',
             'interrupted': '#a6cee3',
             'partial': '#fdbf6f',
