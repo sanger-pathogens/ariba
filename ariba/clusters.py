@@ -609,8 +609,6 @@ class Clusters:
             print('{:_^79}'.format(' Cleaning files '), flush=True)
         self._clean()
 
-        print('self.mlst_profile_file', self.mlst_profile_file)
-        print('self.report_file_filtered', self.report_file_filtered)
         Clusters._write_mlst_reports(self.mlst_profile_file, self.report_file_filtered, self.mlst_reports_prefix, verbose=self.verbose)
 
         if self.clusters_all_ran_ok and self.verbose:
