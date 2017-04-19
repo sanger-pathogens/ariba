@@ -61,6 +61,16 @@ ARIBA is available in the latest version of Debian, and over time will progressi
     sudo apt-get install ariba
 
 
+### Ubuntu
+
+You can use `apt-get` (see above), or to ensure you get the latest version of ARIBA, the following commands can be
+used to install ARIBA and its dependencies. This was tested on a new instance of Ubuntu 16.04.
+
+    sudo  apt-get update
+    sudo apt-get install -y python3-dev python3-pip python3-tk zlib1g-dev bowtie2 mummer cd-hit
+    export ARIBA_CDHIT=cdhit-est
+    sudo pip3 install ariba
+
 ### Dependencies and environment variables
 
 By default, ARIBA will look for the dependencies in your `$PATH`, using
