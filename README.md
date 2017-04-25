@@ -3,7 +3,7 @@ ARIBA
 
 Antimicrobial Resistance Identification By Assembly
 
-For methods and benchmakring, please see the [preprint on biorxiv][ariba biorxiv].
+For methods and benchmarking, please see the [preprint on biorxiv][ariba biorxiv].
 
 
 For how to use ARIBA, please see the [ARIBA wiki page][ARIBA wiki].
