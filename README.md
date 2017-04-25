@@ -3,6 +3,8 @@ ARIBA
 
 Antimicrobial Resistance Identification By Assembly
 
+For methods and benchmakring, please see the [preprint on biorxiv][ariba biorxiv].
+
 
 For how to use ARIBA, please see the [ARIBA wiki page][ARIBA wiki].
 
@@ -137,7 +139,7 @@ Please read the [ARIBA wiki page][ARIBA wiki] for usage instructions.
 
 Build status: [![Build Status](https://travis-ci.org/sanger-pathogens/ariba.svg?branch=master)](https://travis-ci.org/sanger-pathogens/ariba)
 
-
+  [ariba biorxiv]: http://biorxiv.org/content/early/2017/04/07/118000
   [bowtie2]: http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
   [cdhit]: http://weizhongli-lab.org/cd-hit/
   [ARIBA wiki]: https://github.com/sanger-pathogens/ariba/wiki
