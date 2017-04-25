@@ -1,11 +1,3 @@
-Disclaimer
-==========
-
-This is pre-publication software that is currently under active development.
-Use it at your own risk. Bug reports are welcome, but
-user support is not provided at this time.
-
-
 ARIBA
 =====
 
