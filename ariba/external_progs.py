@@ -38,6 +38,7 @@ class ExternalProgs:
         self.progs = {}
         self.version_report = []
         self.all_deps_ok = True
+        self.versions = {}
 
         if verbose:
             print('{:_^79}'.format(' Checking dependencies and their versions '))
@@ -60,9 +61,11 @@ class ExternalProgs:
             got_version, version = self._get_version(prog, self.progs[prog])
 
             if got_version:
+                self.versions[prog] = version
                 if prog in min_versions and LooseVersion(version) < LooseVersion(min_versions[prog]):
                     errors.append(' '.join(['Found version', version, 'of', prog, 'which is too low! Please update to at least', min_versions[prog] + '. Found it here:', prog_exe]))
             else:
+                self.versions[prog] = None
                 errors.append(version)
                 version = 'ERROR'
 
@@ -95,6 +98,10 @@ class ExternalProgs:
 
     def exe(self, prog):
         return self.progs[prog]
+
+
+    def version(self, prog):
+        return self.versions[prog]
 
 
     @staticmethod
