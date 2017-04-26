@@ -55,6 +55,7 @@ class TestMapping(unittest.TestCase):
             ref,
             out_prefix,
             bowtie2=extern_progs.exe('bowtie2'),
+            bowtie2_version=extern_progs.version('bowtie2'),
         )
         expected = get_sam_columns(os.path.join(data_dir, 'mapping_test_bowtie2_unsorted.bam'))
         got = get_sam_columns(out_prefix + '.bam')
@@ -75,6 +76,7 @@ class TestMapping(unittest.TestCase):
             ref,
             out_prefix,
             bowtie2=extern_progs.exe('bowtie2'),
+            bowtie2_version=extern_progs.version('bowtie2'),
             remove_both_unmapped=True,
         )
         expected = get_sam_columns(os.path.join(data_dir, 'mapping_test_bowtie2_remove_both_unmapped_reads.bam'))
@@ -96,6 +98,7 @@ class TestMapping(unittest.TestCase):
             out_prefix,
             sort=True,
             bowtie2=extern_progs.exe('bowtie2'),
+            bowtie2_version=extern_progs.version('bowtie2'),
         )
         expected = get_sam_columns(os.path.join(data_dir, 'mapping_test_bowtie2_sorted.bam'))
         got = get_sam_columns(out_prefix + '.bam')
