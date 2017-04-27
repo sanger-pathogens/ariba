@@ -39,6 +39,7 @@ def run_bowtie2(
       sort=False,
       bowtie2='bowtie2',
       bowtie2_preset='very-sensitive-local',
+      bowtie2_version=None,
       verbose=False,
       verbose_filehandle=sys.stdout,
       remove_both_unmapped=False,
@@ -80,6 +81,9 @@ def run_bowtie2(
         '-1', reads_fwd,
         '-2', reads_rev,
     ]
+
+    if bowtie2_version == '2.3.1':
+        map_cmd.append('--score-min G,1,10')
 
     if remove_both_unmapped:
         map_cmd.append(r''' | awk ' !(and($2,4)) || !(and($2,8)) ' ''')

@@ -4,11 +4,11 @@ set -x
 
 start_dir=$(pwd)
 
-BOWTIE2_VERSION=2.2.8
+BOWTIE2_VERSION=2.3.1
 CDHIT_VERSION=4.6.5
 MUMMER_VERSION=3.23
 
-BOWTIE2_DOWNLOAD_URL="http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip"
+BOWTIE2_DOWNLOAD_URL="http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-legacy-linux-x86_64.zip"
 CDHIT_DOWNLOAD_URL="https://github.com/weizhongli/cdhit/archive/V${CDHIT_VERSION}.tar.gz"
 MUMMER_DOWNLOAD_URL="http://downloads.sourceforge.net/project/mummer/mummer/${MUMMER_VERSION}/MUMmer${MUMMER_VERSION}.tar.gz"
 
@@ -36,9 +36,9 @@ download () {
 
 # --------------- bowtie2 ------------------
 cd $build_dir
-download $BOWTIE2_DOWNLOAD_URL "bowtie2-${BOWTIE2_VERSION}.zip"
-bowtie2_dir="$build_dir/bowtie2-${BOWTIE2_VERSION}"
-unzip -n bowtie2-${BOWTIE2_VERSION}.zip
+download $BOWTIE2_DOWNLOAD_URL "bowtie2-${BOWTIE2_VERSION}-legacy.zip"
+bowtie2_dir="$build_dir/bowtie2-${BOWTIE2_VERSION}-legacy"
+unzip -n bowtie2-${BOWTIE2_VERSION}-legacy.zip
 
 
 # --------------- cdhit --------------------

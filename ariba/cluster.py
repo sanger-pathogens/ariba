@@ -352,6 +352,7 @@ class Cluster:
                 sort=True,
                 bowtie2=self.extern_progs.exe('bowtie2'),
                 bowtie2_preset='very-sensitive-local',
+                bowtie2_version=self.extern_progs.version('bowtie2'),
                 verbose=True,
                 verbose_filehandle=self.log_fh
             )
