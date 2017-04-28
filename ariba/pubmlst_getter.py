@@ -1,4 +1,5 @@
 import tempfile
+import re
 import time
 import os
 import shutil
@@ -79,9 +80,16 @@ class PubmlstGetter:
     def _rename_seqs_in_fasta(cls, infile, outfile):
         f = pyfastaq.utils.open_file_write(outfile)
         file_reader = pyfastaq.sequences.file_reader(infile)
+        nodot_regex = re.compile(r'^.*(?P<separator>[^.0-9])[0-9]+$')
 
         for seq in file_reader:
-            seq.id = seq.id.replace('_', '.').replace('-', '.')
+            if seq.id.startswith('Oxf.'):
+                seq.id = 'Oxf_' + seq.id[4:]
+
+            regex_match = nodot_regex.match(seq.id)
+            if regex_match is not None:
+                seq.id = '.'.join(seq.id.rsplit(regex_match.groupdict()['separator'], maxsplit=1))
+
             print(seq, file=f)
 
         pyfastaq.utils.close(f)
