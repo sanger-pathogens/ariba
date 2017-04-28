@@ -4,3 +4,13 @@ ACGT
 AAAA
 >gene.3
 CCCC
+>foo_gene.4
+TTTT
+>Oxf.gltA.42
+A
+>Oxf.gltA-43
+C
+>Oxf.gltA_44
+G
+>Oxf.gltA?45
+T
