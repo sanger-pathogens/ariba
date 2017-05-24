@@ -61,10 +61,17 @@ class CardRecord:
                 genbank_id = seq_dict['dna_sequence']['accession']
                 start = seq_dict['dna_sequence']['fmin']
                 end = seq_dict['dna_sequence']['fmax']
-                gi = seq_dict['protein_sequence']['GI']
+
+                # Card version <=1.1.7 has 'GI', but 1.1.8 has 'accession' instead
+                if 'GI' in seq_dict['protein_sequence']:
+                    gi = seq_dict['protein_sequence']['GI']
+                else:
+                    gi = seq_dict['protein_sequence']['accession']
+
                 protein_seq = seq_dict['protein_sequence']['sequence']
             except:
                 print('Missing data from', key, file=sys.stderr)
+                pprint.pprint(seq_dict)
                 continue
 
             assert gi != 'NA'
