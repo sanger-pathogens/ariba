@@ -64,3 +64,11 @@ class TestFlag(unittest.TestCase):
             self.assertFalse(f.has(x))
             f.add(x)
             self.assertTrue(f.has(x))
+
+
+    def test_to_comma_separated_string(self):
+        '''Test to_comma_separated_string'''
+        f = flag.Flag(27)
+        expected = 'assembled,assembled_into_one_contig,complete_gene,unique_contig'
+        self.assertEqual(expected, f.to_comma_separated_string())
+
