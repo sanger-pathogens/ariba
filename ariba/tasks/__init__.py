@@ -1,5 +1,6 @@
 __all__ = [
     'aln2meta',
+    'expandflag',
     'flag',
     'getref',
     'micplot',
