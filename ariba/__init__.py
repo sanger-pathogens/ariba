@@ -39,6 +39,7 @@ __all__ = [
     'ref_seq_chooser',
     'report',
     'report_filter',
+    'report_flag_expander',
     'scaffold_graph',
     'samtools_variants',
     'sequence_metadata',
