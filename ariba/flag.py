@@ -61,3 +61,6 @@ class Flag:
     def has(self, s):
         return self.flags[s]
 
+
+    def to_comma_separated_string(self):
+        return ','.join([f for f in flags_in_order if self.flags[f]])

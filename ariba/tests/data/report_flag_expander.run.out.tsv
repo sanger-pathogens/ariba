@@ -1,0 +1,3 @@
+#ariba	column1	flag	foo
+name	1	assembled	foo
+name	2	assembled,assembled_into_one_contig,complete_gene,unique_contig	bar

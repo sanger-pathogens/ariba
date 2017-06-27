@@ -29,6 +29,18 @@ subparser_aln2meta.add_argument('outprefix', help='Prefix of output filenames')
 subparser_aln2meta.set_defaults(func=ariba.tasks.aln2meta.run)
 
 
+#---------------------------- expandflag ------------------------------
+subparser_expandflag = subparsers.add_parser(
+    'expandflag',
+    help='Expands flag column of report file',
+    usage='ariba expandflag <in.report.tsv> <out.tsv',
+    description='Expands the flag column in a report file from number to comma-separated list of flag bits',
+)
+
+subparser_expandflag.add_argument('infile', help='Name of input report TSV file')
+subparser_expandflag.add_argument('outfile', help='Name of output report TSV file')
+subparser_expandflag.set_defaults(func=ariba.tasks.expandflag.run)
+
 
 #---------------------------- flag ------------------------------------
 subparser_flag = subparsers.add_parser(
