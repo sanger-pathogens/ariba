@@ -183,7 +183,7 @@ class RefPreparer:
             print('\nLoading and checking input data', flush=True)
 
         self.refdata.rename_sequences(os.path.join(outdir, '00.rename_info'))
-        self.refdata.sanity_check(os.path.join(outdir, '01.filter'))
+        number_of_removed_seqs, number_of_bad_variants_logged = self.refdata.sanity_check(os.path.join(outdir, '01.filter'))
 
         if self.verbose:
             print('\nRunning cdhit', flush=True)
@@ -210,3 +210,9 @@ class RefPreparer:
         with open(clusters_pickle_file, 'wb') as f:
             pickle.dump(clusters, f)
 
+        if number_of_removed_seqs > 0:
+            print('WARNING.', number_of_removed_seqs, 'sequence(s) excluded. Please see the log file 01.filter.check_genes.log for details. This will show them:', file=sys.stderr)
+            print('    grep REMOVE', os.path.join(outdir, '01.filter.check_genes.log'), file=sys.stderr)
+
+        if number_of_bad_variants_logged > 0:
+            print('WARNING. Problem with at least one variant. Problem variants are rmoved. Please see the file', os.path.join(outdir, '01.filter.check_metadata.log'), 'for details.', file=sys.stderr)

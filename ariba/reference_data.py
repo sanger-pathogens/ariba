@@ -196,10 +196,12 @@ class ReferenceData:
         log_file = out_prefix + '.check_metadata.log'
         tsv_file = out_prefix + '.check_metadata.tsv'
         log_fh = pyfastaq.utils.open_file_write(log_file)
+        log_lines = 0
 
         for sequence_name, metadata_dict in sorted(all_metadata.items()):
             if sequence_name in removed_sequences:
                 print(sequence_name, 'was removed because does not look like a gene, so removing its metadata', file=log_fh)
+                log_lines += 1
                 del all_metadata[sequence_name]
                 continue
 
@@ -210,6 +212,7 @@ class ReferenceData:
                 for position in metadata_dict['p']:
                     for metadata in metadata_dict['p'][position]:
                         print(sequence_name, 'variant is an amino acid change, but sequence is non-coding. Removing. Line of file was:', metadata, file=log_fh)
+                        log_lines += 1
 
                 metadata_dict['p'] = {}
 
@@ -223,6 +226,7 @@ class ReferenceData:
 
                         if not metadata.variant.sanity_check_against_seq(sequences[sequence_name], translate_seq=to_translate):
                             print(sequence_name, 'variant does not match reference. Removing. Line of file was:', metadata, file=log_fh)
+                            log_lines += 1
                             meta_to_remove.append(metadata)
                             continue
 
@@ -239,6 +243,7 @@ class ReferenceData:
 
             if metadata_dict['variant_only'] and len(metadata_dict['n']) == len(metadata_dict['p']) == len(metadata_dict['.']) == 0:
                 print(sequence_name, 'No remaining data after checks. Removing this sequence because it is variants only', file=log_fh)
+                log_lines += 1
                 genes_to_remove.add(sequence_name)
 
         for sequence_name in genes_to_remove:
@@ -247,21 +252,22 @@ class ReferenceData:
 
         pyfastaq.utils.close(log_fh)
         ReferenceData._write_metadata_tsv(all_metadata, tsv_file)
+        return log_lines
 
 
     @classmethod
     def _try_to_get_gene_seq(cls, seq, min_length, max_length):
         seq.seq = seq.seq.upper()
         if len(seq) < min_length:
-            return None, 'Remove: too short. Length: ' + str(len(seq))
+            return None, 'REMOVE\tToo short. Length: ' + str(len(seq))
         elif len(seq) > max_length:
-            return None, 'Remove: too long. Length: ' + str(len(seq))
+            return None, 'REMOVE\tToo long. Length: ' + str(len(seq))
         else:
             got = seq.make_into_gene()
             if got is None:
-                return None, 'Does not look like a gene (tried both strands and all reading frames) ' + seq.seq
+                return None, 'REMOVE\tDoes not look like a gene (tried both strands and all reading frames) ' + seq.seq
             else:
-                return got[0], 'Made ' + seq.id + ' into gene. strand=' + got[1] + ', frame=' + str(got[2])
+                return got[0], 'KEEP\tMade into gene. strand=' + got[1] + ', frame=' + str(got[2])
 
 
     @classmethod
@@ -284,7 +290,7 @@ class ReferenceData:
                 sequences[name] = new_seq
 
             if message is not None:
-                print(name, message, file=log_fh)
+                print(name, message, sep='\t', file=log_fh)
 
         pyfastaq.utils.close(log_fh)
 
@@ -296,7 +302,8 @@ class ReferenceData:
 
     def sanity_check(self, outprefix):
         removed_seqs = self._remove_bad_genes(self.sequences, self.metadata, outprefix + '.check_genes.log', self.min_gene_length, self.max_gene_length)
-        ReferenceData._filter_bad_variant_data(self.sequences, self.metadata, outprefix, removed_seqs)
+        log_lines = ReferenceData._filter_bad_variant_data(self.sequences, self.metadata, outprefix, removed_seqs)
+        return len(removed_seqs), log_lines
 
 
     @classmethod
