@@ -605,7 +605,7 @@ class MicPlotter:
         y_tick_positions, y_tick_labels = MicPlotter._top_plot_y_ticks(mic_data, self.antibiotic, self.log_y)
         plots[0].yaxis.set_ticks(y_tick_positions)
         plots[0].set_yticklabels(y_tick_labels)
-        ylabel = r'$\log_' + str(int(self.log_y)) + '$(MIC) $\mu$g/mL' if self.log_y > 0 else r'MIC $\mu$g/mL'
+        ylabel = r'MIC ($\mu$g/mL)'
         plots[0].set_ylabel(ylabel)
         plots[0].set_xticklabels([])
         plots[0].set_title(self.main_title, fontsize=18)
