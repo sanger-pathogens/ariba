@@ -152,6 +152,9 @@ class ReportFilter:
 
     @staticmethod
     def _remove_all_after_first_frameshift(dicts_list):
+        if len(dicts_list) == 0 or dicts_list[0]['flag'].has('complete_gene'):
+            return dicts_list
+
         fshift_starts = [int(d['ref_start']) for d in dicts_list if d.get('ref_ctg_effect', None) == 'FSHIFT']
         if len(fshift_starts) == 0:
             return dicts_list

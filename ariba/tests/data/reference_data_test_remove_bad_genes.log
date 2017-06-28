@@ -1,5 +1,5 @@
-g1 Remove: too short. Length: 5
-g2 Remove: too long. Length: 100
-g3 Does not look like a gene (tried both strands and all reading frames) GAGGAGCCG
-g4 Does not look like a gene (tried both strands and all reading frames) ATGTAACCT
-g5 Made g5 into gene. strand=+, frame=0
+g1	REMOVE	Too short. Length: 5
+g2	REMOVE	Too long. Length: 100
+g3	REMOVE	Does not look like a gene (tried both strands and all reading frames) GAGGAGCCG
+g4	REMOVE	Does not look like a gene (tried both strands and all reading frames) ATGTAACCT
+g5	KEEP	Made into gene. strand=+, frame=0

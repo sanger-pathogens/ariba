@@ -228,8 +228,13 @@ class TestReferenceData(unittest.TestCase):
         metadata_tsv = os.path.join(data_dir, 'reference_data_filter_bad_data_metadata.in.tsv')
         sequences, metadata = reference_data.ReferenceData._load_input_files_and_check_seq_names([fasta_in], [metadata_tsv])
         tmp_prefix = 'tmp.test_filter_bad_variant_data'
-        reference_data.ReferenceData._filter_bad_variant_data(sequences, metadata, tmp_prefix, set())
+        got_line_count = reference_data.ReferenceData._filter_bad_variant_data(sequences, metadata, tmp_prefix, set())
         expected_prefix = os.path.join(data_dir, 'reference_data_filter_bad_data.expected')
+
+        with open(os.path.join(data_dir, 'reference_data_filter_bad_data.expected.check_metadata.log')) as f:
+            expected_line_count = len(f.readlines())
+
+        self.assertEqual(expected_line_count, got_line_count)
 
         for suffix in ['check_metadata.log', 'check_metadata.tsv']:
             expected = expected_prefix + '.' + suffix
@@ -245,11 +250,11 @@ class TestReferenceData(unittest.TestCase):
     def test_try_to_get_gene_seq(self):
         '''Test _try_to_get_gene_seq'''
         tests = [
-            (pyfastaq.sequences.Fasta('x', 'ACGTG'), None, 'Remove: too short. Length: 5'),
-            (pyfastaq.sequences.Fasta('x', 'A' * 100), None, 'Remove: too long. Length: 100'),
-            (pyfastaq.sequences.Fasta('x', 'GAGGAGCCG'), None, 'Does not look like a gene (tried both strands and all reading frames) GAGGAGCCG'),
-            (pyfastaq.sequences.Fasta('x', 'ATGTAACCT'), None, 'Does not look like a gene (tried both strands and all reading frames) ATGTAACCT'),
-            (pyfastaq.sequences.Fasta('x', 'ATGCCTTAA'), pyfastaq.sequences.Fasta('x', 'ATGCCTTAA'), 'Made x into gene. strand=+, frame=0')
+            (pyfastaq.sequences.Fasta('x', 'ACGTG'), None, 'REMOVE\tToo short. Length: 5'),
+            (pyfastaq.sequences.Fasta('x', 'A' * 100), None, 'REMOVE\tToo long. Length: 100'),
+            (pyfastaq.sequences.Fasta('x', 'GAGGAGCCG'), None, 'REMOVE\tDoes not look like a gene (tried both strands and all reading frames) GAGGAGCCG'),
+            (pyfastaq.sequences.Fasta('x', 'ATGTAACCT'), None, 'REMOVE\tDoes not look like a gene (tried both strands and all reading frames) ATGTAACCT'),
+            (pyfastaq.sequences.Fasta('x', 'ATGCCTTAA'), pyfastaq.sequences.Fasta('x', 'ATGCCTTAA'), 'KEEP\tMade into gene. strand=+, frame=0')
         ]
 
         for seq, got_seq, message in tests:
