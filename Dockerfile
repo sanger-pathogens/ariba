@@ -1,19 +1,35 @@
-#
-# This container will install ARIBA from master
-#
-FROM debian:testing
+FROM ubuntu:17.04
 
-#
-#  Authorship
-#
-MAINTAINER ap13@sanger.ac.uk
+RUN apt-get update
+RUN apt-get install --no-install-recommends -y \
+  build-essential \
+  cd-hit \
+  git \
+  libbz2-dev \
+  liblzma-dev \
+  mummer \
+  python \
+  python3-dev \
+  python3-setuptools \
+  python3-pip \
+  python3-tk \
+  python3-matplotlib \
+  unzip \
+  wget \
+  zlib1g-dev
 
-#
-# Install the dependancies
-#
-RUN apt-get update -qq && apt-get install -y git bowtie2 cd-hit fastaq libc6 libfml0 libgcc1 libminimap0 libstdc++6 mummer python3 python3-setuptools python3-dev python3-pysam python3-pymummer python3-dendropy gcc g++ zlib1g-dev
+RUN wget -q http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/2.2.9/bowtie2-2.2.9-linux-x86_64.zip \
+  && unzip bowtie2-2.2.9-linux-x86_64.zip \
+  && rm bowtie2-2.2.9-linux-x86_64.zip
 
-#
-# Get the latest code from github and install
-#
-RUN git clone https://github.com/sanger-pathogens/ariba.git && cd ariba && python3 setup.py install
+# Need MPLBACKEND="agg" to make matplotlib work without X11, otherwise get the error
+# _tkinter.TclError: no display name and no $DISPLAY environment variable
+ENV ARIBA_BOWTIE2=$PWD/bowtie2-2.2.9/bowtie2 ARIBA_CDHIT=cdhit-est MPLBACKEND="agg"
+
+RUN git clone https://github.com/sanger-pathogens/ariba.git \
+  && cd ariba \
+  && git checkout v2.10.0 \
+  && python3 setup.py test \
+  && python3 setup.py install
+
+CMD ariba
