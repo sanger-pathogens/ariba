@@ -115,6 +115,7 @@ class RefGenesGetter:
         for gene_key, gene_dict in sorted(json_data.items()):
             crecord = card_record.CardRecord(gene_dict)
             data = crecord.get_data()
+            data['ARO_description'] = data['ARO_description'].encode('utf-8')
             fasta_name_prefix = '.'.join([
                 card_record.CardRecord._ARO_name_to_fasta_name(data['ARO_name']),
                 data['ARO_accession'],
