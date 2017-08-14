@@ -28,7 +28,7 @@ ENV ARIBA_BOWTIE2=$PWD/bowtie2-2.2.9/bowtie2 ARIBA_CDHIT=cdhit-est MPLBACKEND="a
 
 RUN git clone https://github.com/sanger-pathogens/ariba.git \
   && cd ariba \
-  && git checkout v2.10.0 \
+  && git checkout v2.10.1 \
   && python3 setup.py test \
   && python3 setup.py install
 

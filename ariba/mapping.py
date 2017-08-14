@@ -1,5 +1,6 @@
 import os
 import sys
+from distutils.version import LooseVersion
 import pysam
 import pyfastaq
 from ariba import common
@@ -82,7 +83,7 @@ def run_bowtie2(
         '-2', reads_rev,
     ]
 
-    if bowtie2_version == '2.3.1':
+    if LooseVersion(bowtie2_version) >= LooseVersion('2.3.1'):
         map_cmd.append('--score-min G,1,10')
 
     if remove_both_unmapped:
