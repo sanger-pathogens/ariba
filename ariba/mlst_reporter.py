@@ -47,7 +47,7 @@ class MlstReporter:
                     depths = [int(x) for x in d['smtls_nts_depth'].split(',')]
                     depths.sort()
                     het_pc = round(100.0 * depths[-1] / sum(depths), 2)
-                    if results['hetmin'] == '.' or results['hetmin'] < het_pc:
+                    if results['hetmin'] == '.' or results['hetmin'] > het_pc:
                         results['hetmin'] = het_pc
         if len(het_data):
             results['hets'] = '.'.join(het_data)
