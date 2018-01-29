@@ -9,11 +9,11 @@ import pyfastaq
 class Error (Exception): pass
 
 
-def syscall(cmd, allow_fail=False, verbose=False, verbose_filehandle=sys.stdout, print_errors=True):
+def syscall(cmd, allow_fail=False, verbose=False, verbose_filehandle=sys.stdout, print_errors=True, shell=True):
     if verbose:
         print('syscall:', cmd, flush=True, file=verbose_filehandle)
     try:
-        subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+        subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as error:
         errors = error.output.decode()
         if print_errors:
