@@ -1,0 +1,5 @@
+line 1
+line 2
+
+== Error ==  system call for: "['/foo/bar/SPAdes-3.6.0-Linux/bin/spades', '/spam/eggs/K21/configs/config.info']" finished abnormally, err code: -7
+
