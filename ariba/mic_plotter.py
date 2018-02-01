@@ -5,6 +5,8 @@ import re
 import os
 import itertools
 import collections
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.cm as cmx
