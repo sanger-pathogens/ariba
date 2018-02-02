@@ -7,10 +7,17 @@ addons:
     - liblapack-dev
     - libgfortran3
     - libncurses5-dev
+deploy:
+  provider: pypi
+  user: sanger-pathogens
+  password:
+    secure: qBViCi1SH7Yhfrar4IAt0GIJzOOhHa94llqq4kDCaw1bcsehF3jkdI5tQdQw9AQFrFm86HovcStYTnMs6shwc3KO+4LxmnR8UeozjayQcFFeiaVtYopn4Ehw0yizhCVEwOa0kloOqByFECLrGTZIdUN7LqDrB2ablwVPpFT4WkpoIWKNMwiQhHUFSokgwMe7CGibozn+NDrrin6s4XeotqRn56NSlv6G1Ag+bHtF1ao0+bGlWH8MTnX2EcyopiAdLtYJ6V59ZZ35HO0xS9wbKj7eXQPBBv96Fnt2olzXCWzdZzMENt9UImWuROATctYgqwXidOchlXews9tzbVEHQGvjD3I23tLdwsiBLnNZjSdk0x4Z3WBszLmMGFUeB+j99C6oap2mZLp7KzieAUkj4zWrzPQXFRH9eSHrDsCTciviwitBsmPdw7rs3LCtxrnE0zddfT2X7V6hDp0Vdxe+GjU0TD9Uy5NH0qw9EarOzL8dDpmNLPA6atOTvZhDWFIJp1JScDFIYDMc75XklC8jxWYOikG0FgUlAlLVRtpQek9LWcgH4Yqwb/hYrCZfG5JjrcsLQSIGM0gBEztJyFVqdazV/gK+pji1avBjfk0S+zElSGYqK+y+L6pzAq0Vb8G0d9l1CK/oS1lo8HyG9boEH3Pj/x7tJe459BivWx0s3uc=
+  on:
+    tags: true
 python:
-  - "3.4"
+- '3.4'
 sudo: false
 install:
-  - "source ./install_dependencies.sh"
+- source ./install_dependencies.sh
 script:
-  - "python setup.py test"
+- python setup.py test
