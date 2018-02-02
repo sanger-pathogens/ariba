@@ -43,6 +43,7 @@ class TestCluster(unittest.TestCase):
         dirs = [os.path.join(data_dir, d) for d in dirs]
         for d in dirs:
             tmpdir = 'tmp.cluster_test_init_fail_files_missing'
+            shutil.rmtree(tmpdir,ignore_errors=True)
             shutil.copytree(d, tmpdir)
             with self.assertRaises(cluster.Error):
                 cluster.Cluster(tmpdir, 'name', refdata=refdata, total_reads=42, total_reads_bases=4242)
@@ -100,6 +101,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_no_reads_after_filtering.in.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_no_reads_after_filtering'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_no_reads_after_filtering'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=0, total_reads_bases=0)
@@ -118,9 +120,10 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail.in.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_choose_ref_fail'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=2, total_reads_bases=108, spades_other_options='--only-assembler')
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=2, total_reads_bases=108)
         c.run()
 
         expected = '\t'.join(['.', '.', '.', '.', '1024', '2', 'cluster_name'] + ['.'] * 24)
@@ -137,9 +140,10 @@ class TestCluster(unittest.TestCase):
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_ref_not_in_cluster'
         all_refs_fa =  os.path.join(data_dir, 'cluster_test_full_run_ref_not_in_cluster.all_refs.fa')
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ref_not_in_cluster'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=72, total_reads_bases=3600, all_ref_seqs_fasta=all_refs_fa)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=72, total_reads_bases=3600, all_ref_seqs_fasta=all_refs_fa)
         c.run()
 
         expected = '\t'.join(['.', '.', '.', '.', '1024', '72', 'cluster_name'] + ['.'] * 24)
@@ -155,6 +159,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_assembly_fail.in.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_assembly_fail'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_assembly_fail'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=4, total_reads_bases=304)
@@ -173,9 +178,10 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_non_coding.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_ok_non_coding'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_non_coding'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=72, total_reads_bases=3600)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=72, total_reads_bases=3600)
         c.run()
 
         self.maxDiff=None
@@ -198,9 +204,10 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_presence_absence'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=64, total_reads_bases=3200)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=64, total_reads_bases=3200)
         c.run()
 
         expected = [
@@ -220,9 +227,10 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.not_present.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.not_present'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=66, total_reads_bases=3300)
         c.run()
         expected = [
             'variants_only1\tvariants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t65\t67\tCGC\t18;18;19\tC;G;C\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type, so do not report\tGeneric description of variants_only1'
@@ -237,9 +245,10 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_varonly.not_present.always_report.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_full_run_varonly.not_present.always_report'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=66, total_reads_bases=3300)
         c.run()
         expected = [
             'variants_only1\tvariants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t65\t67\tCGC\t18;18;19\tC;G;C\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type, but always report anyway\tGeneric description of variants_only1'
@@ -254,9 +263,10 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.present.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.present'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=66, total_reads_bases=3300)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=66, total_reads_bases=3300)
         c.run()
 
         expected = [
@@ -273,8 +283,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_gene_start_mismatch.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_gene_start_mismatch'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_gene_start_mismatch'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=112, total_reads_bases=1080)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=112, total_reads_bases=1080)
         c.run()
         expected = [
             'gene\tgene\t1\t0\t27\t112\tcluster_name\t96\t96\t100.0\tcluster_name.l6.c30.ctg.1\t362\t27.8\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of gene'
@@ -289,8 +300,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_gene.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_pres_abs_gene'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_gene'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
             'ref_gene\tref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_gene'
@@ -307,8 +319,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_2.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_full_run_smtls_snp_varonly_gene_2'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_2'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
             'ref_gene\tref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_gene'
@@ -323,8 +336,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_gene.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_gene'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
 
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
@@ -342,8 +356,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_no_snp.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_smtls_snp_varonly_gene_no_snp'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_no_snp'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
 
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
@@ -361,8 +376,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
 
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
@@ -380,8 +396,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_smtls_snp_presabs_nonc'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_nonc'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
             'ref_seq\tref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_seq'
@@ -396,8 +413,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_known_snp_presabs_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_smtls_known_snp_presabs_nonc'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_known_snp_presabs_nonc'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
             'ref_seq\tref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:0:G18A:.:Description of G18A\tGeneric description of ref_seq'
@@ -412,8 +430,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_full_run_smtls_snp_varonly_nonc'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
         expected = [
             'ref_seq\tref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_seq'
@@ -428,8 +447,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_nonc'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
 
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
@@ -447,8 +467,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc_no_snp.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc_no_snp'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
 
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
@@ -466,8 +487,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_smtls_snp_varonly_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_smtls_snp_varonly_nonc'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=148, total_reads_bases=13320)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
 
         # We shouldn't get an extra 'HET' line because we already know about the snp, so
@@ -485,8 +507,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_partial_asmbly.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_partial_assembly'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_partial_asmbly'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=278, total_reads_bases=15020)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=278, total_reads_bases=15020)
         c.run()
 
         expected = [
@@ -502,8 +525,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_multiple_vars.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_multiple_vars'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_multiple_vars'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=292, total_reads_bases=20900)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=292, total_reads_bases=20900)
         c.run()
 
         expected = [
@@ -520,8 +544,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_delete_codon.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_delete_codon'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_delete_codon'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=292, total_reads_bases=20900)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=292, total_reads_bases=20900)
         c.run()
 
         expected = [
@@ -537,8 +562,9 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_insert_codon.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_insert_codon'
+        shutil.rmtree(tmpdir, ignore_errors=True)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_insert_codon'), tmpdir)
-        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, spades_other_options='--only-assembler', total_reads=292, total_reads_bases=20900)
+        c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=292, total_reads_bases=20900)
         c.run()
 
         expected = [

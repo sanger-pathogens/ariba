@@ -47,7 +47,7 @@ def run(options):
           extern_progs,
           version_report_lines=version_report_lines,
           assembly_coverage=options.assembly_cov,
-          assembler='fermilite',
+          assembler=options.assembler,
           threads=options.threads,
           verbose=options.verbose,
           min_scaff_depth=options.min_scaff_depth,
@@ -59,6 +59,8 @@ def run(options):
           max_gene_nt_extend=options.gene_nt_extend,
           clean=(not options.noclean),
           tmp_dir=options.tmp_dir,
+          spades_mode=options.spades_mode,
+          spades_options=options.spades_options
         )
     c.run()
 

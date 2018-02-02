@@ -13,6 +13,7 @@ prog_to_default = {
     'bowtie2': 'bowtie2',
     'cdhit': 'cd-hit-est',
     'nucmer' : 'nucmer',
+    'spades' : 'spades.py'
 }
 
 
@@ -23,6 +24,7 @@ prog_to_version_cmd = {
     'bowtie2': ('--version', re.compile('.*bowtie2.*version (.*)$')),
     'cdhit': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
     'nucmer': ('--version', re.compile('^NUCmer \(NUCleotide MUMmer\) version ([0-9\.]+)')),
+    'spades': ('--version', re.compile('SPAdes\s+v([0-9\.]+)'))
 }
 
 
@@ -30,8 +32,12 @@ min_versions = {
     'bowtie2': '2.1.0',
     'cdhit': '4.6',
     'nucmer': '3.1',
+    'spades': '3.11.0'
 }
 
+prog_optional = set([
+    'spades'
+])
 
 class ExternalProgs:
     def __init__(self, verbose=False, fail_on_error=True):
@@ -47,11 +53,15 @@ class ExternalProgs:
         warnings = []
 
         for prog in sorted(prog_to_default):
+            msg_sink = errors
+            if prog in prog_optional:
+                msg_sink = warnings
+
             prog_exe = self._get_exe(prog)
             self.progs[prog] = shutil.which(prog_exe)
 
             if self.progs[prog] is None:
-                errors.append(prog + ' not found in path. Looked for ' + prog_exe)
+                msg_sink.append(prog + ' not found in path. Looked for ' + prog_exe)
 
                 self.version_report.append('\t'.join([prog, 'NA', 'NOT_FOUND']))
                 if verbose:
@@ -63,10 +73,10 @@ class ExternalProgs:
             if got_version:
                 self.versions[prog] = version
                 if prog in min_versions and LooseVersion(version) < LooseVersion(min_versions[prog]):
-                    errors.append(' '.join(['Found version', version, 'of', prog, 'which is too low! Please update to at least', min_versions[prog] + '. Found it here:', prog_exe]))
+                    msg_sink.append(' '.join(['Found version', version, 'of', prog, 'which is too low! Please update to at least', min_versions[prog] + '. Found it here:', prog_exe]))
             else:
                 self.versions[prog] = None
-                errors.append(version)
+                msg_sink.append(version)
                 version = 'ERROR'
 
             self.version_report.append('\t'.join([prog, version, self.progs[prog]]))
