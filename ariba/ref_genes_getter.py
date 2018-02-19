@@ -41,7 +41,7 @@ class RefGenesGetter:
     def _get_card_versions(self, tmp_file):
         print('Getting available CARD versions')
         common.download_file('https://card.mcmaster.ca/download', tmp_file, max_attempts=self.max_download_attempts, sleep_time=self.sleep_time, verbose=True)
-        p = re.compile(r'''href="(/download/.*?broad.*?v([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz)"''')
+        p = re.compile(r'''href="(/download/.*?broad.*?v([0-9]+\.[0-9]+\.[0-9]+)\.tar\.(gz|bz2))"''')
         versions = {}
 
         with open(tmp_file) as f:
@@ -85,7 +85,7 @@ class RefGenesGetter:
 
         print('Getting version', self.version)
         card_tarball_url = versions[key]
-        card_tarball = 'card.tar.gz'
+        card_tarball = 'card.tar.bz2'
         print('Working in temporary directory', tmpdir)
         print('Downloading data from card:', card_tarball_url, flush=True)
         common.syscall('wget -O ' + card_tarball + ' ' + card_tarball_url, verbose=True)
