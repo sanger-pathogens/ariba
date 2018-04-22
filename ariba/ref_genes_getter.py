@@ -427,6 +427,25 @@ class RefGenesGetter:
         print('"VFDB 2016: hierarchical and refined dataset for big data analysis-10 years on",\nChen LH et al 2016, Nucleic Acids Res. 44(Database issue):D694-D697. PMID: 26578559\n')
 
 
+    @classmethod
+    def _fix_virulencefinder_fasta_file(cls, infile, outfile):
+        '''Some line breaks are missing in the FASTA files from
+        viruslence finder. Which means there are lines like this:
+        AAGATCCAATAACTGAAGATGTTGAACAAACAATTCATAATATTTATGGTCAATATGCTATTTTCGTTGA
+        AGGTGTTGCGCATTTACCTGGACATCTCTCTCCATTATTAAAAAAATTACTACTTAAATCTTTATAA>coa:1:BA000018.3
+        ATGAAAAAGCAAATAATTTCGCTAGGCGCATTAGCAGTTGCATCTAGCTTATTTACATGGGATAACAAAG
+        and therefore the sequences are messed up when we parse them.
+        This function fixes the file by adding line breaks'''
+        with open(infile) as f_in, open(outfile, 'w') as f_out:
+            for line in f_in:
+                if line.startswith('>') or '>' not in line:
+                    print(line, end='', file=f_out)
+                else:
+                    line1, line2 = line.split('>')
+                    print(line1, file=f_out)
+                    print('>', line2, sep='', end='', file=f_out)
+
+
     def _get_from_virulencefinder(self, outprefix):
         outprefix = os.path.abspath(outprefix)
         final_fasta = outprefix + '.fa'
