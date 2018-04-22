@@ -7,6 +7,7 @@ import tarfile
 import pyfastaq
 import time
 import json
+import sys
 from ariba import common, card_record, vfdb_parser, megares_data_finder, megares_zip_parser
 
 
@@ -434,13 +435,19 @@ class RefGenesGetter:
         AAGATCCAATAACTGAAGATGTTGAACAAACAATTCATAATATTTATGGTCAATATGCTATTTTCGTTGA
         AGGTGTTGCGCATTTACCTGGACATCTCTCTCCATTATTAAAAAAATTACTACTTAAATCTTTATAA>coa:1:BA000018.3
         ATGAAAAAGCAAATAATTTCGCTAGGCGCATTAGCAGTTGCATCTAGCTTATTTACATGGGATAACAAAG
-        and therefore the sequences are messed up when we parse them.
+        and therefore the sequences are messed up when we parse them. Also
+        one has a > at the end, then the seq name on the next line.
         This function fixes the file by adding line breaks'''
         with open(infile) as f_in, open(outfile, 'w') as f_out:
             for line in f_in:
                 if line.startswith('>') or '>' not in line:
                     print(line, end='', file=f_out)
+                elif line.endswith('>\n'):
+                    print('WARNING: found line with ">" at the end! Fixing. Line:' + line.rstrip() + ' in file ' + infile, file=sys.stderr)
+                    print(line.rstrip('>\n'), file=f_out)
+                    print('>', end='', file=f_out)
                 else:
+                    print('WARNING: found line with ">" not at the start! Fixing. Line:' + line.rstrip() + ' in file ' + infile, file=sys.stderr)
                     line1, line2 = line.split('>')
                     print(line1, file=f_out)
                     print('>', line2, sep='', end='', file=f_out)
@@ -473,7 +480,9 @@ class RefGenesGetter:
         for filename in os.listdir(tmpdir):
             if filename.endswith('.fsa'):
                 print('   ', filename)
-                file_reader = pyfastaq.sequences.file_reader(os.path.join(tmpdir, filename))
+                fix_file = os.path.join(tmpdir, filename + '.fix.fsa')
+                RefGenesGetter._fix_virulencefinder_fasta_file(os.path.join(tmpdir, filename), fix_file)
+                file_reader = pyfastaq.sequences.file_reader(fix_file)
                 for seq in file_reader:
                     original_id = seq.id
                     seq.id = seq.id.replace('_', '.', 1)
