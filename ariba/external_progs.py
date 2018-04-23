@@ -20,10 +20,19 @@ prog_to_default = {
 prog_to_env_var = {x: 'ARIBA_' + x.upper() for x in prog_to_default if x not in {'nucmer'}}
 
 
+# Nucmer 3.1 'nucmer --version' outputs this:
+# nucmer
+# NUCmer (NUCleotide MUMmer) version 3.1
+#
+# Numcer 4 'nucmer --version' outputs this:
+# 4.0.0beta2
+#
+# ... make the regex permissive and hope things
+# still work for later versions
 prog_to_version_cmd = {
     'bowtie2': ('--version', re.compile('.*bowtie2.*version (.*)$')),
     'cdhit': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
-    'nucmer': ('--version', re.compile('^NUCmer \(NUCleotide MUMmer\) version ([0-9\.]+)')),
+    'nucmer': ('--version', re.compile('([0-9]+\.[0-9\.]+.*$)')),
     'spades': ('--version', re.compile('SPAdes\s+v([0-9\.]+)'))
 }
 
