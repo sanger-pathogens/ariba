@@ -208,17 +208,22 @@ class RefGenesGetter:
         tmpdir = outprefix + '.tmp.download'
         current_dir = os.getcwd()
 
-        try:
-            os.mkdir(tmpdir)
-            os.chdir(tmpdir)
-        except:
-            raise Error('Error mkdir/chdir ' + tmpdir)
+        if self.version =='old':
+            try:
+                os.mkdir(tmpdir)
+                os.chdir(tmpdir)
+            except:
+                raise Error('Error mkdir/chdir ' + tmpdir)
 
-        zipfile = 'resfinder.zip'
-        cmd = 'curl -X POST --data "folder=resfinder&filename=resfinder.zip" -o ' + zipfile + ' https://cge.cbs.dtu.dk/cge/download_data.php'
-        print('Downloading data with:', cmd, sep='\n')
-        common.syscall(cmd)
-        common.syscall('unzip ' + zipfile)
+            zipfile = 'resfinder.zip'
+            cmd = 'curl -X POST --data "folder=resfinder&filename=resfinder.zip" -o ' + zipfile + ' https://cge.cbs.dtu.dk/cge/download_data.php'
+            print('Downloading data with:', cmd, sep='\n')
+            common.syscall(cmd)
+            common.syscall('unzip ' + zipfile)
+        else:
+            RefGenesGetter._get_genetic_epi_database_from_bitbucket('resfinder', tmpdir, git_commit=self.version)
+            os.chdir(tmpdir)
+
 
         print('Combining downloaded fasta files...')
         fout_fa = pyfastaq.utils.open_file_write(final_fasta)
@@ -237,7 +242,7 @@ class RefGenesGetter:
                     except:
                         description = '.'
 
-                    # names are not unique across the files
+                    # names are not unique across the files
                     if seq.id in used_names:
                         used_names[seq.id] += 1
                         seq.id += '_' + str(used_names[seq.id])
