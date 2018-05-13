@@ -130,7 +130,7 @@ class Cluster:
             self.log_fh = None
 
         if extern_progs is None:
-            self.extern_progs = external_progs.ExternalProgs()
+            self.extern_progs = external_progs.ExternalProgs(using_spades=self.assembler == 'spades')
         else:
             self.extern_progs = extern_progs
 

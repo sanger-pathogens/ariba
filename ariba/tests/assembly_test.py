@@ -9,7 +9,7 @@ from ariba import external_progs
 
 modules_dir = os.path.dirname(os.path.abspath(assembly.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
-extern_progs = external_progs.ExternalProgs()
+extern_progs = external_progs.ExternalProgs(using_spades=True)
 
 class TestAssembly(unittest.TestCase):
     def test_run_fermilite(self):

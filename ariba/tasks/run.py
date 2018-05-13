@@ -35,7 +35,7 @@ def run(options):
         print('Output directory already exists. ARIBA makes the output directory. Cannot continue.', file=sys.stderr)
         sys.exit(1)
 
-    extern_progs, version_report_lines = ariba.versions.get_all_versions()
+    extern_progs, version_report_lines = ariba.versions.get_all_versions(using_spades=options.assembler == 'spades')
     if options.verbose:
         print(*version_report_lines, sep='\n')
 
