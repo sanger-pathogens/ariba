@@ -7,6 +7,7 @@ import tarfile
 import pyfastaq
 import time
 import json
+import subprocess
 import sys
 from ariba import common, card_record, vfdb_parser, megares_data_finder, megares_zip_parser
 
@@ -185,6 +186,19 @@ class RefGenesGetter:
         print('If you use this downloaded data, please cite:')
         print('"The Comprehensive Antibiotic Resistance Database", McArthur et al 2013, PMID: 23650175')
         print('and in your methods say that version', self.version, 'of the database was used')
+
+
+    @classmethod
+    def _get_genetic_epi_database_from_bitbucket(cls, db_name, outdir, git_commit=None):
+        assert db_name in {'plasmidfinder', 'resfinder', 'virulence_finder'}
+        cmd = 'git clone ' + 'https://bitbucket.org/genomicepidemiology/' + db_name + '_db.git ' + outdir
+        common.syscall(cmd)
+
+        if git_commit is not None:
+            common.syscall('cd ' + outdir + ' && git checkout ' + git_commit)
+
+        print('Using this git commit for ' + db_name + ' database:')
+        subprocess.check_call('cd ' + outdir + ' && git log -n 1', shell=True)
 
 
     def _get_from_resfinder(self, outprefix):
