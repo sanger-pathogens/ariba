@@ -6,7 +6,7 @@ def run(options):
     if options.no_cdhit and options.cdhit_clusters is not None:
         sys.exit('Cannot use both --no_cdhit and --cdhit_clusters. Neither or exactly one of those options must be used')
 
-    extern_progs, version_report_lines = versions.get_all_versions()
+    extern_progs, version_report_lines = versions.get_all_versions(using_spades=False)
     if options.verbose:
         print(*version_report_lines, sep='\n')
 

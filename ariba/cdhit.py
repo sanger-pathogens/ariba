@@ -27,7 +27,7 @@ class Runner:
         self.length_diff_cutoff = length_diff_cutoff
         self.verbose = verbose
         self.min_cluster_number = min_cluster_number
-        extern_progs = external_progs.ExternalProgs(fail_on_error=True)
+        extern_progs = external_progs.ExternalProgs(fail_on_error=True, using_spades=False)
         self.cd_hit_est = extern_progs.exe('cdhit')
 
 

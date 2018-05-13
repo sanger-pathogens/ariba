@@ -49,11 +49,12 @@ prog_optional = set([
 ])
 
 class ExternalProgs:
-    def __init__(self, verbose=False, fail_on_error=True):
+    def __init__(self, verbose=False, fail_on_error=True, using_spades=False):
         self.progs = {}
         self.version_report = []
         self.all_deps_ok = True
         self.versions = {}
+        self.using_spades = using_spades
 
         if verbose:
             print('{:_^79}'.format(' Checking dependencies and their versions '))
@@ -62,6 +63,9 @@ class ExternalProgs:
         warnings = []
 
         for prog in sorted(prog_to_default):
+            if prog == 'spades' and not self.using_spades:
+                continue
+
             msg_sink = errors
             if prog in prog_optional:
                 msg_sink = warnings

@@ -20,7 +20,7 @@ class ReadFilter:
         self.log_fh = log_fh
 
         if extern_progs is None:
-            self.extern_progs = external_progs.ExternalProgs()
+            self.extern_progs = external_progs.ExternalProgs(using_spades=False)
         else:
             self.extern_progs = extern_progs
 

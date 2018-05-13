@@ -17,8 +17,8 @@ package_max_versions = {
 }
 
 
-def get_all_versions(raise_error=True):
-    extern_progs = external_progs.ExternalProgs(fail_on_error=False)
+def get_all_versions(raise_error=True, using_spades=True):
+    extern_progs = external_progs.ExternalProgs(fail_on_error=False, using_spades=using_spades)
 
     report_lines = [
         'ARIBA version: ' + ariba_version,
