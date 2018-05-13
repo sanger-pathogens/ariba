@@ -381,8 +381,13 @@ class RefGenesGetter:
 
 
     def _get_from_srst2_argannot(self, outprefix):
-        srst2_version = '0.2.0'
-        srst2_url = 'https://github.com/katholt/srst2/raw/v' + srst2_version + '/data/ARGannot.r1.fasta'
+        if self.version is None:
+            self.version = 'r2'
+        if self.version not in {'r1', 'r2'}:
+            raise Error('srst2_argannot version must be r1 or r2. Got this: ' + self.version)
+
+        version_string = '.r1' if self.version == 'r1' else '_r2'
+        srst2_url = 'https://raw.githubusercontent.com/katholt/srst2/master/data/ARGannot' + version_string + '.fasta'
         srst2_fa = outprefix + '.original.fa'
         command = 'wget -O ' + srst2_fa + ' ' + srst2_url
         common.syscall(command, verbose=True)
@@ -413,7 +418,9 @@ class RefGenesGetter:
         print('If you use this downloaded data, please cite:')
         print('"SRST2: Rapid genomic surveillance for public health and hospital microbiology labs",\nInouye et al 2014, Genome Medicine, PMID: 25422674\n')
         print(argannot_ref)
-        print('and in your methods say that the ARG-ANNOT sequences were used from version', srst2_version, 'of SRST2.')
+        # Use to also output the version of SRST2 here, but the r2 version of their
+        # fasta file was made after SRST2 release 0.2.0. At the time of writing this,
+        # 0.2.0 is the latest release, ie r2 isn't in an SRST2 release.
 
 
     def _get_from_vfdb_core(self, outprefix):
