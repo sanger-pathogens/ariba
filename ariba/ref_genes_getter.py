@@ -190,7 +190,7 @@ class RefGenesGetter:
 
     @classmethod
     def _get_genetic_epi_database_from_bitbucket(cls, db_name, outdir, git_commit=None):
-        assert db_name in {'plasmidfinder', 'resfinder', 'virulence_finder'}
+        assert db_name in {'plasmidfinder', 'resfinder', 'virulencefinder'}
         cmd = 'git clone ' + 'https://bitbucket.org/genomicepidemiology/' + db_name + '_db.git ' + outdir
         common.syscall(cmd)
 
@@ -497,13 +497,13 @@ class RefGenesGetter:
             except:
                 raise Error('Error mkdir/chdir ' + tmpdir)
 
-            zipfile = 'plasmidfinder.zip'
+            zipfile = 'virulencefinder.zip'
             cmd = 'curl -X POST --data "folder=virulencefinder&filename=virulencefinder.zip" -o ' + zipfile + ' https://cge.cbs.dtu.dk/cge/download_data.php'
             print('Downloading data with:', cmd, sep='\n')
             common.syscall(cmd)
             common.syscall('unzip ' + zipfile)
         else:
-            RefGenesGetter._get_genetic_epi_database_from_bitbucket('plasmidfinder', tmpdir, git_commit=self.version)
+            RefGenesGetter._get_genetic_epi_database_from_bitbucket('virulencefinder', tmpdir, git_commit=self.version)
             os.chdir(tmpdir)
 
         print('Combining downloaded fasta files...')
