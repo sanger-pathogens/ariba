@@ -4,9 +4,13 @@ Antimicrobial Resistance Identification By Assembly
 
 For how to use ARIBA, please see the [ARIBA wiki page][ARIBA wiki].
 
-[![Build Status](https://travis-ci.org/sanger-pathogens/ariba.svg?branch=master)](https://travis-ci.org/sanger-pathogens/ariba)
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-brightgreen.svg)](https://github.com/sanger-pathogens/ariba/blob/master/LICENSE)
-[![status](https://img.shields.io/badge/MGEN-10.1099%2Fmgen.0.000131-brightgreen.svg)](http://mgen.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000131)
+[![Build Status](https://travis-ci.org/sanger-pathogens/ariba.svg?branch=master)](https://travis-ci.org/sanger-pathogens/ariba)   
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-brightgreen.svg)](https://github.com/sanger-pathogens/ariba/blob/master/LICENSE)   
+[![status](https://img.shields.io/badge/MGEN-10.1099%2Fmgen.0.000131-brightgreen.svg)](http://mgen.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000131)   
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/recipes/ariba/README.html)  
+[![Container ready](https://img.shields.io/badge/container-ready-brightgreen.svg)](https://quay.io/repository/biocontainers/ariba)  
+[![Docker Build Status](https://img.shields.io/docker/build/sangerpathogens/ariba.svg)](https://hub.docker.com/r/sangerpathogens/ariba)  
+[![Docker Pulls](https://img.shields.io/docker/pulls/sangerpathogens/ariba.svg)](https://hub.docker.com/r/sangerpathogens/ariba)  
 
 ## Contents
 * [Introduction](#introduction)
