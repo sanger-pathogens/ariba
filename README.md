@@ -11,6 +11,7 @@ For how to use ARIBA, please see the [ARIBA wiki page][ARIBA wiki].
 [![Container ready](https://img.shields.io/badge/container-ready-brightgreen.svg)](https://quay.io/repository/biocontainers/ariba)  
 [![Docker Build Status](https://img.shields.io/docker/build/sangerpathogens/ariba.svg)](https://hub.docker.com/r/sangerpathogens/ariba)  
 [![Docker Pulls](https://img.shields.io/docker/pulls/sangerpathogens/ariba.svg)](https://hub.docker.com/r/sangerpathogens/ariba)  
+[![codecov](https://codecov.io/gh/sanger-pathogens/ariba/branch/master/graph/badge.svg)](https://codecov.io/gh/sanger-pathogens/ariba)
 
 ## Contents
 * [Introduction](#introduction)
