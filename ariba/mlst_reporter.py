@@ -1,4 +1,3 @@
-import os
 import pyfastaq
 from ariba import mlst_profile, summary_sample
 

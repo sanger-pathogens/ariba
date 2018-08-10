@@ -73,3 +73,9 @@ def download_file(url, outfile, max_attempts=3, sleep_time=2, verbose=False):
     if verbose:
         print(' done', flush=True)
 
+
+def rmtree(input_dir):
+    '''Does rm -r on input_dir. Meant to replace shutil.rmtree,
+    which seems to be causing issues with files not getting deleted
+    and the directory non-empty afterwards'''
+    syscall('rm -rf ' + input_dir)

@@ -1,6 +1,5 @@
 import os
 import tempfile
-import shutil
 
 from ariba import common, external_progs
 
@@ -79,5 +78,5 @@ class ReadFilter:
             wanted_ids=wanted_read_ids
         )
 
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
         return total_reads, total_bases

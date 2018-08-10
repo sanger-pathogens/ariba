@@ -1,7 +1,6 @@
 import unittest
 import sys
 import os
-import pyfastaq
 import filecmp
 import pymummer
 from ariba import ref_seq_chooser

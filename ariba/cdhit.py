@@ -1,5 +1,4 @@
 import tempfile
-import shutil
 import sys
 import os
 import pyfastaq
@@ -152,6 +151,6 @@ class Runner:
 
         common.syscall(cmd, verbose=self.verbose)
         clusters = self._get_clusters_from_bak_file(cluster_info_outfile, self.min_cluster_number)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
         return clusters
 

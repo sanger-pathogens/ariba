@@ -1,5 +1,4 @@
 import unittest
-import os
 from ariba import summary_cluster, summary_cluster_variant
 
 

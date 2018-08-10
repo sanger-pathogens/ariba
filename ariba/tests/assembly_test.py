@@ -1,10 +1,8 @@
 import unittest
-import sys
 import os
-import shutil
 import filecmp
 import pyfastaq
-from ariba import assembly
+from ariba import assembly, common
 from ariba import external_progs
 
 modules_dir = os.path.dirname(os.path.abspath(assembly.__file__))
@@ -56,7 +54,7 @@ class TestAssembly(unittest.TestCase):
         tmp_log_fh.close()
         self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
         self.assertTrue(filecmp.cmp(expected_fa, os.path.join(tmp_dir, 'debug_all_contigs.fa'), shallow=False))
-        shutil.rmtree(tmp_dir)
+        common.rmtree(tmp_dir)
         os.unlink(tmp_log)
 
 
@@ -75,7 +73,7 @@ class TestAssembly(unittest.TestCase):
         tmp_log_fh.close()
         self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
         self.assertFalse(os.path.exists(os.path.join(tmp_dir, 'contigs.fa')))
-        shutil.rmtree(tmp_dir)
+        common.rmtree(tmp_dir)
         os.unlink(tmp_log)
 
 
@@ -120,7 +118,7 @@ class TestAssembly(unittest.TestCase):
         tmp_log = 'tmp.test_assemble_with_spades.log'
         with open(tmp_log, 'w') as tmp_log_fh:
             print('First line', file=tmp_log_fh)
-            shutil.rmtree(tmp_dir, ignore_errors=True)
+            common.rmtree(tmp_dir)
             #using spades_options=" --only-assembler" because error correction cannot determine quality offset on this
             #artificial dataset
             a = assembly.Assembly(reads1, reads2, 'not needed', 'not needed', tmp_dir, 'not_needed_for_this_test.fa',
@@ -128,7 +126,7 @@ class TestAssembly(unittest.TestCase):
                                   assembler="spades", spades_options=" --only-assembler")
             a._assemble_with_spades()
         self.assertTrue(a.assembled_ok)
-        shutil.rmtree(tmp_dir,ignore_errors=True)
+        common.rmtree(tmp_dir)
         os.unlink(tmp_log)
 
     @unittest.skipUnless(extern_progs.exe('spades'), "Spades assembler is optional and is not configured")
@@ -140,11 +138,11 @@ class TestAssembly(unittest.TestCase):
         tmp_log = 'tmp.test_assemble_with_spades_fail.log'
         with open(tmp_log, 'w') as tmp_log_fh:
             print('First line', file=tmp_log_fh)
-            shutil.rmtree(tmp_dir, ignore_errors=True)
+            common.rmtree(tmp_dir)
             a = assembly.Assembly(reads1, reads2, 'not needed', 'not needed', tmp_dir, 'not_needed_for_this_test.fa',
                                   'not_needed_for_this_test.bam', tmp_log_fh, 'not needed',
                                   assembler="spades", spades_options=" --only-assembler")
             a._assemble_with_spades()
         self.assertFalse(a.assembled_ok)
-        shutil.rmtree(tmp_dir,ignore_errors=True)
+        common.rmtree(tmp_dir)
         os.unlink(tmp_log)

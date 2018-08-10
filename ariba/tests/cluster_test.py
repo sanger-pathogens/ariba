@@ -2,7 +2,7 @@ import unittest
 import os
 import shutil
 import filecmp
-from ariba import cluster, reference_data
+from ariba import cluster, common, reference_data
 
 modules_dir = os.path.dirname(os.path.abspath(cluster.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -23,7 +23,7 @@ def clean_cluster_dir(d, exclude=None):
         if name not in keep:
             full_path = os.path.join(d, name)
             if os.path.isdir(full_path):
-                shutil.rmtree(full_path)
+                common.rmtree(full_path)
             else:
                 os.unlink(full_path)
 
@@ -43,11 +43,11 @@ class TestCluster(unittest.TestCase):
         dirs = [os.path.join(data_dir, d) for d in dirs]
         for d in dirs:
             tmpdir = 'tmp.cluster_test_init_fail_files_missing'
-            shutil.rmtree(tmpdir,ignore_errors=True)
+            common.rmtree(tmpdir)
             shutil.copytree(d, tmpdir)
             with self.assertRaises(cluster.Error):
                 cluster.Cluster(tmpdir, 'name', refdata=refdata, total_reads=42, total_reads_bases=4242)
-            shutil.rmtree(tmpdir)
+            common.rmtree(tmpdir)
 
 
     def test_number_of_reads_for_assembly(self):
@@ -101,7 +101,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_no_reads_after_filtering.in.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_no_reads_after_filtering'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_no_reads_after_filtering'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=0, total_reads_bases=0)
@@ -111,7 +111,7 @@ class TestCluster(unittest.TestCase):
         self.assertEqual([expected], c.report_lines)
         self.assertFalse(c.status_flag.has('ref_seq_choose_fail'))
         self.assertTrue(c.status_flag.has('assembly_fail'))
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_choose_ref_fail(self):
@@ -120,7 +120,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail.in.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_choose_ref_fail'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_choose_ref_fail'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=2, total_reads_bases=108)
@@ -130,7 +130,7 @@ class TestCluster(unittest.TestCase):
         self.assertEqual([expected], c.report_lines)
         self.assertTrue(c.status_flag.has('ref_seq_choose_fail'))
         self.assertFalse(c.status_flag.has('assembly_fail'))
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_ref_not_in_cluster(self):
@@ -140,7 +140,7 @@ class TestCluster(unittest.TestCase):
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_ref_not_in_cluster'
         all_refs_fa =  os.path.join(data_dir, 'cluster_test_full_run_ref_not_in_cluster.all_refs.fa')
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ref_not_in_cluster'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=72, total_reads_bases=3600, all_ref_seqs_fasta=all_refs_fa)
@@ -150,7 +150,7 @@ class TestCluster(unittest.TestCase):
         self.assertEqual([expected], c.report_lines)
         self.assertTrue(c.status_flag.has('ref_seq_choose_fail'))
         self.assertFalse(c.status_flag.has('assembly_fail'))
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_assembly_fail(self):
@@ -159,7 +159,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_assembly_fail.in.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_assembly_fail'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_assembly_fail'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=4, total_reads_bases=304)
@@ -169,7 +169,7 @@ class TestCluster(unittest.TestCase):
         self.assertEqual([expected], c.report_lines)
         self.assertFalse(c.status_flag.has('ref_seq_choose_fail'))
         self.assertTrue(c.status_flag.has('assembly_fail'))
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_ok_non_coding(self):
@@ -178,7 +178,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_non_coding.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.test_full_run_ok_non_coding'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_non_coding'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=72, total_reads_bases=3600)
@@ -195,7 +195,7 @@ class TestCluster(unittest.TestCase):
         ]
 
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_ok_presence_absence(self):
@@ -204,7 +204,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_presence_absence'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_presence_absence'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=64, total_reads_bases=3200)
@@ -218,7 +218,7 @@ class TestCluster(unittest.TestCase):
         ]
 
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_ok_variants_only_variant_not_present(self):
@@ -227,7 +227,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.not_present.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.not_present'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=66, total_reads_bases=3300)
@@ -236,7 +236,7 @@ class TestCluster(unittest.TestCase):
             'variants_only1\tvariants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t65\t67\tCGC\t18;18;19\tC;G;C\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type, so do not report\tGeneric description of variants_only1'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_ok_variants_only_variant_not_present_always_report(self):
@@ -245,7 +245,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_varonly.not_present.always_report.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_full_run_varonly.not_present.always_report'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=66, total_reads_bases=3300)
@@ -254,7 +254,7 @@ class TestCluster(unittest.TestCase):
             'variants_only1\tvariants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t215\t15.3\t1\tSNP\tp\tR3S\t0\t.\t.\t7\t9\tCGC\t65\t67\tCGC\t18;18;19\tC;G;C\t18;18;19\tvariants_only1:1:1:R3S:.:Ref and assembly have wild type, but always report anyway\tGeneric description of variants_only1'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_ok_variants_only_variant_is_present(self):
@@ -263,7 +263,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only.present.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_variants_only.present'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_variants_only'), tmpdir)
 
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=66, total_reads_bases=3300)
@@ -274,7 +274,7 @@ class TestCluster(unittest.TestCase):
             'variants_only1\tvariants_only1\t1\t1\t27\t66\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t215\t15.3\t1\tSNP\tp\tI5A\t1\t.\t.\t13\t15\tGCG\t71\t73\tGCG\t17;17;17\tG;C;G\t17;17;17\tvariants_only1:1:1:I5A:.:Ref and reads have variant so report\tGeneric description of variants_only1',
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_ok_gene_start_mismatch(self):
@@ -283,7 +283,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_ok_gene_start_mismatch.metadata.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_gene_start_mismatch'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_ok_gene_start_mismatch'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=112, total_reads_bases=1080)
         c.run()
@@ -291,7 +291,7 @@ class TestCluster(unittest.TestCase):
             'gene\tgene\t1\t0\t27\t112\tcluster_name\t96\t96\t100.0\tcluster_name.l6.c30.ctg.1\t362\t27.8\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of gene'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_smtls_snp_presabs_gene(self):
@@ -300,7 +300,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_gene.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_pres_abs_gene'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_gene'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -308,7 +308,7 @@ class TestCluster(unittest.TestCase):
             'ref_gene\tref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_gene'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_smtls_snp_varonly_gene_2(self):
@@ -319,7 +319,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_2.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_full_run_smtls_snp_varonly_gene_2'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_2'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -327,7 +327,7 @@ class TestCluster(unittest.TestCase):
             'ref_gene\tref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_gene'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_known_smtls_snp_presabs_gene(self):
@@ -336,7 +336,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_gene.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_gene'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_gene'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -347,7 +347,7 @@ class TestCluster(unittest.TestCase):
             'ref_gene\tref_gene\t1\t0\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t1\tSNP\tp\tM6I\t0\t.\t.\t16\t18\tATG\t135\t137\tATG\t65;64;63\tA;T;G,A\t65;64;32,31\tref_gene:1:0:M6I:.:Description of M6I snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_smtls_snp_varonly_gene_no_snp(self):
@@ -356,7 +356,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_no_snp.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_smtls_snp_varonly_gene_no_snp'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene_no_snp'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -367,7 +367,7 @@ class TestCluster(unittest.TestCase):
             'ref_gene\tref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t1\tSNP\tp\tM6I\t0\t.\t.\t16\t18\tATG\t135\t137\tATG\t65;64;63\tA;T;G,A\t65;64;32,31\tref_gene:1:1:M6I:.:Description of M6I snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_smtls_snp_varonly_gene(self):
@@ -376,7 +376,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_gene_does_have_var'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_gene'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -387,7 +387,7 @@ class TestCluster(unittest.TestCase):
             'ref_gene\tref_gene\t1\t1\t155\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t1\tSNP\tp\tI6M\t1\t.\t.\t16\t18\tATG\t135\t137\tATG\t65;64;63\tA;T;G,A\t65;64;32,31\tref_gene:1:1:I6M:.:Description of I6M snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_smtls_snp_presabs_nonc(self):
@@ -396,7 +396,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_smtls_snp_presabs_nonc'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_presabs_nonc'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -404,7 +404,7 @@ class TestCluster(unittest.TestCase):
             'ref_seq\tref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_seq'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_smtls_known_snp_presabs_nonc(self):
@@ -413,7 +413,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_known_snp_presabs_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_smtls_known_snp_presabs_nonc'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_known_snp_presabs_nonc'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -421,7 +421,7 @@ class TestCluster(unittest.TestCase):
             'ref_seq\tref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:0:G18A:.:Description of G18A\tGeneric description of ref_seq'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_smtls_snp_varonly_nonc(self):
@@ -430,7 +430,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_full_run_smtls_snp_varonly_nonc'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -438,7 +438,7 @@ class TestCluster(unittest.TestCase):
             'ref_seq\tref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t0\tHET\t.\t.\t.\tG18A\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\t.\tGeneric description of ref_seq'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_known_smtls_snp_presabs_nonc(self):
@@ -447,7 +447,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_pres_abs_noncoding'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_known_smtls_snp_presabs_nonc'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -458,7 +458,7 @@ class TestCluster(unittest.TestCase):
             'ref_seq\tref_seq\t0\t0\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:0:G18A:.:Description of G18A snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_smtls_snp_varonly_nonc_no_snp(self):
@@ -467,7 +467,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc_no_snp.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_full_run_smtls_snp_varonly_nonc_no_snp'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -478,7 +478,7 @@ class TestCluster(unittest.TestCase):
             'ref_seq\tref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t1\tSNP\tn\tG18A\t0\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:1:G18A:.:Description of G18A snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_cluster_test_full_run_smtls_snp_varonly_nonc(self):
@@ -487,7 +487,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_smtls_snp_varonly_nonc.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_ok_samtools_snp_known_position_var_only_noncoding'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_smtls_snp_varonly_nonc'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=148, total_reads_bases=13320)
         c.run()
@@ -498,7 +498,7 @@ class TestCluster(unittest.TestCase):
             'ref_seq\tref_seq\t0\t1\t147\t148\tcluster_name\t96\t96\t100.0\tcluster_name.l15.c30.ctg.1\t335\t39.8\t1\tSNP\tn\tA18G\t1\t.\t.\t18\t18\tG\t137\t137\tG\t63\tG,A\t32,31\tref_seq:0:1:A18G:.:Description of A18G snp\t.'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_partial_assembly(self):
@@ -507,7 +507,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_partial_asmbly.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_partial_assembly'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_partial_asmbly'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=278, total_reads_bases=15020)
         c.run()
@@ -516,7 +516,7 @@ class TestCluster(unittest.TestCase):
             'presence_absence1\tpresence_absence1\t1\t0\t19\t278\tcluster_name\t96\t77\t100.0\tcluster_name.l15.c17.ctg.1\t949\t20.5\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\t.\tGeneric description of presence_absence1'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_multiple_vars_in_codon(self):
@@ -525,7 +525,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_multiple_vars.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_run_multiple_vars'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_multiple_vars'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=292, total_reads_bases=20900)
         c.run()
@@ -535,7 +535,7 @@ class TestCluster(unittest.TestCase):
             'presence_absence1\tpresence_absence1\t1\t0\t539\t292\tcluster_name\t96\t96\t96.91\tcluster_name.l15.c30.ctg.1\t1074\t20.4\t0\t.\tp\t.\t0\tA10fs\tFSHIFT\t28\t28\tG\t491\t491\tG\t26\tG\t26\t.\tGeneric description of presence_absence1',
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_delete_codon(self):
@@ -544,7 +544,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_delete_codon.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_delete_codon'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_delete_codon'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=292, total_reads_bases=20900)
         c.run()
@@ -553,7 +553,7 @@ class TestCluster(unittest.TestCase):
             'presence_absence1\tpresence_absence1\t1\t0\t539\t292\tcluster_name\t117\t117\t92.31\tcluster_name.l15.c30.ctg.1\t1104\t20.0\t0\t.\tp\t.\t0\tR25_A26del\tDEL\t73\t73\tA\t553\t553\tA\t27\tA\t27\t.\tGeneric description of presence_absence1',
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
 
     def test_full_run_insert_codon(self):
@@ -562,7 +562,7 @@ class TestCluster(unittest.TestCase):
         tsv_in = os.path.join(data_dir, 'cluster_test_full_run_insert_codon.tsv')
         refdata = reference_data.ReferenceData([fasta_in], [tsv_in])
         tmpdir = 'tmp.cluster_test_full_insert_codon'
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        common.rmtree(tmpdir)
         shutil.copytree(os.path.join(data_dir, 'cluster_test_full_run_insert_codon'), tmpdir)
         c = cluster.Cluster(tmpdir, 'cluster_name', refdata, total_reads=292, total_reads_bases=20900)
         c.run()
@@ -571,4 +571,4 @@ class TestCluster(unittest.TestCase):
             'presence_absence1\tpresence_absence1\t1\t0\t539\t292\tcluster_name\t108\t108\t92.31\tcluster_name.l15.c30.ctg.1\t1115\t19.9\t0\t.\tp\t.\t0\tS25_M26insELI\tINS\t73\t73\tA\t554\t554\tG\t24\tG\t24\t.\tGeneric description of presence_absence1'
         ]
         self.assertEqual(expected, c.report_lines)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
