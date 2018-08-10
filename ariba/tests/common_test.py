@@ -20,3 +20,17 @@ class TestCommon(unittest.TestCase):
         common.cat_files(infiles, tmp_out)
         self.assertTrue(filecmp.cmp(expected, tmp_out, shallow=False))
         os.unlink(tmp_out)
+
+
+    def test_rmtree(self):
+        '''test rmtree'''
+        tmp_dir = 'tmp.rmtree'
+        os.mkdir(tmp_dir)
+        with open (os.path.join(tmp_dir, 'foo'), 'w') as f:
+            pass
+
+        self.assertTrue(os.path.exists(tmp_dir))
+        common.rmtree(tmp_dir)
+        self.assertFalse(os.path.exists(tmp_dir))
+
+
