@@ -1,9 +1,8 @@
 import sys
 import os
-import shutil
 import pickle
 import pyfastaq
-from ariba import reference_data
+from ariba import common, reference_data
 
 class Error (Exception): pass
 
@@ -140,7 +139,7 @@ class RefPreparer:
         original_dir = os.getcwd()
 
         if self.force and os.path.exists(outdir):
-            shutil.rmtree(outdir)
+            common.rmtree(outdir)
 
         if os.path.exists(outdir):
             raise Error('Error! Output directory ' + outdir + ' already exists. Cannot continue')

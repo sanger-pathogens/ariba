@@ -1,10 +1,8 @@
 import unittest
-import copy
-import shutil
 import filecmp
 import os
 import pyfastaq
-from ariba import megares_zip_parser
+from ariba import common, megares_zip_parser
 
 modules_dir = os.path.dirname(os.path.abspath(megares_zip_parser.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -28,7 +26,7 @@ class TestMegaresZipParser(unittest.TestCase):
         for filename in expected.values():
             self.assertTrue(os.path.exists(os.path.join(tmp_dir, filename)))
 
-        shutil.rmtree(tmp_dir)
+        common.rmtree(tmp_dir)
 
 
     def test_extract_files_one_missing(self):

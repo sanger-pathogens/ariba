@@ -1,8 +1,7 @@
 import unittest
 import os
-import shutil
 import filecmp
-from ariba import external_progs, ref_preparer
+from ariba import common, external_progs, ref_preparer
 
 modules_dir = os.path.dirname(os.path.abspath(ref_preparer.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -132,7 +131,7 @@ class TestRefPreparer(unittest.TestCase):
             got = os.path.join(tmp_out, filename)
             self.assertTrue(filecmp.cmp(expected, got, shallow=False))
 
-        shutil.rmtree(tmp_out)
+        common.rmtree(tmp_out)
 
 
     def test_run_all_noncoding(self):
@@ -167,7 +166,7 @@ class TestRefPreparer(unittest.TestCase):
             got = os.path.join(tmp_out, filename)
             self.assertTrue(filecmp.cmp(expected, got, shallow=False))
 
-        shutil.rmtree(tmp_out)
+        common.rmtree(tmp_out)
 
 
 

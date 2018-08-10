@@ -2,10 +2,8 @@ class Error (Exception): pass
 
 import os
 import re
-import shutil
 import tarfile
 import pyfastaq
-import time
 import json
 import subprocess
 import sys
@@ -177,7 +175,7 @@ class RefGenesGetter:
         pyfastaq.utils.close(f_out_log)
         os.chdir(current_dir)
         if not self.debug:
-            shutil.rmtree(tmpdir)
+            common.rmtree(tmpdir)
 
         print('Extracted data and written ARIBA input files\n')
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
@@ -257,7 +255,7 @@ class RefGenesGetter:
         print('\nFinished combining files\n')
         os.chdir(current_dir)
         if not self.debug:
-            shutil.rmtree(tmpdir)
+            common.rmtree(tmpdir)
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
@@ -300,7 +298,7 @@ class RefGenesGetter:
         pyfastaq.utils.close(f_out_tsv)
         pyfastaq.utils.close(f_out_fa)
         if not self.debug:
-            shutil.rmtree(tmpdir)
+            common.rmtree(tmpdir)
 
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
@@ -372,7 +370,7 @@ class RefGenesGetter:
         print('\nFinished combining files\n')
         os.chdir(current_dir)
         if not self.debug:
-            shutil.rmtree(tmpdir)
+            common.rmtree(tmpdir)
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
@@ -446,7 +444,7 @@ class RefGenesGetter:
         vparser = vfdb_parser.VfdbParser(zipfile, outprefix)
         vparser.run()
         if not self.debug:
-            shutil.rmtree(tmpdir)
+            common.rmtree(tmpdir)
         print('done')
         final_fasta = outprefix + '.fa'
         final_tsv = outprefix + '.tsv'
@@ -534,7 +532,7 @@ class RefGenesGetter:
         print('\nFinished combining files\n')
         os.chdir(current_dir)
         if not self.debug:
-            shutil.rmtree(tmpdir)
+            common.rmtree(tmpdir)
         print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
         print('You can use them with ARIBA like this:')
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')

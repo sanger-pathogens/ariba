@@ -1,10 +1,9 @@
 import os
 import sys
-import shutil
 import pyfastaq
 import pymummer
 import fermilite_ariba
-from ariba import common, faidx, mapping, bam_parse, external_progs, ref_seq_chooser
+from ariba import common, mapping, bam_parse, external_progs, ref_seq_chooser
 import shlex
 
 class Error (Exception): pass
@@ -197,7 +196,7 @@ class Assembly:
                             self.assembled_ok = True
             if self.clean:
                 print('Deleting assembly directory', self.assembler_dir, file=self.log_fh)
-                shutil.rmtree(self.assembler_dir,ignore_errors=True)
+                common.rmtree(self.assembler_dir)
         finally:
             os.chdir(cwd)
 

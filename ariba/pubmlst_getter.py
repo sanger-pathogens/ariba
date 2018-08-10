@@ -2,10 +2,10 @@ import tempfile
 import re
 import time
 import os
-import shutil
 import urllib.request
 import xml.etree.ElementTree as ET
 import pyfastaq
+from ariba import common
 
 class Error (Exception): pass
 
@@ -29,7 +29,7 @@ class PubmlstGetter:
         xml_tree = ET.parse(xml_file)
 
         if not self.debug:
-            shutil.rmtree(tmpdir)
+            common.rmtree(tmpdir)
 
         return xml_tree
 

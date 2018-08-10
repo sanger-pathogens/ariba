@@ -6,7 +6,6 @@ import tempfile
 import pickle
 import itertools
 import sys
-import shutil
 import multiprocessing
 import pyfastaq
 import minimap_ariba
@@ -42,7 +41,7 @@ def _run_cluster(obj, verbose, clean, fails_dir, remaining_clusters, remaining_c
             print('Deleting cluster dir', obj.root_dir, flush=True)
         if os.path.exists(obj.root_dir):
             try:
-                shutil.rmtree(obj.root_dir)
+                common.rmtree(obj.root_dir)
             except:
                 pass
 
@@ -557,7 +556,7 @@ class Clusters:
 
     def _clean(self):
         if self.clean:
-            shutil.rmtree(self.fails_dir,ignore_errors=True)
+            common.rmtree(self.fails_dir)
 
             try:
                 self.tmp_dir_obj.cleanup()
@@ -566,7 +565,7 @@ class Clusters:
 
             if self.verbose:
                 print('Deleting Logs directory', self.logs_dir)
-            shutil.rmtree(self.logs_dir,ignore_errors=True)
+            common.rmtree(self.logs_dir)
 
             try:
                 if self.verbose:

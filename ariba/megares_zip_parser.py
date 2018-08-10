@@ -2,7 +2,6 @@ import os
 import sys
 import csv
 import zipfile
-import shutil
 import pyfastaq
 from ariba import common
 
@@ -39,7 +38,7 @@ class MegaresZipParser:
             zfile.extract(member, path=outdir)
 
         if None in original_files.values():
-            shutil.rmtree(outdir)
+            common.rmtree(outdir)
             raise Error('Error. Not all expected files found in downloaded megares zipfile. ' + str(original_files))
 
         return original_files
@@ -114,6 +113,6 @@ class MegaresZipParser:
         sequences = {}
         pyfastaq.tasks.file_to_dict(os.path.join(tmpdir, original_files['fasta']), sequences)
         MegaresZipParser._write_files(self.outprefix, sequences, annotation_data, header_data)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
         os.unlink(self.zip_file)
 

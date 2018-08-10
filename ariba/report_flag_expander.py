@@ -1,6 +1,3 @@
-import copy
-import sys
-
 import pyfastaq
 
 from ariba import flag
