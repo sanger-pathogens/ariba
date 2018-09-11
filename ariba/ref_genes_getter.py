@@ -20,6 +20,7 @@ allowed_ref_dbs = {
     'vfdb_core',
     'vfdb_full',
     'virulencefinder',
+    'ncbi',#added by schultzm
 }
 
 argannot_ref = '"ARG-ANNOT, a new bioinformatic tool to discover antibiotic resistance genes in bacterial genomes",\nGupta et al 2014, PMID: 24145532\n'
@@ -459,7 +460,7 @@ class RefGenesGetter:
     @classmethod
     def _fix_virulencefinder_fasta_file(cls, infile, outfile):
         '''Some line breaks are missing in the FASTA files from
-        viruslence finder. Which means there are lines like this:
+        virulence finder. Which means there are lines like this:
         AAGATCCAATAACTGAAGATGTTGAACAAACAATTCATAATATTTATGGTCAATATGCTATTTTCGTTGA
         AGGTGTTGCGCATTTACCTGGACATCTCTCTCCATTATTAAAAAAATTACTACTTAAATCTTTATAA>coa:1:BA000018.3
         ATGAAAAAGCAAATAATTTCGCTAGGCGCATTAGCAGTTGCATCTAGCTTATTTACATGGGATAACAAAG
@@ -538,6 +539,91 @@ class RefGenesGetter:
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
         print('"Real-time whole-genome sequencing for routine typing, surveillance, and outbreak detection of verotoxigenic Escherichia coli", Joensen al 2014, PMID: 24574290\n')
+
+
+
+    def _get_from_ncbi(self, outprefix): # author schultzm
+        outprefix = os.path.abspath(outprefix)
+        final_fasta = outprefix + '.fa'
+        final_tsv = outprefix + '.tsv'
+
+        BIOPROJECT = "PRJNA313047"
+        #download the database as genbank using efetch
+#         cmd =f"esearch -db nucleotide -query '{BIOPROJECT}' | efetch -db nuccore -format gbwithparts > {BIOPROJECT}.gbk"
+        from pathlib import Path
+#             os.system(cmd)
+        from Bio import Entrez
+        import getpass
+        import socket
+        import sys
+        RETMAX=100000000
+        Entrez.email = getpass.getuser()+'@'+socket.getfqdn()
+        search_handle = Entrez.esearch(db="nucleotide",
+                                term=BIOPROJECT,
+                                retmax=RETMAX,
+                                usehistory="y",
+                                idtype="acc")
+        # See section 9.15  Using the history and WebEnv in
+        # http://biopython.org/DIST/docs/tutorial/Tutorial.html#sec:entrez-webenv
+        search_results = Entrez.read(search_handle)
+        search_handle.close()
+        acc_list = search_results["IdList"]
+        print(f"E-search found {len(acc_list)} records in BioProject {BIOPROJECT}.", file=sys.stderr)
+        webenv = search_results["WebEnv"]
+        query_key = search_results["QueryKey"]
+        if not Path(f"{BIOPROJECT}.gbk").exists():
+            with open(f"{BIOPROJECT}.gbk", "w") as out_handle:
+                print(f"E-fetching {len(acc_list)} genbank records from BioProject {BIOPROJECT}.  This may take a while.", file=sys.stderr)
+                fetch_handle = Entrez.efetch(db="nucleotide",
+                                             rettype="gbwithparts", retmode="text",
+                                             retstart=0, retmax=RETMAX,
+                                             webenv=webenv, query_key=query_key,
+                                             idtype="acc")
+                out_handle.write(fetch_handle.read())
+                fetch_handle.close()
+
+        #pull out the records as fasta from the genbank
+        from Bio.Alphabet import generic_dna
+        from Bio import SeqIO
+        from Bio.Seq import Seq
+        from Bio.SeqRecord import SeqRecord
+
+        with open(f"{BIOPROJECT}.gbk", "r") as input_handle:
+            print(f"Parsing genbank records from {BIOPROJECT}.gbk")
+            with open(final_fasta, "w") as f_out_fa, \
+                 open(final_tsv, "w") as f_out_tsv: 
+                for idx, gb_record in enumerate(SeqIO.parse(input_handle, "genbank")):
+                    n=0
+                    record_new=[]
+                    for index, feature in enumerate(gb_record.features):
+                        if feature.type == 'CDS':
+                            n+=1
+                            gb_feature = gb_record.features[index]
+                            id = None
+                            try:
+                                id = gb_feature.qualifiers["allele"]
+                            except:
+                                try:
+                                    try:
+                                        id = gb_feature.qualifiers["gene"]
+                                    except:
+                                        id = gb_feature.qualifiers["locus_tag"]
+                                except KeyError:
+                                    import sys
+                                    sys.stderr(f"gb_feature.qualifer not found")
+                    
+                            accession = gb_record.id
+#                             product = gb_feature.qualifiers['product']
+#                             locus_tag = gb_feature.qualifiers['locus_tag']
+                            seq_out = Seq(str(gb_feature.extract(gb_record.seq)), generic_dna)
+                            record_new.append(SeqRecord(seq_out,
+                                         id=f"{id[0]}.{accession}",
+                                         description=""))
+                    if len(record_new) == 1:
+                        print(f"Processing record {idx+1} of {len(acc_list)} (accession {accession})", file=sys.stderr)
+                        f_out_fa.write(f"{record_new[0].format('fasta').rstrip()}\n")
+                        f_out_tsv.write(f"{id[0]}.{accession}\t1\t0\t.\t.\t{gb_feature.qualifiers['product'][0]}\n")
+
 
     def run(self, outprefix):
         exec('self._get_from_' + self.ref_db + '(outprefix)')

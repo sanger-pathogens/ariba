@@ -19,7 +19,7 @@ with open(f"{BIOPROJECT}.gbk", "r") as input_handle:
             if feature.type == 'CDS':
                 n+=1
                 gb_feature = gb_record.features[index]
-#                 if "allele" in gb_feature.qualifiers:
+                id = None
                 try:
                     id = gb_feature.qualifiers["allele"]
                 except:
@@ -30,28 +30,15 @@ with open(f"{BIOPROJECT}.gbk", "r") as input_handle:
                             id = gb_feature.qualifiers["locus_tag"]
                     except KeyError:
                         import sys
-                        sys.stderr(f"")
+                        sys.stderr(f"gb_feature.qualifer not found")
                         
-                elif "gene" in gb_feature.qualifiers:
-                    id = gb_feature.qualifiers[]
-                    accession = gb_record.id
-                    product = gb_feature.qualifiers['product']
-                    locus_tag = gb_feature.qualifiers['locus_tag']
-                    desc = '| '
-                    seq_out = Seq(str(gb_feature.extract(gb_record.seq)), generic_dna)
-                    record_new.append(SeqRecord(seq_out,
-    #                              id=product[0],
-                                 id=str(id[0]),
-                                 description=desc +
-                                             'accession: '+ str(accession)))
-                else:
-                    print(f"{gb_record.id}, {gb_feature.qualifiers.keys()}")
-    #                     print(record_new.format('fasta'))
-#                 else:
-#                     pass
-#                     print(gb_feature.qualifiers)
-#         if len(record_new) == 1:
-#                 print(record_new[0].format("fasta"))
-#         if n > 1:
-#             print(f"{n} {gb_record.id}")
-#                 print("\n")
+                accession = gb_record.id
+                product = gb_feature.qualifiers['product']
+                locus_tag = gb_feature.qualifiers['locus_tag']
+                desc = '| '
+                seq_out = Seq(str(gb_feature.extract(gb_record.seq)), generic_dna)
+                record_new.append(SeqRecord(seq_out,
+                             id=f"{str(id[0])}.{str(accession)}",
+                             description=""))
+        if len(record_new) == 1:
+                print(record_new[0].format("fasta").rstrip())

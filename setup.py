@@ -55,7 +55,7 @@ vcfcall_mod = Extension(
 setup(
     ext_modules=[minimap_mod, fermilite_mod, vcfcall_mod],
     name='ariba',
-    version='2.12.1',
+    version='2.13.1',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
     package_data={'ariba': ['test_run_data/*']},
@@ -72,6 +72,7 @@ setup(
         'pyfastaq >= 3.12.0',
         'pysam >= 0.9.1',
         'pymummer>=0.10.2',
+        'biopython>=1.71.dev0'
     ],
     license='GPLv3',
     classifiers=[
