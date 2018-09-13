@@ -542,57 +542,92 @@ class RefGenesGetter:
 
 
 
-    def _get_from_ncbi(self, outprefix): # author schultzm
+    def _get_from_ncbi(self, outprefix): ## author github:schultzm
+        """
+        Download the NCBI-curated Bacterial Antimicrobial Resistance Reference Gene Database.
+        Uses BioPython to do the data collection and extraction.
+        Author: schultzm (github) Sep 13, 2018.
+        
+        >>> from Bio import Entrez
+        >>> import getpass
+        >>> import socket
+        >>> BIOPROJECT = "PRJNA313047"
+        >>> RETMAX = 100
+        >>> import getpass
+        >>> import socket
+        >>> Entrez.email = getpass.getuser()+'@'+socket.getfqdn()
+        >>> search_results = Entrez.read(Entrez.esearch(db="nucleotide",
+        ...                                             term=BIOPROJECT,
+        ...                                             retmax=RETMAX,
+        ...                                             usehistory="y",
+        ...                                             idtype="acc"))
+        >>> webenv = search_results["WebEnv"]
+        >>> query_key = search_results["QueryKey"]
+        >>> target_accn = "    NG_061627.1"
+        >>> records = Entrez.efetch(db="nucleotide",
+        ...                         rettype="gbwithparts",
+        ...                         retmode="text",
+        ...                         retstart=0,
+        ...                         retmax=RETMAX,
+        ...                         webenv=webenv,
+        ...                         query_key=query_key,
+        ...                         idtype="acc")
+        >>> from Bio.Alphabet import generic_dna
+        >>> from Bio import SeqIO
+        >>> from Bio.Seq import Seq
+        >>> from Bio.SeqRecord import SeqRecord
+        >>> for gb_record in SeqIO.parse(records, "genbank"):
+        ...     if gb_record.id == 'NG_061627.1':
+        ...         gb_record
+        SeqRecord(seq=Seq('TAATCCTTGGAAACCTTAGAAATTGATGGAGGATCTTAACAAGATCCTGACATA...GGC', IUPACAmbiguousDNA()), id='NG_061627.1', name='NG_061627', description='Klebsiella pneumoniae SCKLB88 mcr-8 gene for phosphoethanolamine--lipid A transferase MCR-8.2, complete CDS', dbxrefs=['BioProject:PRJNA313047'])
+
+
+        
+
+        
+        """
         outprefix = os.path.abspath(outprefix)
         final_fasta = outprefix + '.fa'
         final_tsv = outprefix + '.tsv'
 
-        BIOPROJECT = "PRJNA313047"
-        #download the database as genbank using efetch
-#         cmd =f"esearch -db nucleotide -query '{BIOPROJECT}' | efetch -db nuccore -format gbwithparts > {BIOPROJECT}.gbk"
-        from pathlib import Path
-#             os.system(cmd)
+        # Download the database as genbank using Bio.Entrez
         from Bio import Entrez
         import getpass
         import socket
         import sys
+        BIOPROJECT = "PRJNA313047" ## https://www.ncbi.nlm.nih.gov/bioproject/?term=PRJNA313047
         RETMAX=100000000
         Entrez.email = getpass.getuser()+'@'+socket.getfqdn()
-        search_handle = Entrez.esearch(db="nucleotide",
-                                term=BIOPROJECT,
-                                retmax=RETMAX,
-                                usehistory="y",
-                                idtype="acc")
         # See section 9.15  Using the history and WebEnv in
         # http://biopython.org/DIST/docs/tutorial/Tutorial.html#sec:entrez-webenv
-        search_results = Entrez.read(search_handle)
-        search_handle.close()
+        search_results = Entrez.read(Entrez.esearch(db="nucleotide",
+                                                    term=BIOPROJECT,
+                                                    retmax=RETMAX,
+                                                    usehistory="y",
+                                                    idtype="acc"))
         acc_list = search_results["IdList"]
         print(f"E-search found {len(acc_list)} records in BioProject {BIOPROJECT}.", file=sys.stderr)
         webenv = search_results["WebEnv"]
         query_key = search_results["QueryKey"]
-        if not Path(f"{BIOPROJECT}.gbk").exists():
-            with open(f"{BIOPROJECT}.gbk", "w") as out_handle:
-                print(f"E-fetching {len(acc_list)} genbank records from BioProject {BIOPROJECT}.  This may take a while.", file=sys.stderr)
-                fetch_handle = Entrez.efetch(db="nucleotide",
-                                             rettype="gbwithparts", retmode="text",
-                                             retstart=0, retmax=RETMAX,
-                                             webenv=webenv, query_key=query_key,
-                                             idtype="acc")
-                out_handle.write(fetch_handle.read())
-                fetch_handle.close()
+        if len(acc_list) > 0:
+            print(f"E-fetching {len(acc_list)} genbank records from BioProject {BIOPROJECT} and writing to.  This may take a while.", file=sys.stderr)
+            records = Entrez.efetch(db="nucleotide",
+                                               rettype="gbwithparts", retmode="text",
+                                               retstart=0, retmax=RETMAX,
+                                               webenv=webenv, query_key=query_key,
+                                               idtype="acc")
+            print(records)
+            #pull out the records as fasta from the genbank
+            from Bio.Alphabet import generic_dna
+            from Bio import SeqIO
+            from Bio.Seq import Seq
+            from Bio.SeqRecord import SeqRecord
 
-        #pull out the records as fasta from the genbank
-        from Bio.Alphabet import generic_dna
-        from Bio import SeqIO
-        from Bio.Seq import Seq
-        from Bio.SeqRecord import SeqRecord
-
-        with open(f"{BIOPROJECT}.gbk", "r") as input_handle:
-            print(f"Parsing genbank records from {BIOPROJECT}.gbk")
+            print(f"Parsing genbank records.")
             with open(final_fasta, "w") as f_out_fa, \
-                 open(final_tsv, "w") as f_out_tsv: 
-                for idx, gb_record in enumerate(SeqIO.parse(input_handle, "genbank")):
+                 open(final_tsv, "w") as f_out_tsv:
+                for idx, gb_record in enumerate(SeqIO.parse(records, "genbank")):
+                    print(f"'{gb_record.id}'")
                     n=0
                     record_new=[]
                     for index, feature in enumerate(gb_record.features):
@@ -611,10 +646,7 @@ class RefGenesGetter:
                                 except KeyError:
                                     import sys
                                     sys.stderr(f"gb_feature.qualifer not found")
-                    
                             accession = gb_record.id
-#                             product = gb_feature.qualifiers['product']
-#                             locus_tag = gb_feature.qualifiers['locus_tag']
                             seq_out = Seq(str(gb_feature.extract(gb_record.seq)), generic_dna)
                             record_new.append(SeqRecord(seq_out,
                                          id=f"{id[0]}.{accession}",
@@ -623,7 +655,12 @@ class RefGenesGetter:
                         print(f"Processing record {idx+1} of {len(acc_list)} (accession {accession})", file=sys.stderr)
                         f_out_fa.write(f"{record_new[0].format('fasta').rstrip()}\n")
                         f_out_tsv.write(f"{id[0]}.{accession}\t1\t0\t.\t.\t{gb_feature.qualifiers['product'][0]}\n")
+                    if idx == len(acc_list)-1:
+                        print('Finished. Final files are:', final_fasta, final_tsv, sep='\n\t', end='\n\n')
+                        print('You can use them with ARIBA like this:')
+                        print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
 
-
+        else:
+            print(f"Nothing to do. Exiting.")    
     def run(self, outprefix):
         exec('self._get_from_' + self.ref_db + '(outprefix)')
