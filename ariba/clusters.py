@@ -167,9 +167,12 @@ class Clusters:
             print('Temporary directory:', self.tmp_dir)
 
         for i in [x for x in dir(signal) if x.startswith("SIG") and x not in {'SIGCHLD', 'SIGCLD'}]:
+            print(f"dir(signal) {i}")
             try:
+                print(f"entered try clause: signal {signal}")
                 signum = getattr(signal, i)
                 signal.signal(signum, self._receive_signal)
+                print(signal.signal(signum, self._receive_signal))
             except:
                 pass
 
