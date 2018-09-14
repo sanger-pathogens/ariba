@@ -72,7 +72,7 @@ setup(
         'pyfastaq >= 3.12.0',
         'pysam >= 0.9.1',
         'pymummer>=0.10.2',
-        'biopython>=1.71.dev0'
+        'biopython>=1.72'
     ],
     license='GPLv3',
     classifiers=[
