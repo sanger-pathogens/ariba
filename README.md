@@ -88,6 +88,10 @@ If the tests all pass, install:
 
     python3 setup.py install
 
+Alternatively, install directly from github using:
+
+    pip3 install git+https://github.com/sanger-pathogens/ariba.git #--user
+
 ### Docker
 ARIBA can be run in a Docker container. First install Docker, then install ARIBA:
 

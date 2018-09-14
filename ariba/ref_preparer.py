@@ -214,4 +214,4 @@ class RefPreparer:
             print('    grep REMOVE', os.path.join(outdir, '01.filter.check_genes.log'), file=sys.stderr)
 
         if number_of_bad_variants_logged > 0:
-            print('WARNING. Problem with at least one variant. Problem variants are rmoved. Please see the file', os.path.join(outdir, '01.filter.check_metadata.log'), 'for details.', file=sys.stderr)
+            print('WARNING. Problem with at least one variant. Problem variants are removed. Please see the file', os.path.join(outdir, '01.filter.check_metadata.log'), 'for details.', file=sys.stderr)

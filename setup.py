@@ -38,7 +38,7 @@ fermilite_c_files = [
     'rope.c',
     'unitig.c'
 ]
-fermilite_c_files = [os.path.join('third_party', 'fermi-lite-0.1', x) for x in fermilite_c_files]
+fermilite_c_files = [os.path.join('ariba', 'third_party', 'fermi-lite-0.1', x) for x in fermilite_c_files]
 fermilite_c_files.append(os.path.join('ariba', 'ext', 'fml-asm_ariba.cpp'))
 fermilite_mod = Extension(
     "fermilite_ariba",
@@ -55,7 +55,7 @@ vcfcall_mod = Extension(
 setup(
     ext_modules=[minimap_mod, fermilite_mod, vcfcall_mod],
     name='ariba',
-    version='2.12.1',
+    version='2.13.1',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
     package_data={'ariba': ['test_run_data/*']},
@@ -72,6 +72,7 @@ setup(
         'pyfastaq >= 3.12.0',
         'pysam >= 0.9.1',
         'pymummer>=0.10.2',
+        'biopython>=1.72'
     ],
     license='GPLv3',
     classifiers=[
