@@ -38,7 +38,7 @@ fermilite_c_files = [
     'rope.c',
     'unitig.c'
 ]
-fermilite_c_files = [os.path.join('ariba', 'third_party', 'fermi-lite-0.1', x) for x in fermilite_c_files]
+fermilite_c_files = [os.path.join('third_party', 'fermi-lite-0.1', x) for x in fermilite_c_files]
 fermilite_c_files.append(os.path.join('ariba', 'ext', 'fml-asm_ariba.cpp'))
 fermilite_mod = Extension(
     "fermilite_ariba",
@@ -72,7 +72,7 @@ setup(
         'pyfastaq >= 3.12.0',
         'pysam >= 0.9.1',
         'pymummer>=0.10.2',
-        'biopython>=1.72'
+        'biopython>=1.72',
     ],
     license='GPLv3',
     classifiers=[

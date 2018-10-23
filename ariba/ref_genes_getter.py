@@ -547,7 +547,7 @@ class RefGenesGetter:
         Download the NCBI-curated Bacterial Antimicrobial Resistance Reference Gene Database.
         Uses BioPython to do the data collection and extraction.
         Author: schultzm (github) Sep 13, 2018.
-        
+
         >>> from Bio import Entrez
         >>> import getpass
         >>> import socket
@@ -581,11 +581,8 @@ class RefGenesGetter:
         ...         gb_record
         SeqRecord(seq=Seq('TAATCCTTGGAAACCTTAGAAATTGATGGAGGATCTTAACAAGATCCTGACATA...GGC', IUPACAmbiguousDNA()), id='NG_061627.1', name='NG_061627', description='Klebsiella pneumoniae SCKLB88 mcr-8 gene for phosphoethanolamine--lipid A transferase MCR-8.2, complete CDS', dbxrefs=['BioProject:PRJNA313047'])
 
-
-        
-
-        
         """
+
         outprefix = os.path.abspath(outprefix)
         final_fasta = outprefix + '.fa'
         final_tsv = outprefix + '.tsv'
