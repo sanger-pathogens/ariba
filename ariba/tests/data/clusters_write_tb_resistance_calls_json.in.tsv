@@ -1,0 +1,6 @@
+flag	ref_name	gene	has_known_var	known_var_change	var_description
+27	ref1	1	1	I42J	Resistance to Ethambutol,Rifampicin
+27	ref2	1	1	R10S	Resistance to Ethambutol
+1	katG	1	.	.	Isoniazid resistance if not complete
+27	pncA	1	.	.	Pyrazinamide resistance if not complete
+27	ref3	1	0	A1B	Resistance to drug1

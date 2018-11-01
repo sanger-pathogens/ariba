@@ -315,3 +315,14 @@ class TestClusters(unittest.TestCase):
         self.assertTrue(filecmp.cmp(expected_long, got_long, shallow=False))
         os.unlink(got_short)
         os.unlink(got_long)
+
+
+    def test_write_tb_resistance_calls_json(self):
+        '''test _write_tb_resistance_calls_json'''
+        ariba_report = os.path.join(data_dir, 'clusters_write_tb_resistance_calls_json.in.tsv')
+        tmp_out = 'tmp.write_tb_resistance_calls_json.out.json'
+        clusters.Clusters._write_tb_resistance_calls_json(ariba_report, tmp_out)
+        expected = os.path.join(data_dir, 'clusters_write_tb_resistance_calls_json.out.json')
+        self.assertTrue(filecmp.cmp(expected, tmp_out, shallow=False))
+        os.unlink(tmp_out)
+

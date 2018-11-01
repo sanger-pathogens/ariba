@@ -1,0 +1,24 @@
+{
+    "Ethambutol": [
+        [
+            "ref1",
+            "I42J"
+        ],
+        [
+            "ref2",
+            "R10S"
+        ]
+    ],
+    "Isoniazid": [
+        [
+            "katG",
+            "Incomplete_gene"
+        ]
+    ],
+    "Rifampicin": [
+        [
+            "ref1",
+            "I42J"
+        ]
+    ]
+}

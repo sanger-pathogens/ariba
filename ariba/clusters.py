@@ -2,6 +2,7 @@ import signal
 import time
 import os
 import copy
+import json
 import tempfile
 import pickle
 import itertools
@@ -9,7 +10,7 @@ import sys
 import multiprocessing
 import pyfastaq
 import minimap_ariba
-from ariba import cluster, common, histogram, mlst_reporter, read_store, report, report_filter, reference_data
+from ariba import cluster, common, histogram, mlst_reporter, read_store, report, report_filter, reference_data, tb
 
 class Error (Exception): pass
 
@@ -585,6 +586,13 @@ class Clusters:
                 print('\nMaking MLST reports', flush=True)
             reporter = mlst_reporter.MlstReporter(ariba_report_tsv, mlst_profile_file, outprefix)
             reporter.run()
+
+
+    @classmethod
+    def _write_tb_resistance_calls_json(cls, ariba_report_tsv, outfile):
+        calls = tb.report_to_resistance_dict(ariba_report_tsv)
+        with open(outfile, 'w') as f:
+            json.dump(calls, f, sort_keys=True, indent=4)
 
 
     def write_versions_file(self, original_dir):
