@@ -227,12 +227,14 @@ class Clusters:
         fasta_file = os.path.join(indir, '02.cdhit.all.fa')
         metadata_file = os.path.join(indir, '01.filter.check_metadata.tsv')
         info_file = os.path.join(indir, '00.info.txt')
+        parameters_file = os.path.join(indir, '00.params.json')
         clusters_pickle_file = os.path.join(indir, '02.cdhit.clusters.pickle')
         params = Clusters._load_reference_data_info_file(info_file)
         refdata = reference_data.ReferenceData(
             [fasta_file],
             [metadata_file],
             genetic_code=params['genetic_code'],
+            parameters_file=parameters_file,
         )
 
         with open(clusters_pickle_file, 'rb') as f:

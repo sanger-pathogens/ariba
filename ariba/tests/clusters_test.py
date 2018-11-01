@@ -89,6 +89,7 @@ class TestClusters(unittest.TestCase):
         expected_clusters = {'0': {'presabs1'}, '1': {'variants_only1'}, '2': {'noncoding1'}}
         self.assertEqual(expected_clusters, got_clusters)
 
+        self.assertEqual({'a': 'b'}, got_refdata.extra_parameters)
 
     def test_minimap_reads_to_all_ref_seqs(self):
         '''test test_minimap_reads_to_all_ref_seqs'''
