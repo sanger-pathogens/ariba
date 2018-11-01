@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import re
@@ -19,6 +20,7 @@ class ReferenceData:
         min_gene_length=6,
         max_gene_length=10000,
         genetic_code=11,
+        parameters_file=None,
     ):
         self.seq_filenames = {}
         self.seq_dicts = {}
@@ -37,6 +39,12 @@ class ReferenceData:
             self.ariba_to_original_name = {}
         else:
             self.ariba_to_original_name = ReferenceData._load_rename_file(rename_file)
+
+        if parameters_file is None or not os.path.exists(parameters_file):
+            self.extra_parameters = {}
+        else:
+            with open(parameters_file) as f:
+                self.extra_parameters = json.load(f)
 
 
     @classmethod
