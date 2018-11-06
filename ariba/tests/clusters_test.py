@@ -1,4 +1,5 @@
 import unittest
+import json
 import shutil
 import os
 import pickle
@@ -327,3 +328,23 @@ class TestClusters(unittest.TestCase):
         self.assertTrue(filecmp.cmp(expected, tmp_out, shallow=False))
         os.unlink(tmp_out)
 
+
+    def test_run_with_tb(self):
+        '''test complete run with TB amr calling'''
+        tmp_out = 'tmp.clusters_run_with_tb'
+        c = clusters.Clusters(
+            os.path.join(data_dir, 'clusters_run_with_tb.ref'),
+            os.path.join(data_dir, 'clusters_run_with_tb.reads_1.fq.gz'),
+            os.path.join(data_dir, 'clusters_run_with_tb.reads_2.fq.gz'),
+            tmp_out,
+            extern_progs,
+        )
+        c.run()
+
+        expect_json = {"Pyrazinamide": [[ "pncA", "A3E"]]}
+        json_file = os.path.join(tmp_out, 'tb.resistance.json')
+        self.assertTrue(os.path.exists(json_file))
+        with open(json_file) as f:
+            got_json = json.load(f)
+        self.assertEqual(expect_json, got_json)
+        common.rmtree(tmp_out)

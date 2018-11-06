@@ -106,6 +106,7 @@ class Clusters:
         self.report_file_filtered = os.path.join(self.outdir, 'report.tsv')
         self.mlst_reports_prefix = os.path.join(self.outdir, 'mlst_report')
         self.mlst_profile_file = os.path.join(self.refdata_dir, 'pubmlst.profile.txt')
+        self.tb_resistance_calls_file = os.path.join(self.outdir, 'tb.resistance.json')
         self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa.gz')
         self.catted_genes_matching_refs_fasta = os.path.join(self.outdir, 'assembled_genes.fa.gz')
         self.catted_assemblies_fasta = os.path.join(self.outdir, 'assemblies.fa.gz')
@@ -676,6 +677,9 @@ class Clusters:
             self._clean()
 
             Clusters._write_mlst_reports(self.mlst_profile_file, self.report_file_filtered, self.mlst_reports_prefix, verbose=self.verbose)
+
+            if 'tb' in self.refdata.extra_parameters and self.refdata.extra_parameters['tb']:
+                Clusters._write_tb_resistance_calls_json(self.report_file_filtered, self.tb_resistance_calls_file)
 
             if self.clusters_all_ran_ok and self.verbose:
                 print('\nAll done!\n')
