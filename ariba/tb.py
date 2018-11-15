@@ -5,6 +5,7 @@ import re
 import sys
 
 from Bio import SeqIO
+import pyfastaq
 
 from ariba import flag
 
@@ -134,3 +135,34 @@ def load_mutations(gene_coords, mutation_to_drug_json, variants_txt, upstream_be
 
     return mutations, genes_with_indels, genes_need_upstream, genes_non_upstream
 
+
+def write_prepareref_fasta_file(outfile, gene_coords, genes_need_upstream, genes_non_upstream, upstream_before=100, upstream_after=100):
+    '''Writes fasta file to be used with -f option of prepareref'''
+    tmp_dict = {}
+    fasta_in = os.path.join(data_dir, 'NC_000962.3.fa.gz')
+    pyfastaq.tasks.file_to_dict(fasta_in, tmp_dict)
+    ref_seq = tmp_dict['NC_000962.3']
+
+    with open(outfile, 'w') as f:
+        for gene in genes_non_upstream:
+            start = gene_coords[gene]['start']
+            end = gene_coords[gene]['end']
+            if start < end:
+                gene_fa = pyfastaq.sequences.Fasta(gene, ref_seq[start:end+1])
+            else:
+                gene_fa = pyfastaq.sequences.Fasta(gene, ref_seq[end:start+1])
+                gene_fa.revcomp()
+
+            print(gene_fa, file=f)
+
+        for gene in genes_need_upstream:
+            start = gene_coords[gene]['start']
+            end = gene_coords[gene]['end']
+            if start < end:
+                gene_fa = pyfastaq.sequences.Fasta(gene, ref_seq[start - upstream_before:start + upstream_after])
+            else:
+                gene_fa = pyfastaq.sequences.Fasta(gene, ref_seq[start - upstream_after + 1:start + upstream_before + 1])
+                gene_fa.revcomp()
+
+            gene_fa.id += '_upstream'
+            print(gene_fa, file=f)

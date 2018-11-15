@@ -2,6 +2,8 @@ import unittest
 import json
 import os
 
+import pyfastaq
+
 from ariba import tb
 
 modules_dir = os.path.dirname(os.path.abspath(tb.__file__))
@@ -78,3 +80,32 @@ class TestTb(unittest.TestCase):
         self.assertEqual(expect_genes_non_upstream, got_genes_non_upstream)
         os.unlink(mutation_to_drug_json)
         os.unlink(variants_txt)
+
+
+    def test_write_prepareref_fasta_file(self):
+        '''test write_prepareref_fasta_file'''
+        outfile = 'tmp.write_prepareref_fasta_file.fa'
+        # start of the ref seq is:
+        # 0         10        20
+        # 0123456789012345678901234567890
+        # TTGACCGATGACCCCGGTTCAGGCTTCACCA
+        gene_coords = {
+            'gene1': {'start': 0, 'end': 6},
+            'gene2': {'start': 12, 'end': 10},
+            'gene3': {'start': 13, 'end': 16},
+
+        }
+        expect_seqs = {
+            'gene1': pyfastaq.sequences.Fasta('gene1', 'TTGACCG'),
+            'gene2': pyfastaq.sequences.Fasta('gene2', 'GGT'),
+            'gene2_upstream': pyfastaq.sequences.Fasta('gene2_upstream', 'CGGGGTCA'),
+            'gene3_upstream': pyfastaq.sequences.Fasta('gene3_upstream', 'ACCCCGGT'),
+        }
+        genes_need_upstream = {'gene2', 'gene3'}
+        genes_non_upstream = {'gene1', 'gene2'}
+        tb.write_prepareref_fasta_file(outfile, gene_coords, genes_need_upstream, genes_non_upstream, upstream_before=3, upstream_after=5)
+        got_seqs = {}
+        pyfastaq.tasks.file_to_dict(outfile, got_seqs)
+        os.unlink(outfile)
+        self.assertEqual(expect_seqs, got_seqs)
+
