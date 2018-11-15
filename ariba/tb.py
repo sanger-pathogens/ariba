@@ -1,6 +1,8 @@
 import csv
 import json
 
+from Bio import SeqIO
+
 from ariba import flag
 
 
@@ -40,3 +42,23 @@ def report_to_resistance_dict(infile):
 
     return res_calls
 
+
+def genbank_to_gene_coords(infile, genes):
+    '''Input file in genbank format. genes = list of gene names to find.
+    Returns dict of gene name -> {start: x, end: y}, where x and y are
+    zero-based. x<y iff gene is on forwards strand'''
+    coords = {}
+
+    for seq_record in SeqIO.parse(infile, "genbank"):
+        for feature in seq_record.features:
+            if feature.type == 'gene':
+                gene_name = feature.qualifiers.get('gene', [None])[0]
+                if gene_name not in genes:
+                    continue
+
+                if feature.location.strand == 1:
+                    coords[gene_name] = {'start': int(feature.location.start), 'end': int(feature.location.end) - 1}
+                else:
+                    coords[gene_name] = {'end': int(feature.location.start), 'start': int(feature.location.end) - 1}
+
+    return coords

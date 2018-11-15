@@ -67,6 +67,7 @@ setup(
     tests_require=['nose >= 1.3'],
     install_requires=[
         'BeautifulSoup4 >= 4.1.0',
+        'biopython',
         'dendropy >= 4.2.0',
         'matplotlib',
         'pyfastaq >= 3.12.0',

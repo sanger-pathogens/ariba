@@ -18,3 +18,16 @@ class TestTb(unittest.TestCase):
         }
         self.assertEqual(expect, got)
 
+
+    def test_genbank_to_gene_coords(self):
+        '''test genbank_to_gene_coords'''
+        infile = os.path.join(data_dir, 'tb_genbank_to_gene_coords.gb')
+        expect = {
+            'gene1': {'start': 42, 'end': 45},
+            'gene2': {'start': 10, 'end': 5},
+        }
+        genes = {'gene1', 'gene2'}
+
+        got = tb.genbank_to_gene_coords(infile, genes)
+        self.assertEqual(expect, got)
+
