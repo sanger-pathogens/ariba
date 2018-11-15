@@ -5,7 +5,7 @@ import unittest
 
 import pyfastaq
 
-from ariba import tb
+from ariba import common, tb
 
 modules_dir = os.path.dirname(os.path.abspath(tb.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -138,3 +138,14 @@ class TestTb(unittest.TestCase):
         for fname in expected_files:
             self.assertTrue(os.path.exists(fname))
             os.unlink(fname)
+
+
+    def test_make_prepareref_dir(self):
+        '''test make_prepareref_dir'''
+        outdir = 'tmp.make_prepareref_dir'
+        common.rmtree(outdir)
+        tb.make_prepareref_dir(outdir)
+        self.assertTrue(os.path.exists(outdir))
+        json_file = os.path.join(outdir, '00.params.json')
+        common.rmtree(outdir)
+

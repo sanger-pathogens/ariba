@@ -3,11 +3,12 @@ import json
 import os
 import re
 import sys
+import tempfile
 
 from Bio import SeqIO
 import pyfastaq
 
-from ariba import flag
+from ariba import common, flag, ref_preparer
 
 data_dir = os.path.join(os.path.dirname(__file__), 'tb_data')
 assert os.path.exists(data_dir)
@@ -224,3 +225,25 @@ def make_prepareref_files(outprefix):
     write_prepareref_fasta_file(fasta_out, ref_gene_coords, genes_need_upstream, genes_non_upstream)
     write_prepareref_metadata_file(mutations, tsv_out)
 
+
+def make_prepareref_dir(outdir):
+    if os.path.exists(outdir):
+        raise Exception('Output directory ' + outdir + ' already exists. Cannot continue')
+
+    tmpdir = tempfile.mkdtemp(prefix=outdir + '.tmp', dir=os.getcwd())
+    tmp_prefix = os.path.join(tmpdir, 'out')
+    make_prepareref_files(tmp_prefix)
+    ref_prep = ref_preparer.RefPreparer(
+        [tmp_prefix + '.fa'],
+        None,
+        metadata_tsv_files=[tmp_prefix + '.tsv'],
+        run_cdhit=False,
+        threads=1,
+    )
+    ref_prep.run(outdir)
+    common.rmtree(tmpdir)
+
+    json_data = {'tb': True}
+    json_file = os.path.join(outdir, '00.params.json')
+    with open(json_file, 'w') as f:
+        json.dump(json_data, f)
