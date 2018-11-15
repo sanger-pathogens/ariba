@@ -1,6 +1,7 @@
-import unittest
+import filecmp
 import json
 import os
+import unittest
 
 import pyfastaq
 
@@ -108,4 +109,19 @@ class TestTb(unittest.TestCase):
         pyfastaq.tasks.file_to_dict(outfile, got_seqs)
         os.unlink(outfile)
         self.assertEqual(expect_seqs, got_seqs)
+
+
+    def test_write_prepareref_metadata_file(self):
+        '''test write_prepareref_metadata_file'''
+        mutations = [
+            {'gene': 'gene1', 'var': 'A6T', 'coding': 1, 'upstream': True, 'drugs': 'drug1', 'original_mutation': 'A-5T'},
+            {'gene': 'gene1', 'var': 'A5C', 'coding': 1, 'upstream': False, 'drugs': 'drug1,drug2'},
+            {'gene': 'gene2', 'var': 'A8G', 'coding': 1, 'upstream': True, 'drugs': 'drug4', 'original_mutation': 'A-3G'},
+            {'gene': 'gene2', 'var': 'A10C', 'coding': 1, 'upstream': False, 'drugs': 'drug5'}
+        ]
+        outfile = 'tmp.write_prepareref_metadata_file.tsv'
+        tb.write_prepareref_metadata_file(mutations, outfile)
+        expected = os.path.join(data_dir, 'tb_write_prepareref_metadata_file.tsv')
+        self.assertTrue(filecmp.cmp(expected, outfile, shallow=False))
+        os.unlink(outfile)
 

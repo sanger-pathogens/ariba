@@ -166,3 +166,37 @@ def write_prepareref_fasta_file(outfile, gene_coords, genes_need_upstream, genes
 
             gene_fa.id += '_upstream'
             print(gene_fa, file=f)
+
+
+def write_prepareref_metadata_file(mutations, outfile):
+    with open(outfile, 'w') as f:
+        for d in mutations:
+            if d['upstream']:
+                gene = d['gene'] + '_upstream'
+                coding = '0'
+            else:
+                gene = d['gene']
+                coding = d['coding']
+
+            if 'original_mutation' in d:
+                original_mutation_string = '. Original mutation ' + d['original_mutation']
+            else:
+                original_mutation_string = ''
+
+            if d['var'].endswith('X'):
+                ref = d['var'][0]
+                if d['coding'] == 1 and not d['upstream']:
+                    letters = aa_letters
+                else:
+                    letters = {'A', 'C', 'G', 'T'}
+
+                assert ref in letters
+
+                for x in letters:
+                    if x == ref:
+                        continue
+                    variant = d['var'][:-1] + x
+                    print(gene, coding, 1, variant, '.', 'Resistance to ' + d['drugs'] + original_mutation_string, sep='\t', file=f)
+            else:
+                print(gene, coding, 1, d['var'], '.', 'Resistance to ' + d['drugs'] + original_mutation_string, sep='\t', file=f)
+
