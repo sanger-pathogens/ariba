@@ -35,11 +35,16 @@ def report_to_resistance_dict(infile):
                     incomplete_genes.add(d['ref_name'])
 
             if d['has_known_var'] == '1':
-                drugs = d['var_description'].split()[-1].split(',')
+                if 'Original mutation' in d['var_description']:
+                    drugs = d['var_description'].split('.')[0].split()[-1].split(',')
+                    change = d['var_description'].split()[-1]
+                else:
+                    drugs = d['var_description'].split()[-1].split(',')
+                    change = d['known_var_change']
                 for drug in drugs:
                     if drug not in res_calls:
                         res_calls[drug] = []
-                    res_calls[drug].append((d['ref_name'], d['known_var_change']))
+                    res_calls[drug].append((d['ref_name'], change))
 
     for gene in incomplete_genes:
         drug = complete_genes[gene]

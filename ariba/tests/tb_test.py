@@ -17,7 +17,7 @@ class TestTb(unittest.TestCase):
         infile = os.path.join(data_dir, 'tb_report_to_resistance_dict.tsv')
         got = tb.report_to_resistance_dict(infile)
         expect = {
-            'Ethambutol': [('ref1', 'I42J'), ('ref2', 'R10S')],
+            'Ethambutol': [('ref1', 'I42J'), ('ref2_upstream', 'A-3G')],
             'Rifampicin': [('ref1', 'I42J')],
             'Isoniazid': [('katG', 'Incomplete_gene')],
         }
