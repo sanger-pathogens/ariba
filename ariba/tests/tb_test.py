@@ -125,3 +125,16 @@ class TestTb(unittest.TestCase):
         self.assertTrue(filecmp.cmp(expected, outfile, shallow=False))
         os.unlink(outfile)
 
+
+    def test_make_prepareref_files(self):
+        '''test make_prepareref_files'''
+        outprefix = 'tmp.make_prepareref_files'
+        expected_files = [outprefix + '.fa', outprefix + '.tsv']
+        for fname in expected_files:
+            if os.path.exists(fname):
+                os.unlink(fname)
+        tb.make_prepareref_files(outprefix)
+
+        for fname in expected_files:
+            self.assertTrue(os.path.exists(fname))
+            os.unlink(fname)

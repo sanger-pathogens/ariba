@@ -109,7 +109,7 @@ def load_mutations(gene_coords, mutation_to_drug_json, variants_txt, upstream_be
                     genes_with_indels.add(d['gene'])
                     continue
                 elif pos > 0:
-                    print('ignoring:', d, file=sys.stderr)
+                    #print('ignoring synonymous change (not implemented):', d['gene'], d['var'], d['drugs'], file=sys.stderr)
                     continue
                 elif pos < 0:
                     this_gene_coords = gene_coords[d['gene']]
@@ -169,6 +169,9 @@ def write_prepareref_fasta_file(outfile, gene_coords, genes_need_upstream, genes
 
 
 def write_prepareref_metadata_file(mutations, outfile):
+    aa_letters = {'G', 'P', 'A', 'V', 'L', 'I', 'M', 'C', 'F', 'Y',
+        'W', 'H', 'K', 'R', 'Q', 'N', 'E', 'D', 'S', 'T'}
+
     with open(outfile, 'w') as f:
         for d in mutations:
             if d['upstream']:
@@ -199,4 +202,20 @@ def write_prepareref_metadata_file(mutations, outfile):
                     print(gene, coding, 1, variant, '.', 'Resistance to ' + d['drugs'] + original_mutation_string, sep='\t', file=f)
             else:
                 print(gene, coding, 1, d['var'], '.', 'Resistance to ' + d['drugs'] + original_mutation_string, sep='\t', file=f)
+
+
+def make_prepareref_files(outprefix):
+    genbank_file = os.path.join(data_dir, 'NC_000962.3.gb')
+    mut_to_drug_json = os.path.join(data_dir, 'panel.20181115.json')
+    panel_txt_file = os.path.join(data_dir, 'panel.20181115.txt')
+    fasta_out = outprefix + '.fa'
+    tsv_out = outprefix + '.tsv'
+
+    with open(panel_txt_file) as f:
+        genes = set([x.split()[0] for x in f])
+
+    ref_gene_coords = genbank_to_gene_coords(genbank_file, genes)
+    mutations, genes_with_indels, genes_need_upstream, genes_non_upstream = load_mutations(ref_gene_coords, mut_to_drug_json, panel_txt_file)
+    write_prepareref_fasta_file(fasta_out, ref_gene_coords, genes_need_upstream, genes_non_upstream)
+    write_prepareref_metadata_file(mutations, tsv_out)
 
