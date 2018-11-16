@@ -37,7 +37,7 @@ def report_to_resistance_dict(infile):
 
             if d['has_known_var'] == '1':
                 if 'Original mutation' in d['var_description']:
-                    drugs = d['var_description'].split('.')[0].split()[-1].split(',')
+                    drugs = d['var_description'].split(':')[-1].split('.')[0].split()[-1].split(',')
                     change = d['var_description'].split()[-1]
                 else:
                     drugs = d['var_description'].split()[-1].split(',')
