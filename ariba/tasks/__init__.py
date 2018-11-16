@@ -5,6 +5,7 @@ __all__ = [
     'getref',
     'micplot',
     'prepareref',
+    'prepareref_tb',
     'pubmlstget',
     'pubmlstspecies',
     'refquery',

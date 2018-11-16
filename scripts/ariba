@@ -149,6 +149,17 @@ subparser_prepareref.add_argument('outdir', help='Output directory (must not alr
 subparser_prepareref.set_defaults(func=ariba.tasks.prepareref.run)
 
 
+#----------------------------- prepareref_tb ----------------------------
+subparser_prepareref_tb = subparsers.add_parser(
+    'prepareref_tb',
+    help='Prepare reference TB data for input to "run"',
+    usage='ariba prepareref_tb <outdir>',
+    description='Prepare built-in TB reference data for running the pipeline with "ariba run"',
+)
+subparser_prepareref_tb.add_argument('outdir', help='Output directory (must not already exist)')
+subparser_prepareref_tb.set_defaults(func=ariba.tasks.prepareref_tb.run)
+
+
 #----------------------------- pubmlstget -------------------------------
 subparser_pubmlstget = subparsers.add_parser(
     'pubmlstget',

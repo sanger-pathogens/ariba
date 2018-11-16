@@ -1,0 +1,28 @@
+ARIBA run with this command:
+/nfs/leia/research/iqbal/software/Python-3.6.5/bin/ariba prepareref prepareref -f ref.fa -m metadata.tsv Ariba.prepareref
+from this directory: /nfs/leia/research/iqbal/mhunt/Mykrobe-eval/Panels/Ariba/Make_test_data_for_git_repo
+
+ARIBA version: 2.12.0
+
+External dependencies:
+bowtie2	2.3.4.1	/nfs/leia/research/iqbal/software/bin/bowtie2-2.3.4.1-linux-x86_64/bowtie2
+cdhit	4.7	/nfs/leia/research/iqbal/software/bin/cd-hit-est
+nucmer	4.0.0beta2	/nfs/leia/research/iqbal/software/bin/nucmer
+
+External dependencies OK: True
+
+Python version:
+3.6.5 (default, May  8 2018, 15:30:32) 
+[GCC 7.2.0]
+
+Python packages:
+ariba	2.12.0	/nfs/leia/research/iqbal/software/Python-3.6.5/lib/python3.6/site-packages/ariba/__init__.py
+bs4	4.6.0	/nfs/leia/research/iqbal/software/Python-3.6.5/lib/python3.6/site-packages/bs4/__init__.py
+dendropy	4.4.0	/nfs/leia/research/iqbal/software/Python-3.6.5/lib/python3.6/site-packages/dendropy/__init__.py
+pyfastaq	3.17.0	/nfs/leia/research/iqbal/software/Python-3.6.5/lib/python3.6/site-packages/pyfastaq/__init__.py
+pymummer	0.10.3	/nfs/leia/research/iqbal/software/Python-3.6.5/lib/python3.6/site-packages/pymummer/__init__.py
+pysam	0.14.1	/nfs/leia/research/iqbal/software/Python-3.6.5/lib/python3.6/site-packages/pysam/__init__.py
+
+Python packages OK: True
+
+Everything looks OK: True

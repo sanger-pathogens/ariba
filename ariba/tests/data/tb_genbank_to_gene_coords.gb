@@ -1,0 +1,21 @@
+LOCUS       NC_123456            4411532 bp    DNA     linear   CON 15-NOV-2018
+ACCESSION   NC_123456
+VERSION     NC_123456.1  GI:123456789
+FEATURES             Location/Qualifiers
+     source          1..100
+                     /organism="foo bar"
+                     /mol_type="genomic DNA"
+     gene            43..46
+                     /gene="gene1"
+     CDS             43..46
+                     /gene="gene1"
+     gene            complement(6..11)
+                     /gene="gene2"
+     CDS             complement(6..11)
+                     /gene="gene2"
+     gene            50..60
+                     /gene="gene3"
+     CDS             50..60
+                     /gene="gene3"
+ORIGIN
+//
