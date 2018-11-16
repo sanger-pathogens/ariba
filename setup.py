@@ -55,10 +55,10 @@ vcfcall_mod = Extension(
 setup(
     ext_modules=[minimap_mod, fermilite_mod, vcfcall_mod],
     name='ariba',
-    version='2.13.0',
+    version='2.13.1',
     description='ARIBA: Antibiotic Resistance Identification By Assembly',
     packages = find_packages(),
-    package_data={'ariba': ['test_run_data/*']},
+    package_data={'ariba': ['test_run_data/*', 'tb_data/*']},
     author='Martin Hunt',
     author_email='path-help@sanger.ac.uk',
     url='https://github.com/sanger-pathogens/ariba',
