@@ -212,8 +212,8 @@ def write_prepareref_metadata_file(mutations, outfile):
 
 def make_prepareref_files(outprefix):
     genbank_file = os.path.join(data_dir, 'NC_000962.3.gb')
-    mut_to_drug_json = os.path.join(data_dir, 'panel.20181221.json')
-    panel_txt_file = os.path.join(data_dir, 'panel.20181221.txt')
+    mut_to_drug_json = os.path.join(data_dir, 'panel.20190102.json')
+    panel_txt_file = os.path.join(data_dir, 'panel.20190102.txt')
     fasta_out = outprefix + '.fa'
     tsv_out = outprefix + '.tsv'
 
