@@ -52,23 +52,23 @@ class TestAssemblyVariants(unittest.TestCase):
     def test_get_variant_effect(self):
         '''test _get_variant_effect'''
         ref_seq = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
-        v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
-        v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
-        v2 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tA\t6\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
-        v3 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tT\t4\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
-        v4 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tA\t6\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
-        v5 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\t.\t4\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
-        v6 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tA\t4\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
-        v7 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tG\t4\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
+        v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v1 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tT\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v2 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tA\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v3 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tT\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v4 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tA\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v5 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\t.\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v6 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tA\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v7 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tG\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v7.qry_base = 'GAT'
-        v8 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tG\t4\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
+        v8 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tG\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v8.qry_base = 'TGA'
-        v9 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tG\t4\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
+        v9 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tG\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v9.qry_base = 'ATTCCT'
-        v10 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\t.\t4\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
+        v10 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\t.\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v10.ref_base = 'CGC'
         v10.ref_end = 5
-        v11 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\t.\t4\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
+        v11 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\t.\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         v11.ref_base = 'CGCGAA'
         v11.ref_end = 8
 
@@ -93,9 +93,9 @@ class TestAssemblyVariants(unittest.TestCase):
     def test_filter_mummer_variants(self):
         '''test filter_mummer_variants'''
         ref_seq = pyfastaq.sequences.Fasta('gene', 'GATCGCGAAGCGATGACCCATGAAGCGACCGAACGCTGA')
-        v1 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tT\t4\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
-        v2 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tA\t6\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
-        v3 = pymummer.variant.Variant(pymummer.snp.Snp('12\tG\tT\t12\tX\tX\t39\t39\tX\tX\tgene\tcontig'))
+        v1 = pymummer.variant.Variant(pymummer.snp.Snp('4\tC\tT\t4\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v2 = pymummer.variant.Variant(pymummer.snp.Snp('6\tC\tA\t6\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
+        v3 = pymummer.variant.Variant(pymummer.snp.Snp('12\tG\tT\t12\tx\tx\t39\t39\tx\tx\tgene\tcontig'))
         mummer_variants = {'contig': [[v1, v2], v3]}
         assembly_variants.AssemblyVariants._filter_mummer_variants(mummer_variants, ref_seq)
         expected = {'contig': [[v1, v2]]}
@@ -110,13 +110,13 @@ class TestAssemblyVariants(unittest.TestCase):
         ref_sequence_name = 'non_coding'
         refdata_var_dict = refdata.metadata[ref_sequence_name]
 
-        v0 = pymummer.variant.Variant(pymummer.snp.Snp('2\tT\tA\t2\tX\tX\t42\t42\tX\tX\tnon_coding\tcontig'))
+        v0 = pymummer.variant.Variant(pymummer.snp.Snp('2\tT\tA\t2\tx\tx\t42\t42\tx\tx\tnon_coding\tcontig'))
 
         # ref has A at position 3, which is variant type. This gives contig the wild type C. Shouldn't report
-        v1 = pymummer.variant.Variant(pymummer.snp.Snp('3\tA\tC\t3\tX\tX\t42\t42\tX\tX\tnon_coding\tcontig'))
+        v1 = pymummer.variant.Variant(pymummer.snp.Snp('3\tA\tC\t3\tx\tx\t42\t42\tx\tx\tnon_coding\tcontig'))
 
         # ref has T at position 5, which is wild type. This gives contig variant type A. Should report
-        v2 = pymummer.variant.Variant(pymummer.snp.Snp('5\tT\tA\t5\tX\tX\t42\t42\tX\tX\tnon_coding\tcontig'))
+        v2 = pymummer.variant.Variant(pymummer.snp.Snp('5\tT\tA\t5\tx\tx\t42\t42\tx\tx\tnon_coding\tcontig'))
 
         meta0 = sequence_metadata.SequenceMetadata('non_coding\t0\t0\tC3A\tid1\tref has variant type A')
         meta2 = sequence_metadata.SequenceMetadata('non_coding\t0\t0\tT5A\tid1\tref has wild type T')
@@ -153,33 +153,33 @@ class TestAssemblyVariants(unittest.TestCase):
         ref_sequence = refdata.sequence(ref_sequence_name)
         refdata_var_dict = refdata.metadata[ref_sequence_name]
 
-        v0 = pymummer.variant.Variant(pymummer.snp.Snp('6\tT\tA\t6\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
-        v1 = pymummer.variant.Variant(pymummer.snp.Snp('9\tA\tT\t9\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
-        v2 = pymummer.variant.Variant(pymummer.snp.Snp('18\tG\tT\t18\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
-        v3 = pymummer.variant.Variant(pymummer.snp.Snp('21\tC\tT\t21\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
-        v4 = pymummer.variant.Variant(pymummer.snp.Snp('7\tA\tT\t7\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
-        v5 = pymummer.variant.Variant(pymummer.snp.Snp('12\tA\tC\t11\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
+        v0 = pymummer.variant.Variant(pymummer.snp.Snp('6\tT\tA\t6\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
+        v1 = pymummer.variant.Variant(pymummer.snp.Snp('9\tA\tT\t9\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
+        v2 = pymummer.variant.Variant(pymummer.snp.Snp('18\tG\tT\t18\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
+        v3 = pymummer.variant.Variant(pymummer.snp.Snp('21\tC\tT\t21\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
+        v4 = pymummer.variant.Variant(pymummer.snp.Snp('7\tA\tT\t7\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
+        v5 = pymummer.variant.Variant(pymummer.snp.Snp('12\tA\tC\t11\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
 
-        v6 = pymummer.variant.Variant(pymummer.snp.Snp('4\tG\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
-        self.assertTrue(v6.update_indel(pymummer.snp.Snp('5\tA\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
+        v6 = pymummer.variant.Variant(pymummer.snp.Snp('4\tG\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
+        self.assertTrue(v6.update_indel(pymummer.snp.Snp('5\tA\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
 
-        v7 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tA\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
-        self.assertTrue(v7.update_indel(pymummer.snp.Snp('4\t.\tA\t5\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
+        v7 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tA\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
+        self.assertTrue(v7.update_indel(pymummer.snp.Snp('4\t.\tA\t5\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
 
-        v8 = pymummer.variant.Variant(pymummer.snp.Snp('4\tG\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
-        self.assertTrue(v8.update_indel(pymummer.snp.Snp('5\tA\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
-        self.assertTrue(v8.update_indel(pymummer.snp.Snp('6\tT\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
+        v8 = pymummer.variant.Variant(pymummer.snp.Snp('4\tG\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
+        self.assertTrue(v8.update_indel(pymummer.snp.Snp('5\tA\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
+        self.assertTrue(v8.update_indel(pymummer.snp.Snp('6\tT\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
 
-        v9 = pymummer.variant.Variant(pymummer.snp.Snp('4\tG\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
-        self.assertTrue(v9.update_indel(pymummer.snp.Snp('5\tA\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
-        self.assertTrue(v9.update_indel(pymummer.snp.Snp('6\tT\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
-        self.assertTrue(v9.update_indel(pymummer.snp.Snp('7\tA\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
-        self.assertTrue(v9.update_indel(pymummer.snp.Snp('8\tG\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
-        self.assertTrue(v9.update_indel(pymummer.snp.Snp('9\tA\t.\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
+        v9 = pymummer.variant.Variant(pymummer.snp.Snp('4\tG\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
+        self.assertTrue(v9.update_indel(pymummer.snp.Snp('5\tA\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
+        self.assertTrue(v9.update_indel(pymummer.snp.Snp('6\tT\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
+        self.assertTrue(v9.update_indel(pymummer.snp.Snp('7\tA\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
+        self.assertTrue(v9.update_indel(pymummer.snp.Snp('8\tG\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
+        self.assertTrue(v9.update_indel(pymummer.snp.Snp('9\tA\t.\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
 
-        v10 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tA\t4\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig'))
-        self.assertTrue(v10.update_indel(pymummer.snp.Snp('4\t.\tT\t5\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
-        self.assertTrue(v10.update_indel(pymummer.snp.Snp('4\t.\tT\t6\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig')))
+        v10 = pymummer.variant.Variant(pymummer.snp.Snp('4\t.\tA\t4\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig'))
+        self.assertTrue(v10.update_indel(pymummer.snp.Snp('4\t.\tT\t5\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
+        self.assertTrue(v10.update_indel(pymummer.snp.Snp('4\t.\tT\t6\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig')))
 
         mummer_variants = [[v0], [v1], [v2], [v3], [v4], [v5], [v6], [v7], [v8], [v9], [v10]]
 
@@ -306,8 +306,8 @@ class TestAssemblyVariants(unittest.TestCase):
         os.unlink(metadata_tsv)
 
         nucmer_snp_file = os.path.join(data_dir, 'assembly_variants_test_get_variants_presence_absence.snps')
-        v2 = pymummer.variant.Variant(pymummer.snp.Snp('14\tC\tA\t14\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig1'))
-        v3 = pymummer.variant.Variant(pymummer.snp.Snp('15\tG\tC\t15\tX\tX\t42\t42\tX\tX\tpresence_absence\tcontig1'))
+        v2 = pymummer.variant.Variant(pymummer.snp.Snp('14\tC\tA\t14\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig1'))
+        v3 = pymummer.variant.Variant(pymummer.snp.Snp('15\tG\tC\t15\tx\tx\t42\t42\tx\tx\tpresence_absence\tcontig1'))
 
         ref_nucmer_coords = {
             'contig1': [pyfastaq.intervals.Interval(0, 30)],
@@ -354,8 +354,8 @@ class TestAssemblyVariants(unittest.TestCase):
         os.unlink(metadata_tsv)
 
         nucmer_snp_file = os.path.join(data_dir, 'assembly_variants_test_get_variants_variants_only.snps')
-        v2 = pymummer.variant.Variant(pymummer.snp.Snp('14\tC\tA\t14\tX\tX\t42\t42\tX\tX\tvariants_only\tcontig1'))
-        v3 = pymummer.variant.Variant(pymummer.snp.Snp('15\tG\tC\t15\tX\tX\t42\t42\tX\tX\tvariants_only\tcontig1'))
+        v2 = pymummer.variant.Variant(pymummer.snp.Snp('14\tC\tA\t14\tx\tx\t42\t42\tx\tx\tvariants_only\tcontig1'))
+        v3 = pymummer.variant.Variant(pymummer.snp.Snp('15\tG\tC\t15\tx\tx\t42\t42\tx\tx\tvariants_only\tcontig1'))
 
         ctg_nucmer_coords = {
             'contig1': [pyfastaq.intervals.Interval(0, 41)],
