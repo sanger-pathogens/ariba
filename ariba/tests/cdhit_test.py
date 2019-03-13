@@ -179,7 +179,7 @@ class TestCdhit(unittest.TestCase):
         r = cdhit.Runner(fa_infile)
         run_cmd = r.get_run_cmd('foo/bar/file.out')
         match = re.search('^.+cd-hit-est -i .+ -o foo/bar/file.out -c 0.9 -T 1 -s 0.0 -d 0 -bak 1$', run_cmd)
-        self.assertIsNotNone(match)
+        self.assertIsNotNone(match, msg="Command output was " + run_cmd)
 
 
     def test_get_run_cmd_with_non_default_memory(self):
@@ -188,7 +188,7 @@ class TestCdhit(unittest.TestCase):
         r = cdhit.Runner(fa_infile, memory_limit=900)
         run_cmd = r.get_run_cmd('foo/bar/file.out')
         match = re.search('^.+cd-hit-est -i .+ -c 0.9 -T 1 -s 0.0 -d 0 -bak 1 -M 900$', run_cmd)
-        self.assertIsNotNone(match)
+        self.assertIsNotNone(match, msg="Command output was " + run_cmd)
 
 
     def test_get_run_cmd_with_unlimited_memory(self):
@@ -197,4 +197,4 @@ class TestCdhit(unittest.TestCase):
         r = cdhit.Runner(fa_infile, memory_limit=0)
         run_cmd = r.get_run_cmd('foo/bar/file.out')
         match = re.search('^.+cd-hit-est -i .+ -c 0.9 -T 1 -s 0.0 -d 0 -bak 1 -M 0$', run_cmd)
-        self.assertIsNotNone(match)
+        self.assertIsNotNone(match, msg="Command output was " + run_cmd)
