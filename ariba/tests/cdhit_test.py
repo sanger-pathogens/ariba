@@ -178,7 +178,7 @@ class TestCdhit(unittest.TestCase):
         fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict_rename.in.fa')
         r = cdhit.Runner(fa_infile)
         run_cmd = r.get_run_cmd('foo/bar/file.out')
-        match = re.search('^.+cd-hit-est -i .+ -o foo/bar/file.out -c 0.9 -T 1 -s 0.0 -d 0 -bak 1$', run_cmd)
+        match = re.search('^.+ -o foo/bar/file.out -c 0.9 -T 1 -s 0.0 -d 0 -bak 1$', run_cmd)
         self.assertIsNotNone(match, msg="Command output was " + run_cmd)
 
 
@@ -187,7 +187,7 @@ class TestCdhit(unittest.TestCase):
         fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict_rename.in.fa')
         r = cdhit.Runner(fa_infile, memory_limit=900)
         run_cmd = r.get_run_cmd('foo/bar/file.out')
-        match = re.search('^.+cd-hit-est -i .+ -c 0.9 -T 1 -s 0.0 -d 0 -bak 1 -M 900$', run_cmd)
+        match = re.search('^.+ -o foo/bar/file.out -c 0.9 -T 1 -s 0.0 -d 0 -bak 1 -M 900$', run_cmd)
         self.assertIsNotNone(match, msg="Command output was " + run_cmd)
 
 
@@ -196,5 +196,5 @@ class TestCdhit(unittest.TestCase):
         fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict_rename.in.fa')
         r = cdhit.Runner(fa_infile, memory_limit=0)
         run_cmd = r.get_run_cmd('foo/bar/file.out')
-        match = re.search('^.+cd-hit-est -i .+ -c 0.9 -T 1 -s 0.0 -d 0 -bak 1 -M 0$', run_cmd)
+        match = re.search('^.+ -o foo/bar/file.out -c 0.9 -T 1 -s 0.0 -d 0 -bak 1 -M 0$', run_cmd)
         self.assertIsNotNone(match, msg="Command output was " + run_cmd)
