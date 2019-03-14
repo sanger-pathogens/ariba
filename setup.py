@@ -72,7 +72,7 @@ setup(
         'matplotlib',
         'pyfastaq >= 3.12.0',
         'pysam >= 0.9.1',
-        'pymummer>=0.10.2',
+        'pymummer<=0.10.3',
     ],
     license='GPLv3',
     classifiers=[
