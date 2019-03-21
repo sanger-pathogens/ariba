@@ -85,6 +85,8 @@ Download the latest release from this github repository or clone it. Run the tes
 
     python3 setup.py test
 
+**Note for OS X:** The tests require gawk which will need to be installed separately, e.g. via Homebrew.
+
 If the tests all pass, install:
 
     python3 setup.py install
