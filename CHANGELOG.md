@@ -1,6 +1,20 @@
 # Change Log
 
-## [v2.13.4](https://github.com/sanger-pathogens/ariba/tree/v2.13.3) (2019-03-15)
+## [v2.13.5](https://github.com/sanger-pathogens/ariba/tree/v2.13.5) (2019-03-22)
+[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.13.4...v2.13.5)
+
+**Closed issues:**
+
+- Installation failed: clang: error: linker command failed with exit code 1 \(use -v to see invocation\) [\#245](https://github.com/sanger-pathogens/ariba/issues/245)
+- virfinddb db not downloading properly [\#229](https://github.com/sanger-pathogens/ariba/issues/229)
+- getref error with resfinder db [\#225](https://github.com/sanger-pathogens/ariba/issues/225)
+- Ariba fails without --noclean depending on database [\#205](https://github.com/sanger-pathogens/ariba/issues/205)
+
+**Merged pull requests:**
+
+- Minor code change to mitigate issue \#245 \(installation failure\) [\#258](https://github.com/sanger-pathogens/ariba/pull/258) ([kpepper](https://github.com/kpepper))
+
+## [v2.13.4](https://github.com/sanger-pathogens/ariba/tree/v2.13.4) (2019-03-15)
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.13.3...v2.13.4)
 
 **Closed issues:**
@@ -10,6 +24,7 @@
 
 **Merged pull requests:**
 
+- Rebuilt CHANGELOG for v2.13.4 [\#257](https://github.com/sanger-pathogens/ariba/pull/257) ([kpepper](https://github.com/kpepper))
 - Allow increasing cd-hit-est memory allocation \#255 [\#256](https://github.com/sanger-pathogens/ariba/pull/256) ([kpepper](https://github.com/kpepper))
 
 ## [v2.13.3](https://github.com/sanger-pathogens/ariba/tree/v2.13.3) (2019-01-02)

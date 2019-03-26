@@ -144,9 +144,14 @@ class ExternalProgs:
            Returns tuple (bool, version). First element True iff found version ok.
            Second element is version string (if found), otherwise an error message'''
         assert prog in prog_to_version_cmd
-        cmd, regex = prog_to_version_cmd[prog]
-        cmd = path + ' ' + cmd
-        cmd_output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        args, regex = prog_to_version_cmd[prog]
+        cmd = path + ' ' + args
+        if prog == 'spades':
+            cmd_output = subprocess.Popen(['python3', path, args], shell=False, stdout=subprocess.PIPE,
+                                          stderr=subprocess.PIPE).communicate()
+        else:
+            cmd_output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+
         cmd_output = common.decode(cmd_output[0]).split('\n')[:-1] + common.decode(cmd_output[1]).split('\n')[:-1]
 
         for line in cmd_output:
