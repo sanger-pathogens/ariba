@@ -1,17 +1,19 @@
 # Change Log
 
-## [v2.13.5](https://github.com/sanger-pathogens/ariba/tree/v2.13.5) (2019-03-22)
+## [v2.13.5](https://github.com/sanger-pathogens/ariba/tree/v2.13.5) (2019-03-26)
+
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.13.4...v2.13.5)
 
 **Closed issues:**
 
-- Installation failed: clang: error: linker command failed with exit code 1 \(use -v to see invocation\) [\#245](https://github.com/sanger-pathogens/ariba/issues/245)
-- virfinddb db not downloading properly [\#229](https://github.com/sanger-pathogens/ariba/issues/229)
-- getref error with resfinder db [\#225](https://github.com/sanger-pathogens/ariba/issues/225)
 - Ariba fails without --noclean depending on database [\#205](https://github.com/sanger-pathogens/ariba/issues/205)
+- Installation failed: clang: error: linker command failed with exit code 1 \(use -v to see invocation\) [\#245](https://github.com/sanger-pathogens/ariba/issues/245)
+-  virfinddb db not downloading properly [\#229](https://github.com/sanger-pathogens/ariba/issues/229)
+- getref error with resfinder db [\#225](https://github.com/sanger-pathogens/ariba/issues/225)
 
 **Merged pull requests:**
 
+- Bump version to 2.13.5 and fix Spades invocation issue [\#259](https://github.com/sanger-pathogens/ariba/pull/259) ([kpepper](https://github.com/kpepper))
 - Minor code change to mitigate issue \#245 \(installation failure\) [\#258](https://github.com/sanger-pathogens/ariba/pull/258) ([kpepper](https://github.com/kpepper))
 
 ## [v2.13.4](https://github.com/sanger-pathogens/ariba/tree/v2.13.4) (2019-03-15)
