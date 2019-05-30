@@ -27,9 +27,11 @@ RUN wget -q http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/2.2.9/bo
 # _tkinter.TclError: no display name and no $DISPLAY environment variable
 ENV ARIBA_BOWTIE2=$PWD/bowtie2-2.2.9/bowtie2 ARIBA_CDHIT=cdhit-est MPLBACKEND="agg"
 
+RUN cd /usr/local/bin && ln -s /usr/bin/python3 python && cd
+
 RUN git clone https://github.com/sanger-pathogens/ariba.git \
   && cd ariba \
-  && git checkout v2.12.0 \
+  && git checkout v2.13.5 \
   && python3 setup.py test \
   && python3 setup.py install
 

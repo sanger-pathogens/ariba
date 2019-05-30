@@ -19,6 +19,7 @@ class RefPreparer:
         genetic_code=11,
         cdhit_min_id=0.9,
         cdhit_min_length=0.0,
+        cdhit_max_memory=None,
         run_cdhit=True,
         clusters_file=None,
         threads=1,
@@ -40,6 +41,7 @@ class RefPreparer:
         self.genetic_code = genetic_code
         self.cdhit_min_id = cdhit_min_id
         self.cdhit_min_length = cdhit_min_length
+        self.cdhit_max_memory = cdhit_max_memory
         self.run_cdhit = run_cdhit
         self.clusters_file = clusters_file
         self.threads = threads
@@ -193,6 +195,7 @@ class RefPreparer:
             seq_identity_threshold=self.cdhit_min_id,
             threads=self.threads,
             length_diff_cutoff=self.cdhit_min_length,
+            memory_limit=self.cdhit_max_memory,
             nocluster=not self.run_cdhit,
             verbose=self.verbose,
             clusters_file=self.clusters_file,

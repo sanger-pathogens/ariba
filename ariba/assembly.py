@@ -140,7 +140,7 @@ class Assembly:
                 spades_out_seq_base = "contigs.fasta"
             else:
                 raise ValueError("Unknown spades_mode value: {}".format(self.spades_mode))
-            asm_cmd = [spades_exe, "-t", str(self.threads), "--pe1-1", self.reads1, "--pe1-2", self.reads2, "-o", self.assembler_dir] + \
+            asm_cmd = ['python3', spades_exe, "-t", str(self.threads), "--pe1-1", self.reads1, "--pe1-2", self.reads2, "-o", self.assembler_dir] + \
                 spades_options
             asm_ok,err = common.syscall(asm_cmd, verbose=True, verbose_filehandle=self.log_fh, shell=False, allow_fail=True)
             if not asm_ok:

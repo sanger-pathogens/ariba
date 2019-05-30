@@ -1,4 +1,5 @@
 import unittest
+import json
 import shutil
 import os
 import pickle
@@ -89,6 +90,7 @@ class TestClusters(unittest.TestCase):
         expected_clusters = {'0': {'presabs1'}, '1': {'variants_only1'}, '2': {'noncoding1'}}
         self.assertEqual(expected_clusters, got_clusters)
 
+        self.assertEqual({'a': 'b'}, got_refdata.extra_parameters)
 
     def test_minimap_reads_to_all_ref_seqs(self):
         '''test test_minimap_reads_to_all_ref_seqs'''
@@ -315,3 +317,34 @@ class TestClusters(unittest.TestCase):
         self.assertTrue(filecmp.cmp(expected_long, got_long, shallow=False))
         os.unlink(got_short)
         os.unlink(got_long)
+
+
+    def test_write_tb_resistance_calls_json(self):
+        '''test _write_tb_resistance_calls_json'''
+        ariba_report = os.path.join(data_dir, 'clusters_write_tb_resistance_calls_json.in.tsv')
+        tmp_out = 'tmp.write_tb_resistance_calls_json.out.json'
+        clusters.Clusters._write_tb_resistance_calls_json(ariba_report, tmp_out)
+        expected = os.path.join(data_dir, 'clusters_write_tb_resistance_calls_json.out.json')
+        self.assertTrue(filecmp.cmp(expected, tmp_out, shallow=False))
+        os.unlink(tmp_out)
+
+
+    def test_run_with_tb(self):
+        '''test complete run with TB amr calling'''
+        tmp_out = 'tmp.clusters_run_with_tb'
+        c = clusters.Clusters(
+            os.path.join(data_dir, 'clusters_run_with_tb.ref'),
+            os.path.join(data_dir, 'clusters_run_with_tb.reads_1.fq.gz'),
+            os.path.join(data_dir, 'clusters_run_with_tb.reads_2.fq.gz'),
+            tmp_out,
+            extern_progs,
+        )
+        c.run()
+
+        expect_json = {"Pyrazinamide": [[ "pncA", "A3E"]]}
+        json_file = os.path.join(tmp_out, 'tb.resistance.json')
+        self.assertTrue(os.path.exists(json_file))
+        with open(json_file) as f:
+            got_json = json.load(f)
+        self.assertEqual(expect_json, got_json)
+        common.rmtree(tmp_out)

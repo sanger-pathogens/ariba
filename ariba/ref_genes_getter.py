@@ -232,7 +232,9 @@ class RefGenesGetter:
         for filename in os.listdir():
             if filename.endswith('.fsa'):
                 print('   ', filename)
-                file_reader = pyfastaq.sequences.file_reader(filename)
+                fix_file = os.path.join(tmpdir, filename + '.fix.fsa')
+                RefGenesGetter._fix_virulencefinder_fasta_file(os.path.join(tmpdir, filename), fix_file)
+                file_reader = pyfastaq.sequences.file_reader(fix_file)
                 for seq in file_reader:
                     try:
                         prefix, suffix = seq.id.split('_', maxsplit=1)

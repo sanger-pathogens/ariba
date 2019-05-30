@@ -21,6 +21,7 @@ def run(options):
         genetic_code=options.genetic_code,
         cdhit_min_id=options.cdhit_min_id,
         cdhit_min_length=options.cdhit_min_length,
+        cdhit_max_memory=options.cdhit_max_memory,
         run_cdhit=not options.no_cdhit,
         clusters_file=options.cdhit_clusters,
         threads=options.threads,

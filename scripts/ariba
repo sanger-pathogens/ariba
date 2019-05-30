@@ -135,7 +135,8 @@ cdhit_group = subparser_prepareref.add_argument_group('cd-hit options')
 cdhit_group.add_argument('--no_cdhit', action='store_true', help='Do not run cd-hit. Each input sequence is put into its own "cluster". Incompatible with --cdhit_clusters.')
 cdhit_group.add_argument('--cdhit_clusters', help='File specifying how the sequences should be clustered. Will be used instead of running cdhit. Format is one cluster per line. Sequence names separated by whitespace. Incompatible with --no_cdhit', metavar='FILENAME')
 cdhit_group.add_argument('--cdhit_min_id', type=float, help='Sequence identity threshold (cd-hit option -c) [%(default)s]', default=0.9, metavar='FLOAT')
-cdhit_group.add_argument('--cdhit_min_length', type=float, help='length difference cutoff (cd-hit option -s) [%(default)s]', default=0.0, metavar='FLOAT')
+cdhit_group.add_argument('--cdhit_min_length', type=float, help='Length difference cutoff (cd-hit option -s) [%(default)s]', default=0.0, metavar='FLOAT')
+cdhit_group.add_argument('--cdhit_max_memory', type=int, help='Memory limit in MB (cd-hit option -M) [%(default)s]. Use 0 for unlimited.', metavar='INT')
 
 other_prep_group = subparser_prepareref.add_argument_group('other options')
 other_prep_group.add_argument('--min_gene_length', type=int, help='Minimum allowed length in nucleotides of reference genes [%(default)s]', metavar='INT', default=6)
@@ -147,6 +148,17 @@ other_prep_group.add_argument('--verbose', action='store_true', help='Be verbose
 
 subparser_prepareref.add_argument('outdir', help='Output directory (must not already exist)')
 subparser_prepareref.set_defaults(func=ariba.tasks.prepareref.run)
+
+
+#----------------------------- prepareref_tb ----------------------------
+subparser_prepareref_tb = subparsers.add_parser(
+    'prepareref_tb',
+    help='Prepare reference TB data for input to "run"',
+    usage='ariba prepareref_tb <outdir>',
+    description='Prepare built-in TB reference data for running the pipeline with "ariba run"',
+)
+subparser_prepareref_tb.add_argument('outdir', help='Output directory (must not already exist)')
+subparser_prepareref_tb.set_defaults(func=ariba.tasks.prepareref_tb.run)
 
 
 #----------------------------- pubmlstget -------------------------------

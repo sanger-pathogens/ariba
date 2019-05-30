@@ -53,11 +53,16 @@ class TestReferenceData(unittest.TestCase):
 
         self.assertEqual(expected_seqs_dict, ref_data.sequences)
         self.assertEqual({}, ref_data.ariba_to_original_name)
+        self.assertEqual({}, ref_data.extra_parameters)
 
         rename_file =  os.path.join(data_dir, 'reference_data_init_ok.rename.tsv')
-        ref_data = reference_data.ReferenceData([fasta_in], [tsv_in], rename_file=rename_file)
+        parameters_file = os.path.join(data_dir, 'reference_data_init_ok.params.json')
+        ref_data = reference_data.ReferenceData([fasta_in], [tsv_in],
+            rename_file=rename_file, parameters_file=parameters_file)
         expected_rename_dict = {'gene1': 'original_gene1', 'gene2': 'original_gene2'}
         self.assertEqual(expected_rename_dict, ref_data.ariba_to_original_name)
+        expected_extra_parameters = {'foo': 'bar', 'spam': 'eggs'}
+        self.assertEqual(expected_extra_parameters, ref_data.extra_parameters)
 
 
     def test_load_rename_file(self):

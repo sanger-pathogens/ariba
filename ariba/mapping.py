@@ -86,8 +86,10 @@ def run_bowtie2(
     if LooseVersion(bowtie2_version) >= LooseVersion('2.3.1'):
         map_cmd.append('--score-min G,1,10')
 
+    # We use gawk instead of awk here as we need bitwise comparisons
+    # and these are not available via awk on Mac OSX.
     if remove_both_unmapped:
-        map_cmd.append(r''' | awk ' !(and($2,4)) || !(and($2,8)) ' ''')
+        map_cmd.append(r''' | gawk ' !(and($2,4)) || !(and($2,8)) ' ''')
 
     tmp_sam_file = out_prefix + '.unsorted.sam'
     map_cmd.append(' > ' + tmp_sam_file)
