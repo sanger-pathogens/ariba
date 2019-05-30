@@ -544,7 +544,7 @@ class RefGenesGetter:
 
 
 
-    def _get_from_ncbi(self, outprefix): ## author github:schultzm
+    def _get_from_ncbi(self, outprefix, test=None): ## author github:schultzm
         """
         Download the NCBI-curated Bacterial Antimicrobial Resistance Reference Gene Database.
         Uses BioPython to do the data collection and extraction.
@@ -608,6 +608,9 @@ class RefGenesGetter:
         print(f"E-search found {len(acc_list)} records in BioProject {BIOPROJECT}.", file=sys.stderr)
         webenv = search_results["WebEnv"]
         query_key = search_results["QueryKey"]
+        if test:
+            return webenv
+            #up to here
         if len(acc_list) > 0:
             print(f"E-fetching {len(acc_list)} genbank records from BioProject {BIOPROJECT} and writing to.  This may take a while.", file=sys.stderr)
             records = Entrez.efetch(db="nucleotide",
