@@ -9,7 +9,10 @@ class TestNcbiGetter(unittest.TestCase):
         # self.ncbi_db = RefGenesGetter.run('ncbi')
         
     def test_ncbi(self):
-        print(self.ncbi_db.va)
+        '''
+        Test that more than 4000 records have been found on NCBI AMR DB.
+        '''
+        self.assertTrue(len(self.ncbi_db) > 4000)
 
 if __name__ == '__main__':
     unittest.main()

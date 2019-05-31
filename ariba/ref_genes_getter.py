@@ -548,7 +548,7 @@ class RefGenesGetter:
         """
         Download the NCBI-curated Bacterial Antimicrobial Resistance Reference Gene Database.
         Uses BioPython to do the data collection and extraction.
-        Author: schultzm (github) Sep 13, 2018.
+        Author: schultzm (github) May 31, 2019.
 
         >>> from Bio import Entrez
         >>> import getpass
@@ -605,11 +605,10 @@ class RefGenesGetter:
                                                     usehistory="y",
                                                     idtype="acc"))
         acc_list = search_results["IdList"]
-        print(f"E-search found {len(acc_list)} records in BioProject {BIOPROJECT}.", file=sys.stderr)
         webenv = search_results["WebEnv"]
         query_key = search_results["QueryKey"]
         if test:
-            return webenv
+            return acc_list
             #up to here
         if len(acc_list) > 0:
             print(f"E-fetching {len(acc_list)} genbank records from BioProject {BIOPROJECT} and writing to.  This may take a while.", file=sys.stderr)
