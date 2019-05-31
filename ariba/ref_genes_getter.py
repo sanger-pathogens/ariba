@@ -617,7 +617,6 @@ class RefGenesGetter:
                                                retstart=0, retmax=RETMAX,
                                                webenv=webenv, query_key=query_key,
                                                idtype="acc")
-            print(records)
             #pull out the records as fasta from the genbank
             from Bio.Alphabet import generic_dna
             from Bio import SeqIO
