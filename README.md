@@ -39,15 +39,15 @@ The input is a FASTA file of reference sequences (can be a mix of genes and nonc
 ## Quick Start
 Get reference data, for instance from [CARD](https://card.mcmaster.ca/). See [getref](https://github.com/sanger-pathogens/ariba/wiki/Task%3A-getref) for a full list.
 
-    ariba getref card out.card
+    ariba getref ncbi out.ncbi
 
 Prepare reference data for ARIBA:
 
-    ariba prepareref -f out.card.fa -m out.card.tsv out.card.prepareref
+    ariba prepareref -f out.ncbi.fa -m out.ncbi.tsv out.ncbi.prepareref
 
 Run local assemblies and call variants:
 
-    ariba run out.card.prepareref reads1.fastq reads2.fastq out.run
+    ariba run out.ncbi.prepareref reads1.fastq reads2.fastq out.run
 
 Summarise data from several runs:
 
@@ -90,6 +90,10 @@ Download the latest release from this github repository or clone it. Run the tes
 If the tests all pass, install:
 
     python3 setup.py install
+
+Alternatively, install directly from github using:
+
+    pip3 install git+https://github.com/sanger-pathogens/ariba.git #--user
 
 ### Docker
 ARIBA can be run in a Docker container. First install Docker, then install ARIBA:

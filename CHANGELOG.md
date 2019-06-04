@@ -1,4 +1,9 @@
 # Change Log
+## [v2.14.0] author schultzm
+** Features from schultzm pull request on fork `ncbi`  
+- Added feature to download NCBI Antimicrobial Resistance Gene Database  
+- Fixed bug in fermilite path  
+
 
 ## [v2.13.5](https://github.com/sanger-pathogens/ariba/tree/v2.13.5) (2019-03-26)
 
