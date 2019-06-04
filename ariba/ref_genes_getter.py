@@ -644,8 +644,7 @@ class RefGenesGetter:
                                     except:
                                         id = gb_feature.qualifiers["locus_tag"]
                                 except KeyError:
-                                    import sys
-                                    sys.stderr(f"gb_feature.qualifer not found")
+                                    print(f"gb_feature.qualifer not found", file=sys.stderr)
                             accession = gb_record.id
                             seq_out = Seq(str(gb_feature.extract(gb_record.seq)), generic_dna)
                             record_new.append(SeqRecord(seq_out,
