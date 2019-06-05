@@ -104,6 +104,8 @@ To use ARIBA use a command like this (substituting in your directories), where y
 
     docker run --rm -it -v /home/ubuntu/data:/data sangerpathogens/ariba ariba -h
 
+When calling Ariba via Docker you'll also need to add **/data/** in front of all the passed in file or directory names (e.g. /data/my_output_folder) as that's where Ariba expects to find its data within the container.
+
 
 ### Debian (testing)
 ARIBA is available in the latest version of Debian, and over time will progressively filter through to Ubuntu and other distributions which use Debian. To install it as root:
@@ -144,9 +146,9 @@ Note that ARIBA also runs `bowtie2-build`, for which it uses the
 it would try to use
 
     $HOME/bowtie2-2.1.0/bowtie2-build
- 
+
 ## Temporary files
- 
+
 ARIBA can temporarily make a large number of files whilst running, which
 are put in a temporary directory made by ARIBA.  The total size of these
 files is small, but there can be a many of them. This can be a
@@ -225,5 +227,3 @@ Microbial Genomics 2017. doi: [110.1099/mgen.0.000131](http://mgen.microbiologyr
   [ARIBA wiki]: https://github.com/sanger-pathogens/ariba/wiki
   [mummer]: http://mummer.sourceforge.net/
   [python]: https://www.python.org/
-
-
