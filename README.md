@@ -60,7 +60,7 @@ Please read the [ARIBA wiki page][ARIBA wiki] for full usage instructions.
 If you encounter an issue when installing ARIBA please contact your local system administrator. If you encounter a bug please log it [here](https://github.com/sanger-pathogens/ariba/issues) or email us at ariba-help@sanger.ac.uk.
 
 ### Required dependencies
-  * [Python3][python] version >= 3.4.0
+  * [Python3][python] version >= 3.6.0
   * [Bowtie2][bowtie2] version >= 2.1.0
   * [CD-HIT][cdhit] version >= 4.6
   * [MUMmer][mummer] version >= 3.23
@@ -69,7 +69,7 @@ ARIBA also depends on several Python packages, all of which are available
 via pip. Installing ARIBA with pip3 will get these automatically if they
 are not already installed:
   * dendropy >= 4.2.0
-  * matplotlib (no minimum version required, but only tested on 2.0.0)
+  * matplotlib>=3.1.0
   * pyfastaq >= 3.12.0
   * pysam >= 0.9.1
   * pymummer >= 0.10.1
