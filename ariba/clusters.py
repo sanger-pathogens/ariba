@@ -168,7 +168,7 @@ class Clusters:
         if self.verbose:
             print('Temporary directory:', self.tmp_dir)
 
-        for i in [x for x in dir(signal) if x.startswith("SIG") and x not in {'SIGCHLD', 'SIGCLD'}]:
+        for i in [x for x in dir(signal) if x.startswith("SIG") and x not in {'SIGCHLD', 'SIGCLD', 'SIGPIPE'}]:
             try:
                 signum = getattr(signal, i)
                 signal.signal(signum, self._receive_signal)
