@@ -1,23 +1,39 @@
 # Change Log
-## [v2.14.0] author schultzm
-** Features from schultzm pull request on fork `ncbi`  
-- Added feature to download NCBI Antimicrobial Resistance Gene Database  
-- Fixed bug in fermilite path  
 
-
-## [v2.13.5](https://github.com/sanger-pathogens/ariba/tree/v2.13.5) (2019-03-26)
-
-[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.13.4...v2.13.5)
+[v2.14.0](https://github.com/sanger-pathogens/ariba/tree/v2.14.0) (2019-06-06)
+[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.13.5...v2.14.0)
 
 **Closed issues:**
 
+- Reference dataset of ARG-ANNOT cannot be downloaded [\#265](https://github.com/sanger-pathogens/ariba/issues/265)
+- unable to download mlst schemes [\#264](https://github.com/sanger-pathogens/ariba/issues/264)
+- Several "At least one cluster failed!Stopping..." errors [\#261](https://github.com/sanger-pathogens/ariba/issues/261)
+- Allow increasing cd-hit-est memory allocation [\#255](https://github.com/sanger-pathogens/ariba/issues/255)
+- Ariba pubmlstget Error [\#240](https://github.com/sanger-pathogens/ariba/issues/240)
+- segmentation fault when I import ariba [\#230](https://github.com/sanger-pathogens/ariba/issues/230)
+- How to use spades and set minimum coverage [\#215](https://github.com/sanger-pathogens/ariba/issues/215)
+
+**Merged pull requests:**
+
+- Additional v2.14.0 updates [\#270](https://github.com/sanger-pathogens/ariba/pull/270) ([kpepper](https://github.com/kpepper))
+- Added getref feature for NCBI's Bacterial Antimicrobial Resistance Reference Gene Database [\#269](https://github.com/sanger-pathogens/ariba/pull/269) ([schultzm](https://github.com/schultzm))
+
+## [v2.13.5](https://github.com/sanger-pathogens/ariba/tree/v2.13.5) (2019-03-26)
+[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.13.4...v2.13.5)
+
+**Fixed bugs:**
+
 - Ariba fails without --noclean depending on database [\#205](https://github.com/sanger-pathogens/ariba/issues/205)
+
+**Closed issues:**
+
 - Installation failed: clang: error: linker command failed with exit code 1 \(use -v to see invocation\) [\#245](https://github.com/sanger-pathogens/ariba/issues/245)
 -  virfinddb db not downloading properly [\#229](https://github.com/sanger-pathogens/ariba/issues/229)
 - getref error with resfinder db [\#225](https://github.com/sanger-pathogens/ariba/issues/225)
 
 **Merged pull requests:**
 
+- Updated CHANGELOG.md [\#260](https://github.com/sanger-pathogens/ariba/pull/260) ([kpepper](https://github.com/kpepper))
 - Bump version to 2.13.5 and fix Spades invocation issue [\#259](https://github.com/sanger-pathogens/ariba/pull/259) ([kpepper](https://github.com/kpepper))
 - Minor code change to mitigate issue \#245 \(installation failure\) [\#258](https://github.com/sanger-pathogens/ariba/pull/258) ([kpepper](https://github.com/kpepper))
 
