@@ -1,5 +1,13 @@
 # Change Log
 
+[v2.14.1](https://github.com/sanger-pathogens/ariba/tree/v2.14.1) (2019-06-13)
+[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.0...v2.14.1)
+
+**Fixed bugs:**
+
+- Ariba fails to install from PyPI due to missing .h files in distribution. Related to MANIFEST.in change in [\#269](https://github.com/sanger-pathogens/ariba/pull/269)
+- Fix for Issue [\#263](https://github.com/sanger-pathogens/ariba/issues/263)
+
 [v2.14.0](https://github.com/sanger-pathogens/ariba/tree/v2.14.0) (2019-06-06)
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.13.5...v2.14.0)
 
