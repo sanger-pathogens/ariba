@@ -39,7 +39,7 @@ RUN cd /usr/local/bin && ln -s /usr/bin/python3 python && cd
 
 RUN git clone https://github.com/sanger-pathogens/ariba.git \
   && cd ariba \
-  && git checkout v2.14.1 \
+  && git checkout v2.14.2 \
   && python3 setup.py test \
   && python3 setup.py install
 
