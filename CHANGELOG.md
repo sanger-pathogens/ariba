@@ -1,5 +1,14 @@
 # Change Log
 
+[v2.14.2](https://github.com/sanger-pathogens/ariba/tree/v2.14.2) (2019-06-18)
+[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.1...v2.14.2)
+
+**Fixed bugs:**
+
+- Added Spades assembler into Docker file - RT ticket 660940
+- Incremented release number
+- Added LICENSE file into release distribution - RT ticket 660890
+
 [v2.14.1](https://github.com/sanger-pathogens/ariba/tree/v2.14.1) (2019-06-13)
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.0...v2.14.1)
 

@@ -104,7 +104,7 @@ To use ARIBA use a command like this (substituting in your directories), where y
 
     docker run --rm -it -v /home/ubuntu/data:/data sangerpathogens/ariba ariba -h
 
-When calling Ariba via Docker you'll also need to add **/data/** in front of all the passed in file or directory names (e.g. /data/my_output_folder) as that's where Ariba expects to find its data within the container.
+When calling Ariba via Docker (as above) you'll also need to add **/data/** in front of all the passed in file or directory names (e.g. /data/my_output_folder).
 
 
 ### Debian (testing)
