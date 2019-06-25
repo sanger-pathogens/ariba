@@ -7,7 +7,7 @@ MAINTAINER ariba-help@sanger.ac.uk
 # Software version numbers
 ARG BOWTIE2_VERSION=2.2.9
 ARG SPADES_VERSION=3.13.1
-ARG ARIBA_VERSION=2.14.2
+ARG ARIBA_TAG=master
 
 RUN apt-get -qq update && \
     apt-get install --no-install-recommends -y \
@@ -44,7 +44,7 @@ RUN cd /usr/local/bin && ln -s /usr/bin/python3 python && cd
 
 RUN git clone https://github.com/sanger-pathogens/ariba.git \
   && cd ariba \
-  && git checkout v${ARIBA_VERSION} \
+  && git checkout ${ARIBA_TAG} \
   && rm -rf .git \
   && python3 setup.py test \
   && python3 setup.py install
