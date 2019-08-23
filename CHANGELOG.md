@@ -1,5 +1,13 @@
 # Change Log
 
+[v2.14.3](https://github.com/sanger-pathogens/ariba/tree/v2.14.3) (2019-08-23)
+[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.2...v2.14.3)
+
+**Fixed bugs:**
+
+- Version 3.0.3 of CARD breaks prepareref [\#278](https://github.com/sanger-pathogens/ariba/issues/278)
+- RT 667288: Change docker file Ariba git clone to a copy
+
 [v2.14.2](https://github.com/sanger-pathogens/ariba/tree/v2.14.2) (2019-06-18)
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.1...v2.14.2)
 

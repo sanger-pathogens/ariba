@@ -7,13 +7,13 @@ MAINTAINER ariba-help@sanger.ac.uk
 # Software version numbers
 ARG BOWTIE2_VERSION=2.2.9
 ARG SPADES_VERSION=3.13.1
-ARG CDHIT_VERSION=4.8.1
 ARG ARIBA_TAG=master
 ARG ARIBA_BUILD_DIR=/ariba
 
 RUN apt-get -qq update && \
     apt-get install --no-install-recommends -y \
   build-essential \
+  cd-hit \
   curl \
   git \
   libbz2-dev \
@@ -27,16 +27,6 @@ RUN apt-get -qq update && \
   unzip \
   wget \
   zlib1g-dev
-
-# Install cd-hit
-# We build cd-hit "manually" rather than using apt-get - see Ariba GitHub issue 278
-RUN git clone https://github.com/weizhongli/cdhit.git \
-  && cd cdhit \
-  && git checkout V${CDHIT_VERSION} \
-  && make MAX_SEQ=10000000 \
-  && ln -s -f $PWD/cd-hit-est /usr/bin/cd-hit-est \
-  && ln -s -f /usr/bin/cd-hit-est /usr/bin/cdhit-est \
-  && cd ..
 
 # Install bowtie
 RUN wget -q http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip \

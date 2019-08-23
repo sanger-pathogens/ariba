@@ -1,0 +1,3 @@
+input fasta file:	/Users/kp11/workspace/applications/Ariba/ariba/ariba/tests/data/ref_preparer_test_run.in.4.fa
+input tsv file:	/Users/kp11/workspace/applications/Ariba/ariba/ariba/tests/data/ref_preparer_test_run.in.4.tsv
+genetic_code	1

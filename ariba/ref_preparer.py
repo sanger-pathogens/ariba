@@ -16,6 +16,8 @@ class RefPreparer:
         version_report_lines=None,
         min_gene_length=6,
         max_gene_length=10000,
+        min_noncoding_length=6,
+        max_noncoding_length=20000,
         genetic_code=11,
         cdhit_min_id=0.9,
         cdhit_min_length=0.0,
@@ -38,6 +40,8 @@ class RefPreparer:
         self.all_coding = all_coding
         self.min_gene_length = min_gene_length
         self.max_gene_length = max_gene_length
+        self.min_noncoding_length = min_noncoding_length
+        self.max_noncoding_length = max_noncoding_length
         self.genetic_code = genetic_code
         self.cdhit_min_id = cdhit_min_id
         self.cdhit_min_length = cdhit_min_length
@@ -177,6 +181,8 @@ class RefPreparer:
             self.metadata_tsv_files,
             min_gene_length=self.min_gene_length,
             max_gene_length=self.max_gene_length,
+            min_noncoding_length = self.min_noncoding_length,
+            max_noncoding_length = self.max_noncoding_length,
             genetic_code=self.genetic_code,
         )
 
@@ -213,8 +219,9 @@ class RefPreparer:
             pickle.dump(clusters, f)
 
         if number_of_removed_seqs > 0:
-            print('WARNING.', number_of_removed_seqs, 'sequence(s) excluded. Please see the log file 01.filter.check_genes.log for details. This will show them:', file=sys.stderr)
+            print('WARNING.', number_of_removed_seqs, 'sequence(s) excluded. Please see the 01.filter.check_genes.log and 01.filter.check_noncoding.log for details. This will show them:', file=sys.stderr)
             print('    grep REMOVE', os.path.join(outdir, '01.filter.check_genes.log'), file=sys.stderr)
+            print('    cat', os.path.join(outdir, '01.filter.check_noncoding.log'), file=sys.stderr)
 
         if number_of_bad_variants_logged > 0:
             print('WARNING. Problem with at least one variant. Problem variants are removed. Please see the file', os.path.join(outdir, '01.filter.check_metadata.log'), 'for details.', file=sys.stderr)

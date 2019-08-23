@@ -60,7 +60,7 @@ setup(
     packages = find_packages(),
     package_data={'ariba': ['test_run_data/*', 'tb_data/*']},
     author='Martin Hunt',
-    author_email='path-help@sanger.ac.uk',
+    author_email='ariba-help@sanger.ac.uk',
     url='https://github.com/sanger-pathogens/ariba',
     scripts=glob.glob('scripts/*'),
     test_suite='nose.collector',
@@ -72,7 +72,7 @@ setup(
         'pyfastaq >= 3.12.0',
         'pysam >= 0.9.1',
         'pymummer<=0.10.3',
-        'matplotlib>=3.1.0',
+        'matplotlib >= 3.1.0',
     ],
     license='GPLv3',
     classifiers=[

@@ -141,6 +141,8 @@ cdhit_group.add_argument('--cdhit_max_memory', type=int, help='Memory limit in M
 other_prep_group = subparser_prepareref.add_argument_group('other options')
 other_prep_group.add_argument('--min_gene_length', type=int, help='Minimum allowed length in nucleotides of reference genes [%(default)s]', metavar='INT', default=6)
 other_prep_group.add_argument('--max_gene_length', type=int, help='Maximum allowed length in nucleotides of reference genes [%(default)s]', metavar='INT', default=10000)
+other_prep_group.add_argument('--min_noncoding_length', type=int, help='Minimum allowed length in nucleotides of non-coding sequences [%(default)s]', metavar='INT', default=6)
+other_prep_group.add_argument('--max_noncoding_length', type=int, help='Maximum allowed length in nucleotides of non-coding sequences [%(default)s]', metavar='INT', default=20000)
 other_prep_group.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
 other_prep_group.add_argument('--force', action='store_true', help='Overwrite output directory, if it already exists')
 other_prep_group.add_argument('--threads', type=int, help='Number of threads (currently only applies to cdhit) [%(default)s]', default=1, metavar='INT')
