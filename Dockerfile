@@ -10,6 +10,8 @@ ARG SPADES_VERSION=3.13.1
 ARG ARIBA_TAG=master
 ARG ARIBA_BUILD_DIR=/ariba
 
+ARG LOCALE_COUNTRY=en_GB
+
 RUN apt-get -qq update && \
     apt-get install --no-install-recommends -y \
   build-essential \
@@ -27,6 +29,12 @@ RUN apt-get -qq update && \
   unzip \
   wget \
   zlib1g-dev
+
+# Install locales
+RUN apt-get update && apt-get install -y locales-all && rm -rf /var/lib/apt/lists/* 
+# Set a default locale.
+ENV LANG=${LOCALE_COUNTRY}.UTF-8 \
+    LANGUAGE=${LOCALE_COUNTRY}:en 
 
 # Install bowtie
 RUN wget -q http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip \
