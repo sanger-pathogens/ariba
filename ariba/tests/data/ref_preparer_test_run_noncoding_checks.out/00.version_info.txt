@@ -1,0 +1,5 @@
+ARIBA run with this command:
+setup.py prepareref test
+from this directory: /Users/kp11/workspace/applications/Ariba/ariba
+
+

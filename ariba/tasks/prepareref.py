@@ -18,6 +18,8 @@ def run(options):
         version_report_lines=version_report_lines,
         min_gene_length=options.min_gene_length,
         max_gene_length=options.max_gene_length,
+        min_noncoding_length=options.min_noncoding_length,
+        max_noncoding_length=options.max_noncoding_length,
         genetic_code=options.genetic_code,
         cdhit_min_id=options.cdhit_min_id,
         cdhit_min_length=options.cdhit_min_length,

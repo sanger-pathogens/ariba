@@ -1,0 +1,3 @@
+cannot_make_into_a_gene	REMOVE	Does not look like a gene (tried both strands and all reading frames) AAAAAAAAAAAAAAAA
+gene1	KEEP	Made into gene. strand=+, frame=0
+gene2	KEEP	Made into gene. strand=+, frame=0

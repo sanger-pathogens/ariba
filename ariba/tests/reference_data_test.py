@@ -265,6 +265,19 @@ class TestReferenceData(unittest.TestCase):
         for seq, got_seq, message in tests:
             self.assertEqual((got_seq, message), reference_data.ReferenceData._try_to_get_gene_seq(seq, 6, 99))
 
+    def test_check_noncoding_seq(self):
+        '''Test _check_noncoding_seq'''
+        tests = [
+            (pyfastaq.sequences.Fasta('x', 'A' * 3), False, 'REMOVE\tToo short. Length: 3'),
+            (pyfastaq.sequences.Fasta('x', 'A' * 21), False, 'REMOVE\tToo long. Length: 21'),
+            (pyfastaq.sequences.Fasta('x', 'A' * 5), True, None),
+            (pyfastaq.sequences.Fasta('x', 'A' * 4), True, None),
+            (pyfastaq.sequences.Fasta('x', 'A' * 20), True, None)
+        ]
+
+        for seq, valid, message in tests:
+            self.assertEqual((valid, message), reference_data.ReferenceData._check_noncoding_seq(seq, 4, 20))
+
 
     def test_remove_bad_genes(self):
         '''Test _remove_bad_genes'''
@@ -283,6 +296,29 @@ class TestReferenceData(unittest.TestCase):
         }
         self.assertEqual(expected_dict, test_seq_dict)
         expected_log = os.path.join(data_dir, 'reference_data_test_remove_bad_genes.log')
+        self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
+        os.unlink(tmp_log)
+
+
+    def test_remove_bad_noncoding_seqs(self):
+        '''Test _remove_bad_noncoding_seqs'''
+        test_seq_dict = {}
+        fasta_file = os.path.join(data_dir, 'reference_data_remove_bad_noncoding.in.fa')
+        metadata_file = os.path.join(data_dir, 'reference_data_remove_bad_noncoding.in.tsv')
+        metadata = reference_data.ReferenceData._load_all_metadata_tsvs([metadata_file])
+        pyfastaq.tasks.file_to_dict(fasta_file, test_seq_dict)
+        tmp_log = 'tmp.test_remove_bad_noncoding.log'
+        expected_removed = {'noncoding1','noncoding2'}
+        got_removed = reference_data.ReferenceData._remove_bad_noncoding_seqs(test_seq_dict, metadata, tmp_log,
+                                                                     min_noncoding_length=6, max_noncoding_length=15)
+        self.assertEqual(expected_removed, got_removed)
+        expected_dict = {
+            'noncoding3': pyfastaq.sequences.Fasta('noncoding3', 'CCCCCC'),
+            'noncoding4': pyfastaq.sequences.Fasta('noncoding4', 'TTTTTTTTTTTTTTT'),
+            'noncoding5': pyfastaq.sequences.Fasta('noncoding5', 'AAAAAAAAAAAA')
+        }
+        self.assertEqual(expected_dict, test_seq_dict)
+        expected_log = os.path.join(data_dir, 'reference_data_test_remove_bad_noncoding.log')
         self.assertTrue(filecmp.cmp(expected_log, tmp_log, shallow=False))
         os.unlink(tmp_log)
 

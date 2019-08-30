@@ -117,6 +117,7 @@ class TestRefPreparer(unittest.TestCase):
         test_files = [
             '01.filter.check_metadata.tsv',
             '01.filter.check_genes.log',
+            '01.filter.check_noncoding.log',
             '01.filter.check_metadata.log',
             '02.cdhit.all.fa',
             '02.cdhit.clusters.tsv',
@@ -152,6 +153,7 @@ class TestRefPreparer(unittest.TestCase):
             '00.auto_metadata.tsv',
             '01.filter.check_metadata.tsv',
             '01.filter.check_genes.log',
+            '01.filter.check_noncoding.log',
             '01.filter.check_metadata.log',
             '02.cdhit.all.fa',
             '02.cdhit.clusters.tsv',
@@ -168,6 +170,41 @@ class TestRefPreparer(unittest.TestCase):
 
         common.rmtree(tmp_out)
 
+    def test_run_noncoding_checks(self):
+        '''test run with noncoding sequences that are outside of the allowed size range'''
+        fasta_in = [
+            os.path.join(data_dir, 'ref_preparer_test_run.in.4.fa')
+        ]
+        tsv_in = [
+            os.path.join(data_dir, 'ref_preparer_test_run.in.4.tsv')
+        ]
 
+        extern_progs = external_progs.ExternalProgs()
+        refprep = ref_preparer.RefPreparer(
+            fasta_in, extern_progs, min_noncoding_length=6, max_noncoding_length=20,
+            metadata_tsv_files=tsv_in, genetic_code=1)
+        tmp_out = 'tmp.ref_preparer_test_run_noncoding_checks'
+        refprep.run(tmp_out)
+        expected_outdir = os.path.join(data_dir, 'ref_preparer_test_run_noncoding_checks.out')
+
+        test_files = [
+            '01.filter.check_metadata.tsv',
+            '01.filter.check_genes.log',
+            '01.filter.check_noncoding.log',
+            '01.filter.check_metadata.log',
+            '02.cdhit.all.fa',
+            '02.cdhit.clusters.tsv',
+            '02.cdhit.gene.fa',
+            '02.cdhit.gene.varonly.fa',
+            '02.cdhit.noncoding.fa',
+            '02.cdhit.noncoding.varonly.fa',
+        ]
+
+        for filename in test_files:
+            expected = os.path.join(expected_outdir, filename)
+            got = os.path.join(tmp_out, filename)
+            self.assertTrue(filecmp.cmp(expected, got, shallow=False))
+
+        common.rmtree(tmp_out)
 
 

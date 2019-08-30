@@ -1,0 +1,8 @@
+cannot_make_into_a_gene	1	0	.	.	.
+noncoding1-toolong	0	0	.	.	.
+noncoding2	0	0	C4T	.	.
+noncoding3-tooshort	0	0	C4T	.	.
+noncoding4-toolong	0	0	C4T	.	.
+noncoding5-tooshort	0	0	C4T	.	.
+gene1	1	0	.	.	.
+gene2	1	0	.	.	.
