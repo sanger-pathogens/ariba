@@ -277,13 +277,12 @@ class RefGenesGetter:
         except:
             raise Error('Error mkdir/chdir ' + tmpdir)
 
-        zipfile = 'arg-annot-database_doc.zip'
-        common.download_file('http://www.mediterranee-infection.com/arkotheque/client/ihumed/_depot_arko/articles/304/arg-annot-database_doc.zip', zipfile, max_attempts=self.max_download_attempts, sleep_time=self.sleep_time, verbose=True)
-        common.syscall('unzip ' + zipfile)
+        downloadfile = 'arg-annot-database_doc'
+        common.download_file('https://www.mediterranee-infection.com/wp-content/uploads/2019/09/ARG-ANNOT_NT_V6_July2019.txt', downloadfile, max_attempts=self.max_download_attempts, sleep_time=self.sleep_time, verbose=True)
         os.chdir(current_dir)
         print('Extracted files.')
 
-        genes_file = os.path.join(tmpdir, 'Database Nt Sequences File.txt')
+        genes_file = os.path.join(tmpdir, downloadfile)
         final_fasta = outprefix + '.fa'
         final_tsv = outprefix + '.tsv'
 
