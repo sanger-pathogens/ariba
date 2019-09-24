@@ -1,5 +1,12 @@
 # Change Log
 
+[v2.14.4](https://github.com/sanger-pathogens/ariba/tree/v2.14.4) (2019-09-24)
+[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.3...v2.14.4)
+
+**Fixed bugs:**
+
+- ARGannot download fails [\#281](https://github.com/sanger-pathogens/ariba/issues/281)
+
 [v2.14.3](https://github.com/sanger-pathogens/ariba/tree/v2.14.3) (2019-08-23)
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.2...v2.14.3)
 
