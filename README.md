@@ -6,7 +6,7 @@ For how to use ARIBA, please see the [ARIBA wiki page][ARIBA wiki].
 
 PLEASE NOTE: we currently do not have the resources to provide support for Ariba - see the [Feedback/Issues](#feedbackissues) section.
 
-[![Unmaintained](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/) 
+[![Unmaintained](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)  
 [![Build Status](https://travis-ci.org/sanger-pathogens/ariba.svg?branch=master)](https://travis-ci.org/sanger-pathogens/ariba)   
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-brightgreen.svg)](https://github.com/sanger-pathogens/ariba/blob/master/LICENSE)   
 [![status](https://img.shields.io/badge/MGEN-10.1099%2Fmgen.0.000131-brightgreen.svg)](http://mgen.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000131)   
