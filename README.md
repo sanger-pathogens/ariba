@@ -4,6 +4,9 @@ Antimicrobial Resistance Identification By Assembly
 
 For how to use ARIBA, please see the [ARIBA wiki page][ARIBA wiki].
 
+PLEASE NOTE: we currently do not have the resources to provide support for Ariba - see the [Feedback/Issues](#feedbackissues) section.
+
+[![Unmaintained](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)  
 [![Build Status](https://travis-ci.org/sanger-pathogens/ariba.svg?branch=master)](https://travis-ci.org/sanger-pathogens/ariba)   
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-brightgreen.svg)](https://github.com/sanger-pathogens/ariba/blob/master/LICENSE)   
 [![status](https://img.shields.io/badge/MGEN-10.1099%2Fmgen.0.000131-brightgreen.svg)](http://mgen.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000131)   
@@ -55,9 +58,12 @@ Summarise data from several runs:
 
 Please read the [ARIBA wiki page][ARIBA wiki] for full usage instructions.
 
+## Tutorials
+[The Jupyter notebook tutorial](https://github.com/sanger-pathogens/pathogen-informatics-training)
+
 ## Installation
 
-If you encounter an issue when installing ARIBA please contact your local system administrator. If you encounter a bug please log it [here](https://github.com/sanger-pathogens/ariba/issues) or email us at ariba-help@sanger.ac.uk.
+If you encounter an issue when installing ARIBA please contact your local system administrator. If you encounter a bug you can log it [here](https://github.com/sanger-pathogens/ariba/issues).
 
 ### Required dependencies
   * [Python3][python] version >= 3.6.0
@@ -107,7 +113,7 @@ To use ARIBA use a command like this (substituting in your directories), where y
 When calling Ariba via Docker (as above) you'll also need to add **/data/** in front of all the passed in file or directory names (e.g. /data/my_output_folder).
 
 
-### Debian (testing)
+### Debian (Ariba version may not be the latest)
 ARIBA is available in the latest version of Debian, and over time will progressively filter through to Ubuntu and other distributions which use Debian. To install it as root:
 
     sudo apt-get install ariba
@@ -211,7 +217,7 @@ Please read the [ARIBA wiki page][ARIBA wiki] for full usage instructions.
 ARIBA is free software, licensed under [GPLv3](https://github.com/sanger-pathogens/ariba/blob/master/LICENSE).
 
 ## Feedback/Issues
-Please report any issues to the [issues page](https://github.com/sanger-pathogens/ariba/issues) or email ariba-help@sanger.ac.uk
+We currently do not have the resources to provide support for Ariba. However, the community might be able to help you out if you report any issues about usage of the software to the [issues page](https://github.com/sanger-pathogens/ariba/issues).
 
 ## Citation
 If you use this software please cite:
