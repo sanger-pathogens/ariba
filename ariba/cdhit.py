@@ -1,5 +1,4 @@
 import tempfile
-import shutil
 import sys
 import os
 import pyfastaq
@@ -14,6 +13,7 @@ class Runner:
       seq_identity_threshold=0.9,
       threads=1,
       length_diff_cutoff=0.0,
+      memory_limit=None,
       verbose=False,
       min_cluster_number=0
     ):
@@ -21,13 +21,17 @@ class Runner:
         if not os.path.exists(infile):
             raise Error('File not found: "' + infile + '". Cannot continue')
 
+        if (memory_limit is not None) and (memory_limit < 0):
+            raise Error('Input parameter cdhit_max_memory is set to an invalid value. Cannot continue')
+
         self.infile = os.path.abspath(infile)
         self.seq_identity_threshold = seq_identity_threshold
         self.threads = threads
         self.length_diff_cutoff = length_diff_cutoff
+        self.memory_limit = memory_limit
         self.verbose = verbose
         self.min_cluster_number = min_cluster_number
-        extern_progs = external_progs.ExternalProgs(fail_on_error=True)
+        extern_progs = external_progs.ExternalProgs(fail_on_error=True, using_spades=False)
         self.cd_hit_est = extern_progs.exe('cdhit')
 
 
@@ -134,15 +138,11 @@ class Runner:
         return clusters
 
 
-    def run(self):
-        tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
-        cdhit_fasta = os.path.join(tmpdir, 'cdhit')
-        cluster_info_outfile = cdhit_fasta + '.bak.clstr'
-
+    def get_run_cmd(self, output_file):
         cmd = ' '.join([
             self.cd_hit_est,
             '-i', self.infile,
-            '-o', cdhit_fasta,
+            '-o', output_file,
             '-c', str(self.seq_identity_threshold),
             '-T', str(self.threads),
             '-s', str(self.length_diff_cutoff),
@@ -150,8 +150,21 @@ class Runner:
             '-bak 1',
         ])
 
+        # Add in cdhit memory allocation if one has been specified
+        if self.memory_limit is not None:
+            cmd = ' '.join([cmd, '-M', str(self.memory_limit)])
+
+        return cmd
+
+
+    def run(self):
+        tmpdir = tempfile.mkdtemp(prefix='tmp.run_cd-hit.', dir=os.getcwd())
+        cdhit_fasta = os.path.join(tmpdir, 'cdhit')
+        cluster_info_outfile = cdhit_fasta + '.bak.clstr'
+        cmd = self.get_run_cmd(cdhit_fasta)
         common.syscall(cmd, verbose=self.verbose)
         clusters = self._get_clusters_from_bak_file(cluster_info_outfile, self.min_cluster_number)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
         return clusters
+
 

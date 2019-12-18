@@ -1,5 +1,4 @@
 import unittest
-import copy
 import filecmp
 import os
 from ariba import mic_plotter
@@ -109,7 +108,7 @@ class TestMicPlotter(unittest.TestCase):
                 'cluster3': {'assembled': 'no', 'match': 'no', 'ref_seq': 'NA', 'pct_id': 'NA', 'known_var': 'no', 'novel_var': 'no', 'A42T': 'no', 'A44T.%': 'NA'},
                 'cluster4': {'assembled': 'yes', 'match': 'yes', 'ref_seq': 'ref4', 'pct_id': 100.0, 'known_var': 'yes', 'novel_var': 'no', 'group4.A44T': 'no', 'group4.A44T.%': 'NA'},
             },
-        } 
+        }
 
         expected_top_plot_data = {
             'antibio1': {
@@ -262,7 +261,7 @@ class TestMicPlotter(unittest.TestCase):
         '''test _top_plot_y_ticks'''
         # FIXME
         pass
-        
+
 
     def test_top_plot_scatter_counts(self):
         '''test _top_plot_scatter_counts'''

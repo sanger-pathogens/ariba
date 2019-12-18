@@ -1,1 +1,1 @@
-cannot_make_into_a_gene was removed because does not look like a gene, so removing its metadata
+cannot_make_into_a_gene was removed because it failed filtering checks, so removing its metadata

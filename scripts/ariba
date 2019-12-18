@@ -62,7 +62,7 @@ subparser_getref = subparsers.add_parser(
     description='Download reference data from one of a few supported public resources',
 )
 subparser_getref.add_argument('--debug', action='store_true', help='Do not delete temporary downloaded files')
-subparser_getref.add_argument('--version', help='Version of reference data to download. If not used, gets the latest version. Only applies to card and megares')
+subparser_getref.add_argument('--version', help='Version of reference data to download. If not used, gets the latest version. Applies to: card, megares, ncbi, plasmidfinder, resfinder, srst2_argannot, virulencefinder. For plasmid/res/virulencefinder: default is to get latest from bitbucket - supply git commit hash to get a specific version from bitbucket, or use "old " to get from old website. For srst2_argannot: default is latest version r2, use r1 to get the older version')
 subparser_getref.add_argument('db', help='Database to download. Must be one of: ' + ' '.join(allowed_dbs), choices=allowed_dbs, metavar="DB name")
 subparser_getref.add_argument('outprefix', help='Prefix of output filenames')
 subparser_getref.set_defaults(func=ariba.tasks.getref.run)
@@ -135,11 +135,14 @@ cdhit_group = subparser_prepareref.add_argument_group('cd-hit options')
 cdhit_group.add_argument('--no_cdhit', action='store_true', help='Do not run cd-hit. Each input sequence is put into its own "cluster". Incompatible with --cdhit_clusters.')
 cdhit_group.add_argument('--cdhit_clusters', help='File specifying how the sequences should be clustered. Will be used instead of running cdhit. Format is one cluster per line. Sequence names separated by whitespace. Incompatible with --no_cdhit', metavar='FILENAME')
 cdhit_group.add_argument('--cdhit_min_id', type=float, help='Sequence identity threshold (cd-hit option -c) [%(default)s]', default=0.9, metavar='FLOAT')
-cdhit_group.add_argument('--cdhit_min_length', type=float, help='length difference cutoff (cd-hit option -s) [%(default)s]', default=0.0, metavar='FLOAT')
+cdhit_group.add_argument('--cdhit_min_length', type=float, help='Length difference cutoff (cd-hit option -s) [%(default)s]', default=0.0, metavar='FLOAT')
+cdhit_group.add_argument('--cdhit_max_memory', type=int, help='Memory limit in MB (cd-hit option -M) [%(default)s]. Use 0 for unlimited.', metavar='INT')
 
 other_prep_group = subparser_prepareref.add_argument_group('other options')
 other_prep_group.add_argument('--min_gene_length', type=int, help='Minimum allowed length in nucleotides of reference genes [%(default)s]', metavar='INT', default=6)
 other_prep_group.add_argument('--max_gene_length', type=int, help='Maximum allowed length in nucleotides of reference genes [%(default)s]', metavar='INT', default=10000)
+other_prep_group.add_argument('--min_noncoding_length', type=int, help='Minimum allowed length in nucleotides of non-coding sequences [%(default)s]', metavar='INT', default=6)
+other_prep_group.add_argument('--max_noncoding_length', type=int, help='Maximum allowed length in nucleotides of non-coding sequences [%(default)s]', metavar='INT', default=20000)
 other_prep_group.add_argument('--genetic_code', type=int, help='Number of genetic code to use. Currently supported 1,4,11 [%(default)s]', choices=[1,4,11], default=11, metavar='INT')
 other_prep_group.add_argument('--force', action='store_true', help='Overwrite output directory, if it already exists')
 other_prep_group.add_argument('--threads', type=int, help='Number of threads (currently only applies to cdhit) [%(default)s]', default=1, metavar='INT')
@@ -147,6 +150,17 @@ other_prep_group.add_argument('--verbose', action='store_true', help='Be verbose
 
 subparser_prepareref.add_argument('outdir', help='Output directory (must not already exist)')
 subparser_prepareref.set_defaults(func=ariba.tasks.prepareref.run)
+
+
+#----------------------------- prepareref_tb ----------------------------
+subparser_prepareref_tb = subparsers.add_parser(
+    'prepareref_tb',
+    help='Prepare reference TB data for input to "run"',
+    usage='ariba prepareref_tb <outdir>',
+    description='Prepare built-in TB reference data for running the pipeline with "ariba run"',
+)
+subparser_prepareref_tb.add_argument('outdir', help='Output directory (must not already exist)')
+subparser_prepareref_tb.set_defaults(func=ariba.tasks.prepareref_tb.run)
 
 
 #----------------------------- pubmlstget -------------------------------
@@ -222,8 +236,14 @@ nucmer_group.add_argument('--nucmer_min_len', type=int, help='Minimum alignment 
 nucmer_group.add_argument('--nucmer_breaklen', type=int, help='Value to use for -breaklen when running nucmer [%(default)s]', default=200, metavar='INT')
 
 assembly_group = subparser_run.add_argument_group('Assembly options')
+assembly_group.add_argument('--assembler', help='Assembler to use', choices=['fermilite','spades'], default='fermilite')
 assembly_group.add_argument('--assembly_cov', type=int, help='Target read coverage when sampling reads for assembly [%(default)s]', default=50, metavar='INT')
 assembly_group.add_argument('--min_scaff_depth', type=int, help='Minimum number of read pairs needed as evidence for scaffold link between two contigs [%(default)s]', default=10, metavar='INT')
+assembly_group.add_argument('--spades_mode', help='If using Spades assembler, either use default WGS mode, Single Cell mode (`spades.py --sc`) or RNA mode (`spades.py --rna`). '
+                                                  'Use SC or RNA mode if your input is from a viral sequencing with very uneven and deep coverage. '
+                                                  'Set `--assembly_cov` to some high value if using SC or RNA mode', choices=['wgs','sc','rna'], default='wgs')
+assembly_group.add_argument('--spades_options', help='Extra options to pass to Spades assembler. Sensible default options will be picked based on `--spades_mode` argument. '
+                                                     'Anything set here will replace the defaults completely')
 
 other_run_group = subparser_run.add_argument_group('Other options')
 other_run_group.add_argument('--threads', type=int, help='Experimental. Number of threads. Will run clusters in parallel, but not minimap (yet) [%(default)s]', default=1, metavar='INT')

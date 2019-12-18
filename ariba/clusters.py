@@ -2,20 +2,23 @@ import signal
 import time
 import os
 import copy
+import json
 import tempfile
 import pickle
 import itertools
 import sys
-import shutil
 import multiprocessing
 import pyfastaq
 import minimap_ariba
-from ariba import cluster, common, histogram, mlst_reporter, read_store, report, report_filter, reference_data
+from ariba import cluster, common, histogram, mlst_reporter, read_store, report, report_filter, reference_data, tb
 
 class Error (Exception): pass
 
-
-def _run_cluster(obj, verbose, clean, fails_dir):
+# passing shared objects (remaining_clusters) through here and thus making them
+# explicit arguments to Pool.startmap when running this function. That seems to be
+# a recommended safe transfer mechanism as opposed making them attributes of a
+# pre-constructed 'obj' variable (although the docs are a bit hazy on that)
+def _run_cluster(obj, verbose, clean, fails_dir, remaining_clusters, remaining_clusters_lock):
     failed_clusters = os.listdir(fails_dir)
 
     if len(failed_clusters) > 0:
@@ -25,7 +28,7 @@ def _run_cluster(obj, verbose, clean, fails_dir):
     if verbose:
         print('Start running cluster', obj.name, 'in directory', obj.root_dir, flush=True)
     try:
-        obj.run()
+        obj.run(remaining_clusters=remaining_clusters,remaining_clusters_lock=remaining_clusters_lock)
     except:
         print('Failed cluster:', obj.name, file=sys.stderr)
         with open(os.path.join(fails_dir, obj.name), 'w'):
@@ -38,7 +41,10 @@ def _run_cluster(obj, verbose, clean, fails_dir):
         if verbose:
             print('Deleting cluster dir', obj.root_dir, flush=True)
         if os.path.exists(obj.root_dir):
-            shutil.rmtree(obj.root_dir)
+            try:
+                common.rmtree(obj.root_dir)
+            except:
+                pass
 
     return obj
 
@@ -56,7 +62,8 @@ class Clusters:
       threads=1,
       verbose=False,
       assembler='fermilite',
-      spades_other=None,
+      spades_mode='rna',
+      spades_options=None,
       max_insert=1000,
       min_scaff_depth=10,
       nucmer_min_id=90,
@@ -86,10 +93,10 @@ class Clusters:
         self.logs_dir = os.path.join(self.outdir, 'Logs')
 
         self.assembler = assembler
-        assert self.assembler in ['fermilite']
         self.assembly_kmer = assembly_kmer
         self.assembly_coverage = assembly_coverage
-        self.spades_other = spades_other
+        self.spades_mode = spades_mode
+        self.spades_options = spades_options
 
         self.cdhit_files_prefix = os.path.join(self.refdata_dir, 'cdhit')
         self.cdhit_cluster_representatives_fa = self.cdhit_files_prefix + '.cluster_representatives.fa'
@@ -99,6 +106,7 @@ class Clusters:
         self.report_file_filtered = os.path.join(self.outdir, 'report.tsv')
         self.mlst_reports_prefix = os.path.join(self.outdir, 'mlst_report')
         self.mlst_profile_file = os.path.join(self.refdata_dir, 'pubmlst.profile.txt')
+        self.tb_resistance_calls_file = os.path.join(self.outdir, 'tb.resistance.json')
         self.catted_assembled_seqs_fasta = os.path.join(self.outdir, 'assembled_seqs.fa.gz')
         self.catted_genes_matching_refs_fasta = os.path.join(self.outdir, 'assembled_genes.fa.gz')
         self.catted_assemblies_fasta = os.path.join(self.outdir, 'assemblies.fa.gz')
@@ -135,7 +143,6 @@ class Clusters:
                 os.mkdir(d)
             except:
                 raise Error('Error mkdir ' + d)
-
         if tmp_dir is None:
             if 'ARIBA_TMPDIR' in os.environ:
                 tmp_dir = os.path.abspath(os.environ['ARIBA_TMPDIR'])
@@ -161,7 +168,7 @@ class Clusters:
         if self.verbose:
             print('Temporary directory:', self.tmp_dir)
 
-        for i in [x for x in dir(signal) if x.startswith("SIG") and x not in {'SIGCHLD', 'SIGCLD'}]:
+        for i in [x for x in dir(signal) if x.startswith("SIG") and x not in {'SIGCHLD', 'SIGCLD', 'SIGPIPE', 'SIGTSTP', 'SIGCONT'}]:
             try:
                 signum = getattr(signal, i)
                 signal.signal(signum, self._receive_signal)
@@ -221,12 +228,14 @@ class Clusters:
         fasta_file = os.path.join(indir, '02.cdhit.all.fa')
         metadata_file = os.path.join(indir, '01.filter.check_metadata.tsv')
         info_file = os.path.join(indir, '00.info.txt')
+        parameters_file = os.path.join(indir, '00.params.json')
         clusters_pickle_file = os.path.join(indir, '02.cdhit.clusters.pickle')
         params = Clusters._load_reference_data_info_file(info_file)
         refdata = reference_data.ReferenceData(
             [fasta_file],
             [metadata_file],
             genetic_code=params['genetic_code'],
+            parameters_file=parameters_file,
         )
 
         with open(clusters_pickle_file, 'rb') as f:
@@ -373,6 +382,28 @@ class Clusters:
         cluster_list = []
         self.log_files = []
 
+        # How the thread count withing each Cluster.run is managed:
+        # We want to handle those cases where there are more total threads allocated to the application than there are clusters
+        # remaining to run (for example,
+        # there are only two references, and eight threads). If we keep the default thread value of 1 in cluster. Cluster,
+        # then we will be wasting the allocated threads. The most simple approach would be to divide all threads equally between clusters
+        # before calling Pool.map. Multithreaded external programs like Spades and Bowtie2 are then called with multiple threads. That should
+        # never be slower than keeping just one thread in cluster.Cluster, except maybe in the extreme cases when (if)
+        # a multi-threaded run of the external program takes longer wall-clock time than a single-threaded one.
+        # However, this solution would always keep
+        # Cluster.threads=1 if the initial number of clusters > number of total threads. This can result in inefficiency at the
+        # tail of the Pool.map execution flow - when the clusters are getting finished overall, we are waiting for the completion of
+        # fewer and fewer remaining
+        # single-threaded cluster tasks while more and more total threads are staying idle. We mitigate this through the following approach:
+        # - Create a shared Value object that holds the number of remaining clusters (remaining_clusters).
+        # - Each Cluster.run decrements the remaining_clusters when it completes
+        # - Cluster.run sets its own thread count to max(1,threads_total//remaining_clusters). This can be done as many times
+        #   as needed at various points within Cluster.run (e.g. once before Spades is called, and again before Bowtie2 is called),
+        #   in order to catch more idle threads.
+        # This is a simple and conservative approach to adaptively use all threads at the tail of the map flow. It
+        # never over-subscribes the threads, and it does not require any extra blocking within Cluster.run in order to
+        # wait for threads becoming available.
+
         for cluster_name in sorted(self.cluster_to_dir):
             counter += 1
 
@@ -406,24 +437,55 @@ class Clusters:
                 reads_insert=self.insert_size,
                 sspace_k=self.min_scaff_depth,
                 sspace_sd=self.insert_sspace_sd,
-                threads=1, # clusters now run in parallel, so this should always be 1!
+                threads=1, # initially set to 1, then will adaptively self-modify while running
                 assembled_threshold=self.assembled_threshold,
                 unique_threshold=self.unique_threshold,
                 max_gene_nt_extend=self.max_gene_nt_extend,
-                spades_other_options=self.spades_other,
+                spades_mode=self.spades_mode,
+                spades_options=self.spades_options,
                 clean=self.clean,
                 extern_progs=self.extern_progs,
+                threads_total=self.threads
             ))
-
+        # Here is why we use proxy objects from a Manager process below
+        # instead of simple shared multiprocessing.Value counter:
+        # Shared memory objects in multiprocessing use tempfile module to
+        # create temporary directory, then create temporary file inside it,
+        # memmap the file and unlink it. If TMPDIR envar points to a NFS
+        # mount, the final cleanup handler from multiprocessing will often
+        # return an exception due to a stale NFS file (.nfsxxxx) from a shutil.rmtree
+        # call. See help on tempfile.gettempdir() for how the default location of
+        # temporary files is selected. The exception is caught in except clause
+        # inside multiprocessing cleanup, and only a harmless traceback is printed,
+        # but it looks very spooky to the user and causes confusion. We use
+        # instead shared proxies from the Manager. Those do not rely on shared
+        # memory, and thus bypass the NFS issues. The counter is accesses infrequently
+        # relative to computations, so the performance does not suffer.
+        # default authkey in the manager will be some generated random-looking string
+        manager = multiprocessing.Manager()
+        remaining_clusters = manager.Value('l',len(cluster_list))
+        # manager.Value does not provide access to the internal RLock that we need for
+        # implementing atomic -=, so we need to carry around a separate RLock object.
+        remaining_clusters_lock = manager.RLock()
         try:
             if self.threads > 1:
                 self.pool = multiprocessing.Pool(self.threads)
-                cluster_list = self.pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose), itertools.repeat(self.clean), itertools.repeat(self.fails_dir)))
+                cluster_list = self.pool.starmap(_run_cluster, zip(cluster_list, itertools.repeat(self.verbose), itertools.repeat(self.clean), itertools.repeat(self.fails_dir),
+                                                                   itertools.repeat(remaining_clusters),itertools.repeat(remaining_clusters_lock)))
+                # harvest the pool as soon as we no longer need it
+                self.pool.close()
+                self.pool.join()
             else:
                 for c in cluster_list:
-                    _run_cluster(c, self.verbose, self.clean, self.fails_dir)
+                    _run_cluster(c, self.verbose, self.clean, self.fails_dir, remaining_clusters, remaining_clusters_lock)
         except:
             self.clusters_all_ran_ok = False
+
+        if self.verbose:
+            print('Final value of remaining_clusters counter:', remaining_clusters)
+        remaining_clusters = None
+        remaining_clusters_lock = None
+        manager.shutdown()
 
         if len(os.listdir(self.fails_dir)) > 0:
             self.clusters_all_ran_ok = False
@@ -498,7 +560,7 @@ class Clusters:
 
     def _clean(self):
         if self.clean:
-            shutil.rmtree(self.fails_dir)
+            common.rmtree(self.fails_dir)
 
             try:
                 self.tmp_dir_obj.cleanup()
@@ -507,10 +569,7 @@ class Clusters:
 
             if self.verbose:
                 print('Deleting Logs directory', self.logs_dir)
-            try:
-                shutil.rmtree(self.logs_dir)
-            except:
-                pass
+            common.rmtree(self.logs_dir)
 
             try:
                 if self.verbose:
@@ -532,6 +591,13 @@ class Clusters:
             reporter.run()
 
 
+    @classmethod
+    def _write_tb_resistance_calls_json(cls, ariba_report_tsv, outfile):
+        calls = tb.report_to_resistance_dict(ariba_report_tsv)
+        with open(outfile, 'w') as f:
+            json.dump(calls, f, sort_keys=True, indent=4)
+
+
     def write_versions_file(self, original_dir):
         with open('version_info.txt', 'w') as f:
             print('ARIBA run with this command:', file=f)
@@ -551,67 +617,71 @@ class Clusters:
 
     def _run(self):
         cwd = os.getcwd()
-        os.chdir(self.outdir)
-        self.write_versions_file(cwd)
-        self._map_and_cluster_reads()
-        self.log_files = None
+        try:
+            os.chdir(self.outdir)
+            self.write_versions_file(cwd)
+            self._map_and_cluster_reads()
+            self.log_files = None
 
-        if len(self.cluster_to_dir) > 0:
-            got_insert_data_ok = self._set_insert_size_data()
-            if not got_insert_data_ok:
-                print('WARNING: not enough proper read pairs (found ' + str(self.proper_pairs) + ') to determine insert size.', file=sys.stderr)
-                print('This probably means that very few reads were mapped at all. No local assemblies will be run', file=sys.stderr)
-                if self.verbose:
-                    print('Not enough proper read pairs mapped to determine insert size. Skipping all assemblies.', flush=True)
+            if len(self.cluster_to_dir) > 0:
+                got_insert_data_ok = self._set_insert_size_data()
+                if not got_insert_data_ok:
+                    print('WARNING: not enough proper read pairs (found ' + str(self.proper_pairs) + ') to determine insert size.', file=sys.stderr)
+                    print('This probably means that very few reads were mapped at all. No local assemblies will be run', file=sys.stderr)
+                    if self.verbose:
+                        print('Not enough proper read pairs mapped to determine insert size. Skipping all assemblies.', flush=True)
+                else:
+                    if self.verbose:
+                        print('{:_^79}'.format(' Assembling each cluster '))
+                        print('Will run', self.threads, 'cluster(s) in parallel', flush=True)
+                    self._init_and_run_clusters()
+                    if self.verbose:
+                        print('Finished assembling clusters\n')
             else:
                 if self.verbose:
-                    print('{:_^79}'.format(' Assembling each cluster '))
-                    print('Will run', self.threads, 'cluster(s) in parallel', flush=True)
-                self._init_and_run_clusters()
-                if self.verbose:
-                    print('Finished assembling clusters\n')
-        else:
+                    print('No reads mapped. Skipping all assemblies', flush=True)
+                print('WARNING: no reads mapped to reference genes. Therefore no local assemblies will be run', file=sys.stderr)
+
+            if not self.clusters_all_ran_ok:
+                raise Error('At least one cluster failed! Stopping...')
+
             if self.verbose:
-                print('No reads mapped. Skipping all assemblies', flush=True)
-            print('WARNING: no reads mapped to reference genes. Therefore no local assemblies will be run', file=sys.stderr)
+                print('{:_^79}'.format(' Writing reports '), flush=True)
+                print('Making', self.report_file_all_tsv)
+            self._write_report(self.clusters, self.report_file_all_tsv)
 
-        if not self.clusters_all_ran_ok:
-            raise Error('At least one cluster failed! Stopping...')
+            if self.verbose:
+                print('Making', self.report_file_filtered)
+            rf = report_filter.ReportFilter(infile=self.report_file_all_tsv)
+            rf.run(self.report_file_filtered)
 
-        if self.verbose:
-            print('{:_^79}'.format(' Writing reports '), flush=True)
-            print('Making', self.report_file_all_tsv)
-        self._write_report(self.clusters, self.report_file_all_tsv)
-
-        if self.verbose:
-            print('Making', self.report_file_filtered)
-        rf = report_filter.ReportFilter(infile=self.report_file_all_tsv)
-        rf.run(self.report_file_filtered)
-
-        if self.verbose:
-            print()
-            print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
-            print(self.catted_assembled_seqs_fasta, 'and', self.catted_genes_matching_refs_fasta, flush=True)
-        self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
-        self._write_catted_genes_matching_refs_fasta(self.catted_genes_matching_refs_fasta)
-        self._write_catted_assemblies_fasta(self.catted_assemblies_fasta)
-
-        if self.log_files is not None:
-            clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
             if self.verbose:
                 print()
-                print('{:_^79}'.format(' Catting cluster log files '), flush=True)
-                print('Writing file', clusters_log_file, flush=True)
-            common.cat_files(self.log_files, clusters_log_file)
+                print('{:_^79}'.format(' Writing fasta of assembled sequences '), flush=True)
+                print(self.catted_assembled_seqs_fasta, 'and', self.catted_genes_matching_refs_fasta, flush=True)
+            self._write_catted_assembled_seqs_fasta(self.catted_assembled_seqs_fasta)
+            self._write_catted_genes_matching_refs_fasta(self.catted_genes_matching_refs_fasta)
+            self._write_catted_assemblies_fasta(self.catted_assemblies_fasta)
 
-        if self.verbose:
-            print()
-            print('{:_^79}'.format(' Cleaning files '), flush=True)
-        self._clean()
+            if self.log_files is not None:
+                clusters_log_file = os.path.join(self.outdir, 'log.clusters.gz')
+                if self.verbose:
+                    print()
+                    print('{:_^79}'.format(' Catting cluster log files '), flush=True)
+                    print('Writing file', clusters_log_file, flush=True)
+                common.cat_files(self.log_files, clusters_log_file)
 
-        Clusters._write_mlst_reports(self.mlst_profile_file, self.report_file_filtered, self.mlst_reports_prefix, verbose=self.verbose)
+            if self.verbose:
+                print()
+                print('{:_^79}'.format(' Cleaning files '), flush=True)
+            self._clean()
 
-        if self.clusters_all_ran_ok and self.verbose:
-            print('\nAll done!\n')
+            Clusters._write_mlst_reports(self.mlst_profile_file, self.report_file_filtered, self.mlst_reports_prefix, verbose=self.verbose)
 
-        os.chdir(cwd)
+            if 'tb' in self.refdata.extra_parameters and self.refdata.extra_parameters['tb']:
+                Clusters._write_tb_resistance_calls_json(self.report_file_filtered, self.tb_resistance_calls_file)
+
+            if self.clusters_all_ran_ok and self.verbose:
+                print('\nAll done!\n')
+        finally:
+            os.chdir(cwd)

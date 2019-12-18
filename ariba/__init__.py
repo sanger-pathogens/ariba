@@ -49,6 +49,7 @@ __all__ = [
     'summary_cluster_variant',
     'summary_sample',
     'tasks',
+    'tb',
     'versions',
     'vfdb_parser',
 ]

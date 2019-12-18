@@ -9,11 +9,13 @@ import pyfastaq
 class Error (Exception): pass
 
 
-def syscall(cmd, allow_fail=False, verbose=False, verbose_filehandle=sys.stdout, print_errors=True):
+def syscall(cmd, allow_fail=False, verbose=False, verbose_filehandle=sys.stdout, print_errors=True, shell=True):
     if verbose:
         print('syscall:', cmd, flush=True, file=verbose_filehandle)
+        if not shell:
+            print('syscall string:', " ".join('"{}"'.format(_) for _ in cmd), flush=True, file=verbose_filehandle)
     try:
-        subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+        subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as error:
         errors = error.output.decode()
         if print_errors:
@@ -26,7 +28,9 @@ def syscall(cmd, allow_fail=False, verbose=False, verbose_filehandle=sys.stdout,
             return False, errors
         else:
             sys.exit(1)
-
+    except Exception as msg:
+        print("Unexpected exception: ", msg, file=sys.stderr)
+        raise
     return True, None
 
 
@@ -69,3 +73,9 @@ def download_file(url, outfile, max_attempts=3, sleep_time=2, verbose=False):
     if verbose:
         print(' done', flush=True)
 
+
+def rmtree(input_dir):
+    '''Does rm -r on input_dir. Meant to replace shutil.rmtree,
+    which seems to be causing issues with files not getting deleted
+    and the directory non-empty afterwards'''
+    syscall('rm -rf ' + input_dir)

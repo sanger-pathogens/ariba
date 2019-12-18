@@ -3,7 +3,7 @@ import copy
 import os
 import pymummer
 import pyfastaq
-import shutil
+from ariba import common
 
 class Error (Exception): pass
 
@@ -147,7 +147,7 @@ class RefSeqChooser:
             maxmatch=True,
         ).run()
         nucmer_matches = RefSeqChooser._load_nucmer_coords_file(coords_file, log_fh=log_fh)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
 
         if len(nucmer_matches) == 0:
             return None, {}
@@ -172,7 +172,7 @@ class RefSeqChooser:
 
         print('Checking for a better match to a ref sequence outside the cluster', file=self.log_fh)
         best_hit_from_all_seqs, not_needed = RefSeqChooser._closest_nucmer_match_between_fastas(self.all_refs_fasta, pieces_fasta_file, self.log_fh, self.nucmer_min_id, self.nucmer_min_len, self.nucmer_breaklen, True, False)
-        shutil.rmtree(tmpdir)
+        common.rmtree(tmpdir)
         self.closest_ref_from_all_refs = best_hit_from_all_seqs.ref_name
         if self.closest_ref_from_all_refs is None:
             return

@@ -1,6 +1,8 @@
 import unittest
 import os
+import re
 from ariba import cdhit, external_progs
+
 
 modules_dir = os.path.dirname(os.path.abspath(cdhit.__file__))
 data_dir = os.path.join(modules_dir, 'tests', 'data')
@@ -11,6 +13,13 @@ class TestCdhit(unittest.TestCase):
         '''test init_fail_infile_missing'''
         with self.assertRaises(cdhit.Error):
             cdhit.Runner('oopsnotafile', 'out')
+
+
+    def test_init_fail_invalid_memory(self):
+        '''test_init_fail_invalid_memory'''
+        infile = os.path.join(data_dir, 'cdhit_test_run.in.fa')
+        with self.assertRaises(cdhit.Error):
+            cdhit.Runner(infile, memory_limit=-10)
 
 
     def test_get_clusters_from_bak_file(self):
@@ -162,3 +171,30 @@ class TestCdhit(unittest.TestCase):
             '1': {'seq3'},
         }
         self.assertEqual(clusters, expected_clusters)
+
+
+    def test_get_run_cmd_with_default_memory(self):
+        '''test_get_run_cmd_with_default_memory'''
+        fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict_rename.in.fa')
+        r = cdhit.Runner(fa_infile)
+        run_cmd = r.get_run_cmd('foo/bar/file.out')
+        match = re.search('^.+ -o foo/bar/file.out -c 0.9 -T 1 -s 0.0 -d 0 -bak 1$', run_cmd)
+        self.assertIsNotNone(match, msg="Command output was " + run_cmd)
+
+
+    def test_get_run_cmd_with_non_default_memory(self):
+        '''test_get_run_cmd_with_non_default_memory'''
+        fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict_rename.in.fa')
+        r = cdhit.Runner(fa_infile, memory_limit=900)
+        run_cmd = r.get_run_cmd('foo/bar/file.out')
+        match = re.search('^.+ -o foo/bar/file.out -c 0.9 -T 1 -s 0.0 -d 0 -bak 1 -M 900$', run_cmd)
+        self.assertIsNotNone(match, msg="Command output was " + run_cmd)
+
+
+    def test_get_run_cmd_with_unlimited_memory(self):
+        '''test_get_run_cmd_with_unlimited_memory'''
+        fa_infile = os.path.join(data_dir, 'cdhit_test_run_get_clusters_from_dict_rename.in.fa')
+        r = cdhit.Runner(fa_infile, memory_limit=0)
+        run_cmd = r.get_run_cmd('foo/bar/file.out')
+        match = re.search('^.+ -o foo/bar/file.out -c 0.9 -T 1 -s 0.0 -d 0 -bak 1 -M 0$', run_cmd)
+        self.assertIsNotNone(match, msg="Command output was " + run_cmd)

@@ -5,12 +5,14 @@ import re
 import os
 import itertools
 import collections
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.cm as cmx
 import math
 import pyfastaq
-from ariba import common, reference_data
+from ariba import reference_data
 
 class Error (Exception): pass
 

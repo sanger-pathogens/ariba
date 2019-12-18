@@ -1,0 +1,4 @@
+gene1_upstream	0	1	A6T	.	Resistance to drug1. Original mutation A-5T
+gene1	1	1	A5C	.	Resistance to drug1,drug2
+gene2_upstream	0	1	A8G	.	Resistance to drug4. Original mutation A-3G
+gene2	1	1	A10C	.	Resistance to drug5

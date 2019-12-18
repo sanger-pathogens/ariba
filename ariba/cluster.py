@@ -4,10 +4,9 @@ import os
 import atexit
 import random
 import math
-import shutil
 import sys
 import pyfastaq
-from ariba import assembly, assembly_compare, assembly_variants, external_progs, flag, mapping, report, samtools_variants
+from ariba import assembly, assembly_compare, assembly_variants, common, external_progs, flag, mapping, report, samtools_variants
 
 class Error (Exception): pass
 
@@ -43,10 +42,12 @@ class Cluster:
       max_allele_freq=0.90,
       unique_threshold=0.03,
       max_gene_nt_extend=30,
-      spades_other_options=None,
+      spades_mode="rna", #["rna","wgs"]
+      spades_options=None,
       clean=True,
       extern_progs=None,
       random_seed=42,
+      threads_total=1
     ):
         self.root_dir = os.path.abspath(root_dir)
         self.read_store = read_store
@@ -71,7 +72,8 @@ class Cluster:
         self.sspace_k = sspace_k
         self.sspace_sd = sspace_sd
         self.reads_insert = reads_insert
-        self.spades_other_options = spades_other_options
+        self.spades_mode = spades_mode
+        self.spades_options = spades_options
 
         self.reads_for_assembly1 = os.path.join(self.root_dir, 'reads_for_assembly_1.fq')
         self.reads_for_assembly2 = os.path.join(self.root_dir, 'reads_for_assembly_2.fq')
@@ -95,6 +97,9 @@ class Cluster:
         self.max_gene_nt_extend = max_gene_nt_extend
         self.status_flag = flag.Flag()
         self.clean = clean
+
+        self.threads_total = threads_total
+        self.remaining_clusters = None
 
         self.assembly_dir = os.path.join(self.root_dir, 'Assembly')
         self.final_assembly_fa = os.path.join(self.root_dir, 'assembly.fa')
@@ -124,7 +129,7 @@ class Cluster:
             self.log_fh = None
 
         if extern_progs is None:
-            self.extern_progs = external_progs.ExternalProgs()
+            self.extern_progs = external_progs.ExternalProgs(using_spades=self.assembler == 'spades')
         else:
             self.extern_progs = extern_progs
 
@@ -138,12 +143,30 @@ class Cluster:
         for s in wanted_signals:
             signal.signal(s, self._receive_signal)
 
+    def _update_threads(self):
+        """Update available thread count post-construction.
+        To be called any number of times from run() method"""
+        if self.remaining_clusters is not None:
+            self.threads = max(1,self.threads_total//self.remaining_clusters.value)
+        #otherwise just keep the current (initial) value
+        print("{} detected {} threads available to it".format(self.name,self.threads), file = self.log_fh)
+
+    def _report_completion(self):
+        """Update shared counters to signal that we are done with this cluster.
+        Call just before exiting run() method (in a finally clause)"""
+        rem_clust = self.remaining_clusters
+        if rem_clust is not None:
+            # -= is non-atomic, need to acquire a lock
+            with self.remaining_clusters_lock:
+                rem_clust.value -= 1
+            # we do not need this object anymore
+            self.remaining_clusters = None
+            print("{} reported completion".format(self.name), file=self.log_fh)
 
     def _atexit(self):
         if self.log_fh is not None:
             pyfastaq.utils.close(self.log_fh)
             self.log_fh = None
-
 
     def _receive_signal(self, signum, stack):
         print('Signal', signum, 'received in cluster', self.name + '... Stopping!', file=sys.stderr, flush=True)
@@ -190,7 +213,10 @@ class Cluster:
     def _clean_file(self, filename):
         if self.clean:
             print('Deleting file', filename, file=self.log_fh)
-            os.unlink(filename)
+            try: #protect against OSError: [Errno 16] Device or resource busy: '.nfs0000000010f0f04f000003c9' and such
+                os.unlink(filename)
+            except:
+                pass
 
 
     def _clean(self):
@@ -269,33 +295,39 @@ class Cluster:
             return total_reads
 
 
-    def run(self):
-        self._set_up_input_files()
-
-        for fname in [self.all_reads1, self.all_reads2, self.references_fa]:
-            if not os.path.exists(fname):
-                raise Error('File ' + fname + ' not found. Cannot continue')
-
-        original_dir = os.getcwd()
-        os.chdir(self.root_dir)
-
+    def run(self,remaining_clusters=None,remaining_clusters_lock=None):
         try:
-            self._run()
-        except Error as err:
+            self.remaining_clusters = remaining_clusters
+            self.remaining_clusters_lock = remaining_clusters_lock
+            self._update_threads()
+            self._set_up_input_files()
+
+            for fname in [self.all_reads1, self.all_reads2, self.references_fa]:
+                if not os.path.exists(fname):
+                    raise Error('File ' + fname + ' not found. Cannot continue')
+
+            original_dir = os.getcwd()
+            os.chdir(self.root_dir)
+
+            try:
+                self._run()
+            except Error as err:
+                os.chdir(original_dir)
+                print('Error running cluster! Error was:', err, sep='\n', file=self.log_fh)
+                pyfastaq.utils.close(self.log_fh)
+                self.log_fh = None
+                raise Error('Error running cluster ' + self.name + '!')
+
             os.chdir(original_dir)
-            print('Error running cluster! Error was:', err, sep='\n', file=self.log_fh)
+            print('Finished', file=self.log_fh, flush=True)
+            print('{:_^79}'.format(' LOG FILE END ' + self.name + ' '), file=self.log_fh, flush=True)
+
+            # This stops multiprocessing complaining with the error:
+            # multiprocessing.pool.MaybeEncodingError: Error sending result: '[<ariba.cluster.Cluster object at 0x7ffa50f8bcd0>]'. Reason: 'TypeError("cannot serialize '_io.TextIOWrapper' object",)'
             pyfastaq.utils.close(self.log_fh)
             self.log_fh = None
-            raise Error('Error running cluster ' + self.name + '!')
-
-        os.chdir(original_dir)
-        print('Finished', file=self.log_fh, flush=True)
-        print('{:_^79}'.format(' LOG FILE END ' + self.name + ' '), file=self.log_fh, flush=True)
-
-        # This stops multiprocessing complaining with the error:
-        # multiprocessing.pool.MaybeEncodingError: Error sending result: '[<ariba.cluster.Cluster object at 0x7ffa50f8bcd0>]'. Reason: 'TypeError("cannot serialize '_io.TextIOWrapper' object",)'
-        pyfastaq.utils.close(self.log_fh)
-        self.log_fh = None
+        finally:
+            self._report_completion()
 
 
     def _run(self):
@@ -310,6 +342,7 @@ class Cluster:
             print('\nUsing', made_reads, 'from a total of', self.total_reads, 'for assembly.', file=self.log_fh, flush=True)
             print('Assembling reads:', file=self.log_fh, flush=True)
 
+            self._update_threads()
             self.assembly = assembly.Assembly(
               self.reads_for_assembly1,
               self.reads_for_assembly2,
@@ -323,7 +356,10 @@ class Cluster:
               contig_name_prefix=self.name,
               assembler=self.assembler,
               extern_progs=self.extern_progs,
-              clean=self.clean
+              clean=self.clean,
+              spades_mode=self.spades_mode,
+              spades_options=self.spades_options,
+              threads=self.threads
             )
 
             self.assembly.run()
@@ -332,7 +368,7 @@ class Cluster:
             self._clean_file(self.reads_for_assembly2)
             if self.clean:
                 print('Deleting Assembly directory', self.assembly_dir, file=self.log_fh, flush=True)
-                shutil.rmtree(self.assembly_dir)
+                common.rmtree(self.assembly_dir)
 
 
         if self.assembled_ok and self.assembly.ref_seq_name is not None:
@@ -342,13 +378,13 @@ class Cluster:
             self.is_variant_only = '1' if is_variant_only else '0'
 
             print('\nAssembly was successful\n\nMapping reads to assembly:', file=self.log_fh, flush=True)
-
+            self._update_threads()
             mapping.run_bowtie2(
                 self.all_reads1,
                 self.all_reads2,
                 self.final_assembly_fa,
                 self.final_assembly_bam[:-4],
-                threads=1,
+                threads=self.threads,
                 sort=True,
                 bowtie2=self.extern_progs.exe('bowtie2'),
                 bowtie2_preset='very-sensitive-local',

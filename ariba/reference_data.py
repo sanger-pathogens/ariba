@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import re
@@ -18,12 +19,17 @@ class ReferenceData:
         rename_file=None,
         min_gene_length=6,
         max_gene_length=10000,
+        min_noncoding_length=6,
+        max_noncoding_length=20000,
         genetic_code=11,
+        parameters_file=None,
     ):
         self.seq_filenames = {}
         self.seq_dicts = {}
         self.min_gene_length = min_gene_length
         self.max_gene_length = max_gene_length
+        self.min_noncoding_length = min_noncoding_length
+        self.max_noncoding_length = max_noncoding_length
 
         self.sequences, self.metadata = ReferenceData._load_input_files_and_check_seq_names(fasta_files, metadata_tsv_files)
         if len(self.sequences) == 0:
@@ -37,6 +43,12 @@ class ReferenceData:
             self.ariba_to_original_name = {}
         else:
             self.ariba_to_original_name = ReferenceData._load_rename_file(rename_file)
+
+        if parameters_file is None or not os.path.exists(parameters_file):
+            self.extra_parameters = {}
+        else:
+            with open(parameters_file) as f:
+                self.extra_parameters = json.load(f)
 
 
     @classmethod
@@ -200,7 +212,7 @@ class ReferenceData:
 
         for sequence_name, metadata_dict in sorted(all_metadata.items()):
             if sequence_name in removed_sequences:
-                print(sequence_name, 'was removed because does not look like a gene, so removing its metadata', file=log_fh)
+                print(sequence_name, 'was removed because it failed filtering checks, so removing its metadata', file=log_fh)
                 log_lines += 1
                 del all_metadata[sequence_name]
                 continue
@@ -271,6 +283,16 @@ class ReferenceData:
 
 
     @classmethod
+    def _check_noncoding_seq(cls, seq, min_length, max_length):
+        if len(seq) < min_length:
+            return False, 'REMOVE\tToo short. Length: ' + str(len(seq))
+        elif len(seq) > max_length:
+            return False, 'REMOVE\tToo long. Length: ' + str(len(seq))
+        else:
+            return True, None
+
+
+    @classmethod
     def _remove_bad_genes(cls, sequences, metadata, log_file, min_gene_length, max_gene_length):
         to_remove = set()
 
@@ -300,11 +322,46 @@ class ReferenceData:
         return to_remove
 
 
-    def sanity_check(self, outprefix):
-        removed_seqs = self._remove_bad_genes(self.sequences, self.metadata, outprefix + '.check_genes.log', self.min_gene_length, self.max_gene_length)
-        log_lines = ReferenceData._filter_bad_variant_data(self.sequences, self.metadata, outprefix, removed_seqs)
-        return len(removed_seqs), log_lines
+    @classmethod
+    def _remove_bad_noncoding_seqs(cls, sequences, metadata, log_file, min_noncoding_length, max_noncoding_length):
+        to_remove = set()
 
+        if len(sequences) == 0:
+            return to_remove
+
+        log_fh = pyfastaq.utils.open_file_write(log_file)
+
+        for name in sorted(sequences):
+            if metadata[name]['seq_type'] != 'n':
+                continue
+
+            valid, message = ReferenceData._check_noncoding_seq(sequences[name], min_noncoding_length, max_noncoding_length)
+            if not valid:
+                to_remove.add(name)
+
+            if message is not None:
+                print(name, message, sep='\t', file=log_fh)
+
+        pyfastaq.utils.close(log_fh)
+
+        for name in to_remove:
+            sequences.pop(name)
+
+        return to_remove
+
+    def sanity_check(self, outprefix):
+
+        removed_gene_seqs = self._remove_bad_genes(self.sequences,
+                                              self.metadata, outprefix + '.check_genes.log',
+                                              self.min_gene_length, self.max_gene_length)
+
+        removed_noncoding_seqs = self._remove_bad_noncoding_seqs(self.sequences, self.metadata,
+                                                       outprefix + '.check_noncoding.log', self.min_noncoding_length,
+                                                       self.max_noncoding_length)
+
+        all_removed_seqs = removed_gene_seqs.union(removed_noncoding_seqs)
+        log_lines = ReferenceData._filter_bad_variant_data(self.sequences, self.metadata, outprefix, all_removed_seqs)
+        return len(all_removed_seqs), log_lines
 
     @classmethod
     def _new_seq_name(cls, name):
@@ -426,7 +483,7 @@ class ReferenceData:
         pyfastaq.utils.close(f_out)
 
 
-    def cluster_with_cdhit(self, outprefix, seq_identity_threshold=0.9, threads=1, length_diff_cutoff=0.0, nocluster=False, verbose=False, clusters_file=None):
+    def cluster_with_cdhit(self, outprefix, seq_identity_threshold=0.9, threads=1, length_diff_cutoff=0.0, memory_limit=None, nocluster=False, verbose=False, clusters_file=None):
         clusters = {}
         ReferenceData._write_sequences_to_files(self.sequences, self.metadata, outprefix)
         ref_types = ('noncoding', 'noncoding.varonly', 'gene', 'gene.varonly')
@@ -446,6 +503,7 @@ class ReferenceData:
               seq_identity_threshold=seq_identity_threshold,
               threads=threads,
               length_diff_cutoff=length_diff_cutoff,
+              memory_limit=memory_limit,
               verbose=verbose,
               min_cluster_number = min_cluster_number,
             )

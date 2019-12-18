@@ -1,9 +1,6 @@
 import unittest
-import sys
 import os
-import pyfastaq
 import filecmp
-import pymummer
 from ariba import pubmlst_getter
 
 modules_dir = os.path.dirname(os.path.abspath(pubmlst_getter.__file__))

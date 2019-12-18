@@ -61,7 +61,7 @@ class ReportFilter:
 
     @staticmethod
     def _load_report(infile):
-        '''Loads report file into a dictionary. Key=refrence name.
+        '''Loads report file into a dictionary. Key=reference name.
         Value = list of report lines for that reference'''
         report_dict = {}
         f = pyfastaq.utils.open_file_read(infile)

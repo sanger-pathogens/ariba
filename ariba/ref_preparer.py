@@ -1,9 +1,8 @@
 import sys
 import os
-import shutil
 import pickle
 import pyfastaq
-from ariba import reference_data
+from ariba import common, reference_data
 
 class Error (Exception): pass
 
@@ -17,9 +16,12 @@ class RefPreparer:
         version_report_lines=None,
         min_gene_length=6,
         max_gene_length=10000,
+        min_noncoding_length=6,
+        max_noncoding_length=20000,
         genetic_code=11,
         cdhit_min_id=0.9,
         cdhit_min_length=0.0,
+        cdhit_max_memory=None,
         run_cdhit=True,
         clusters_file=None,
         threads=1,
@@ -38,9 +40,12 @@ class RefPreparer:
         self.all_coding = all_coding
         self.min_gene_length = min_gene_length
         self.max_gene_length = max_gene_length
+        self.min_noncoding_length = min_noncoding_length
+        self.max_noncoding_length = max_noncoding_length
         self.genetic_code = genetic_code
         self.cdhit_min_id = cdhit_min_id
         self.cdhit_min_length = cdhit_min_length
+        self.cdhit_max_memory = cdhit_max_memory
         self.run_cdhit = run_cdhit
         self.clusters_file = clusters_file
         self.threads = threads
@@ -140,7 +145,7 @@ class RefPreparer:
         original_dir = os.getcwd()
 
         if self.force and os.path.exists(outdir):
-            shutil.rmtree(outdir)
+            common.rmtree(outdir)
 
         if os.path.exists(outdir):
             raise Error('Error! Output directory ' + outdir + ' already exists. Cannot continue')
@@ -176,6 +181,8 @@ class RefPreparer:
             self.metadata_tsv_files,
             min_gene_length=self.min_gene_length,
             max_gene_length=self.max_gene_length,
+            min_noncoding_length = self.min_noncoding_length,
+            max_noncoding_length = self.max_noncoding_length,
             genetic_code=self.genetic_code,
         )
 
@@ -194,6 +201,7 @@ class RefPreparer:
             seq_identity_threshold=self.cdhit_min_id,
             threads=self.threads,
             length_diff_cutoff=self.cdhit_min_length,
+            memory_limit=self.cdhit_max_memory,
             nocluster=not self.run_cdhit,
             verbose=self.verbose,
             clusters_file=self.clusters_file,
@@ -211,8 +219,9 @@ class RefPreparer:
             pickle.dump(clusters, f)
 
         if number_of_removed_seqs > 0:
-            print('WARNING.', number_of_removed_seqs, 'sequence(s) excluded. Please see the log file 01.filter.check_genes.log for details. This will show them:', file=sys.stderr)
+            print('WARNING.', number_of_removed_seqs, 'sequence(s) excluded. Please see the 01.filter.check_genes.log and 01.filter.check_noncoding.log for details. This will show them:', file=sys.stderr)
             print('    grep REMOVE', os.path.join(outdir, '01.filter.check_genes.log'), file=sys.stderr)
+            print('    cat', os.path.join(outdir, '01.filter.check_noncoding.log'), file=sys.stderr)
 
         if number_of_bad_variants_logged > 0:
-            print('WARNING. Problem with at least one variant. Problem variants are rmoved. Please see the file', os.path.join(outdir, '01.filter.check_metadata.log'), 'for details.', file=sys.stderr)
+            print('WARNING. Problem with at least one variant. Problem variants are removed. Please see the file', os.path.join(outdir, '01.filter.check_metadata.log'), 'for details.', file=sys.stderr)

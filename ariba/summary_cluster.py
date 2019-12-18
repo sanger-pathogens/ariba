@@ -1,4 +1,3 @@
-import sys
 from ariba import flag, report, summary_cluster_variant
 
 class Error (Exception): pass
