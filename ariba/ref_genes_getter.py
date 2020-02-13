@@ -183,7 +183,7 @@ class RefGenesGetter:
         print('You can use them with ARIBA like this:')
         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
         print('If you use this downloaded data, please cite:')
-        print('"The Comprehensive Antibiotic Resistance Database", McArthur et al 2013, PMID: 23650175')
+        print('"CARD 2020: antibiotic resistome surveillance with the comprehensive antibiotic resistance database", Alcock et al 2020, PMID: 31665441')
         print('and in your methods say that version', self.version, 'of the database was used')
 
 
@@ -659,6 +659,6 @@ class RefGenesGetter:
                         print('ariba prepareref -f', final_fasta, '-m', final_tsv, 'output_directory\n')
 
         else:
-            print(f"Nothing to do. Exiting.")    
+            print(f"Nothing to do. Exiting.")
     def run(self, outprefix):
         exec('self._get_from_' + self.ref_db + '(outprefix)')
