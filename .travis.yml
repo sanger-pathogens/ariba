@@ -2,6 +2,7 @@ language: python
 addons:
   apt:
     packages:
+    - cython
     - zlib1g-dev
     - libblas-dev
     - liblapack-dev
