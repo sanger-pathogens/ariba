@@ -24,8 +24,22 @@ class MegaresZipParser:
         except:
             raise Error('Error making directory ' + outdir)
 
+        # Old <2.0.0 megares has eg these files:
+        #  megares_annotations_v1.01.csv
+        #  megares_database_v1.01.fasta
+        #  megares_to_external_header_mappings_v1.01.tsv
+        # megares 2.0.0 has these files:
+        #  megares_drugs_annotations_v2.00.csv
+        #  megares_drugs_database_v2.00.fasta
+        #  megares_modified_annotations_v2.00.csv
+        #  megares_modified_database_v2.00.fasta
+        #  megares_to_external_header_mappings_v2.00.csv
+        # The sequences in *_modified_* files seem to be a superset of
+        # *_drugs_*, so use the *_modified_* ones. This will happen
+        # as long as we loop over sorted filenames, because the _modified_
+        # csv and fasta are listed last
         zfile = zipfile.ZipFile(zip_file)
-        for member in zfile.namelist():
+        for member in sorted(zfile.namelist()):
             if '_annotations_' in member:
                 original_files['annotations'] = member
             elif '_database_' in member and member.endswith('.fasta'):
@@ -51,7 +65,7 @@ class MegaresZipParser:
 
         with open(infile) as f:
             reader = csv.DictReader(f, delimiter=delimiter)
-            if set(expected_columns) != set(reader.fieldnames):
+            if not set(expected_columns).issubset(set(reader.fieldnames)):
                 raise Error('Unexpected header in annotations file. Expected columns: ' + ','.join(expected_columns) + ' but got: ' + ','.join(reader.fieldnames))
 
             for row in reader:
@@ -67,7 +81,21 @@ class MegaresZipParser:
 
     @classmethod
     def _load_header_mappings_file(cls, infile):
-        return MegaresZipParser._csv_to_dict(infile, '\t', {'Source_Database', 'MEGARes_Header', 'Source_Headers(space_separated)'}, 'MEGARes_Header')
+        # Megares <2.0.0 uses a tsv file, whereas 2.0.0 uses csv.
+        # Also, the column names changed slightly for 2.0.0, so we'll change
+        # them to be the same as <2.0.0 after loading the file
+        if infile.endswith(".tsv"):
+            return MegaresZipParser._csv_to_dict(infile, '\t', {'Source_Database', 'MEGARes_Header', 'Source_Headers(space_separated)'}, 'MEGARes_Header')
+        else:
+            assert infile.endswith(".csv")
+            data = MegaresZipParser._csv_to_dict(infile, ',', {'Database', 'MEGARes_v2_header', 'Source_header'}, 'MEGARes_v2_header')
+            fixed_data = {}
+            for key, d in data.items():
+                fixed_data[key] = {
+                    "Source_Database": d["Database"],
+                    "Source_Headers(space_separated)": d["Source_header"]
+                }
+            return fixed_data
 
 
     @classmethod
