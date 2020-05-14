@@ -1,38 +1,67 @@
 # Change Log
 
-[v2.14.4](https://github.com/sanger-pathogens/ariba/tree/v2.14.4) (2019-09-24)
-[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.3...v2.14.4)
+## [v2.14.5](https://github.com/sanger-pathogens/ariba/tree/v2.14.5) (2020-05-14)
+[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.4...v2.14.5)
 
-**Fixed bugs:**
+**Closed issues:**
 
+- Megares Downloading Error [\#294](https://github.com/sanger-pathogens/ariba/issues/294)
+- Summarising MLST reports? [\#292](https://github.com/sanger-pathogens/ariba/issues/292)
+- CARD 3.0.6 introduces white space in seq id causing fasta/metadata mismatch [\#284](https://github.com/sanger-pathogens/ariba/issues/284)
 - ARGannot download fails [\#281](https://github.com/sanger-pathogens/ariba/issues/281)
 
-[v2.14.3](https://github.com/sanger-pathogens/ariba/tree/v2.14.3) (2019-08-23)
+**Merged pull requests:**
+
+- bump version number [\#297](https://github.com/sanger-pathogens/ariba/pull/297) ([puethe](https://github.com/puethe))
+- Handle megares 2.0.0 [\#295](https://github.com/sanger-pathogens/ariba/pull/295) ([martinghunt](https://github.com/martinghunt))
+- Correct swapped col and row filters [\#288](https://github.com/sanger-pathogens/ariba/pull/288) ([aunderwo](https://github.com/aunderwo))
+- Remove support information [\#286](https://github.com/sanger-pathogens/ariba/pull/286) ([kpepper](https://github.com/kpepper))
+
+## [v2.14.4](https://github.com/sanger-pathogens/ariba/tree/v2.14.4) (2019-09-24)
+[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.3...v2.14.4)
+
+**Merged pull requests:**
+
+- Fixed GitHub issue \#281 - ARG-ANNOT Fails to Download [\#282](https://github.com/sanger-pathogens/ariba/pull/282) ([kpepper](https://github.com/kpepper))
+
+## [v2.14.3](https://github.com/sanger-pathogens/ariba/tree/v2.14.3) (2019-08-30)
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.2...v2.14.3)
 
-**Fixed bugs:**
+**Closed issues:**
 
 - Version 3.0.3 of CARD breaks prepareref [\#278](https://github.com/sanger-pathogens/ariba/issues/278)
-- RT 667288: Change docker file Ariba git clone to a copy
+- matplotlib listed twice as a dep in setup.py [\#275](https://github.com/sanger-pathogens/ariba/issues/275)
+- v2.14.1	attributeError: 'Namespace' object has no attribute 'cdhit\_max\_memory' [\#273](https://github.com/sanger-pathogens/ariba/issues/273)
+- Use ariba run for several isolates in batch [\#262](https://github.com/sanger-pathogens/ariba/issues/262)
+- Stopping! Signal received: 13 [\#238](https://github.com/sanger-pathogens/ariba/issues/238)
 
-[v2.14.2](https://github.com/sanger-pathogens/ariba/tree/v2.14.2) (2019-06-18)
+**Merged pull requests:**
+
+- Added default locale to docker file [\#280](https://github.com/sanger-pathogens/ariba/pull/280) ([kpepper](https://github.com/kpepper))
+- Fix for issue \#278 Version 3.0.3 of CARD breaks prepareref [\#279](https://github.com/sanger-pathogens/ariba/pull/279) ([kpepper](https://github.com/kpepper))
+- Remove extra matplotlib entry in install\_requires [\#277](https://github.com/sanger-pathogens/ariba/pull/277) ([andersgs](https://github.com/andersgs))
+- Removed the specific Ariba release number from the docker file [\#276](https://github.com/sanger-pathogens/ariba/pull/276) ([kpepper](https://github.com/kpepper))
+
+## [v2.14.2](https://github.com/sanger-pathogens/ariba/tree/v2.14.2) (2019-06-21)
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.1...v2.14.2)
 
 **Fixed bugs:**
 
-- Added Spades assembler into Docker file - RT ticket 660940
-- Incremented release number
-- Added LICENSE file into release distribution - RT ticket 660890
+- Issue with ariba and slurm \(signal 18, signal 20\) [\#263](https://github.com/sanger-pathogens/ariba/issues/263)
 
-[v2.14.1](https://github.com/sanger-pathogens/ariba/tree/v2.14.1) (2019-06-13)
+**Merged pull requests:**
+
+- RT 660940 - add spades to docker file [\#274](https://github.com/sanger-pathogens/ariba/pull/274) ([kpepper](https://github.com/kpepper))
+- Added AUTHORS and LICENSE to the manifest [\#272](https://github.com/sanger-pathogens/ariba/pull/272) ([kpepper](https://github.com/kpepper))
+
+## [v2.14.1](https://github.com/sanger-pathogens/ariba/tree/v2.14.1) (2019-06-13)
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.0...v2.14.1)
 
-**Fixed bugs:**
+**Merged pull requests:**
 
-- Ariba fails to install from PyPI due to missing .h files in distribution. Related to MANIFEST.in change in [\#269](https://github.com/sanger-pathogens/ariba/pull/269)
-- Fix for Issue [\#263](https://github.com/sanger-pathogens/ariba/issues/263)
+- Backed out MANIFEST.in change. Bumped release number to v2.14.1. [\#271](https://github.com/sanger-pathogens/ariba/pull/271) ([kpepper](https://github.com/kpepper))
 
-[v2.14.0](https://github.com/sanger-pathogens/ariba/tree/v2.14.0) (2019-06-06)
+## [v2.14.0](https://github.com/sanger-pathogens/ariba/tree/v2.14.0) (2019-06-06)
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.13.5...v2.14.0)
 
 **Closed issues:**
