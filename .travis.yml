@@ -2,7 +2,7 @@ language: python
 addons:
   apt:
     packages:
-    - cython3
+    - python3-pysam
     - zlib1g-dev
     - libblas-dev
     - liblapack-dev
