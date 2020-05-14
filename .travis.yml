@@ -2,7 +2,6 @@ language: python
 addons:
   apt:
     packages:
-    - python3-pysam
     - zlib1g-dev
     - libblas-dev
     - liblapack-dev
@@ -12,6 +11,7 @@ python:
 - '3.6'
 sudo: false
 install:
+- pip install --upgrade pip
 - source ./install_dependencies.sh
 before_script:
 - pip install codecov
