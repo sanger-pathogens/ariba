@@ -62,12 +62,12 @@ class MegaresZipParser:
 
     @classmethod
     def _load_annotations_file(cls, infile):
-        return MegaresZipParser._csv_to_dict(infile, ',', {'header', 'class', 'mechanism', 'group'}, 'header')
+        return MegaresZipParser._csv_to_dict(infile, ',', {'header', 'type', 'class', 'mechanism' ,'group'}, 'header')
 
 
     @classmethod
     def _load_header_mappings_file(cls, infile):
-        return MegaresZipParser._csv_to_dict(infile, '\t', {'Source_Database', 'MEGARes_Header', 'Source_Headers(space_separated)'}, 'MEGARes_Header')
+        return MegaresZipParser._csv_to_dict(infile, ',', {'Database', 'Source_header', 'MEGARes_v2_header'} , 'MEGARes_v2_header')
 
 
     @classmethod
@@ -88,7 +88,7 @@ class MegaresZipParser:
                 print('WARNING: sequence "', seq, '" has no record in annotations file', sep='', file=sys.stderr)
 
             if seq in header_mappings:
-                final_column.append('Source_Database:' + header_mappings[seq]['Source_Database'] + '; Source_Headers:' + header_mappings[seq]['Source_Headers(space_separated)'])
+                final_column.append('Source_Database:' + header_mappings[seq]['Database'] + '; Source_Headers:' + header_mappings[seq]['Source_headers'])
             else:
                 print('WARNING: sequence "', seq, '" has no record in header mappings file', sep='', file=sys.stderr)
 
