@@ -105,7 +105,7 @@ class PubmlstGetter:
         self._download_file(profile_url, profile_outfile)
 
         for fasta_url in fasta_urls:
-            outfile = os.path.join(outdir, fasta_url.split('/')[-1])
+            outfile = "{0}.tfa".format(os.path.join(outdir, fasta_url.split('/')[-2]))
             self._download_file(fasta_url, outfile + '.tmp')
             PubmlstGetter._rename_seqs_in_fasta(outfile + '.tmp', outfile)
             os.unlink(outfile + '.tmp')
