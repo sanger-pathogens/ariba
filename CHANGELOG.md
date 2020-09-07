@@ -1,5 +1,20 @@
 # Change Log
 
+## [v2.14.6](https://github.com/sanger-pathogens/ariba/tree/v2.14.6) (2020-09-07)
+[Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.5...v2.14.6)
+
+**Closed issues:**
+
+- PubMLST URL change breaks pubmlstget [\#304](https://github.com/sanger-pathogens/ariba/issues/304)
+- get\_ref card is attempting to download RGI [\#301](https://github.com/sanger-pathogens/ariba/issues/301)
+- Reference dataset of megares cannot be downloaded  [\#287](https://github.com/sanger-pathogens/ariba/issues/287)
+
+**Merged pull requests:**
+
+- Fix for changes in PubMLST url [\#305](https://github.com/sanger-pathogens/ariba/pull/305) ([rpetit3](https://github.com/rpetit3))
+- Solution 1: for fixing CARD download [\#302](https://github.com/sanger-pathogens/ariba/pull/302) ([rpetit3](https://github.com/rpetit3))
+- Update CARD citation message [\#289](https://github.com/sanger-pathogens/ariba/pull/289) ([fmaguire](https://github.com/fmaguire))
+
 ## [v2.14.5](https://github.com/sanger-pathogens/ariba/tree/v2.14.5) (2020-05-14)
 [Full Changelog](https://github.com/sanger-pathogens/ariba/compare/v2.14.4...v2.14.5)
 
