@@ -2,8 +2,6 @@ FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-MAINTAINER ariba-help@sanger.ac.uk
-
 # Software version numbers
 ARG BOWTIE2_VERSION=2.2.9
 ARG SPADES_VERSION=3.13.1
