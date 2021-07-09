@@ -33,7 +33,7 @@ prog_to_version_cmd = {
     'bowtie2': ('--version', re.compile('.*bowtie2.*version (.*)$')),
     'cdhit': ('', re.compile('CD-HIT version ([0-9\.]+) \(')),
     'nucmer': ('--version', re.compile('([0-9]+\.[0-9\.]+.*$)')),
-    'spades': ('--version', re.compile('SPAdes\s+v([0-9\.]+)'))
+    'spades': ('--version', re.compile('SPAdes.*v([0-9\.]+)'))
 }
 
 
