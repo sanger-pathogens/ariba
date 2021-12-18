@@ -62,8 +62,7 @@ setup(
     author='Martin Hunt',
     url='https://github.com/sanger-pathogens/ariba',
     scripts=glob.glob('scripts/*'),
-    test_suite='nose.collector',
-    tests_require=['nose >= 1.3'],
+    tests_require=['pytest'],
     install_requires=[
         'BeautifulSoup4 >= 4.1.0',
         'biopython < 1.78',
