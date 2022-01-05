@@ -8,7 +8,7 @@ class MlstProfile:
     def __init__(self, infile, duplicate_warnings=True):
         self.infile = infile
         self.duplicate_warnings = duplicate_warnings
-        self.columns_to_ignore = ['clonal_complex', 'CC', 'Lineage', 'mlst_clade', 'species']
+        self.columns_to_ignore = ['clonal_complex', 'CC', 'Lineage', 'mlst_clade', 'species', 'comments']
 
         if not os.path.exists(self.infile):
             raise Error('Error! Input file "' + self.infile + '" not found.')

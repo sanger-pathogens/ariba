@@ -617,7 +617,6 @@ class RefGenesGetter:
                                                webenv=webenv, query_key=query_key,
                                                idtype="acc")
             #pull out the records as fasta from the genbank
-            from Bio.Alphabet import generic_dna
             from Bio import SeqIO
             from Bio.Seq import Seq
             from Bio.SeqRecord import SeqRecord
@@ -645,7 +644,7 @@ class RefGenesGetter:
                                 except KeyError:
                                     print(f"gb_feature.qualifer not found", file=sys.stderr)
                             accession = gb_record.id
-                            seq_out = Seq(str(gb_feature.extract(gb_record.seq)), generic_dna)
+                            seq_out = Seq(str(gb_feature.extract(gb_record.seq)))
                             record_new.append(SeqRecord(seq_out,
                                          id=f"{id[0]}.{accession}",
                                          description=""))
