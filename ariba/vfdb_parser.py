@@ -3,7 +3,7 @@ import pyfastaq
 
 class Error (Exception): pass
 
-name_regex = re.compile(r'^(?P<vfdb_id>V\S+\)) \((?P<name>\S+)\) (?P<description>.*\]) \[(?P<genus_etc>.*)\]$')
+name_regex = re.compile(r'^(?P<vfdb_id>V\S+) \((?P<name>.*?)\) (?P<description>.*\]) \[(?P<genus_etc>.*)\]$')
 
 class VfdbParser:
     def __init__(self, infile, outprefix):
