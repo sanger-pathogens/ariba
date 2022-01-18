@@ -92,14 +92,24 @@ class VfdbParser:
         fa_out = pyfastaq.utils.open_file_write(self.outprefix + '.fa')
         tsv_out = pyfastaq.utils.open_file_write(self.outprefix + '.tsv')
 
-        vfid_dict = VfdbParser._load_VFs_xls_metadata(self.outprefix)
+        vfid_dict = self._load_VFs_xls_metadata(self.outprefix)
+        seqid_list = []
         
         for seq in file_reader:
             original_id = seq.id
             seq.id, description = self._fa_header_to_name_and_metadata(seq.id)
-            vf_metadata = VfdbParser._vfid_to_metadata(vfid_dict, description)
+            vf_metadata = self._vfid_to_metadata(vfid_dict, description)
             if description == '.':
                 seq.id = original_id.split()[0]
+            
+            # remove sequences with duplicate ids
+            seqid = seq.id.split()[0]
+    
+            if seqid in seqid_list:
+                print('Duplicate entry ' + seqid + ' removed from downloaded dataset.')
+                continue
+            seqid_list.append(seqid)
+            
             print(seq.id, '1', '0', '.', '.', description + ': '+ vf_metadata + ' Original name: ' + original_id, sep='\t', file=tsv_out)
             print(seq, file=fa_out)
 
