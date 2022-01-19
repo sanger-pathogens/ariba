@@ -95,6 +95,11 @@ class VfdbParser:
         vfid_dict = self._load_VFs_xls_metadata(self.outprefix)
         seqid_list = []
         
+        # reporting variables
+        count_noncoding = 0
+        max_length_coding = 0
+        max_length_noncoding = 0      
+    
         for seq in file_reader:
             original_id = seq.id
             seq.id, description = self._fa_header_to_name_and_metadata(seq.id)
@@ -110,9 +115,70 @@ class VfdbParser:
                 continue
             seqid_list.append(seqid)
             
-            print(seq.id, '1', '0', '.', '.', description + ': '+ vf_metadata + ' Original name: ' + original_id, sep='\t', file=tsv_out)
-            print(seq, file=fa_out)
+            seq_length = len(seq)
+
+            # check if sequence is indeed coding
+            pyfastaq.sequences.genetic_code = 11
+            got = seq.make_into_gene()
+            if got is None:
+                # sequence is not coding
+
+                # check if sequence contains redundant nts and expand
+                to_expand = False
+                for nt in pyfastaq.sequences.redundant_nts:
+
+                    hits = seq.search(nt)
+                    if hits == []:
+                        continue
+                    print('Found redundant nts in ' + seqid + '\texpanding...')
+                    to_expand = True
+                    break
+
+                if to_expand:
+                    expand_list = seq.expand_nucleotides()
+                    for expanded_seq in expand_list:
+                        # check if sequence is coding now
+                        got = expanded_seq.make_into_gene()
+                        if got is None:
+                            # sequence is still not coding
+                            count_noncoding += 1
+                            if seq_length > max_length_noncoding:
+                                max_length_noncoding = seq_length
+
+                            print(expanded_seq.id, '0', '0', '.', '.', description + ': '+ vf_metadata + ' Original name: ' + original_id, sep='\t', file=tsv_out)
+
+                        else:
+                            # sequence is coding now
+                            if seq_length > max_length_coding:
+                                max_length_coding = seq_length
+
+                            print(expanded_seq.id, '1', '0', '.', '.', description + ': '+ vf_metadata + ' Original name: ' + original_id, sep='\t', file=tsv_out)
+
+                        print(expanded_seq, file=fa_out)
+
+                else:
+                    # not to_expand
+                    count_noncoding += 1
+                    if seq_length > max_length_noncoding:
+                        max_length_noncoding = seq_length
+
+                    print(seq.id, '0', '0', '.', '.', description + ': '+ vf_metadata + ' Original name: ' + original_id, sep='\t', file=tsv_out)
+                    print(seq, file=fa_out)
+
+            else:
+                # sequence is coding
+                if seq_length > max_length_coding:
+                    max_length_coding = seq_length
+
+                print(seq.id, '1', '0', '.', '.', description + ': '+ vf_metadata + ' Original name: ' + original_id, sep='\t', file=tsv_out)
+                print(seq, file=fa_out)            
 
         pyfastaq.utils.close(fa_out)
         pyfastaq.utils.close(tsv_out)
-
+        
+        print('A total number of ' + str(count_noncoding) + ' sequences in the dataset have been declared as noncoding in ' + self.outprefix + '.tsv')
+        # report max_seq_length if greater default value
+        if max_length_coding > 10000:
+            print('Observed long coding sequences, ariba prepareref should be run with --max_gene_length ' + str(max_length_coding))
+        if max_length_noncoding > 20000:
+            print('Observed long noncoding sequences, ariba prepareref should be run with --max_noncoding_length ' + str(max_length_coding))
