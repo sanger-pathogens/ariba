@@ -611,11 +611,6 @@ class RefGenesGetter:
             #up to here
         if len(acc_list) > 0:
             print(f"E-fetching {len(acc_list)} genbank records from BioProject {BIOPROJECT} and writing to.  This may take a while.", file=sys.stderr)
-            records = Entrez.efetch(db="nucleotide",
-                                               rettype="gbwithparts", retmode="text",
-                                               retstart=0, retmax=RETMAX,
-                                               webenv=webenv, query_key=query_key,
-                                               idtype="acc")
             #pull out the records as fasta from the genbank
             from Bio import SeqIO
             from Bio.Seq import Seq
@@ -624,8 +619,16 @@ class RefGenesGetter:
             print(f"Parsing genbank records.")
             with open(final_fasta, "w") as f_out_fa, \
                  open(final_tsv, "w") as f_out_tsv:
-                for idx, gb_record in enumerate(SeqIO.parse(records, "genbank")):
-                    print(f"'{gb_record.id}'")
+                for idx, record_id in enumerate(acc_list):
+                    print(f"'{record_id}'")
+                    if record_id.startswith('AP'):
+                        print('skipping')
+                        continue
+                    record = Entrez.efetch(db="nucleotide",
+                                                rettype="gbwithparts", retmode="text",
+                                                id=record_id)
+                    gb_record = SeqIO.read(record, "genbank")
+
                     n=0
                     record_new=[]
                     for index, feature in enumerate(gb_record.features):
