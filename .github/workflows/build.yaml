@@ -1,0 +1,117 @@
+name: Build ariba images
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - master
+      - github_actions
+  pull_request:
+    branches:
+      - master
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    steps:
+
+    - name: Set up Go 1.16
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.16
+      id: go
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update && sudo apt-get install -y \
+          build-essential \
+          libssl-dev \
+          uuid-dev \
+          libgpgme11-dev \
+          squashfs-tools \
+          libseccomp-dev \
+          pkg-config \
+          debootstrap \
+          debian-keyring \
+          debian-archive-keyring \
+          rsync
+
+    - name: Install Singularity
+      env:
+        SINGULARITY_VERSION: 3.5.3
+        GOPATH: /tmp/go
+      run: |
+        mkdir -p $GOPATH
+        sudo mkdir -p /usr/local/var/singularity/mnt
+        mkdir -p $GOPATH/src/github.com/sylabs
+        cd $GOPATH/src/github.com/sylabs
+        wget https://github.com/hpcng/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-${SINGULARITY_VERSION}.tar.gz
+        tar -xzf singularity-${SINGULARITY_VERSION}.tar.gz
+        cd singularity
+        ./mconfig -v -p /usr/local
+        make -j `nproc 2>/dev/null || echo 1` -C ./builddir all
+        sudo make -C ./builddir install
+
+
+    - name: Check out code for the container build
+      uses: actions/checkout@v2
+
+    - name: Set release version if is a release
+      if: startsWith(github.event.ref, 'refs/tags/v')
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    - name: Set release version if not a release
+      if: false == startsWith(github.event.ref, 'refs/tags/v')
+      run: echo "RELEASE_VERSION=test" >> $GITHUB_ENV
+
+    - name: Build Singularity container
+      env:
+        SINGULARITY_RECIPE: Singularity.def
+        OUTPUT_CONTAINER: ariba_${{env.RELEASE_VERSION}}.img
+      run: |
+        ls
+        if [ -f "${SINGULARITY_RECIPE}" ]; then
+            sudo -E singularity build ${OUTPUT_CONTAINER} ${SINGULARITY_RECIPE}
+        else
+            echo "${SINGULARITY_RECIPE} is not found."
+            echo "Present working directory: $PWD"
+            ls
+        fi
+
+    - name: Release
+      if: startsWith(github.event.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ariba*.img
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Log in to github container registry
+      if: startsWith(github.event.ref, 'refs/tags/v')
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      if: startsWith(github.event.ref, 'refs/tags/v')
+      id: meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+    - name: Build and push Docker image
+      if: startsWith(github.event.ref, 'refs/tags/v')
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
