@@ -1,0 +1,7 @@
+BeautifulSoup4 >= 4.1.0
+biopython < 1.78
+dendropy >= 4.2.0
+pyfastaq >= 3.12.0
+pysam >= 0.9.1
+pymummer <= 0.10.3
+matplotlib >= 3.1.0

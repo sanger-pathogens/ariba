@@ -52,6 +52,10 @@ vcfcall_mod = Extension(
     [os.path.join('ariba', 'ext', 'vcfcall_ariba.cpp')],
 )
 
+
+with open("requirements.txt") as f:
+    install_requires = [x.rstrip() for x in f]
+
 setup(
     ext_modules=[minimap_mod, fermilite_mod, vcfcall_mod],
     name='ariba',
@@ -64,15 +68,7 @@ setup(
     scripts=glob.glob('scripts/*'),
     test_suite='nose.collector',
     tests_require=['nose >= 1.3'],
-    install_requires=[
-        'BeautifulSoup4 >= 4.1.0',
-        'biopython < 1.78',
-        'dendropy >= 4.2.0',
-        'pyfastaq >= 3.12.0',
-        'pysam >= 0.9.1',
-        'pymummer<=0.10.3',
-        'matplotlib >= 3.1.0',
-    ],
+    install_requires=install_requires,
     license='GPLv3',
     classifiers=[
         'Development Status :: 4 - Beta',

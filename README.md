@@ -6,15 +6,12 @@ For how to use ARIBA, please see the [ARIBA wiki page][ARIBA wiki].
 
 PLEASE NOTE: we currently do not have the resources to provide support for Ariba - see the [Feedback/Issues](#feedbackissues) section.
 
-[![Unmaintained](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)  
-[![Build Status](https://travis-ci.com/sanger-pathogens/ariba.svg?branch=master)](https://travis-ci.com/sanger-pathogens/ariba)   
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-brightgreen.svg)](https://github.com/sanger-pathogens/ariba/blob/master/LICENSE)   
-[![status](https://img.shields.io/badge/MGEN-10.1099%2Fmgen.0.000131-brightgreen.svg)](http://mgen.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000131)   
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/recipes/ariba/README.html)  
-[![Container ready](https://img.shields.io/badge/container-ready-brightgreen.svg)](https://quay.io/repository/biocontainers/ariba)  
-[![Docker Build Status](https://img.shields.io/docker/build/sangerpathogens/ariba.svg)](https://hub.docker.com/r/sangerpathogens/ariba)  
-[![Docker Pulls](https://img.shields.io/docker/pulls/sangerpathogens/ariba.svg)](https://hub.docker.com/r/sangerpathogens/ariba)  
-[![codecov](https://codecov.io/gh/sanger-pathogens/ariba/branch/master/graph/badge.svg)](https://codecov.io/gh/sanger-pathogens/ariba)
+[![Unmaintained](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+[![Build Status](https://github.com/sanger-pathogens/ariba/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/sanger-pathogens/ariba/actions/workflows/build.yaml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-brightgreen.svg)](https://github.com/sanger-pathogens/ariba/blob/master/LICENSE)
+[![status](https://img.shields.io/badge/MGEN-10.1099%2Fmgen.0.000131-brightgreen.svg)](http://mgen.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000131)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/recipes/ariba/README.html)
+[![Container ready](https://img.shields.io/badge/container-ready-brightgreen.svg)](https://quay.io/repository/biocontainers/ariba)
 
 ## Contents
 * [Introduction](#introduction)
@@ -24,6 +21,7 @@ PLEASE NOTE: we currently do not have the resources to provide support for Ariba
   * [Using pip3](#using-pip3)
   * [From Source](#from-source)
   * [Docker](#docker)
+  * [Singularity](#singularity)
   * [Debian (testing)](#debian-testing)
   * [Ubuntu](#ubuntu)
   * [Dependencies and environment variables](#dependencies-and-environment-variables)
@@ -102,15 +100,32 @@ Alternatively, install directly from github using:
     pip3 install git+https://github.com/sanger-pathogens/ariba.git #--user
 
 ### Docker
-ARIBA can be run in a Docker container. First install Docker, then install ARIBA:
+ARIBA can be run in a Docker container. First install Docker, then install the latest
+version of ARIBA:
 
-    docker pull sangerpathogens/ariba
+    docker pull gchr.io/sanger-pathogens/ariba:latest
+
+All Docker images are listed in the
+[packages page](https://github.com/sanger-pathogens/ariba/pkgs/container/ariba).
 
 To use ARIBA use a command like this (substituting in your directories), where your files are assumed to be stored in /home/ubuntu/data:
 
     docker run --rm -it -v /home/ubuntu/data:/data sangerpathogens/ariba ariba -h
 
 When calling Ariba via Docker (as above) you'll also need to add **/data/** in front of all the passed in file or directory names (e.g. /data/my_output_folder).
+
+
+### Singularity
+
+ARIBA can be run in a Singularity container. First install Singularity.
+[Releases](https://github.com/sanger-pathogens/ariba/releases) include
+a Singularity image to download.
+
+Alternatively, build your own Singularity image:
+
+```
+singularity build ariba.simg Singularity.def
+```
 
 
 ### Debian (Ariba version may not be the latest)
