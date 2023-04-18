@@ -1,0 +1,31 @@
+BootStrap: library
+From: ubuntu:20.04
+
+%environment
+    export PATH=/bioinf-tools/SPAdes/bin/:$PATH
+    export LANG=C.UTF-8
+    export ARIBA_BOWTIE2=/bioinf-tools/bowtie2/bowtie2
+    export ARIBA_CDHIT=cdhit-est
+    export MPLBACKEND="agg"
+
+
+%setup
+    mkdir $SINGULARITY_ROOTFS/ariba
+    rsync -a install_dependencies.sh MANIFEST.in LICENSE scripts ariba requirements.txt setup.py third_party $SINGULARITY_ROOTFS/ariba/
+
+
+%post
+    export PATH=/bioinf-tools/SPAdes/bin/:$PATH
+    export ARIBA_BOWTIE2=/bioinf-tools/bowtie2/bowtie2
+    export ARIBA_CDHIT=cdhit-est
+
+    /ariba/install_dependencies.sh /bioinf-tools
+    cd /ariba
+    python3 -m pip install -r requirements.txt
+    python3 setup.py clean --all
+	python3 setup.py test
+	python3 setup.py install
+
+
+%runscript
+    ariba "$@"

@@ -1,73 +1,55 @@
-#!/bin/bash
-set -e
-set -x
+#!/usr/bin/env bash
+set -vexu
 
-start_dir=$(pwd)
+install_root=$1
 
 BOWTIE2_VERSION=2.3.1
-CDHIT_VERSION=4.6.5
-MUMMER_VERSION=3.23
+SPADES_VERSION=3.13.1
 
-BOWTIE2_DOWNLOAD_URL="http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-legacy-linux-x86_64.zip"
-CDHIT_DOWNLOAD_URL="https://github.com/weizhongli/cdhit/archive/V${CDHIT_VERSION}.tar.gz"
-MUMMER_DOWNLOAD_URL="http://downloads.sourceforge.net/project/mummer/mummer/${MUMMER_VERSION}/MUMmer${MUMMER_VERSION}.tar.gz"
+apt-get update -qq
+apt-get install -y software-properties-common
+apt-add-repository universe
+apt-get update -qq
 
+apt-get install --no-install-recommends -y \
+  build-essential \
+  cd-hit \
+  curl \
+  git \
+  libcurl4-gnutls-dev \
+  libssl-dev \
+  libbz2-dev \
+  liblzma-dev \
+  mummer \
+  python3-dev \
+  python3-setuptools \
+  python3-pip \
+  python3-pysam \
+  python3-tk \
+  python3-matplotlib \
+  unzip \
+  wget \
+  zlib1g-dev
 
-# Make an install location
-if [ ! -d 'build' ]; then
-  mkdir build
+ln -s -f /usr/bin/python3 /usr/local/bin/python
+
+if [ ! -d $install_root ]; then
+  mkdir $install_root
 fi
-cd build
-build_dir=$(pwd)
-
-# DOWNLOAD ALL THE THINGS
-download () {
-  url=$1
-  download_location=$2
-
-  if [ -e $download_location ]; then
-    echo "Skipping download of $url, $download_location already exists"
-  else
-    echo "Downloading $url to $download_location"
-    wget $url -O $download_location
-  fi
-}
+cd $install_root
 
 
 # --------------- bowtie2 ------------------
-cd $build_dir
-download $BOWTIE2_DOWNLOAD_URL "bowtie2-${BOWTIE2_VERSION}-legacy.zip"
-bowtie2_dir="$build_dir/bowtie2-${BOWTIE2_VERSION}-legacy"
-unzip -n bowtie2-${BOWTIE2_VERSION}-legacy.zip
+cd $install_root
+wget -q http://downloads.sourceforge.net/project/bowtie-bio/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-legacy-linux-x86_64.zip
+unzip -n bowtie2-${BOWTIE2_VERSION}-legacy-linux-x86_64.zip
+rm bowtie2-${BOWTIE2_VERSION}-legacy-linux-x86_64.zip
+mv bowtie2-${BOWTIE2_VERSION}-legacy bowtie2
 
 
-# --------------- cdhit --------------------
-cd $build_dir
-download $CDHIT_DOWNLOAD_URL "cdhit-${CDHIT_VERSION}.tar.gz"
-tar -zxf cdhit-${CDHIT_VERSION}.tar.gz
-cdhit_dir="$build_dir/cdhit-${CDHIT_VERSION}"
-cd $cdhit_dir
-make
-
-
-# --------------- mummer ------------------
-cd $build_dir
-download $MUMMER_DOWNLOAD_URL "MUMmer${MUMMER_VERSION}.tar.gz"
-mummer_dir="$build_dir/MUMmer${MUMMER_VERSION}"
-tar -zxf MUMmer${MUMMER_VERSION}.tar.gz
-cd $mummer_dir
-make
-
-
-cd $start_dir
-
-update_path () {
-  new_dir=$1
-  if [[ ! "$PATH" =~ (^|:)"${new_dir}"(:|$) ]]; then
-    export PATH=${new_dir}:${PATH}
-  fi
-}
-
-update_path ${bowtie2_dir}
-update_path ${cdhit_dir}
-update_path ${mummer_dir}
+# --------------- spades -------------------
+cd $install_root
+wget -q https://github.com/ablab/spades/releases/download/v${SPADES_VERSION}/SPAdes-${SPADES_VERSION}-Linux.tar.gz
+tar xf SPAdes-${SPADES_VERSION}-Linux.tar.gz
+rm SPAdes-${SPADES_VERSION}-Linux.tar.gz
+mv SPAdes-${SPADES_VERSION}-Linux SPAdes
