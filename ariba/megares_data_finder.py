@@ -8,8 +8,9 @@ class Error (Exception): pass
 
 class MegaresDataFinder:
     def __init__(self, version=None):
-        self.url_root = 'https://megares.meglab.org/download/'
-        self.index_url = self.url_root + 'index.php'
+        self.url_root = 'https://www.meglab.org/megares/download'
+        self.url_root_downloads='https://www.meglab.org'
+        self.index_url = self.url_root 
         self.version = version
 
 
@@ -30,7 +31,7 @@ class MegaresDataFinder:
         except:
             raise Error('Error parsing contents of megares download page. Cannot continue')
 
-        prefix = 'megares_v'
+        prefix = '/downloads/megares_v'
         suffix = '.zip'
         zips = {}
 
@@ -47,6 +48,7 @@ class MegaresDataFinder:
     def _get_url_for_version(cls, zips, version=None):
         if version is None:
             versions = list(zips.keys())
+            print (versions)
             versions.sort(key=LooseVersion)
             return zips[versions[-1]]
         else:
@@ -63,6 +65,6 @@ class MegaresDataFinder:
         zips = MegaresDataFinder._zips_from_index_page_string(html_text)
         print('Found versions: ', ', '.join(list(zips.keys())))
         url = MegaresDataFinder._get_url_for_version(zips, version=self.version)
-        return self.url_root + url
+        return self.url_root_downloads + url
 
 

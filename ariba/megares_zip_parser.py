@@ -88,13 +88,14 @@ class MegaresZipParser:
             return MegaresZipParser._csv_to_dict(infile, '\t', {'Source_Database', 'MEGARes_Header', 'Source_Headers(space_separated)'}, 'MEGARes_Header')
         else:
             assert infile.endswith(".csv")
-            data = MegaresZipParser._csv_to_dict(infile, ',', {'Database', 'MEGARes_v2_header', 'Source_header'}, 'MEGARes_v2_header')
+            data = MegaresZipParser._csv_to_dict(infile, ',', {'Database','Source_header','MEGARes_header','UpdatedHeader'}, 'MEGARes_header')
             fixed_data = {}
             for key, d in data.items():
                 fixed_data[key] = {
                     "Source_Database": d["Database"],
                     "Source_Headers(space_separated)": d["Source_header"]
                 }
+            print(fixed_data)
             return fixed_data
 
 
@@ -143,4 +144,3 @@ class MegaresZipParser:
         MegaresZipParser._write_files(self.outprefix, sequences, annotation_data, header_data)
         common.rmtree(tmpdir)
         os.unlink(self.zip_file)
-
