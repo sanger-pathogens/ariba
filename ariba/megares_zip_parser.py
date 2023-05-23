@@ -82,7 +82,7 @@ class MegaresZipParser:
     @classmethod
     def _load_header_mappings_file(cls, infile):
         # Megares <2.0.0 uses a tsv file, whereas 2.0.0 uses csv.
-        # Also, the column names changed slightly for 2.0.0, so we'll change
+        # Also, the column names changed slightly for 3.0, so we'll change
         # them to be the same as <2.0.0 after loading the file
         if infile.endswith(".tsv"):
             return MegaresZipParser._csv_to_dict(infile, '\t', {'Source_Database', 'MEGARes_Header', 'Source_Headers(space_separated)'}, 'MEGARes_Header')
