@@ -1,6 +1,7 @@
 import os
 import sys
 import pysam
+import pysam.bcftools
 import pyfastaq
 import vcfcall_ariba
 
@@ -36,13 +37,11 @@ class SamtoolsVariants:
 
         tmp_vcf = self.vcf_file + '.tmp'
         with open(tmp_vcf, 'w') as f:
-            print(pysam.mpileup(
-                '-t', 'INFO/AD,INFO/ADF,INFO/ADR',
+            print(pysam.bcftools.mpileup(
+                '-a', 'INFO/AD,INFO/ADF,INFO/ADR',
                 '-L', '99999999',
                 '-A',
                 '-f', self.ref_fa,
-                '-u',
-                '-v',
                 self.bam,
             ), end='', file=f)
 
