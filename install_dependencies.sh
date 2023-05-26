@@ -24,7 +24,6 @@ apt-get install --no-install-recommends -y \
   python3-dev \
   python3-setuptools \
   python3-pip \
-  python3-pysam \
   python3-tk \
   python3-matplotlib \
   unzip \
@@ -38,6 +37,8 @@ if [ ! -d $install_root ]; then
 fi
 cd $install_root
 
+# pysam from pip because apt-get version is too old
+python3 -m pip install pysam>=0.21.0
 
 # --------------- bowtie2 ------------------
 cd $install_root
