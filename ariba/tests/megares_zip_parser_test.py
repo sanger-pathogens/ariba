@@ -14,11 +14,11 @@ class TestMegaresZipParser(unittest.TestCase):
         zip_file = os.path.join(data_dir, 'megares_zip_parse_extract_files_ok.zip')
         tmp_dir = 'tmp.test_megares_extract_files_ok'
         got = megares_zip_parser.MegaresZipParser._extract_files(zip_file, tmp_dir)
-        common_dir = os.path.join('megares_zip_parse_extract_files_ok', 'megares_v1.01')
+        common_dir = os.path.join('megares_zip_parse_extract_files_ok', 'megares_v3.00')
         expected = {
-            'annotations': os.path.join(common_dir, 'megares_annotations_v1.01.csv'),
-            'fasta': os.path.join(common_dir, 'megares_database_v1.01.fasta'),
-            'header_mappings': os.path.join(common_dir, 'megares_to_external_header_mappings_v1.01.tsv')
+            'annotations': os.path.join(common_dir, 'megares_annotations_v3.00.csv'),
+            'fasta': os.path.join(common_dir, 'megares_database_v3.00.fasta'),
+            'header_mappings': os.path.join(common_dir, 'megares_to_external_header_mappings_v3.00.csv')
         }
 
         self.assertEqual(expected, got)
@@ -63,9 +63,9 @@ class TestMegaresZipParser(unittest.TestCase):
 
     def test_write_files(self):
         '''test _write_files'''
-        fasta_file = os.path.join(data_dir, 'megares_zip_parser_write_files', 'megares_database_v1.01.fasta')
-        annotations_file = os.path.join(data_dir, 'megares_zip_parser_write_files', 'megares_annotations_v1.01.csv')
-        mappings_file = os.path.join(data_dir, 'megares_zip_parser_write_files', 'megares_to_external_header_mappings_v1.01.tsv')
+        fasta_file = os.path.join(data_dir, 'megares_zip_parser_write_files', 'megares_database_v3.00.fasta')
+        annotations_file = os.path.join(data_dir, 'megares_zip_parser_write_files', 'megares_annotations_v3.00.csv')
+        mappings_file = os.path.join(data_dir, 'megares_zip_parser_write_files', 'megares_to_external_header_mappings_v3.00.csv')
         sequences = {}
         pyfastaq.tasks.file_to_dict(fasta_file, sequences)
         annotation_data = megares_zip_parser.MegaresZipParser._load_annotations_file(annotations_file)
