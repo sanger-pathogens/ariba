@@ -36,7 +36,7 @@ class PubmlstGetter:
 
     def _download_file(self, url, outfile):
         if self.verbose:
-            print('Downloading "', url, '" and saving as "', outfile, '" ...', end='', sep='', flush=True)
+            print(f'Downloading "{url}" and saving as "{outfile}" ...', end='', flush=True)
         max_attempts = 3
         sleep_time = 3
         for i in range(max_attempts):
@@ -94,21 +94,20 @@ class PubmlstGetter:
 
         pyfastaq.utils.close(f)
 
-
+    
     def _download_profile_and_fastas(self, outdir, profile_url, fasta_urls):
-        try:
-            os.mkdir(outdir)
-        except:
-            raise Error('Error mkdir ' + outdir)
-
+        os.makedirs(outdir, exist_ok=True)
+        
         profile_outfile = os.path.join(outdir, 'profile.txt')
         self._download_file(profile_url, profile_outfile)
 
         for fasta_url in fasta_urls:
-            outfile = "{0}.tfa".format(os.path.join(outdir, fasta_url.split('/')[-2]))
-            self._download_file(fasta_url, outfile + '.tmp')
-            PubmlstGetter._rename_seqs_in_fasta(outfile + '.tmp', outfile)
-            os.unlink(outfile + '.tmp')
+            gene_name = fasta_url.split('/')[-2] ## Extracts the gene name from the URL
+            tmp_file = os.path.join(outdir, f"{gene_name}.tmp")
+            outfile = os.path.join(outdir, f"{gene_name}.tfa") ## final file .tfa for each gene
+            self._download_file(fasta_url, tmp_file)
+            PubmlstGetter._rename_seqs_in_fasta(tmp_file, outfile)
+            os.unlink(tmp_file)
 
 
     def print_available_species(self):
